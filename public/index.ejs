@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Packaging : RFQ List</title>
+    <%- include('header') -%>
+    <link rel="icon" href="./img/estimate.png" type="image/png" sizes="16x16" />
+    <link rel="stylesheet" href="./css/style.css" />
+    <script src="./js/function_index.js"></script>
+  </head>
+  <body>
+    <div class="export-loading">
+      <div>
+        <div class="export-loader"></div>
+        <h2>Please Wait...</h2>
+      </div>
+    </div>
+    <div id="modal" is_open="0">
+      <div id="modal-select-template">
+        <h2>Select Template</h2>
+        <div class="border-dashed pd-2">
+          <ul class="ul-select-template">
+            <li>1</li>
+            <li>2</li>
+            <li>3</li>
+            <li>4</li>
+            <li>5</li>
+            <li>6</li>
+            <li>7</li>
+            <li>8</li>
+            <li>9</li>
+            <li>10</li>
+            <li>11</li>
+            <li>12</li>
+            <li>13</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div id="div-sticky">
+      <div id="header-tools">
+        <div id="headlabel">RFQ</div>
+        <a
+          href="#"
+          id="costingSystemBtn"
+          class="btn-costing"
+          aria-label="Costing System"
+          ><i class="fa fa-external-link-square"></i> COSTING</i
+        ></a>
+
+        <div id="right-menu" style="display: none">
+          <div id="login-div">Log in as <span id="name">---------</span></div>
+          <div id="logout-div">
+            <i class="fa fa-sign-out" style="font-size: 22px"></i>
+          </div>
+        </div>
+      </div>
+      <!-- <div id="newRFQ">
+            <button>Add New RFQ</button>
+        </div> -->
+    </div>
+    <div id="frame">
+      <div id="newRFQ">
+        <button>Add New RFQ</button>
+      </div>
+      <div id="search" class="relative">
+        <table>
+          <tr>
+            <td style="width: 4%">ID</td>
+            <td style="width: 8%">
+              <input
+                id="jobid"
+                class="text text-center"
+                placeholder="ระบุเลขที่เอกสาร"
+              />
+            </td>
+            <td style="width: 7%">Job Name</td>
+            <td style="width: 18%">
+              <input
+                id="jobName"
+                class="text text-left"
+                placeholder="ระบุชื่องาน"
+              />
+            </td>
+            <td style="width: 5%">AE</td>
+            <td style="width: 12%">
+              <input id="ae" class="text text-left" placeholder="ระบุชื่อ AE" />
+            </td>
+            <td style="width: 8%">Customer</td>
+            <td style="width: 18%">
+              <input
+                id="customer"
+                class="text text-left"
+                placeholder="ระบุชื่อลูกค้า"
+              />
+            </td>
+          </tr>
+          <tr>
+            <td colspan="8">
+              <center>
+                <table class="table-search">
+                  <tr>
+                    <!-- <td style="width:15%"></td> -->
+                    <td class="td-label" style="width: 5%">From :</td>
+                    <td class="td-input">
+                      <input
+                        id="fromDate"
+                        type="text"
+                        class="date text-center"
+                        placeholder="วัน/เดือน/ปี"
+                      />
+                    </td>
+                    <td class="td-label" style="width: 5%">To :</td>
+                    <td class="td-input">
+                      <input
+                        id="toDate"
+                        type="text"
+                        class="date text-center"
+                        placeholder="วัน/เดือน/ปี"
+                      />
+                    </td>
+                    <td
+                      class="td-label"
+                      style="text-align: right; padding-right: 10px"
+                    >
+                      Approve Status
+                    </td>
+                    <td class="td-input">
+                      <select
+                        id="slc-appStatus"
+                        style="text-align-last: center; width: 100%"
+                      >
+                        <option value="all">All</option>
+                        <option value="0">-</option>
+                        <option value="1">Pending</option>
+                        <option value="3">Approved</option>
+                        <option value="2">Reject</option>
+                      </select>
+                    </td>
+                    <td
+                      class="td-label"
+                      style="text-align: right; padding-right: 10px"
+                    >
+                      Profit Sharing
+                    </td>
+                    <td class="td-input">
+                      <select
+                        id="slc-profit_sharing"
+                        style="text-align-last: center; width: 100%"
+                      >
+                        <option value="all">All</option>
+                        <option value="1">Yes</option>
+                        <option value="0">No</option>
+                      </select>
+                    </td>
+                    <!-- <td style="width:15%"></td> -->
+                  </tr>
+                </table>
+              </center>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="9">
+              <button id="search-bttn">Search</button>
+              <button
+                id="prepare-export-data"
+                onclick="exportDataExcel()"
+                style="margin-left: 30px"
+              >
+                Export Excel
+              </button>
+              <button
+                id="export-bttn"
+                type="button"
+                tableexport-id="40bf358-xlsx"
+                class="button-default xlsx"
+                style="margin-left: 30px; display: none"
+              >
+                Export Excel
+              </button>
+            </td>
+          </tr>
+        </table>
+        <span class="display_number_of_rows"
+          >Result : <span class="warning no_of_rows">...</span> records</span
+        >
+      </div>
+      <table
+        id="export-rfq"
+        border
+        cellpadding="5"
+        tableexport-key="export-rfq"
+        style="display: none"
+      >
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+      <div id="list">
+        <table id="table-list">
+          <thead>
+            <tr>
+              <th style="text-align: center; width: 7%">ID</th>
+              <th style="text-align: center; width: 23%">ชื่องาน</th>
+              <th style="text-align: center; width: 6%">Create By</th>
+              <th style="text-align: center; width: 8%">AE</th>
+              <th style="text-align: center; width: 15%">Customer</th>
+              <th style="text-align: center; width: 13%">ยอดงาน</th>
+
+              <th style="text-align: center; width: 10%">
+                <div
+                  style="width: 100%"
+                  class="sorter pointer"
+                  data-field="status_id"
+                  data-sort_type="0"
+                  title="click for sorting"
+                >
+                  Request For Approve<br />
+                  <img
+                    src="./images/testH.png"
+                    style="width: 16px; height: auto; display: none"
+                    class="sort_date"
+                  />
+                  <img
+                    src="./images/no_sort.png"
+                    style="width: auto; height: 16px"
+                    class="no_sort"
+                  />
+                </div>
+              </th>
+
+              <th style="text-align: center; width: 4%">Profit Sharing</th>
+              <th style="text-align: center; width: 6%">Approve<br />Status</th>
+              <th style="text-align: center; width: 8%">ผู้อนุมัติ</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div id="menu">
+      <div id="menu-accordion">
+        <h3 id="head-menu">
+          <span id="docType"></span> :
+          <span id="id_no"></span> &nbsp;&nbsp;<span id="title_name"></span>
+        </h3>
+        <div id="job_info"></div>
+        <h3>Menu</h3>
+        <div>
+          <button id="view">View</button>
+          <button id="edit">Edit</button>
+          <button id="quote">Quote</button>
+          <button id="copy">New Copy</button>
+        </div>
+        <div id="close-menu" onclick="closeMenu()">x</div>
+      </div>
+    </div>
+  </body>
+</html>

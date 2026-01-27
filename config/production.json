@@ -1,0 +1,12 @@
+{
+  "data": {
+    "port": 4040,
+    "version": "3.1",
+    "api_url": "http://hostname/estimate_packaging",
+    "node_api": "http://hostname:4010",
+    "base_url": "http://hostname:4040",
+    "report_url": "http://hostname:4051/estimate",
+    "wizard_api": "http://hostname:4060",
+    "costing_url": "http://hostname:4050/all"
+  }
+}

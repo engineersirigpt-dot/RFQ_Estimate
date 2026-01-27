@@ -1,0 +1,9 @@
+Estimate JetPress
+ค่า plate เปลี่ยนเป็นค่า proof
+เปลี่ยนระยะเผื่อ
+print-rate ใช้ after waste คิดราคา
+ช่อง summary กำหนดสีอะไรมาก็ขึ้นได้แค่ 4/0  4/4
+ค่าปริ้นท์ ใช้ Paper Print ในการคิด (ไม่มี min price)
+
+
+เจียร -> เจียน

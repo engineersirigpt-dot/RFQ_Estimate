@@ -1,0 +1,1289 @@
+
+
+	<div id="print_form">
+		<div id="section_button" class="w-100 text-center d-flex flex-row justify-center vcenter pd-2" style="height:100px;">
+				<Button class="print_spec button w-lg mr-4"> Print [ Spec ] </Button>
+				<Button class="print_summary button w-lg"> Print [ Summary ] </Button>
+		</div>
+		<table class="w-100" id="section_1" border="0" cellspacing="0" cellpadding="0">
+			<!-- ROW 1 -->
+			<tr>
+				<td class="col_1 col_title">
+					<span class="title">
+						<strong>
+							RFQ ID :
+						</strong>
+					</span>
+				</td>
+				<td class="col_2">
+					<span class="job_id text_value">XXXXXXXXX</span>
+				</td>
+				<td class="col_3 col_title">
+					<span class="title">
+						<strong>
+							AE Name :
+						</strong>
+					</span>
+				</td>
+				<td class="col_4">
+					<span class="ae_name text_value">XXXXXXXXX</span>
+				</td>
+				<td class="col_5 col_title">
+					<span class="title">
+						<strong>
+							Estimator :
+						</strong>
+					</span>
+				</td>
+				<td class="col_6" colspan="2">
+					<span class="estimator_name text_value">XXXXXXXXX</span>
+				</td>
+				<td class="col_7 col_title">
+					<span class="title">
+						<strong>
+							Approve Status :
+						</strong>
+					</span>
+				</td>
+				<td class="col_8">
+					<span class="approve_status text_value">XXXXXXXXX</span>
+				</td>
+			</tr>
+			<!-- ROW 2 -->
+			<tr>
+				<td class="col_1 col_title">
+					<span class="title">
+						<strong>
+							Job Name :
+						</strong>
+					</span>
+				</td>
+				<td class="col_2" colspan="3">
+					<span class="job_name text_value">XXXXXXXXX</span>
+				</td>
+				<td class="col_5 col_title">
+					<span class="title">
+						<strong>
+							Customer :
+						</strong>
+					</span>
+				</td>
+				<td class="col_6" colspan="2">
+					<span class="customer_name text_value">XXXXXXXXX</span>
+				</td>
+				<td class="col_7 col_title">
+					<span class="title">
+						<strong>
+							Date :
+						</strong>
+					</span>
+				</td>
+				<td class="col_8">
+					<span class="create_date text_value">XXXXXXXXX</span>
+				</td>
+			</tr>
+			<!-- ROW 3 -->
+			<tr>
+				<td class="col_1" colspan="9">
+					<span class="title ml-1">
+						<input type="checkbox" id="is_multi_edition"/>
+						<strong>
+							งานมีหลาย F
+						</strong>
+					</span>
+				</td>
+			</tr>
+		</table>
+		<!-- Section 2 Qty. -->
+		<table class="w-100" id="section_qty" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td class="col_1 col-section center vcenter w-10 box-size bg-blue">
+					<span class="title">
+						<strong>
+							Quantity
+						</strong>
+					</span>
+				</td>
+				<td colspan="6" class="td_img">
+					<table class="w-100" id="tb_qty_normal" border="0" cellspacing="0" cellpadding="0">
+						<tbody>
+							<tr>
+								<td class="w-xl text-left">
+									<div class="w-100">
+										Quantity
+									</div>
+								</td>
+								<td class="td_qty">
+									<input type="text" class="w-s input_qty text-right">
+								</td>
+							</tr>
+							<tr>
+								<td class="w-xl text-left">
+									<div class="w-100">
+										Run-on <input type="text" disabled class="runon_percent w-s"> %
+									</div>
+								</td>
+								<td class="td_runon">
+									<input type="text" class="w-s input_runon text-right">
+								</td>
+							</tr>
+							<tr>
+								<td class="w-xl text-left">
+									<div class="w-100">
+										AE Qty.
+									</div>
+								</td>
+								<td>
+									<input type="text" class="w-s ae_qty text-right">
+								</td>
+							</tr>
+							<tr>
+								<td class="w-xl text-left">
+									<div class="w-100">
+										Customer Qty.
+									</div>
+								</td>
+								<td>
+									<input type="text" class="w-s customer_qty text-right">
+								</td>
+							</tr>
+						</tbody>
+					</table>
+
+					<table class="w-100 d-none" id="tb_qty_f" border="0" cellspacing="0" cellpadding="0">
+						<thead>
+							<th width="11%" class="bg-blue">
+								<div class="w-100 center">
+									F Code
+								</div>
+							</th>
+							<th width="11%" class="bg-blue">
+								<div class="w-100 center">
+									Quantity
+								</div>
+							</th>
+							<th width="11%" class="bg-blue">
+								<div class="w-100 center">
+									Run-on (%)
+								</div>
+							</th>
+							<th width="11%" class="bg-blue">
+								<div class="w-100 center">
+									Run-on
+								</div>
+							</th>
+							<th width="11%" class="bg-blue">
+								<div class="w-100 center">
+									AE Qty
+								</div>
+							</th>
+							<th width="11%" class="bg-blue">
+								<div class="w-100 center">
+									Customer Qty
+								</div>
+							</th>
+							<th width="11%" class="bg-blue">
+								<div class="w-100 center">
+									Total Qty
+								</div>
+							</th>
+							<th width="11%" class="bg-blue">
+								<div class="w-100 center">
+									ลิมิตสี
+								</div>
+							</th>
+							<th width="11%" class="bg-blue">
+								<div class="w-100 center">
+									ลิมิตสี (เล่ม)
+								</div>
+							</th>
+						</thead>
+						<tbody>
+							<tr>
+								<td align="center">
+									<span class="f_code">-</span>
+								</td>
+								<td align="center">
+									<span class="qty">-</span>
+								</td>
+								<td align="center">
+									<span class="runon_percent">-</span>
+								</td>
+								<td align="center">
+									<span class="runon_qty">-</span>
+								</td>
+								<td align="center">
+									<span class="ae_qty">-</span>
+								</td>
+								<td align="center">
+									<span class="customer_qty">-</span>
+								</td>
+								<td align="center">
+									<span class="total_qty">-</span>
+								</td>
+								<td align="center">
+									<input type="checkbox" class="chk_color_limit">
+								</td>
+								<td align="center">
+									<span class="color_limit">-</span>
+								</td>
+							</tr>
+						</tbody>
+						<tfoot>
+							<tr>
+								<td colspan="9" align="left">
+									<div class="w-lg">
+										<strong>Total Qty. : </strong>
+										<span class="total_net_qty">-</span>
+									</div>
+								</td>
+							</tr>
+						</tfoot>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<!-- Section 3 Job -->
+		<table class="w-100" id="section_3" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td colspan="7">
+					<div class="ml-1 w-100 d-flex flex-row">
+						<div class="w-lg">
+							<strong>ประเภทงาน : </strong>
+							<span class="job_type">-</span>
+						</div>
+						<div class="w-lg">
+							<strong>ประเภทหมึก : </strong>
+							<span class="ink_type">-</span>
+						</div>
+						<div class="w-lg">
+							<strong>ประเภทพิมพ์ : </strong>
+							<span class="print_type">-</span>
+						</div>
+						<div class="w-lg div_color_limit">
+							<input type="checkbox" class="chk_color_limit">
+							<strong>ลิมิตสี(เล่ม) : </strong>
+							<span class="color_limit">-</span>
+						</div>
+						<div class="w-lg">
+							<input type="checkbox" class="chk_profit_sharing">
+							<strong>Profit Sharing</strong>
+						</div>
+					</div>
+				</td>
+			</tr>
+		</table>
+		<!-- Section 4 Component -->
+		<table class="w-100" id="section_component" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td class="col_1 col-section center vcenter w-10 box-size bg-blue">
+					<span class="title">
+						<strong>
+							Component
+						</strong>
+					</span>
+				</td>
+				<td colspan="6">
+					<table class="w-100" border="0" cellspacing="0" cellpadding="0">
+						<thead>
+							<th width="5%" class="bg-blue">
+								<div class="w-100 center">
+									No.
+								</div>
+							</th>
+							<th width="25%" class="bg-blue">
+								<div class="w-100 center">
+									Component
+								</div>
+							</th>
+							<th width="25%" class="bg-blue">
+								<div class="w-100 center">
+									Type
+								</div>
+							</th>
+							<th width="45%" class="bg-blue">
+								<div class="w-100 center">
+									Pattern
+								</div>
+							</th>
+						</thead>
+						<tbody>
+							<tr>
+								<td align="center">
+									<span class="component_no">-</span>
+								</td>
+								<td align="center">
+									<span class="component_name">-</span>
+								</td>
+								<td align="center">
+									<span class="component_type">-</span>
+								</td>
+								<td align="center">
+									<span class="box_type">-</span>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<!-- Section 5 Paper -->
+		<table class="w-100" id="section_paper" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td class="col_1 col-section center vcenter w-10 box-size bg-blue">
+					<span class="title">
+						<strong>
+							Paper
+						</strong>
+					</span>
+				</td>
+				<td colspan="6">
+					<table class="w-100" border="0" cellspacing="0" cellpadding="0">
+						<thead>
+							<th width="10%" class="bg-blue">
+								<div class="w-100 center">
+									Component
+								</div>
+							</th>
+							<th width="10%" class="bg-blue">
+								<div class="w-100 center">
+									Paper
+								</div>
+							</th>
+							<th width="10%" class="bg-blue">
+								<div class="w-100 center">
+									Gsm
+								</div>
+							</th>
+							<th width="10%" class="bg-blue">
+								<div class="w-100 center">
+									% Mark-up
+								</div>
+							</th>
+							<th width="10%" class="bg-blue">
+								<div class="w-100 center">
+									ตัดกระดาษ
+								</div>
+							</th>
+							<th width="10%" class="bg-blue">
+								<div class="w-100 center">
+									Cost
+								</div>
+							</th>
+							<th width="10%" class="bg-blue">
+								<div class="w-100 center">
+									Sales
+								</div>
+							</th>
+							<th width="10%" class="bg-blue">
+								<div class="w-100 center">
+									Unit
+								</div>
+							</th>
+							<th class="bg-blue">
+								<div class="w-100 center">
+									Remark
+								</div>
+							</th>
+						</thead>
+						<tbody>
+							<tr>
+								<td align="center">
+									<span class="component_name">-</span>
+								</td>
+								<td align="center">
+									<span class="paper_name">-</span>
+								</td>
+								<td align="center">
+									<span class="paper_gram">-</span>
+								</td>
+								<td align="center">
+									<span class="paper_markup">-</span>
+								</td>
+								<td align="center">
+									<span class="roll_cut">-</span>
+								</td>
+								<td align="center">
+									<span class="paper_cost">-</span>
+								</td>
+								<td align="center">
+									<span class="paper_total_price">-</span>
+								</td>
+								<td align="center">
+									<span class="unit">-</span>
+								</td>
+								<td align="center">
+									<span class="remark">-</span>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<!-- Section 5 END -->
+		<!-- Section 6 Corrugated -->
+		<table class="w-100" id="section_corrugated" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td class="col_1 col-section center vcenter w-10 box-size bg-blue">
+					<span class="title">
+						<strong>
+							Corrugated
+						</strong>
+					</span>
+				</td>
+				<td colspan="6">
+					<table class="w-100" border="0" cellspacing="0" cellpadding="0">
+						<thead>
+							<th width="10%" class="bg-blue">
+								<div class="w-100 center">
+									Component
+								</div>
+							</th>
+							<th width="7%" class="bg-blue">
+								<div class="w-100 center">
+									Layer
+								</div>
+							</th>
+							<th width="7%" class="bg-blue">
+								<div class="w-100 center">
+									ลอน
+								</div>
+							</th>
+							<th width="7%" class="bg-blue">
+								<div class="w-100 center">
+									Grade 1
+								</div>
+							</th>
+							<th width="7%" class="bg-blue">
+								<div class="w-100 center">
+									Gsm 1
+								</div>
+							</th>
+							<th width="7%" class="bg-blue">
+								<div class="w-100 center">
+									Grade 2
+								</div>
+							</th>
+							<th width="7%" class="bg-blue">
+								<div class="w-100 center">
+									Gsm 2
+								</div>
+							</th>
+							<th width="7%" class="bg-blue">
+								<div class="w-100 center">
+									Grade 3
+								</div>
+							</th>
+							<th width="7%" class="bg-blue">
+								<div class="w-100 center">
+									Gsm 3
+								</div>
+							</th>
+							<th class="bg-blue">
+								<div class="w-100 center">
+									Remark
+								</div>
+							</th>
+						</thead>
+						<tbody>
+							<tr>
+								<td align="center">
+									<span class="component_name">-</span>
+								</td>
+								<td align="center">
+									<span class="corrugated_layer">-</span>
+								</td>
+								<td align="center">
+									<span class="corrugated_type">-</span>
+								</td>
+								<td align="center">
+									<span class="corrugated_grade1">-</span>
+								</td>
+								<td align="center">
+									<span class="corrugated_gram1">-</span>
+								</td>
+								<td align="center">
+									<span class="corrugated_grade2">-</span>
+								</td>
+								<td align="center">
+									<span class="corrugated_gram2">-</span>
+								</td>
+								<td align="center">
+									<span class="corrugated_grade3">-</span>
+								</td>
+								<td align="center">
+									<span class="corrugated_gram3">-</span>
+								</td>
+								<td align="center">
+									<span class="remark">-</span>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<!-- Section 6 END -->
+		<!-- Section 7 Colors -->
+		<table class="w-100" id="section_color" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td class="col_1 col-section center vcenter w-10 box-size bg-blue">
+					<span class="title">
+						<strong>
+							Colors
+						</strong>
+					</span>
+				</td>
+				<td colspan="6">
+					<table class="w-100" border="0" cellspacing="0" cellpadding="0">
+						<thead>
+							<th width="10%" class="bg-blue">
+								<div class="w-100 center">
+									<span class="column_name">Component</span>
+								</div>
+							</th>
+							<th width="5%" class="bg-blue">
+								<div class="w-100 center">
+									Outside
+								</div>
+							</th>
+							<th width="5%" class="bg-blue">
+								<div class="w-100 center">
+									Inside
+								</div>
+							</th>
+							<th width="10%" class="bg-blue">
+								<div class="w-100 center">
+									Special Ink
+								</div>
+							</th>
+							<th width="20%" class="bg-blue">
+								<div class="w-100 center">
+									Color
+								</div>
+							</th>
+							<th width="25%" class="bg-blue">
+								<div class="w-100 center">
+									ชนิดหมึก
+								</div>
+							</th>
+							<th width="25%" class="bg-blue">
+								<div class="w-100 center">
+									ลักษณะการพิมพ์สี
+								</div>
+							</th>
+						</thead>
+						<tbody>
+							<tr>
+								<td align="center">
+									<span class="component_name">-</span>
+								</td>
+								<td align="center">
+									<span class="out_col">-</span>
+								</td>
+								<td align="center">
+									<span class="in_col">-</span>
+								</td>
+								<td align="center">
+									<input type="checkbox" class="is_spe_ink">
+								</td>
+								<td align="center">
+									<span class="spe_ink_name">-</span>
+								</td>
+								<td align="center">
+									<span class="spe_ink_type">-</span>
+								</td>
+								<td align="center">
+									<span class="spe_ink_style">-</span>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<!-- Section 7 END -->
+		<!-- Section 8 AFTER PRESS-->
+		<table class="w-100" id="section_8" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td colspan="7" align="center" class="bg-head">
+					<h4>
+						<strong>After Press</strong>
+					</h4>
+				</td>
+			</tr>
+		</table>
+		<!-- Section 8 END -->
+		<!-- Section 9 Coating -->
+		<table class="w-100" id="section_coating" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td class="col_1 col-section center vcenter w-10 box-size bg-blue">
+					<span class="title">
+						<strong>
+							Coating
+						</strong>
+					</span>
+				</td>
+				<td colspan="6">
+					<table class="w-60" border="0" cellspacing="0" cellpadding="0">
+						<thead>
+							<th width="15%" class="bg-blue">
+								<div class="w-100 center">
+									Component
+								</div>
+							</th>
+							<th width="20%" class="bg-blue">
+								<div class="w-100 center">
+									Type 1
+								</div>
+							</th>
+							<th width="30%" class="bg-blue">
+								<div class="w-100 center">
+									Type 2
+								</div>
+							</th>
+							<th width="25%" class="bg-blue" colspan="2">
+								<div class="w-100 center">
+									Size (sq.in)
+								</div>
+							</th>
+						</thead>
+						<tbody>
+							<tr>
+								<td align="center">
+									<span class="component_name">-</span>
+								</td>
+								<td align="center">
+									<span class="type1">-</span>
+								</td>
+								<td align="center">
+									<span class="type2">-</span>
+								</td>
+								<td align="center">
+									<span class="width">-</span>
+								</td>
+								<td align="center">
+									<span class="length">-</span>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<!-- Section 10 Foilstamp -->
+		<table class="w-100" id="section_foilstamp" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td class="col_1 col-section center vcenter w-10 box-size bg-blue">
+					<span class="title">
+						<strong>
+							Foilstamp
+						</strong>
+					</span>
+				</td>
+				<td colspan="6">
+					<table class="w-60" border="0" cellspacing="0" cellpadding="0">
+						<thead>
+							<th width="15%" class="bg-blue">
+								<div class="w-100 center">
+									<span class="column_name">Component</span>
+								</div>
+							</th>
+							<th width="25%" class="bg-blue" colspan="2">
+								<div class="w-100 center">
+									Size (sq.in)
+								</div>
+							</th>
+							<th width="20%" class="bg-blue">
+								<div class="w-100 center">
+									Color
+								</div>
+							</th>
+							<th width="30%" class="bg-blue">
+								<div class="w-100 center">
+									Code
+								</div>
+							</th>
+							
+						</thead>
+						<tbody>
+							<tr>
+								<td align="center">
+									<span class="component_name">-</span>
+								</td>
+								<td align="center">
+									<span class="width">-</span>
+								</td>
+								<td align="center">
+									<span class="length">-</span>
+								</td>
+								<td align="center">
+									<span class="color_th">-</span>
+								</td>
+								<td align="center">
+									<span class="code">-</span>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<!-- Section 11 Emboss -->
+		<table class="w-100" id="section_emboss" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td class="col_1 col-section center vcenter w-10 box-size bg-blue">
+					<span class="title">
+						<strong>
+							Emboss
+						</strong>
+					</span>
+				</td>
+				<td colspan="6">
+					<table class="w-40" border="0" cellspacing="0" cellpadding="0">
+						<thead>
+							<th width="30%" class="bg-blue">
+								<div class="w-100 center">
+									<span class="column_name">Component</span>
+								</div>
+							</th>
+							<th width="40%" class="bg-blue" colspan="2">
+								<div class="w-100 center">
+									Size (sq.in)
+								</div>
+							</th>
+							<th width="30%" class="bg-blue">
+								<div class="w-100 center">
+									ความนูน
+								</div>
+							</th>
+							
+						</thead>
+						<tbody>
+							<tr>
+								<td align="center">
+									<span class="component_name">-</span>
+								</td>
+								<td align="center">
+									<span class="width">-</span>
+								</td>
+								<td align="center">
+									<span class="length">-</span>
+								</td>
+								<td align="center">
+									<span class="depth">-</span>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<!-- Section 12 Deboss -->
+		<table class="w-100" id="section_deboss" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td class="col_1 col-section center vcenter w-10 box-size bg-blue">
+					<span class="title">
+						<strong>
+							Deboss
+						</strong>
+					</span>
+				</td>
+				<td colspan="6">
+					<table class="w-40" border="0" cellspacing="0" cellpadding="0">
+						<thead>
+							<th width="30%" class="bg-blue">
+								<div class="w-100 center">
+									<span class="column_name">Component</span>
+								</div>
+							</th>
+							<th width="40%" class="bg-blue" colspan="2">
+								<div class="w-100 center">
+									Size (sq.in)
+								</div>
+							</th>
+							<th width="30%" class="bg-blue">
+								<div class="w-100 center">
+									ความลึก
+								</div>
+							</th>
+							
+						</thead>
+						<tbody>
+							<tr>
+								<td align="center">
+									<span class="component_name">-</span>
+								</td>
+								<td align="center">
+									<span class="width">-</span>
+								</td>
+								<td align="center">
+									<span class="length">-</span>
+								</td>
+								<td align="center">
+									<span class="depth">-</span>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<!-- Section s13 Other Process -->
+		<table class="w-100" id="section_other_process" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td class="col_1 col-section center vcenter w-10 box-size bg-blue">
+					<span class="title">
+						<strong>
+							Other Process
+						</strong>
+					</span>
+				</td>
+				<td colspan="6">
+					<table border="0" cellspacing="0" cellpadding="0">
+						<thead>
+							<th width="150px" class="bg-blue">
+								<div class="w-100 center">
+									Process
+								</div>
+							</th>
+							<th width="150px" class="bg-blue">
+								<div class="w-100 center">
+									ราคาต่อหน่วยคงที่
+								</div>
+							</th>
+							<th width="120px" class="th_process_ppu bg-blue">
+								<div class="w-100 center">
+									ราคาต่อหน่วย
+								</div>
+							</th>
+						</thead>
+						<tbody>
+							<tr>
+								<td align="center">
+									<span class="process_name">-</span>
+								</td>
+								<td align="center">
+									<input type="checkbox" class="is_fixed">
+								</td>
+								<td align="center" class="td_process_ppu">
+									<span class="ppu">-</span>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<!-- Section s14 Handwork Process -->
+		<table class="w-100" id="section_handwork_process" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td class="col_1 col-section center vcenter w-10 box-size bg-blue">
+					<span class="title">
+						<strong>
+							Handwork <br> Process
+						</strong>
+					</span>
+				</td>
+				<td colspan="6">
+					<table border="0" cellspacing="0" cellpadding="0">
+						<thead>
+							<th width="150px" class="bg-blue">
+								<div class="w-100 center">
+									Process
+								</div>
+							</th>
+							<th width="150px" class="bg-blue">
+								<div class="w-100 center">
+									ราคาต่อหน่วยคงที่
+								</div>
+							</th>
+							<th width="120px" class="th_process_ppu bg-blue">
+								<div class="w-100 center">
+									ราคาต่อหน่วย
+								</div>
+							</th>
+						</thead>
+						<tbody>
+							<tr>
+								<td align="center">
+									<span class="process_name">-</span>
+								</td>
+								<td align="center">
+									<input type="checkbox" class="is_fixed">
+								</td>
+								<td align="center" class="td_process_ppu">
+									<span class="ppu">-</span>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<!-- Section s15 จัดจ้าง -->
+		<table class="w-100" id="section_custom_process" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td class="col_1 col-section center vcenter w-10 box-size bg-blue">
+					<span class="title">
+						<strong>
+							จัดจ้าง
+						</strong>
+					</span>
+				</td>
+				<td colspan="6">
+					<table border="0" cellspacing="0" cellpadding="0">
+						<thead>
+							<th width="150px" class="bg-blue">
+								<div class="w-100 center">
+									Process
+								</div>
+							</th>
+							<th width="150px" class="bg-blue">
+								<div class="w-100 center">
+									ราคาต่อหน่วยคงที่
+								</div>
+							</th>
+							<th width="120px" class="th_process_ppu bg-blue">
+								<div class="w-100 center">
+									ราคาต่อหน่วย
+								</div>
+							</th>
+						</thead>
+						<tbody>
+							<tr>
+								<td align="center">
+									<span class="process_name">-</span>
+								</td>
+								<td align="center">
+									<input type="checkbox" class="is_fixed">
+								</td>
+								<td align="center" class="td_process_ppu">
+									<span class="ppu">-</span>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<!-- Section s16 Materials -->
+		<table class="w-100" id="section_material_process" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td class="col_1 col-section center vcenter w-10 box-size bg-blue">
+					<span class="title">
+						<strong>
+							Materials
+						</strong>
+					</span>
+				</td>
+				<td colspan="6">
+					<table border="0" cellspacing="0" cellpadding="0">
+						<thead>
+							<th width="150px" class="bg-blue">
+								<div class="w-100 center">
+									Materials
+								</div>
+							</th>
+							<th width="120px" class="bg-blue">
+								<div class="w-100 center">
+									ราคาต่อหน่วย
+								</div>
+							</th>
+							<th width="120px" class="bg-blue">
+								<div class="w-100 center">
+									จำนวนคงที่
+								</div>
+							</th>
+							<th width="100px" class="th_process_qty bg-blue">
+								<div class="w-100 center">
+									จำนวน
+								</div>
+							</th>
+						</thead>
+						<tbody>
+							<tr>
+								<td align="center">
+									<span class="name">-</span>
+								</td>
+								<td align="center">
+									<span class="ppu">-</span>
+								</td>
+								<td align="center">
+									<input type="checkbox" class="is_fixed">
+								</td>
+								<td align="center" class="td_process_qty">
+									<span class="qty">-</span>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<!-- Section s17 Other -->
+		<table class="w-100" id="section_otherCost_process" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td class="col_1 col-section center vcenter w-10 box-size bg-blue">
+					<span class="title">
+						<strong>
+							Other
+						</strong>
+					</span>
+				</td>
+				<td colspan="6">
+					<table border="0" cellspacing="0" cellpadding="0">
+						<thead>
+							<th width="150px" class="bg-blue">
+								<div class="w-100 center">
+									Process
+								</div>
+							</th>
+							<th width="120px" class="bg-blue">
+								<div class="w-100 center">
+									ราคาต่อหน่วย
+								</div>
+							</th>
+							<th width="120px" class="bg-blue">
+								<div class="w-100 center">
+									จำนวนคงที่
+								</div>
+							</th>
+							<th width="100px" class="th_process_qty bg-blue">
+								<div class="w-100 center">
+									จำนวน
+								</div>
+							</th>
+						</thead>
+						<tbody>
+							<tr>
+								<td align="center">
+									<span class="name">-</span>
+								</td>
+								<td align="center">
+									<span class="ppu">-</span>
+								</td>
+								<td align="center">
+									<input type="checkbox" class="is_fixed">
+								</td>
+								<td align="center" class="td_process_qty">
+									<span class="qty">-</span>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<!-- Section s18 Attach File -->
+		<table class="w-100" id="section_file" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td class="col_1 col-section center vcenter w-10 box-size bg-blue">
+					<span class="title">
+						<strong>
+							Attach File
+						</strong>
+					</span>
+				</td>
+				<td colspan="6" class="pd-left-2 td_file">
+				</td>
+			</tr>
+		</table>
+		<!-- Section s19 Delivery -->
+		<table class="w-100" id="section_delivery" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td class="col_1 col-section-sm center vcenter w-10 box-size bg-blue">
+					<span class="title">
+						<strong>
+							Delivery
+						</strong>
+					</span>
+				</td>
+				<td colspan="6">
+					<table class="w-60" border="0" cellspacing="0" cellpadding="0">
+						<thead>
+							<th width="10%" class="bg-blue">
+								<div class="w-100 center">
+									แบ่งส่ง
+								</div>
+							</th>
+							<th width="35%" class="bg-blue">
+								<div class="w-100 center">
+									จังหวัด
+								</div>
+							</th>
+							<th width="20%" class="bg-blue">
+								<div class="w-100 center">
+									วันที่ส่ง
+								</div>
+							</th>
+							<th width="20%" class="bg-blue col-f-code">
+								<div class="w-100 center">
+									F Code
+								</div>
+							</th>
+							<th width="15%" class="bg-blue">
+								<div class="w-100 center">
+									จำนวน
+								</div>
+							</th>
+						</thead>
+						<tbody>
+							<tr>
+								<td align="center">
+									<input type="checkbox" class="is_split_delivery">
+								</td>
+								<td align="center">
+									<span class="destinationName">-</span>
+								</td>
+								<td align="center">
+									<span class="dueDate">-</span>
+								</td>
+								<td align="center" class="col-f-code">
+									<span class="f_code">-</span>
+								</td>
+								<td align="center">
+									<span class="qty">-</span>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<!-- Section s20 ส่วนต่างลูกค้า -->
+		<table class="w-100" id="section_priceDiff" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td class="col_1 col-section-sm center vcenter w-10 box-size bg-blue">
+					<span class="title">
+						<strong>
+							ส่วนต่างลูกค้า
+						</strong>
+					</span>
+				</td>
+				<td colspan="6">
+					<table class="100" border="0">
+						<tr>
+							<td align="center">
+								<input type="checkbox">
+							</td>
+							<td align="left" class="td_price w-s">
+								<input readonly type="text" class="w-s text-right">
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<!-- Section s21 ของขวัญลูกค้า -->
+		<table class="w-100" id="section_customer_gift" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td class="col_1 col-section-sm center vcenter w-10 box-size bg-blue">
+					<span class="title">
+						<strong>
+							ของขวัญลูกค้า
+						</strong>
+					</span>
+				</td>
+				<td colspan="6">
+					<table class="100" border="0">
+						<tr>
+							<td align="center">
+								<input type="checkbox">
+							</td>
+							<td align="left" class="td_price w-s">
+								<input readonly type="text" class="w-s text-right">
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<!-- Section Component Size & Laying -->
+		<table class="w-100 bg-blue" id="section_component_laying" border="0" cellpadding="0" cellspacing="0">
+			<tbody>
+				<tr class="tr_size_component">
+					<td colspan="7">
+						<table class="component_laying w-100 bg-white" border="0" cellspacing="0" cellpadding="0">
+							<thead>
+								<th colspan="7" align="center" class="bg-head">
+									<h4>
+										<strong>Component ที่ <span class="component_no"></span> <span class="component_name"></span> </strong>
+									</h4>
+								</th>
+							</thead>
+							<tbody>
+								<tr>
+									<td class="col_1 col-section-sm center vcenter w-10 box-size bg-blue">
+										<span class="title">
+											<strong>
+												Size
+											</strong>
+										</span>
+									</td>
+									<td colspan="6" class="w-100 size_img center vcenter">
+										<div class="w-100 d-flex flex-row justify-center">
+											<div class="template_img"></div>
+											<div class="spec  text-left" style="margin-top:10px;"></div>
+											<div class="size  text-left" style="margin-top:10px;"></div>
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<td class="col_1 col-section-sm center vcenter w-10 box-size bg-blue">
+										<span class="title">
+											<strong>
+												Layout
+											</strong>
+										</span>
+									</td>
+									<td colspan="6" class="w-100 layout_img center vcenter">
+										<div style="width:100%; text-align:left; height:25px;">
+											<div class="mr-1">
+												<input disabled type="checkbox" class="is_manual_layout"> Manual Layout
+											</div>
+										</div>
+										<div class="w-100 d-flex flex-row justify-center">
+											<div class="size_layout text-left" style="margin-right:10px;"></div>
+											<div class="layout text-left" style="margin-right:10px;"></div>
+											<div class="num_laying text-left" style="margin-right:10px;"></div>
+											<div class="tolerance text-left"></div>
+										</div>
+										<div class="paper_usage w-100 center pd-1"></div>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<!-- Section Packing -->
+		<table class="w-100" id="section_packing" border="0" cellspacing="0" cellpadding="0">
+			<tbody>
+				<tr class="tr_packing_component">
+					<td class="col_1 col-section-sm center vcenter w-10 box-size bg-blue">
+						<span class="title">
+							<strong>
+								Packing
+							</strong>
+						</span>
+					</td>
+					<td colspan="6" class="td_packing text-left">
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<table class="w-100" id="section_rfq_summary" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td colspan="7" align="center" class="bg-head">
+					<h4>
+						<strong>Summary</strong>
+					</h4>
+				</td>
+			</tr>
+			<tr>
+			</tr>
+		</table>
+	</div>

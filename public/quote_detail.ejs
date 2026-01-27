@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title></title>
+<%- include('header') -%>
+<link rel="stylesheet"  href="./css/style_quote.css">
+<script src="./js/commonFunction.js" ></script>
+<script src="./js/library/moment.min.js" ></script>
+<script src="./js/function_quote_detail.js" ></script>
+<script src="./js/function_estimate_fetchData.js" ></script>
+<script src="./js/function_quotationTextEditor.js" ></script>
+
+<body>
+    <h2 style="margin-left: 20%;">รายละเอียดใบเสนอราคา</h2>
+    <div id="quote-datail">
+        <table cellpadding="5px" style="margin:auto">
+            <tr>
+                <td  class="info-label">RFQ No:</td>
+                <td style="width: 450px;"><input id="rfq_id" readonly style="width: 225px;"></td>
+                <td style="width: 200px;" class="info-label">ใบเสนอราคาเลขที่:</td>
+                <td style="width: 225px;"><input id="quotation_id" readonly ></td>
+                <input id="doc_status" type="hidden">
+            </tr>
+            <tr>
+                <td class="info-label">ชื่อลูกค้า:</td>
+                <td><input id="customer_name" readonly ></td>
+                <td class="info-label">วันที่เปิด:</td>
+                <td><input id="issue_date"  class="is_Date" type="text"  value=""> </td>
+
+            </tr>
+            <tr>
+                <td class="info-label" rowspan="3" style="vertical-align: top;" >ที่อยู่:</td>
+                <td rowspan="3" style="vertical-align: top;"><textarea id="customer_address" ></textarea></td>
+                <td class="info-label">เงื่อนไขการชำระเงิน:</td>
+                <td><input id="payment_condition" readonly ></td>
+            </tr>
+            <tr>
+                <td class="info-label">จำนวนวันยืนราคา:</td>
+                <td>
+                    <div>
+                        <select id="select_validate_day">
+                            <option value="">-</option>
+                            <option value="30">30</option>
+                            <option value="60">60</option>
+                            <option value="90">90</option>
+                            <option value="120">120</option>
+                        </select>
+                        วัน
+                    </div>
+            </td>
+            </tr>
+            <tr>
+                <td class="info-label">กำหนดยืนราคาถึงวันที่:</td>
+                <td><input id="valid_date" class="required is_Date" data-validate="กำหนดยืนราคาถึงวันที่"></td>
+            </tr>
+            <tr>
+                <td class="info-label">ชื่อผู้ติดต่อ:</td>
+                <td><select id="customer_contact_person" style="width: 225px;"></select></td>
+                <td class="info-label">กำหนดส่งงานภายใน:</td>
+                <td><input id="due_date" class="is_Date" ></td>
+            </tr>
+            <tr>
+                <td class="info-label">เบอร์โทร:</td>
+                <td><input id="customer_tel"  style="width: 225px;"></td>
+                <td class="info-label">ชื่อพนักงาน:</td>
+                <td><input id="ae_name"  ></td>
+            </tr>
+            <tr>
+                <td class="info-label">เบอร์แฟ็ก:</td>
+                <td><input id="customer_fax"  style="width: 225px;"></td>
+                <td></td>
+                <td>
+                    <input type="checkbox" id="is_request_for_approve" style="margin-right:5px;width:30px;">
+                    <span><b>Request for approve</b></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="info-label">เบอร์มือถือ:</td>
+                <td><input id="customer_mobile"  style="width: 225px;"></td>
+                <td class="info-label" ><span option="on_request_for_approve">เลือกผู้อนุมัติ 1:</span></td>
+                <td>
+                    <select class="request_approve_to_1" style="width: 225px;text-align:center;" option="on_request_for_approve">
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="info-label">Email:</td>
+                <td><input id="customer_email"  style="width: 225px;"></td>
+                <td class="info-label"><span option="on_request_for_approve">เลือกผู้อนุมัติ 2:</span></td>
+                <td>
+                    <select class="request_approve_to_2" style="width: 225px;text-align:center;" option="on_request_for_approve">
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td><br></td>
+            </tr>
+            <tr>
+                <td class="info-label">ชื่องาน :</td>
+                <td>
+                    <input id="quotation_description" style="width:100%;padding-left:5px;"></input>
+                </td>
+            </tr>
+            <tr>
+                <td class="info-label">รูปแบบข้อมูล:</td>
+                <td>
+                    <div>
+                        <input type="radio" name="job_info_type_id" id="local_job_info" value="1" checked/><label for="local_job_info">ในประเทศ</label>
+                        <input type="radio" name="job_info_type_id" id="export_job_info" value="2"/><label for="export_job_info">ต่างประเทศ</label>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id="quote-table">
+        <table cellpadding="5px">
+            <thead >
+                <tr>
+                    <th rowspan="2" style="width: 5%;">ลำดับที่</th>
+                    <th rowspan="2" style="width: 40%;">ชื่อรายการ</th>
+                    <th rowspan="2" style="width: 5%;">หน่วย</th>
+                    <th rowspan="2" style="width: 10%;">จำนวน</th>
+                    <th colspan="2" style="width: 20%;">สกุลเงินไทย</th>
+                    <th colspan="2" style="width: 20%">
+                        สกุลเงิน 
+                        <select id="currency">
+                        </select>
+                        @ <input disabled id="exchange_cur" style="width:40px;text-align: center;" value="1"> THB/<span class="price_unit">THB</span>
+                    </th>
+                </tr>
+                <tr>
+                    <th>ราคา (บาท)/หน่วย </th>
+                    <th>เป็นเงิน</th>
+                    <th>ราคา (<span class="price_unit">THB</span>)/หน่วย</th>
+                    <th>Total (<span class="price_unit">THB</span>)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="tr-qty q-list">
+                    <td class="align-top td-input">1</td>
+                    <td><textarea id="job_info"></textarea></td>
+                    <td class="td-input"><input class="unit" style="width: 80%;text-align: center;" value="Pcs."></td>
+                    <td class="td-input"><input style="width: 80%;text-align: right;" class="qty list-qty"></td>
+                    <td class="td-input">
+                        <input style="width: 80%;text-align: right;" class="THB_unitprice"><br>
+                        <span class="validate_THB_unitprice" style="text-align:center;"></span>
+                    </td>
+                    <td class="td-input"><input style="width: 80%;text-align: right;" class="THB_price" readonly></td>
+                    <td class="td-input"><input style="width: 80%;text-align: right;" class="CUR_unitprice"></td>
+                    <td class="td-input"><input style="width: 80%;text-align: right;" class="CUR_price" readonly></td>
+                </tr>
+                <tr id="tr-price_format">
+                    <td colspan="2" style="text-align: left;">
+                    </td>
+                    <td colspan="4" style="text-align:center">รูปแบบของราคาในรายการข้างต้น 
+                        <select id="price_format" style="text-align-last: center;">
+                            <optgroup label="งานในประเทศ">
+                                <option value="1" class="local">ราคายังไม่รวม VAT</option>
+                                <option value="2" class="local d-none">ราคารวม VAT แล้ว</option>
+                                <option value="6" class="local">ราคารวม VAT แล้ว</option>
+                            </optgroup>
+                            <optgroup label="งานต่างประเทศ">
+                                <option value="3" class="export">ไม่คิด VAT</option>
+                                <option value="4" class="export">ราคายังไม่รวม VAT</option>
+                                <option value="5" class="export d-none">ราคารวม VAT แล้ว</option>
+                                <option value="7" class="export">ราคารวม VAT แล้ว</option>
+                            </optgroup>
+                        </select>
+                    </td>
+                    <td style="border-bottom: none;border-right: none;vertical-align: bottom;"><strong id="qty-label">Quantity</strong></td>
+                    <td style="border-bottom: none;border-left: none;text-align:right;vertical-align: bottom;">
+                        <div id='qty-select-all'><input id="qty-all" type="checkbox">Select All</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="5" style="text-align: right;">ราคาทั้งหมดก่อนรวม VAT</td>
+                    <td id="vat_excluded" style="text-align: right;"></td>
+                    <td rowspan="3" colspan="2" style="vertical-align: top;border-top: none;padding-top: 0px;">
+                        <div id="qty-div"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="5" style="text-align: right;">ภาษีมูลค่าเพิ่ม</td>
+                    <td id="vat" style="text-align: right;"></td>
+                </tr>
+                <tr>
+                    <td colspan="5" style="text-align: right;">ราคาทั้งหมดหลังรวม VAT</td>
+                    <td id="vat_included" style="text-align: right;"></td>
+                </tr>
+                <tr>
+                    <td colspan="8">
+                        <div id="bttn-menu-div">
+                            <button id='add-row'>เพิ่มแถว <i class="fa fa-plus-circle" style="font-size: 20px;"></i></button>
+                            <button id='delete-row'>ลบแถว <i class="fa fa-minus-circle" style="font-size: 20px;"></i></button>
+                            <button id='save'>บันทึก <i class="fa fa-save" style="font-size: 20px;"></i></button>
+                            <button id='close'>ปิด <i class="fa fa-times-circle" style="font-size: 20px;"></i></button>
+                            <!-- <button id='test'>test </button> -->
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <br/>
+</body>
+</html>
