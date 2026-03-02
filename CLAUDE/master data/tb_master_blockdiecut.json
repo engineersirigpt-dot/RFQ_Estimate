@@ -1,0 +1,106 @@
+[
+  {
+    "id": 1,
+    "width": 15.5,
+    "length": 21.5,
+    "rate_per_sqin": 6.0,
+    "rate": 2000.0,
+    "modified": "3/8/2021 09:46:49.48"
+  },
+  {
+    "id": 2,
+    "width": 18.0,
+    "length": 25.0,
+    "rate_per_sqin": 5.5,
+    "rate": 2000.0,
+    "modified": "14/8/2021 13:23:13.14"
+  },
+  {
+    "id": 3,
+    "width": 21.5,
+    "length": 31.0,
+    "rate_per_sqin": 5.25,
+    "rate": 2500.0,
+    "modified": "14/8/2021 13:23:28.76"
+  },
+  {
+    "id": 4,
+    "width": 24.0,
+    "length": 35.0,
+    "rate_per_sqin": 5.0,
+    "rate": 3000.0,
+    "modified": "3/8/2021 09:46:49.48"
+  },
+  {
+    "id": 5,
+    "width": 25.0,
+    "length": 36.0,
+    "rate_per_sqin": 5.0,
+    "rate": 3000.0,
+    "modified": "3/8/2021 09:46:49.48"
+  },
+  {
+    "id": 6,
+    "width": 28.0,
+    "length": 40.0,
+    "rate_per_sqin": 4.75,
+    "rate": 3500.0,
+    "modified": "4/8/2021 15:47:51.23"
+  },
+  {
+    "id": 7,
+    "width": 31.0,
+    "length": 43.0,
+    "rate_per_sqin": 4.75,
+    "rate": 4000.0,
+    "modified": "4/8/2021 15:47:51.23"
+  },
+  {
+    "id": 8,
+    "width": 33.0,
+    "length": 45.0,
+    "rate_per_sqin": 4.75,
+    "rate": 4500.0,
+    "modified": "4/8/2021 15:47:51.23"
+  },
+  {
+    "id": 9,
+    "width": 37.0,
+    "length": 51.5,
+    "rate_per_sqin": 4.75,
+    "rate": 4500.0,
+    "modified": "30/3/2022 16:59:17"
+  },
+  {
+    "id": 10,
+    "width": 45.0,
+    "length": 45.0,
+    "rate_per_sqin": 4.75,
+    "rate": 4500.0,
+    "modified": "8/1/2024 14:30:58.763"
+  },
+  {
+    "id": 11,
+    "width": 35.0,
+    "length": 55.0,
+    "rate_per_sqin": 6.0,
+    "rate": 4500.0,
+    "modified": "27/8/2024 14:19:00.493"
+  },
+  {
+    "id": 12,
+    "width": 60.0,
+    "length": 60.0,
+    "rate_per_sqin": 6.0,
+    "rate": 4500.0,
+    "modified": "27/8/2024 15:03:02.487"
+  },
+  {
+    "id": 13,
+    "width": 100.0,
+    "length": 100.0,
+    "rate_per_sqin": 6.0,
+    "rate": 4500.0,
+    "modified": "9/5/2025 13:29:02.267"
+  }
+]

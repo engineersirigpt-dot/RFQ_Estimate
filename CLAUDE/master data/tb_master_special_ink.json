@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "process_id": 39,
+    "special_ink_type": "common special ink",
+    "special_ink_type_th": "หมึกพิเศษธรรมดา",
+    "price": 250.0,
+    "modified": "30/9/2021 14:59:52.63"
+  },
+  {
+    "id": 2,
+    "process_id": 40,
+    "special_ink_type": "metallic special ink",
+    "special_ink_type_th": "หมึกเมทัลลิค",
+    "price": 950.0,
+    "modified": "30/9/2021 15:00:57.95"
+  },
+  {
+    "id": 3,
+    "process_id": 41,
+    "special_ink_type": "reflective special ink",
+    "special_ink_type_th": "หมึกสะท้อนแสง",
+    "price": 1000.0,
+    "modified": "30/9/2021 15:01:46.12"
+  },
+  {
+    "id": 4,
+    "process_id": 42,
+    "special_ink_type": "UV resistant special ink",
+    "special_ink_type_th": "หมึกทนแดด",
+    "price": 450.0,
+    "modified": "30/9/2021 15:02:26.32"
+  },
+  {
+    "id": 5,
+    "process_id": 47,
+    "special_ink_type": "UV special ink",
+    "special_ink_type_th": "หมึก UV",
+    "price": 1300.0,
+    "modified": "18/4/2022 16:27:35.497"
+  }
+]

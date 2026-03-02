@@ -7730,6 +7730,27 @@ class Estimate {
 
 		this.setCalculateTax()
 
+		const processInfoBuilder = new ProcessInfoBuilder(this)
+		this.mainData.component1.forEach((comp, compIndex) => {
+			processInfoBuilder.buildProcessInfo(compIndex)
+		})
+
+		const targetLength = this.mainData.qty.totalqty.length
+
+		// Initialize process_info structure
+		this.mainData.process_info = {
+			material: [],
+			plate: [],
+			proof: [],
+			print: [],
+			process: [],
+			other: [],
+			handwork: [],
+			packing: []
+		}
+		processInfoBuilder.addCustomProcess(null, targetLength)
+		processInfoBuilder.addOtherCostProcess(null, targetLength)
+
 	}
 
 	setSystemVersion(version) {
