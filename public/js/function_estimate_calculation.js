@@ -7748,9 +7748,15 @@ class Estimate {
 			handwork: [],
 			packing: []
 		}
+
+		processInfoBuilder.addMaterialProcess(null, targetLength)
+		processInfoBuilder.addChipProcess(null, targetLength)
+		processInfoBuilder.addInspectionProcess(null, targetLength)
 		processInfoBuilder.addCustomProcess(null, targetLength)
 		processInfoBuilder.addOtherCostProcess(null, targetLength)
-
+		processInfoBuilder.addShrinkwrapProcess(null, targetLength)
+		processInfoBuilder.addBagProcess(null, targetLength)
+		processInfoBuilder.addTrimProcess(null, targetLength)
 	}
 
 	setSystemVersion(version) {

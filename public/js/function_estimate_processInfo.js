@@ -139,13 +139,9 @@ class ProcessInfoBuilder {
         this.addDieCutProcess(comp, compIndex, targetLength)
         this.addDigitalDieCutProcess(comp, compIndex, targetLength)
         this.addCorrugatedGluedProcess(comp, compIndex, targetLength)
-        this.addChipProcess(compIndex, targetLength)
-        this.addInspectionProcess(compIndex, targetLength)
-        this.addShrinkwrapProcess(compIndex, targetLength)
-        this.addBagProcess(compIndex, targetLength)
-        this.addTrimProcess(compIndex, targetLength)
+
         this.addPackingProcess(comp, compIndex, targetLength)
-        this.addMaterialProcess(compIndex, targetLength)
+
         this.addComponentMaterialProcess(comp, compIndex, targetLength)
     }
 
@@ -708,17 +704,14 @@ class ProcessInfoBuilder {
             const processInfo = this.getPackagingProcessId('chip')
             const unitId = this.getUnitId(processInfo.unit_name)
 
-            // Add to all components
-            this.mainData.component1.forEach((comp, idx) => {
-                comp.process_info.handwork.push({
-                    process_id: processInfo.mi2_process_id,
-                    unit_id: unitId,
-                    process_name: 'แกะ',
-                    remark: null,
-                    is_apply_all_edition: true,
-                    info: {},
-                    line: this.normalizeLineArray(proc.line, targetLength)
-                })
+            this.mainData.process_info.handwork.push({
+                process_id: processInfo.mi2_process_id,
+                unit_id: unitId,
+                process_name: proc.info?.name || 'แกะ',
+                remark: null,
+                is_apply_all_edition: true,
+                info: proc.info || {},
+                line: this.normalizeLineArray(proc.line, targetLength)
             })
         })
     }
@@ -732,17 +725,14 @@ class ProcessInfoBuilder {
             const processInfo = this.getPackagingProcessId('inspection')
             const unitId = this.getUnitId(processInfo.unit_name)
 
-            // Add to all components
-            this.mainData.component1.forEach((comp, idx) => {
-                comp.process_info.process.push({
-                    process_id: processInfo.mi2_process_id,
-                    unit_id: unitId,
-                    process_name: 'Inspection',
-                    remark: null,
-                    is_apply_all_edition: true,
-                    info: {},
-                    line: this.normalizeLineArray(proc.line, targetLength)
-                })
+            this.mainData.process_info.process.push({
+                process_id: processInfo.mi2_process_id,
+                unit_id: unitId,
+                process_name: proc.info?.name || 'Inspection',
+                remark: null,
+                is_apply_all_edition: true,
+                info: proc.info || {},
+                line: this.normalizeLineArray(proc.line, targetLength)
             })
         })
     }
@@ -756,17 +746,14 @@ class ProcessInfoBuilder {
             const processInfo = this.getPackagingProcessId('shrinkwrap')
             const unitId = this.getUnitId(processInfo.unit_name)
 
-            // Add to all components
-            this.mainData.component1.forEach((comp, idx) => {
-                comp.process_info.process.push({
-                    process_id: processInfo.mi2_process_id,
-                    unit_id: unitId,
-                    process_name: 'Shrinkwrap',
-                    remark: null,
-                    is_apply_all_edition: true,
-                    info: {},
-                    line: this.normalizeLineArray(proc.line, targetLength)
-                })
+            this.mainData.process_info.process.push({
+                process_id: processInfo.mi2_process_id,
+                unit_id: unitId,
+                process_name: proc.info?.name || 'Shrinkwrap',
+                remark: null,
+                is_apply_all_edition: true,
+                info: proc.info || {},
+                line: this.normalizeLineArray(proc.line, targetLength)
             })
         })
     }
@@ -780,17 +767,14 @@ class ProcessInfoBuilder {
             const processInfo = this.getPackagingProcessId('bag')
             const unitId = this.getUnitId(processInfo.unit_name)
 
-            // Add to all components
-            this.mainData.component1.forEach((comp, idx) => {
-                comp.process_info.process.push({
-                    process_id: processInfo.mi2_process_id,
-                    unit_id: unitId,
-                    process_name: 'Bag',
-                    remark: null,
-                    is_apply_all_edition: true,
-                    info: {},
-                    line: this.normalizeLineArray(proc.line, targetLength)
-                })
+            this.mainData.process_info.process.push({
+                process_id: processInfo.mi2_process_id,
+                unit_id: unitId,
+                process_name: proc.info?.name || 'Bag',
+                remark: null,
+                is_apply_all_edition: true,
+                info: proc.info || {},
+                line: this.normalizeLineArray(proc.line, targetLength)
             })
         })
     }
@@ -804,17 +788,14 @@ class ProcessInfoBuilder {
             const processInfo = this.getPackagingProcessId('trim')
             const unitId = this.getUnitId(processInfo.unit_name)
 
-            // Add to all components
-            this.mainData.component1.forEach((comp, idx) => {
-                comp.process_info.process.push({
-                    process_id: processInfo.mi2_process_id,
-                    unit_id: unitId,
-                    process_name: 'Trim',
-                    remark: null,
-                    is_apply_all_edition: true,
-                    info: {},
-                    line: this.normalizeLineArray(proc.line, targetLength)
-                })
+            this.mainData.process_info.process.push({
+                process_id: processInfo.mi2_process_id,
+                unit_id: unitId,
+                process_name: proc.info?.name || 'Trim',
+                remark: null,
+                is_apply_all_edition: true,
+                info: proc.info || {},
+                line: this.normalizeLineArray(proc.line, targetLength)
             })
         })
     }
@@ -876,21 +857,18 @@ class ProcessInfoBuilder {
     addMaterialProcess(compIndex, targetLength) {
         if (!this.mainData.material) return
 
-        this.mainData.material.forEach(mat => {
+        this.mainData.material.forEach(proc => {
             const processInfo = this.getPackagingProcessId('material')
             const unitId = this.getUnitId(processInfo.unit_name)
 
-            // Add to all components
-            this.mainData.component1.forEach((comp, idx) => {
-                comp.process_info.material.push({
-                    process_id: processInfo.mi2_process_id,
-                    unit_id: unitId,
-                    process_name: mat.info?.name || 'Material',
-                    remark: null,
-                    is_apply_all_edition: mat.info?.is_fixedPrice || false,
-                    info: mat.info || {},
-                    line: this.normalizeLineArray(mat.line, targetLength)
-                })
+            this.mainData.process_info.material.push({
+                process_id: processInfo.mi2_process_id,
+                unit_id: unitId,
+                process_name: proc.info?.name || 'Material',
+                remark: null,
+                is_apply_all_edition: true,
+                info: proc.info || {},
+                line: this.normalizeLineArray(proc.line, targetLength)
             })
         })
     }

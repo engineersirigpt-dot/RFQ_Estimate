@@ -46,6 +46,7 @@ function displayEstimateData(data) {
 	} else {
 		// * กรณี delivery ไม่มี rate ให้คำนวณหา rate (แก้ปัญหา RFQ เก่าๆ)
 		if (!mainData?.delivery?.every(item => item?.qty_rate?.length)) {
+			console.log("fixed delivery bug.")
 			est.setCalculateDeliveryPrice()
 		}
 
