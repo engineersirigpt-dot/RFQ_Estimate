@@ -1,0 +1,856 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36" version="29.6.0">
+  <diagram name="Estimate Packaging Flow" id="estimate-flow-1">
+    <mxGraphModel dx="983" dy="596" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2600" pageHeight="3400" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="sec1_label" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=14;fontStyle=5;fontColor=#333333;align=left;" value="Required: ข้อมูลหลักก่อนคำนวณ Layout" vertex="1">
+          <mxGeometry height="30" width="350" x="30" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="start" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontStyle=1;fontSize=12;" value="START" vertex="1">
+          <mxGeometry height="35" width="130" x="835" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="node_a" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=10;" value="[A] จำนวนงาน" vertex="1">
+          <mxGeometry height="50" width="170" x="815" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="txt_a" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=8;align=left;" value="- กรอกจำนวนที่ต้องการผลิต" vertex="1">
+          <mxGeometry height="20" width="160" x="990" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="e_start_a" edge="1" parent="1" source="start" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_a" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_start_a_lbl" connectable="0" parent="e_start_a" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;" value="กรอก" vertex="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="node_b" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=10;" value="[B] ประเภทพิมพ์" vertex="1">
+          <mxGeometry height="50" width="170" x="815" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="e_a_b" edge="1" parent="1" source="node_a" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_b" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_a_b_lbl" connectable="0" parent="e_a_b" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;" value="เลือก" vertex="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="opt_b1" parent="1" style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontSize=9;" value="Offset" vertex="1">
+          <mxGeometry height="30" width="100" x="650" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="opt_b2" parent="1" style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontSize=9;" value="Flexo" vertex="1">
+          <mxGeometry height="30" width="100" x="770" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="txt_b2" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=7;align=center;" value="(ระบุขนาด กว้างxยาว)" vertex="1">
+          <mxGeometry height="15" width="100" x="770" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="opt_b3" parent="1" style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontSize=9;" value="Jet Press" vertex="1">
+          <mxGeometry height="30" width="100" x="926" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="opt_b4" parent="1" style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontSize=9;" value="Konica" vertex="1">
+          <mxGeometry height="30" width="100" x="1050" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="e_b_b1" edge="1" parent="1" source="node_b" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="opt_b1" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_b_b2" edge="1" parent="1" source="node_b" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="opt_b2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_b_b3" edge="1" parent="1" source="node_b" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="opt_b3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_b_b4" edge="1" parent="1" source="node_b" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="opt_b4" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="node_c" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=10;" value="[C] ประเภทหมึก" vertex="1">
+          <mxGeometry height="50" width="170" x="815" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="e_b1_c" edge="1" parent="1" source="opt_b1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_c" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="690" y="380" />
+              <mxPoint x="900" y="380" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_b2_c" edge="1" parent="1" source="opt_b2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_c" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_b3_c" edge="1" parent="1" source="opt_b3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_c" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_b4_c" edge="1" parent="1" source="opt_b4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_c" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1100" y="380" />
+              <mxPoint x="900" y="380" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="opt_c1" parent="1" style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontSize=9;" value="ธรรมดา" vertex="1">
+          <mxGeometry height="30" width="100" x="770" y="490" as="geometry" />
+        </mxCell>
+        <mxCell id="opt_c2" parent="1" style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontSize=9;" value="UV" vertex="1">
+          <mxGeometry height="30" width="100" x="930" y="490" as="geometry" />
+        </mxCell>
+        <mxCell id="e_c_c1" edge="1" parent="1" source="node_c" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="opt_c1" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_c_c2" edge="1" parent="1" source="node_c" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="opt_c2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="node_d" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=10;" value="[D] ประเภทชิ้นงาน" vertex="1">
+          <mxGeometry height="50" width="170" x="815" y="575" as="geometry" />
+        </mxCell>
+        <mxCell id="e_c1_d" edge="1" parent="1" source="opt_c1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_d" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_c2_d" edge="1" parent="1" source="opt_c2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_d" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_c2_d_lbl" connectable="0" parent="e_c2_d" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;" value="เลือก" vertex="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="opt_d1" parent="1" style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontSize=9;" value="ไม่ประกบลูกฟูก" vertex="1">
+          <mxGeometry height="30" width="130" x="660" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="opt_d2" parent="1" style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontSize=9;" value="ประกบลูกฟูก" vertex="1">
+          <mxGeometry height="30" width="130" x="835" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="opt_d3" parent="1" style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontSize=9;" value="เฉพาะลูกฟูก" vertex="1">
+          <mxGeometry height="30" width="130" x="1010" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="e_d_d1" edge="1" parent="1" source="node_d" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="opt_d1" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_d_d2" edge="1" parent="1" source="node_d" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="opt_d2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_d_d3" edge="1" parent="1" source="node_d" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="opt_d3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="node_e" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=10;" value="[E] รูปแบบกล่อง" vertex="1">
+          <mxGeometry height="50" width="170" x="815" y="760" as="geometry" />
+        </mxCell>
+        <mxCell id="e_d1_e" edge="1" parent="1" source="opt_d1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_e" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_d2_e" edge="1" parent="1" source="opt_d2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_e" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_d2_e_lbl" connectable="0" parent="e_d2_e" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;" value="เลือก" vertex="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_d3_e" edge="1" parent="1" source="opt_d3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_e" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="opt_e1" parent="1" style="whiteSpace=wrap;html=1;fontSize=7;" value="E1 ฝาคู่สลับ" vertex="1">
+          <mxGeometry height="22" width="88" x="240" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="opt_e2" parent="1" style="whiteSpace=wrap;html=1;fontSize=7;" value="E2 ฝาคู่ตรง" vertex="1">
+          <mxGeometry height="22" width="88" x="338" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="opt_e3" parent="1" style="whiteSpace=wrap;html=1;fontSize=7;" value="E3 ออโต้หูขัด" vertex="1">
+          <mxGeometry height="22" width="88" x="436" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="opt_e4" parent="1" style="whiteSpace=wrap;html=1;fontSize=7;" value="E4 ออโต้ทากาว" vertex="1">
+          <mxGeometry height="22" width="88" x="534" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="opt_e5" parent="1" style="whiteSpace=wrap;html=1;fontSize=7;" value="E5 ฝาครอบ" vertex="1">
+          <mxGeometry height="22" width="88" x="632" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="opt_e6" parent="1" style="whiteSpace=wrap;html=1;fontSize=7;" value="E6 ฝาครอบ(ขอบ)" vertex="1">
+          <mxGeometry height="22" width="88" x="730" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="opt_e7" parent="1" style="whiteSpace=wrap;html=1;fontSize=7;" value="E7 เบนโตะ" vertex="1">
+          <mxGeometry height="22" width="88" x="828" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="opt_e8" parent="1" style="whiteSpace=wrap;html=1;fontSize=7;" value="E8 ทรงจั่ว" vertex="1">
+          <mxGeometry height="22" width="88" x="926" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="opt_e9" parent="1" style="whiteSpace=wrap;html=1;fontSize=7;" value="E9 ปลอก" vertex="1">
+          <mxGeometry height="22" width="88" x="1024" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="opt_e10" parent="1" style="whiteSpace=wrap;html=1;fontSize=7;" value="E10 ทรงหมอน" vertex="1">
+          <mxGeometry height="22" width="88" x="1122" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="opt_e11" parent="1" style="whiteSpace=wrap;html=1;fontSize=7;" value="E11 ฝาปิดทากาว" vertex="1">
+          <mxGeometry height="22" width="88" x="1220" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="opt_e12" parent="1" style="whiteSpace=wrap;html=1;fontSize=7;" value="E12 Custom" vertex="1">
+          <mxGeometry height="22" width="88" x="1318" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="e_e_e1" edge="1" parent="1" source="node_e" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="opt_e1" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="840" />
+              <mxPoint x="284" y="840" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_e_e2" edge="1" parent="1" source="node_e" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="opt_e2" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="840" />
+              <mxPoint x="382" y="840" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_e_e3" edge="1" parent="1" source="node_e" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="opt_e3" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="840" />
+              <mxPoint x="480" y="840" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_e_e4" edge="1" parent="1" source="node_e" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="opt_e4" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="840" />
+              <mxPoint x="578" y="840" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_e_e5" edge="1" parent="1" source="node_e" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="opt_e5" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="840" />
+              <mxPoint x="676" y="840" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_e_e6" edge="1" parent="1" source="node_e" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="opt_e6" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="840" />
+              <mxPoint x="774" y="840" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_e_e7" edge="1" parent="1" source="node_e" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="opt_e7" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="840" />
+              <mxPoint x="872" y="840" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_e_e8" edge="1" parent="1" source="node_e" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="opt_e8" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="840" />
+              <mxPoint x="970" y="840" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_e_e9" edge="1" parent="1" source="node_e" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="opt_e9" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="840" />
+              <mxPoint x="1068" y="840" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_e_e10" edge="1" parent="1" source="node_e" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="opt_e10" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="840" />
+              <mxPoint x="1166" y="840" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_e_e11" edge="1" parent="1" source="node_e" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="opt_e11" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="840" />
+              <mxPoint x="1264" y="840" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_e_e12" edge="1" parent="1" source="node_e" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="opt_e12" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="840" />
+              <mxPoint x="1362" y="840" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="node_f" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=10;" value="[F] ขนาดกล่อง" vertex="1">
+          <mxGeometry height="50" width="170" x="815" y="940" as="geometry" />
+        </mxCell>
+        <mxCell id="txt_f" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=8;align=left;" value="- กว้าง, ยาว, สูง&lt;br&gt;- ติดกาว, ฝาเสียบ, ปีกกล่อง&lt;br&gt;- จำนวนจุดติดกาว&lt;br&gt;(ขนาดขึ้นกับ Template ที่เลือก)" vertex="1">
+          <mxGeometry height="55" width="200" x="990" y="930" as="geometry" />
+        </mxCell>
+        <mxCell id="e_e1_f" edge="1" parent="1" source="opt_e1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_f" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="284" y="910" />
+              <mxPoint x="900" y="910" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_e2_f" edge="1" parent="1" source="opt_e2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_f" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="382" y="910" />
+              <mxPoint x="900" y="910" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_e3_f" edge="1" parent="1" source="opt_e3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_f" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="480" y="910" />
+              <mxPoint x="900" y="910" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_e4_f" edge="1" parent="1" source="opt_e4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_f" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="578" y="910" />
+              <mxPoint x="900" y="910" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_e5_f" edge="1" parent="1" source="opt_e5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_f" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="676" y="910" />
+              <mxPoint x="900" y="910" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_e6_f" edge="1" parent="1" source="opt_e6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_f" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="774" y="910" />
+              <mxPoint x="900" y="910" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_e7_f" edge="1" parent="1" source="opt_e7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_f" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="872" y="910" />
+              <mxPoint x="900" y="910" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_e8_f" edge="1" parent="1" source="opt_e8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_f" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="970" y="910" />
+              <mxPoint x="900" y="910" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_e9_f" edge="1" parent="1" source="opt_e9" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_f" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1068" y="910" />
+              <mxPoint x="900" y="910" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_e10_f" edge="1" parent="1" source="opt_e10" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_f" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1166" y="910" />
+              <mxPoint x="900" y="910" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_e11_f" edge="1" parent="1" source="opt_e11" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_f" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1264" y="910" />
+              <mxPoint x="900" y="910" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_e12_f" edge="1" parent="1" source="opt_e12" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_f" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1362" y="910" />
+              <mxPoint x="900" y="910" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="node_g" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=10;" value="[G] จำนวนสี" vertex="1">
+          <mxGeometry height="50" width="170" x="815" y="1050" as="geometry" />
+        </mxCell>
+        <mxCell id="txt_g" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=8;align=left;" value="- จำนวนสีด้านนอก&lt;br&gt;- จำนวนสีด้านใน&lt;br&gt;- ลิมิตสี (optional)&lt;br&gt;- สีพิเศษ (optional) → [L]&lt;br&gt;&lt;i&gt;(เฉพาะ Offset เท่านั้น)&lt;/i&gt;" vertex="1">
+          <mxGeometry height="65" width="180" x="990" y="1035" as="geometry" />
+        </mxCell>
+        <mxCell id="e_f_g" edge="1" parent="1" source="node_f" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_g" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_f_g_lbl" connectable="0" parent="e_f_g" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;" value="กรอก" vertex="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="node_h" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=10;" value="[H] กระดาษ" vertex="1">
+          <mxGeometry height="50" width="170" x="500" y="1200" as="geometry" />
+        </mxCell>
+        <mxCell id="txt_h" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=8;align=left;" value="- ประเภทกระดาษ&lt;br&gt;- แกรมกระดาษ&lt;br&gt;- ความหนา (opt)&lt;br&gt;- Custom (opt) → [T]" vertex="1">
+          <mxGeometry height="55" width="120" x="400" y="1195" as="geometry" />
+        </mxCell>
+        <mxCell id="node_i" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=10;" value="[I] ลูกฟูก" vertex="1">
+          <mxGeometry height="50" width="170" x="815" y="1200" as="geometry" />
+        </mxCell>
+        <mxCell id="txt_i" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=8;align=left;" value="- จำนวนชั้น (2/3/5)&lt;br&gt;- ลอน (A/B/C/F/G)&lt;br&gt;- Type+Gram ชั้น 1-3&lt;br&gt;- Custom (opt) → [U]" vertex="1">
+          <mxGeometry height="55" width="140" x="972" y="1235" as="geometry" />
+        </mxCell>
+        <mxCell id="ntY2dGQHUMkU9v53ZUtd-1" edge="1" parent="1" source="node_j" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="txt_u" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="node_j" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=10;" value="[J] แนวลอน" vertex="1">
+          <mxGeometry height="50" width="170" x="1160" y="1200" as="geometry" />
+        </mxCell>
+        <mxCell id="opt_j1" parent="1" style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontSize=8;" value="ลอนขนานด้านสั้น" vertex="1">
+          <mxGeometry height="25" width="100" x="1130" y="1290" as="geometry" />
+        </mxCell>
+        <mxCell id="opt_j2" parent="1" style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontSize=8;" value="ลอนขนานด้านยาว" vertex="1">
+          <mxGeometry height="25" width="100" x="1260" y="1290" as="geometry" />
+        </mxCell>
+        <mxCell id="e_j_j1" edge="1" parent="1" source="node_j" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="opt_j1" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_j_j2" edge="1" parent="1" source="node_j" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="opt_j2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_g_h" edge="1" parent="1" source="node_g" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_h" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="1150" />
+              <mxPoint x="585" y="1150" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_g_h_lbl" connectable="0" parent="e_g_h" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;fontColor=#0066CC;" value="D1, D2" vertex="1">
+          <mxGeometry relative="1" x="-0.5" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_g_i" edge="1" parent="1" source="node_g" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_i" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_g_i_lbl" connectable="0" parent="e_g_i" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;fontColor=#0066CC;" value="D2, D3" vertex="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_g_j" edge="1" parent="1" source="node_g" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_j" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="1150" />
+              <mxPoint x="1245" y="1150" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_g_j_lbl" connectable="0" parent="e_g_j" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;fontColor=#0066CC;" value="D2, D3" vertex="1">
+          <mxGeometry relative="1" x="0.5" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="node_t" parent="1" style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;dashed=1;fontSize=9;" value="[T] กระดาษ Custom" vertex="1">
+          <mxGeometry height="35" width="130" x="280" y="1290" as="geometry" />
+        </mxCell>
+        <mxCell id="txt_t" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=7;align=left;" value="Paper Type, Name,&lt;br&gt;Gram, ความหนา,&lt;br&gt;ราคา (ต่อแผ่น/kg)" vertex="1">
+          <mxGeometry height="35" width="120" x="275" y="1325" as="geometry" />
+        </mxCell>
+        <mxCell id="node_u" parent="1" style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;dashed=1;fontSize=9;" value="[U] ลูกฟูก Custom" vertex="1">
+          <mxGeometry height="35" width="130" x="1380" y="1200" as="geometry" />
+        </mxCell>
+        <mxCell id="txt_u" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=7;align=left;" value="ชั้น, ลอน, Grade,&lt;br&gt;ความหนา, ราคา&lt;br&gt;(ต่อตร.ฟุต/แผ่น),&lt;br&gt;ขนาดลูกฟูก" vertex="1">
+          <mxGeometry height="45" width="120" x="1380" y="1235" as="geometry" />
+        </mxCell>
+        <mxCell id="e_h_t" edge="1" parent="1" source="node_h" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;" target="node_t" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_h_t_lbl" connectable="0" parent="e_h_t" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;" value="ถ้า Custom" vertex="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_i_u" edge="1" parent="1" source="node_i" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;" target="node_u" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1180" y="1225" />
+              <mxPoint x="1180" y="1218" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_i_u_lbl" connectable="0" parent="e_i_u" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;" value="ถ้า Custom" vertex="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-90" y="-1" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="merge1" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontSize=1;" value="" vertex="1">
+          <mxGeometry height="14" width="14" x="893" y="1380" as="geometry" />
+        </mxCell>
+        <mxCell id="e_h_m1" edge="1" parent="1" source="node_h" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="merge1" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="585" y="1340" />
+              <mxPoint x="900" y="1340" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_i_m1" edge="1" parent="1" source="node_i" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="merge1" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_j1_m1" edge="1" parent="1" source="opt_j1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="merge1" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1180" y="1340" />
+              <mxPoint x="900" y="1340" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_j2_m1" edge="1" parent="1" source="opt_j2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="merge1" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1310" y="1350" />
+              <mxPoint x="900" y="1350" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sec2_label" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=14;fontStyle=5;fontColor=#B85450;align=left;" value="Optional: ข้อมูลเสริมก่อนคำนวณ Layout (เส้นประ)" vertex="1">
+          <mxGeometry height="30" width="400" x="30" y="1430" as="geometry" />
+        </mxCell>
+        <mxCell id="opt_junction" parent="1" style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;dashed=1;fontSize=10;fontStyle=1;" value="เพิ่ม Add-on (Optional)" vertex="1">
+          <mxGeometry height="40" width="140" x="830" y="1440" as="geometry" />
+        </mxCell>
+        <mxCell id="e_m1_oj" edge="1" parent="1" source="merge1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="opt_junction" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="node_k" parent="1" style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;dashed=1;fontSize=8;" value="[K] งานหลาย F" vertex="1">
+          <mxGeometry height="35" width="110" x="300" y="1540" as="geometry" />
+        </mxCell>
+        <mxCell id="txt_k" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=7;align=left;" value="F Code, จำนวนงาน,&lt;br&gt;สี, ลิมิต, สีพิเศษ" vertex="1">
+          <mxGeometry height="25" width="110" x="300" y="1575" as="geometry" />
+        </mxCell>
+        <mxCell id="node_l" parent="1" style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;dashed=1;fontSize=8;" value="[L] สีพิเศษ" vertex="1">
+          <mxGeometry height="35" width="110" x="430" y="1540" as="geometry" />
+        </mxCell>
+        <mxCell id="txt_l" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=7;align=left;" value="Pantone, ชนิดหมึก&lt;br&gt;(5แบบ), ลักษณะพิมพ์" vertex="1">
+          <mxGeometry height="25" width="110" x="430" y="1575" as="geometry" />
+        </mxCell>
+        <mxCell id="node_m" parent="1" style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;dashed=1;fontSize=8;" value="[M] Coating" vertex="1">
+          <mxGeometry height="35" width="110" x="560" y="1540" as="geometry" />
+        </mxCell>
+        <mxCell id="txt_m" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=7;align=left;" value="รูปแบบเคลือบ&lt;br&gt;+ เทคนิค (28 แบบ)" vertex="1">
+          <mxGeometry height="25" width="110" x="560" y="1575" as="geometry" />
+        </mxCell>
+        <mxCell id="node_n" parent="1" style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;dashed=1;fontSize=8;" value="[N] Foil Stamp" vertex="1">
+          <mxGeometry height="35" width="110" x="690" y="1540" as="geometry" />
+        </mxCell>
+        <mxCell id="txt_n" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=7;align=left;" value="สี, รหัส, ขนาด,&lt;br&gt;Custom Roll (opt)" vertex="1">
+          <mxGeometry height="25" width="110" x="690" y="1575" as="geometry" />
+        </mxCell>
+        <mxCell id="node_o" parent="1" style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;dashed=1;fontSize=8;" value="[O] Emboss" vertex="1">
+          <mxGeometry height="35" width="110" x="820" y="1540" as="geometry" />
+        </mxCell>
+        <mxCell id="txt_o" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=7;align=left;" value="ขนาดพื้นที่, ความนูน&lt;br&gt;(1.25/1.65 mm)" vertex="1">
+          <mxGeometry height="25" width="110" x="820" y="1575" as="geometry" />
+        </mxCell>
+        <mxCell id="node_p" parent="1" style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;dashed=1;fontSize=8;" value="[P] Deboss" vertex="1">
+          <mxGeometry height="35" width="110" x="950" y="1540" as="geometry" />
+        </mxCell>
+        <mxCell id="txt_p" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=7;align=left;" value="ขนาดพื้นที่, ความจม&lt;br&gt;(1.25/1.65 mm)" vertex="1">
+          <mxGeometry height="25" width="110" x="950" y="1575" as="geometry" />
+        </mxCell>
+        <mxCell id="node_q" parent="1" style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;dashed=1;fontSize=8;" value="[Q] Digital Die-cut" vertex="1">
+          <mxGeometry height="35" width="110" x="1080" y="1540" as="geometry" />
+        </mxCell>
+        <mxCell id="txt_q" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=7;align=left;" value="เฉพาะ Konica&lt;br&gt;เลือกใช้หรือไม่" vertex="1">
+          <mxGeometry height="25" width="110" x="1080" y="1575" as="geometry" />
+        </mxCell>
+        <mxCell id="node_r" parent="1" style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;dashed=1;fontSize=8;" value="[R] Corrugated Glue" vertex="1">
+          <mxGeometry height="35" width="110" x="1210" y="1540" as="geometry" />
+        </mxCell>
+        <mxCell id="txt_r" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=7;align=left;" value="เฉพาะประกบลูกฟูก&lt;br&gt;คิดค่าประกบเสมอ" vertex="1">
+          <mxGeometry height="25" width="110" x="1210" y="1575" as="geometry" />
+        </mxCell>
+        <mxCell id="node_s" parent="1" style="whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;dashed=1;fontSize=8;" value="[S] Manual Layout" vertex="1">
+          <mxGeometry height="35" width="110" x="1340" y="1540" as="geometry" />
+        </mxCell>
+        <mxCell id="txt_s" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=7;align=left;" value="Paper Size, จำนวนวาง,&lt;br&gt;ทิศทาง Grain" vertex="1">
+          <mxGeometry height="25" width="120" x="1340" y="1575" as="geometry" />
+        </mxCell>
+        <mxCell id="e_oj_k" edge="1" parent="1" source="opt_junction" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;" target="node_k" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="1510" />
+              <mxPoint x="355" y="1510" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_oj_l" edge="1" parent="1" source="opt_junction" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;" target="node_l" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="1510" />
+              <mxPoint x="485" y="1510" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_oj_m" edge="1" parent="1" source="opt_junction" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;" target="node_m" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="1510" />
+              <mxPoint x="615" y="1510" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_oj_n" edge="1" parent="1" source="opt_junction" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;" target="node_n" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="1510" />
+              <mxPoint x="745" y="1510" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_oj_o" edge="1" parent="1" source="opt_junction" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;" target="node_o" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="1510" />
+              <mxPoint x="875" y="1510" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_oj_p" edge="1" parent="1" source="opt_junction" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;" target="node_p" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="1510" />
+              <mxPoint x="1005" y="1510" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_oj_q" edge="1" parent="1" source="opt_junction" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;" target="node_q" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="1510" />
+              <mxPoint x="1135" y="1510" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_oj_r" edge="1" parent="1" source="opt_junction" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;" target="node_r" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="1510" />
+              <mxPoint x="1265" y="1510" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_oj_s" edge="1" parent="1" source="opt_junction" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;" target="node_s" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="1510" />
+              <mxPoint x="1395" y="1510" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="merge2" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontSize=1;" value="" vertex="1">
+          <mxGeometry height="14" width="14" x="893" y="1660" as="geometry" />
+        </mxCell>
+        <mxCell id="e_oj_m2" edge="1" parent="1" source="opt_junction" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="merge2" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="230" y="1460" />
+              <mxPoint x="230" y="1667" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_oj_m2_lbl" connectable="0" parent="e_oj_m2" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;" value="ข้ามได้ (ไม่บังคับ)" vertex="1">
+          <mxGeometry relative="1" x="-0.3" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_k_m2" edge="1" parent="1" source="node_k" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;" target="merge2" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="355" y="1640" />
+              <mxPoint x="900" y="1640" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_l_m2" edge="1" parent="1" source="node_l" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;" target="merge2" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="485" y="1640" />
+              <mxPoint x="900" y="1640" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_m_m2" edge="1" parent="1" source="node_m" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;" target="merge2" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="615" y="1640" />
+              <mxPoint x="900" y="1640" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_n_m2" edge="1" parent="1" source="node_n" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;" target="merge2" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="745" y="1640" />
+              <mxPoint x="900" y="1640" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_o_m2" edge="1" parent="1" source="node_o" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;" target="merge2" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="875" y="1640" />
+              <mxPoint x="900" y="1640" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_p_m2" edge="1" parent="1" source="node_p" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;" target="merge2" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1005" y="1640" />
+              <mxPoint x="900" y="1640" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_q_m2" edge="1" parent="1" source="node_q" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;" target="merge2" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1135" y="1640" />
+              <mxPoint x="900" y="1640" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_r_m2" edge="1" parent="1" source="node_r" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;" target="merge2" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1265" y="1640" />
+              <mxPoint x="900" y="1640" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_s_m2" edge="1" parent="1" source="node_s" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;" target="merge2" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1395" y="1640" />
+              <mxPoint x="900" y="1640" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sec3_label" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=14;fontStyle=5;fontColor=#333333;align=left;" value="Required: ข้อมูลหลังคำนวณ Layout" vertex="1">
+          <mxGeometry height="30" width="350" x="30" y="1700" as="geometry" />
+        </mxCell>
+        <mxCell id="node_calc" parent="1" style="whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontStyle=1;fontSize=12;" value="คำนวณ Layout" vertex="1">
+          <mxGeometry height="50" width="130" x="835" y="1720" as="geometry" />
+        </mxCell>
+        <mxCell id="e_m2_calc" edge="1" parent="1" source="merge2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_calc" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="node_v" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=10;" value="[V] Delivery" vertex="1">
+          <mxGeometry height="50" width="170" x="815" y="1830" as="geometry" />
+        </mxCell>
+        <mxCell id="e_calc_v" edge="1" parent="1" source="node_calc" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_v" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_calc_v_lbl" connectable="0" parent="e_calc_v" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;" value="เลือก" vertex="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="opt_v1" parent="1" style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontSize=9;" value="ส่งครั้งเดียว" vertex="1">
+          <mxGeometry height="30" width="120" x="750" y="1920" as="geometry" />
+        </mxCell>
+        <mxCell id="txt_v1" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=7;align=left;" value="สถานที่, วันที่(opt)" vertex="1">
+          <mxGeometry height="15" width="120" x="750" y="1950" as="geometry" />
+        </mxCell>
+        <mxCell id="opt_v2" parent="1" style="whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontSize=9;" value="แบ่งส่ง (หลายรอบ)" vertex="1">
+          <mxGeometry height="30" width="120" x="930" y="1920" as="geometry" />
+        </mxCell>
+        <mxCell id="txt_v2" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=7;align=left;" value="สถานที่, วันที่(opt),&lt;br&gt;item/จำนวน" vertex="1">
+          <mxGeometry height="20" width="120" x="930" y="1950" as="geometry" />
+        </mxCell>
+        <mxCell id="e_v_v1" edge="1" parent="1" source="node_v" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="opt_v1" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_v_v2" edge="1" parent="1" source="node_v" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="opt_v2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="node_w" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=10;" value="[W] Packing" vertex="1">
+          <mxGeometry height="50" width="170" x="815" y="2020" as="geometry" />
+        </mxCell>
+        <mxCell id="txt_w" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=8;align=left;" value="1. Paperband (ประเภท, จำนวน/band)&lt;br&gt;2. Kraftwrap (จำนวน/pack)&lt;br&gt;3. Carton (ขนาด, จำนวน/carton, ลูกฟูก)&lt;br&gt;4. Pallet (ขนาด, จำนวน carton/pallet)" vertex="1">
+          <mxGeometry height="55" width="260" x="990" y="2010" as="geometry" />
+        </mxCell>
+        <mxCell id="e_v1_w" edge="1" parent="1" source="opt_v1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_w" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_v1_w_lbl" connectable="0" parent="e_v1_w" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;" value="กรอก" vertex="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_v2_w" edge="1" parent="1" source="opt_v2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="node_w" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="node_x" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#FFF2CC;strokeColor=#D6B656;dashed=1;fontSize=10;" value="[X] ปรับราคา" vertex="1">
+          <mxGeometry height="50" width="170" x="815" y="2130" as="geometry" />
+        </mxCell>
+        <mxCell id="txt_x" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=8;align=left;" value="- ส่วนต่างลูกค้า (บาท/หน่วย)&lt;br&gt;- ของขวัญลูกค้า (บาท)" vertex="1">
+          <mxGeometry height="30" width="200" x="990" y="2130" as="geometry" />
+        </mxCell>
+        <mxCell id="e_w_x" edge="1" parent="1" source="node_w" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;" target="node_x" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_w_x_lbl" connectable="0" parent="e_w_x" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;fontColor=#B85450;" value="optional" vertex="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="node_y" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#FFF2CC;strokeColor=#D6B656;dashed=1;fontSize=10;" value="[Y] ภาษี/สกุลเงิน" vertex="1">
+          <mxGeometry height="50" width="170" x="815" y="2240" as="geometry" />
+        </mxCell>
+        <mxCell id="txt_y" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=8;align=left;" value="- ภาษี (%)&lt;br&gt;- สกุลเงิน&lt;br&gt;- อัตราแลกเปลี่ยน" vertex="1">
+          <mxGeometry height="40" width="160" x="990" y="2235" as="geometry" />
+        </mxCell>
+        <mxCell id="e_x_y" edge="1" parent="1" source="node_x" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;" target="node_y" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_x_y_lbl" connectable="0" parent="e_x_y" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;fontColor=#B85450;" value="optional" vertex="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="end" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontStyle=1;fontSize=12;" value="END" vertex="1">
+          <mxGeometry height="35" width="130" x="835" y="2350" as="geometry" />
+        </mxCell>
+        <mxCell id="e_y_end" edge="1" parent="1" source="node_y" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" target="end" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="note_z1" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=15;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=8;align=left;verticalAlign=top;" value="&lt;b&gt;[Z] ข้อจำกัดตาม Print Type:&lt;/b&gt;&lt;br&gt;&lt;br&gt;• Offset → Component 1/2/3, สีพิเศษได้&lt;br&gt;• Flexo → เฉพาะ Component 3&lt;br&gt;• Jet Press → Component 1/2, gsm 190–500&lt;br&gt;• Konica → เฉพาะ Component 1, gsm 60–350&lt;br&gt;&lt;br&gt;• Jet Press/Flexo/Konica → ไม่มีสีพิเศษ&lt;br&gt;• Offset Reprint → แสดงตัวเลือก Plate เก่า" vertex="1">
+          <mxGeometry height="150" width="250" x="1200" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="note_z2" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=15;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=8;align=left;verticalAlign=top;" value="&lt;b&gt;[Z] กรอกตาม Component Type:&lt;/b&gt;&lt;br&gt;&lt;br&gt;• Type 1 (ไม่ประกบ) → กระดาษ [H] เท่านั้น&lt;br&gt;• Type 2 (ประกบ) → กระดาษ [H] + ลูกฟูก [I]&lt;br&gt;&amp;nbsp;&amp;nbsp;+ แนวลอน [J], สีด้านใน = 0 อัตโนมัติ&lt;br&gt;• Type 3 (เฉพาะลูกฟูก) → ลูกฟูก [I]&lt;br&gt;&amp;nbsp;&amp;nbsp;+ แนวลอน [J], สีด้านใน = 0 อัตโนมัติ&lt;br&gt;&lt;br&gt;• Corrugated Custom + ราคา/แผ่น&lt;br&gt;&amp;nbsp;&amp;nbsp;→ ต้องเลือก Manual Layout [S]" vertex="1">
+          <mxGeometry height="160" width="260" x="1200" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="note_z3" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=15;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=8;align=left;verticalAlign=top;" value="&lt;b&gt;[Z] เงื่อนไข Coating:&lt;/b&gt;&lt;br&gt;&lt;br&gt;• UV Drip-off → เพิ่มสีพิเศษ &amp;quot;Drip off&amp;quot;&lt;br&gt;&amp;nbsp;&amp;nbsp;หมึก UV + ลายเส้น อัตโนมัติ&lt;br&gt;• Spot UV / Spot UV Semi → ระบุขนาด กxย&lt;br&gt;• Blister Pack → ระบุพลาสติก (PVC/PET)&lt;br&gt;• อัดลาย → ระบุหมายเลข Pattern&lt;br&gt;• UV เว้นลิ้น → เพิ่ม &amp;quot;ผ้ายาง...เว้นลิ้น&amp;quot;&lt;br&gt;&lt;br&gt;• Konica + PP Sticker Paper&lt;br&gt;&amp;nbsp;&amp;nbsp;→ เปิดเลือก OPP Cold Film" vertex="1">
+          <mxGeometry height="170" width="250" x="560" y="1620" as="geometry" />
+        </mxCell>
+        <mxCell id="note_z4" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=15;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=8;align=left;verticalAlign=top;" value="&lt;b&gt;[Z] งานหลาย F:&lt;/b&gt;&lt;br&gt;&lt;br&gt;• ระบุจำนวนสี (นอก/ใน) แต่ละ F&lt;br&gt;• ระบุสีพิเศษแต่ละ F&lt;br&gt;• Add-on (Coating/Foil/Emboss/Deboss)&lt;br&gt;&amp;nbsp;&amp;nbsp;ต้องระบุ F Code ที่ใช้งาน" vertex="1">
+          <mxGeometry height="100" width="230" x="300" y="1620" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_box" parent="1" style="whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=9;align=left;verticalAlign=top;spacingLeft=8;spacingTop=5;" value="&lt;b&gt;Legend:&lt;/b&gt;&lt;br&gt;&lt;br&gt;⬬ Ellipse = START / END&lt;br&gt;▱ Parallelogram สีฟ้า = Input / กรอกข้อมูล&lt;br&gt;▭ Rectangle สีแดง = ตัวเลือก&lt;br&gt;▭ Rectangle สีม่วง = Process&lt;br&gt;▭ Rectangle สีเหลืองเส้นประ = Optional&lt;br&gt;📝 Note สีเหลือง = เงื่อนไข/Dependencies [Z]&lt;br&gt;── เส้นทึบ = Required&lt;br&gt;- - เส้นประ = Optional&lt;br&gt;● จุดดำ = จุดรวม (Merge)" vertex="1">
+          <mxGeometry height="180" width="280" x="30" y="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

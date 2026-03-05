@@ -42,40 +42,45 @@ class ProcessInfoBuilder {
 
     getPackagingProcessId(name) {
         const processMap = {
-            'paper': { mi2_process_id: 1, unit_name: 'sheet', process_group: 'material' },
+            'paper': { mi2_process_id: 73, unit_name: 'sheet', process_group: 'material' },
             'corrugated': { mi2_process_id: 145, unit_name: 'sheet', process_group: 'material' },
-            'special_ink': { mi2_process_id: 2, unit_name: 'unit', process_group: 'material' },
-            'plate': { mi2_process_id: 3, unit_name: 'plate', process_group: 'plate' },
-            'print': { mi2_process_id: 4, unit_name: 'unit', process_group: 'print' },
-            'proof': { mi2_process_id: 5, unit_name: 'unit', process_group: 'proof' },
-            'coating': { mi2_process_id: 6, unit_name: 'pcs', process_group: 'process' },
-            'foilstamp': { mi2_process_id: 7, unit_name: 'pcs', process_group: 'process' },
-            'block_foilstamp': { mi2_process_id: 8, unit_name: 'block', process_group: 'process' },
-            'roll_foilstamp': { mi2_process_id: 9, unit_name: 'roll', process_group: 'process' },
-            'emboss': { mi2_process_id: 10, unit_name: 'pcs', process_group: 'process' },
-            'block_emboss': { mi2_process_id: 11, unit_name: 'block', process_group: 'process' },
-            'deboss': { mi2_process_id: 12, unit_name: 'pcs', process_group: 'process' },
-            'block_deboss': { mi2_process_id: 13, unit_name: 'block', process_group: 'process' },
-            'diecut': { mi2_process_id: 14, unit_name: 'pcs', process_group: 'process' },
-            'block_diecut': { mi2_process_id: 15, unit_name: 'block', process_group: 'process' },
-            'digital_diecut': { mi2_process_id: 16, unit_name: 'unit', process_group: 'process' },
+            'special_ink': { mi2_process_id: 78, unit_name: 'unit', process_group: 'material' },
+            'plate': { mi2_process_id: 74, unit_name: 'plate', process_group: 'plate' },
+            'plate_turn_back': { mi2_process_id: 75, unit_name: 'plate', process_group: 'plate' },
+            'sub_plate': { mi2_process_id: 88, unit_name: 'plate', process_group: 'plate' },
+            'print': { mi2_process_id: 76, unit_name: 'unit', process_group: 'print' },
+            'print_turn_back': { mi2_process_id: 77, unit_name: 'unit', process_group: 'print' },
+            'proof': { mi2_process_id: 81, unit_name: 'unit', process_group: 'proof' },
+            'coating': { mi2_process_id: 34, unit_name: 'unit', process_group: 'process' },
+            'foilstamp': { mi2_process_id: 35, unit_name: 'pcs', process_group: 'process' },
+            'block_foilstamp': { mi2_process_id: 99, unit_name: 'block', process_group: 'process' },
+            'roll_foilstamp': { mi2_process_id: 136, unit_name: 'roll', process_group: 'process' },
+            'emboss': { mi2_process_id: 36, unit_name: 'pcs', process_group: 'process' },
+            'block_emboss': { mi2_process_id: 100, unit_name: 'block', process_group: 'process' },
+            'deboss': { mi2_process_id: 37, unit_name: 'pcs', process_group: 'process' },
+            'block_deboss': { mi2_process_id: 101, unit_name: 'block', process_group: 'process' },
+            'diecut': { mi2_process_id: 3, unit_name: 'unit', process_group: 'process' },
+            'block_diecut': { mi2_process_id: 98, unit_name: 'block', process_group: 'process' },
+            'digital_diecut': { mi2_process_id: 80, unit_name: 'unit', process_group: 'process' },
             'corrugated_glue': { mi2_process_id: 17, unit_name: 'pcs', process_group: 'process' },
-            'chip': { mi2_process_id: 18, unit_name: 'pcs', process_group: 'handwork' },
-            'inspection': { mi2_process_id: 19, unit_name: 'pcs', process_group: 'process' },
-            'assembly': { mi2_process_id: 20, unit_name: 'pcs', process_group: 'process' },
-            'shrinkwrap': { mi2_process_id: 21, unit_name: 'unit', process_group: 'process' },
-            'trim': { mi2_process_id: 22, unit_name: 'pcs', process_group: 'process' },
-            'kraftwrap': { mi2_process_id: 23, unit_name: 'pack', process_group: 'packing' },
-            'paperband': { mi2_process_id: 24, unit_name: 'paperband', process_group: 'packing' },
-            'carton': { mi2_process_id: 25, unit_name: 'carton', process_group: 'packing' },
-            'pallet': { mi2_process_id: 26, unit_name: 'pallet', process_group: 'packing' },
-            'material': { mi2_process_id: 27, unit_name: 'unit', process_group: 'material' },
-            'process': { mi2_process_id: 28, unit_name: 'unit', process_group: 'process' },
-            'outsource': { mi2_process_id: 29, unit_name: 'unit', process_group: 'process' },
-            'other': { mi2_process_id: 30, unit_name: 'unit', process_group: 'other' },
-            'other_material': { mi2_process_id: 31, unit_name: 'unit', process_group: 'material' },
-            'bag': { mi2_process_id: 21, unit_name: 'unit', process_group: 'process' },
-            'delivery': { mi2_process_id: 33, unit_name: 'round', process_group: 'packing' }
+            'chip': { mi2_process_id: 17, unit_name: 'pcs', process_group: 'handwork' },
+            'inspection': { mi2_process_id: 82, unit_name: 'pcs', process_group: 'process' },
+            'assembly': { mi2_process_id: 104, unit_name: 'unit', process_group: 'process' },
+            'shrinkwrap': { mi2_process_id: 11, unit_name: 'pcs', process_group: 'process' },
+            'trim': { mi2_process_id: 2, unit_name: 'pcs', process_group: 'process' },
+            'kraftwrap': { mi2_process_id: 39, unit_name: 'kraft wrap', process_group: 'packing' },
+            'paperband': { mi2_process_id: 38, unit_name: 'paperband', process_group: 'packing' },
+            'carton': { mi2_process_id: 40, unit_name: 'carton', process_group: 'packing' },
+            'pallet': { mi2_process_id: 41, unit_name: 'pallet', process_group: 'packing' },
+            'material': { mi2_process_id: 65, unit_name: 'unit', process_group: 'material' },
+            'other_material': { mi2_process_id: 65, unit_name: 'unit', process_group: 'material' },
+            'process': { mi2_process_id: 62, unit_name: 'unit', process_group: 'process' },
+            'other_process': { mi2_process_id: 139, unit_name: 'unit', process_group: 'process' },
+            'handwork': { mi2_process_id: 63, unit_name: 'unit', process_group: 'handwork' },
+            'outsource': { mi2_process_id: 64, unit_name: 'unit', process_group: 'process' },
+            'shipping': { mi2_process_id: 66, unit_name: 'unit', process_group: 'packing' },
+            'bag': { mi2_process_id: 11, unit_name: 'pcs', process_group: 'process' },
+            'delivery': { mi2_process_id: 60, unit_name: 'shipment', process_group: 'packing' }
         }
         return processMap[name] || { mi2_process_id: null, unit_name: 'unit', process_group: 'process' }
     }
@@ -162,9 +167,9 @@ class ProcessInfoBuilder {
         comp.process_info.material.push({
             process_id: processInfo.mi2_process_id,
             unit_id: unitId,
-            process_name: `${comp.paper?.input?.paper_type || ''} ${comp.paper?.input?.paper_name || ''} ${comp.paper?.input?.paper_gram || 0}g`.trim(),
-            remark: null,
-            is_apply_all_edition: false,
+            process_name: `Paper ${comp.paper?.paper_name || ''} ${comp.paper?.paper_gram || 0} gram`.trim(),
+            remark: comp?.paper?.remark,
+            is_apply_all_edition: true,
             info: {
                 paper_info: comp.paper_info,
                 paper_size: comp.paperSize,
@@ -197,7 +202,7 @@ class ProcessInfoBuilder {
             unit_id: unitId,
             process_name: `Corrugated Board ลอน ${layerType} ${numLayer} ชั้น ${grade}`.trim(),
             remark: `${comp.corrugated_layer?.info?.flute_side || 0} x ${comp.corrugated_layer?.info?.cut_off || 0}`,
-            is_apply_all_edition: false,
+            is_apply_all_edition: true,
             info: {
                 corrugated_layer: comp.corrugated_layer?.info,
                 flute_side: comp.corrugated_layer?.info?.flute_side,
@@ -454,7 +459,7 @@ class ProcessInfoBuilder {
             comp.process_info.process.push({
                 process_id: rollProcessInfo.mi2_process_id,
                 unit_id: rollUnitId,
-                process_name: `Foil หน้า่วม 25" ความยาว ${info?.foil_length || 0} ft`,
+                process_name: `Foil หน้าม้วน ${info?.foil_width || 0}" ความยาว ${info?.foil_length || 0} ft`,
                 remark: `สีเงิน ${info?.foil_code || ''}`,
                 is_apply_all_edition: fCodes.length === 0,
                 info: {
@@ -567,7 +572,7 @@ class ProcessInfoBuilder {
                 comp.process_info.material.push({
                     process_id: processInfo.mi2_process_id,
                     unit_id: unitId,
-                    process_name: speInk.info?.name || 'Special Ink',
+                    process_name: `${speInk.info?.name || 'Special Ink'} ${speInk?.name} : ${speInk?.info?.ink_name || '-'}`,
                     remark: null,
                     is_apply_all_edition: false,
                     info: {
@@ -592,7 +597,7 @@ class ProcessInfoBuilder {
             comp.process_info.process.push({
                 process_id: processInfo.mi2_process_id,
                 unit_id: unitId,
-                process_name: `All ${proc.info?.description || ''}`.trim(),
+                process_name: `Assembly (ประกบ/ติดลิ้นกาว) ${comp?.box_type?.glued_spot || '-'} จุด`.trim(),
                 remark: proc.info?.description || null,
                 is_apply_all_edition: true,
                 info: proc.info || {},
@@ -621,7 +626,7 @@ class ProcessInfoBuilder {
             comp.process_info.process.push({
                 process_id: laborProcessInfo.mi2_process_id,
                 unit_id: laborUnitId,
-                process_name: `Diecut All`,
+                process_name: `Diecut`,
                 remark: 'Labor',
                 is_apply_all_edition: true,
                 info: {
@@ -642,7 +647,7 @@ class ProcessInfoBuilder {
             comp.process_info.process.push({
                 process_id: blockProcessInfo.mi2_process_id,
                 unit_id: blockUnitId,
-                process_name: `Block Diecut${isReprint ? ' (Reprint)' : ''} All`,
+                process_name: `Block Diecut${isReprint ? ' (Reprint)' : ''}`,
                 remark: 'Block',
                 is_apply_all_edition: true,
                 info: {
@@ -686,7 +691,7 @@ class ProcessInfoBuilder {
             comp.process_info.process.push({
                 process_id: processInfo.mi2_process_id,
                 unit_id: unitId,
-                process_name: 'Corrugated Glued',
+                process_name: 'ทากาวประกบลูกฟูกกับกระดาษ',
                 remark: null,
                 is_apply_all_edition: true,
                 info: {},
@@ -841,7 +846,7 @@ class ProcessInfoBuilder {
                 comp.process_info.packing.push({
                     process_id: processInfo.mi2_process_id,
                     unit_id: unitId,
-                    process_name: `${processName} All`,
+                    process_name: `${processName}`,
                     remark: null,
                     is_apply_all_edition: true,
                     info: {
@@ -864,7 +869,7 @@ class ProcessInfoBuilder {
             this.mainData.process_info.material.push({
                 process_id: processInfo.mi2_process_id,
                 unit_id: unitId,
-                process_name: proc.info?.name || 'Material',
+                process_name: proc.name || 'Material',
                 remark: null,
                 is_apply_all_edition: true,
                 info: proc.info || {},
@@ -902,13 +907,13 @@ class ProcessInfoBuilder {
 
             let processInfo, groupKey
             if (proc.type === 'other') {
-                processInfo = this.getPackagingProcessId('process')
+                processInfo = this.getPackagingProcessId('other_process')
                 groupKey = 'process'
             } else if (proc.type === 'handwork') {
-                processInfo = this.getPackagingProcessId('chip')
+                processInfo = this.getPackagingProcessId('handwork')
                 groupKey = 'handwork'
             } else {
-                processInfo = this.getPackagingProcessId('process')
+                processInfo = this.getPackagingProcessId('outsource')
                 groupKey = 'process'
             }
 
