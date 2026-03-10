@@ -12413,13 +12413,13 @@ function storeCustomerGift() {
 
 function setEnableMarkingPercent() {
     const isAdmin = JSON.parse(localStorage.getItem('data'))?.roles?.some(obj => obj.user_group_id === 1) || false
-    const { is_super_admin } = JSON.parse(localStorage.getItem('data')) || false
+    const { is_super_admin, enable_price_check } = JSON.parse(localStorage.getItem('data')) || false
     const isRequestCustomerCommission = $('.chk_price_difference:checked')?.length ? true : false
     const markingSelector = '.MarkDown input, .MarkUp input, .MarkingPercentMaterial input, .MarkingPercentProduction input'
 
     $(markingSelector).attr('readonly', true)
 
-    if (isAdmin) {
+    if (enable_price_check) {
         $(markingSelector).attr('readonly', false)
     }
 
