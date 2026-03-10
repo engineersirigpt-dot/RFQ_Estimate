@@ -1,0 +1,659 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36" version="29.6.1">
+  <diagram name="Logic-Flow-Details" id="logic-flow-details">
+    <mxGraphModel dx="1056" dy="640" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4677" pageHeight="3307" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="L_title" parent="1" style="text;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=14;fontStyle=1;" value="A. การวาง Layout (Layout Calculation)" vertex="1">
+          <mxGeometry height="50" width="860" x="50" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="L_start" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=12;" value="START" vertex="1">
+          <mxGeometry height="40" width="100" x="410" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="L_input" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" value="[Input] Box Spec&#xa;W, L, D, T, G, dust, OL&#xa;box_type (1-12), comp_type (1-3)&#xa;print_type, qty" vertex="1">
+          <mxGeometry height="70" width="230" x="345" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="L_A1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" value="A1: คำนวณ Open Size&#xa;ตาม box_type (1-12)" vertex="1">
+          <mxGeometry height="60" width="230" x="345" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="L_A1_note" parent="1" style="text;html=1;strokeColor=#d79b00;fillColor=#ffe6cc;align=left;verticalAlign=top;whiteSpace=wrap;rounded=1;fontSize=9;spacingLeft=5;spacingTop=5;" value="&lt;b&gt;สูตร Open Size ตาม box_type:&lt;/b&gt;&#xa;Type 1-2 (RTE/STE): W=2(W+T)+D, L=2(W+L)+G&#xa;Type 3-4 (TTSLB/TTAB): W=T+W+D+W/2+OL, L=2(W+L)+G&#xa;Type 5 (DGWS): W=W+4D, L=L+4D+2dust&#xa;Type 6 (FVT): W=W+4D+2dust+2OL, L=L+4D+2dust+2OL&#xa;Type 7 (CBT): W=2(L+dust)+W, L=2(L+D)+L&#xa;Type 8 (GTA): W=T+2D+W/2+OL, L=2(W+L)+G&#xa;Type 9 (Sleeve): W=D, L=2(W+L)+G&#xa;Type 10 (Pillow): W=L+D, L=2W+G&#xa;Type 11 (SE): W=2W+D, L=2(W+L)+G&#xa;Type 12 (Custom): [Input โดยผู้ใช้]" vertex="1">
+          <mxGeometry height="170" width="290" x="645" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="Uie43r7ikGTTsyTnrPTX-1" edge="1" parent="1" source="L_A2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;dashed=1;fillColor=#ffe6cc;strokeColor=#d79b00;" target="L_A2_note">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="L_A2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" value="A2: คำนวณ Tolerance&#xa;ตาม print_type &amp; comp_type" vertex="1">
+          <mxGeometry height="60" width="230" x="345" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="L_A2_note" parent="1" style="text;html=1;strokeColor=#d79b00;fillColor=#ffe6cc;align=left;verticalAlign=top;whiteSpace=wrap;rounded=1;fontSize=9;spacingLeft=5;spacingTop=5;" value="&lt;b&gt;Tolerance ตาม Print Type:&lt;/b&gt;&#xa;Offset: gripper=12, color_bar=8, paper_edge=4 mm&#xa;Flexo/JetPress: gripper=25, color_bar=3, paper_edge=4 mm&#xa;Konica: gripper=35, color_bar=0, paper_edge=15 mm&#xa;&#xa;&lt;b&gt;Component Type:&lt;/b&gt;&#xa;Type 1,2: short=gripper+color_bar, long=paper_edge×2&#xa;Type 3: short=gripper+color_bar+(paper_edge×2), long=paper_edge×2&#xa;&#xa;→ layout_size = open_size + tolerance" vertex="1">
+          <mxGeometry height="145" width="290" x="645" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="Uie43r7ikGTTsyTnrPTX-2" edge="1" parent="1" source="L_A3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;dashed=1;fillColor=#ffe6cc;strokeColor=#d79b00;" target="L_A3_note">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="L_A3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" value="A3: เลือก Machine &amp; Standard Paper Size&#xa;[db: tb_master_std_paper, machine_std_paper]" vertex="1">
+          <mxGeometry height="60" width="270" x="325" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="L_A3_note" parent="1" style="text;html=1;strokeColor=#d79b00;fillColor=#ffe6cc;align=left;verticalAlign=top;whiteSpace=wrap;rounded=1;fontSize=9;spacingLeft=5;spacingTop=5;" value="&lt;b&gt;เครื่องพิมพ์:&lt;/b&gt;&lt;br&gt;L444SP Cut1: Offset, max 33×45.275&quot;, comp 1,2&lt;br&gt;L440 Cut2: Offset, max 28.35×40.56&quot; ← Default&lt;br&gt;LS1029 Cut3: Offset, max 20.87×29.53&quot;&lt;br&gt;Flexo (id4): max 57×94.4&quot;, comp type 3&lt;br&gt;Jet Press (id5): max 23.03×29.52&quot;&lt;br&gt;Konica (id6): max 13×19.17&quot;" vertex="1">
+          <mxGeometry height="100" width="290" x="645" y="550" as="geometry" />
+        </mxCell>
+        <mxCell id="L_dec_cut2" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="พบ std_paper&#xa;ใน Cut2?" vertex="1">
+          <mxGeometry height="70" width="170" x="375" y="615" as="geometry" />
+        </mxCell>
+        <mxCell id="L_dec_other" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="พบ std_paper&#xa;ใน machine อื่น?" vertex="1">
+          <mxGeometry height="70" width="170" x="160" y="730" as="geometry" />
+        </mxCell>
+        <mxCell id="L_maxsize" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" value="ใช้ machine แรก&#xa;+ max paper size" vertex="1">
+          <mxGeometry height="50" width="170" x="55" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="L_machine_ok" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="ได้ Machine + Paper Size&#xa;(roll_width, cut_off, machine_id)" vertex="1">
+          <mxGeometry height="50" width="290" x="315" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="L_A4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" value="A4: คำนวณ UPS ทั้ง 4 Layout" vertex="1">
+          <mxGeometry height="50" width="230" x="345" y="950" as="geometry" />
+        </mxCell>
+        <mxCell id="L_A4_sv" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" value="Straight&#xa;+ Vertical" vertex="1">
+          <mxGeometry height="50" width="130" x="55" y="1050" as="geometry" />
+        </mxCell>
+        <mxCell id="L_A4_sh" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" value="Straight&#xa;+ Horizontal" vertex="1">
+          <mxGeometry height="50" width="130" x="205" y="1050" as="geometry" />
+        </mxCell>
+        <mxCell id="L_A4_ov" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" value="Overlap&#xa;+ Vertical" vertex="1">
+          <mxGeometry height="50" width="130" x="355" y="1050" as="geometry" />
+        </mxCell>
+        <mxCell id="L_A4_oh" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" value="Overlap&#xa;+ Horizontal" vertex="1">
+          <mxGeometry height="50" width="130" x="505" y="1050" as="geometry" />
+        </mxCell>
+        <mxCell id="L_A4_note" parent="1" style="text;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;align=left;verticalAlign=top;whiteSpace=wrap;rounded=1;fontSize=9;spacingLeft=5;spacingTop=5;" value="&lt;b&gt;สูตร UPS:&lt;/b&gt;&#xa;W_count = จำนวนชิ้นใน W direction&#xa;L_count = floor(paperSize_L / L_side_one)&#xa;UPS = W_count × L_count&#xa;&#xa;Overlap: สลับ head-to-toe ลด bleed&#xa;→ คำนวณทั้ง 4 แบบ เลือก UPS สูงสุด" vertex="1">
+          <mxGeometry height="120" width="250" x="660" y="1040" as="geometry" />
+        </mxCell>
+        <mxCell id="L_select_ups" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" value="เลือก Layout ที่ UPS สูงสุด&#xa;→ กำหนด UPS, laySize, layoutType" vertex="1">
+          <mxGeometry height="50" width="290" x="315" y="1150" as="geometry" />
+        </mxCell>
+        <mxCell id="L_output" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" value="[Output] UPS, Layout Size (laySize W×L inch)&#xa;Machine, roll_width, cut_off&#xa;→ ส่งต่อให้ Paper Usage" vertex="1">
+          <mxGeometry height="70" width="290" x="315" y="1250" as="geometry" />
+        </mxCell>
+        <mxCell id="L_end" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=12;" value="END" vertex="1">
+          <mxGeometry height="40" width="100" x="410" y="1360" as="geometry" />
+        </mxCell>
+        <mxCell id="Le1" edge="1" parent="1" source="L_start" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="L_input" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Le2" edge="1" parent="1" source="L_input" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="L_A1" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Le3" edge="1" parent="1" source="L_A1" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="L_A2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Le4" edge="1" parent="1" source="L_A2" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="L_A3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Le5" edge="1" parent="1" source="L_A3" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="L_dec_cut2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Le6" edge="1" parent="1" source="L_dec_cut2" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="L_machine_ok" value="Yes">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="460" y="790" />
+              <mxPoint x="460" y="850" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Le7" edge="1" parent="1" source="L_dec_cut2" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="L_dec_other" value="No">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="245" y="650" />
+              <mxPoint x="245" y="765" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Le8" edge="1" parent="1" source="L_dec_other" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="L_machine_ok" value="Yes">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="330" y="765" />
+              <mxPoint x="330" y="875" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Le9" edge="1" parent="1" source="L_dec_other" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="L_maxsize" value="No">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="140" y="765" />
+              <mxPoint x="140" y="875" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Le10" edge="1" parent="1" source="L_maxsize" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="L_machine_ok" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="225" y="875" />
+              <mxPoint x="315" y="875" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Le11" edge="1" parent="1" source="L_machine_ok" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="L_A4" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Le12" edge="1" parent="1" source="L_A4" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="L_A4_sv" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Le13" edge="1" parent="1" source="L_A4" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="L_A4_sh" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Le14" edge="1" parent="1" source="L_A4" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="L_A4_ov" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Le15" edge="1" parent="1" source="L_A4" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="L_A4_oh" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Le16" edge="1" parent="1" source="L_A4_sv" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="L_select_ups" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="120" y="1180" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Le17" edge="1" parent="1" source="L_A4_sh" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="L_select_ups" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Le18" edge="1" parent="1" source="L_A4_ov" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="L_select_ups" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Le19" edge="1" parent="1" source="L_A4_oh" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="L_select_ups" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Le20" edge="1" parent="1" source="L_select_ups" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="L_output" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Le21" edge="1" parent="1" source="L_output" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="L_end" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P_title" parent="1" style="text;html=1;strokeColor=#82b366;fillColor=#d5e8d4;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=14;fontStyle=1;" value="B. การคำนวณ Paper Usage" vertex="1">
+          <mxGeometry height="50" width="720" x="1100" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="P_start" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=12;" value="START" vertex="1">
+          <mxGeometry height="40" width="100" x="1410" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="P_input" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" value="[Input] qty, UPS, paper_size (roll_width, cut_off inch)&#xa;print_type, gram, addon_list, comp_type" vertex="1">
+          <mxGeometry height="60" width="410" x="1255" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="P_B1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=10;" value="B1: คำนวณ Split&#xa;split = floor(roll_width / paperSize_W) × floor(cut_off / paperSize_L)&#xa;[db: tb_master_std_paper → roll_width, cut_off]" vertex="1">
+          <mxGeometry height="65" width="410" x="1255" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="P_B2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" value="B2: คำนวณ After UPS&#xa;after_ups = ceil(qty / UPS)" vertex="1">
+          <mxGeometry height="55" width="410" x="1255" y="405" as="geometry" />
+        </mxCell>
+        <mxCell id="Uie43r7ikGTTsyTnrPTX-3" edge="1" parent="1" source="P_B3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;dashed=1;fillColor=#ffe6cc;strokeColor=#d79b00;" target="P_waste_note">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P_B3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=12;" value="B3: คำนวณ Waste แต่ละประเภท" vertex="1">
+          <mxGeometry height="50" width="410" x="1255" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="P_waste_note" parent="1" style="text;html=1;strokeColor=#d79b00;fillColor=#ffe6cc;align=left;verticalAlign=top;whiteSpace=wrap;rounded=1;fontSize=9;spacingLeft=5;spacingTop=5;" value="&lt;b&gt;ประเภท Waste [db: tb_master_waste]:&lt;/b&gt;&#xa;• waste_print: ตาม print_type, rate &lt; 1 → % ของ after_ups&#xa;• waste_afterpress: ค่าเดียวกันทุก print_type&#xa;• waste_coating: คิดต่อด้าน (1 หรือ 2 ด้าน)&#xa;• waste_foilstamp: คิดต่อรายการ foil&#xa;• waste_bossing: คิดต่อ emboss/deboss&#xa;• waste_corrugated_board: comp type 2,3&#xa;• waste_color_limit [config]:&#xa;  Offset/Flexo: base=300แผ่น, +50แผ่น/สี (สี&gt;4)&#xa;  JetPress/Konica: base=150แผ่น, +20แผ่น/สี (สี&gt;4), reduce 30%&#xa;• waste_print_col_add: สี &gt; 4 สี [db]&#xa;&#xa;&lt;b&gt;JetPress/Konica:&lt;/b&gt; ใช้ตาราง waste แยก&#xa;  [db: tb_master_jetpress_waste / tb_master_konica_waste]" vertex="1">
+          <mxGeometry height="180" width="320" x="1750" y="490" as="geometry" />
+        </mxCell>
+        <mxCell id="P_dec_reduce" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="Reduce Waste?&#xa;(reduce_paper_waste_percent &gt; 0)" vertex="1">
+          <mxGeometry height="75" width="210" x="1355" y="595" as="geometry" />
+        </mxCell>
+        <mxCell id="P_reduce" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" value="Apply Waste Reduction&lt;br&gt;waste_i -= ceil(waste_i × reduce% / 100)&lt;br&gt;[ ยกเว้น waste_print, waste_color_limit ]&lt;br&gt;digital_diecut → reduce% += 20%" vertex="1">
+          <mxGeometry height="65" width="410" x="1255" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="P_waste_sum" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" value="รวม Total Waste&#xa;waste = waste_print + waste_color_limit + waste_afterpress&#xa;      + waste_coating×sides + waste_foilstamp + waste_bossing + ..." vertex="1">
+          <mxGeometry height="65" width="410" x="1255" y="840" as="geometry" />
+        </mxCell>
+        <mxCell id="P_B4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=12;" value="B4: คำนวณปริมาณกระดาษ" vertex="1">
+          <mxGeometry height="50" width="410" x="1255" y="940" as="geometry" />
+        </mxCell>
+        <mxCell id="P_B4_steps" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="after_waste = after_ups + total_waste&#xa;paper_print = after_waste × sig  (sig = 1)&#xa;paper_qty   = ceil(paper_print / split)" vertex="1">
+          <mxGeometry height="65" width="410" x="1255" y="1020" as="geometry" />
+        </mxCell>
+        <mxCell id="P_dec_konica" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="print_type&#xa;= Konica?" vertex="1">
+          <mxGeometry height="70" width="190" x="1365" y="1130" as="geometry" />
+        </mxCell>
+        <mxCell id="P_konica_net" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" value="paper_net = paper_qty&#xa;(ไม่ปัดขึ้น 100)" vertex="1">
+          <mxGeometry height="50" width="170" x="1150" y="1140" as="geometry" />
+        </mxCell>
+        <mxCell id="P_normal_net" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="paper_net = ceil(paper_qty / 100) × 100&#xa;(ปัดขึ้นให้หาร 100 ลงตัว)" vertex="1">
+          <mxGeometry height="50" width="220" x="1600" y="1140" as="geometry" />
+        </mxCell>
+        <mxCell id="P_weight" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="คำนวณน้ำหนักกระดาษ&#xa;kg = paper_net × gram / 1,550,000 × roll_width × cut_off&#xa;ton = kg / 1,000" vertex="1">
+          <mxGeometry height="65" width="410" x="1255" y="1250" as="geometry" />
+        </mxCell>
+        <mxCell id="P_output" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" value="[Output] paper_net, paper_print, split, kilogram, ton&#xa;→ ส่งต่อให้ Cost Calculation [C1] Paper Cost" vertex="1">
+          <mxGeometry height="60" width="410" x="1255" y="1360" as="geometry" />
+        </mxCell>
+        <mxCell id="P_end" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=12;" value="END" vertex="1">
+          <mxGeometry height="40" width="100" x="1410" y="1460" as="geometry" />
+        </mxCell>
+        <mxCell id="Pe1" edge="1" parent="1" source="P_start" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="P_input" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Pe2" edge="1" parent="1" source="P_input" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="P_B1" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Pe3" edge="1" parent="1" source="P_B1" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="P_B2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Pe4" edge="1" parent="1" source="P_B2" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="P_B3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Pe5" edge="1" parent="1" source="P_B3" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="P_dec_reduce" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Pe6" edge="1" parent="1" source="P_dec_reduce" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="P_reduce" value="Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Pe7" edge="1" parent="1" source="P_dec_reduce" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="P_waste_sum" value="No">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1700" y="632" />
+              <mxPoint x="1700" y="872" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Pe8" edge="1" parent="1" source="P_reduce" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="P_waste_sum" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Pe9" edge="1" parent="1" source="P_waste_sum" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="P_B4" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Pe10" edge="1" parent="1" source="P_B4" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="P_B4_steps" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Pe11" edge="1" parent="1" source="P_B4_steps" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="P_dec_konica" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Pe12" edge="1" parent="1" source="P_dec_konica" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="P_konica_net" value="Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Pe13" edge="1" parent="1" source="P_dec_konica" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="P_normal_net" value="No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Pe14" edge="1" parent="1" source="P_konica_net" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="P_weight" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1240" y="1282" />
+              <mxPoint x="1255" y="1282" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Pe15" edge="1" parent="1" source="P_normal_net" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="P_weight" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1710" y="1282" />
+              <mxPoint x="1665" y="1282" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Pe16" edge="1" parent="1" source="P_weight" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="P_output" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Pe17" edge="1" parent="1" source="P_output" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="P_end" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="K_title" parent="1" style="text;html=1;strokeColor=#d6b656;fillColor=#ffe6cc;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=14;fontStyle=1;" value="C15. การ Packing" vertex="1">
+          <mxGeometry height="50" width="1700" x="50" y="1700" as="geometry" />
+        </mxCell>
+        <mxCell id="K_start" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=12;" value="START" vertex="1">
+          <mxGeometry height="40" width="100" x="845" y="1780" as="geometry" />
+        </mxCell>
+        <mxCell id="K_input" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" value="[Input] qty, box_size (W×L×D mm &amp; inch), weight_per_piece (kg), packing_type selections" vertex="1">
+          <mxGeometry height="55" width="500" x="645" y="1850" as="geometry" />
+        </mxCell>
+        <mxCell id="K_dec_type" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" value="เลือก Packing Type" vertex="1">
+          <mxGeometry height="70" width="210" x="790" y="1945" as="geometry" />
+        </mxCell>
+        <mxCell id="K_pb_title" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontStyle=1;fontSize=11;" value="Paperband (สายรัดกระดาษ)" vertex="1">
+          <mxGeometry height="40" width="280" x="60" y="2070" as="geometry" />
+        </mxCell>
+        <mxCell id="K_pb1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;" value="qty_per_paperband = 100 pcs &lt;b&gt;DEFAULT&lt;/b&gt;" vertex="1">
+          <mxGeometry height="50" width="280" x="60" y="2140" as="geometry" />
+        </mxCell>
+        <mxCell id="K_pb2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;" value="num_paperband = ceil(qty / qty_per_paperband)" vertex="1">
+          <mxGeometry height="40" width="280" x="60" y="2210" as="geometry" />
+        </mxCell>
+        <mxCell id="K_pb3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;" value="price = num_paperband × 0.5 THB&#xa;[config: paperband_price = 0.5 THB/มัด]" vertex="1">
+          <mxGeometry height="50" width="280" x="60" y="2270" as="geometry" />
+        </mxCell>
+        <mxCell id="K_kw_title" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontStyle=1;fontSize=11;" value="Kraftwrap (ห่อกระดาษคราฟท์)" vertex="1">
+          <mxGeometry height="40" width="310" x="400" y="2070" as="geometry" />
+        </mxCell>
+        <mxCell id="K_kw1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;" value="หา Bulk Layout&#xa;คำนวณจำนวนชิ้นต่อ layer ใน kraftwrap&#xa;(เลือก Vertical หรือ Horizontal ที่วางได้มากกว่า)" vertex="1">
+          <mxGeometry height="65" width="310" x="400" y="2140" as="geometry" />
+        </mxCell>
+        <mxCell id="K_kw2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;" value="weight_per_layer = weight_per_piece × num_per_layer" vertex="1">
+          <mxGeometry height="40" width="310" x="400" y="2225" as="geometry" />
+        </mxCell>
+        <mxCell id="K_kw_dec" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="กำหนด qty_per_kraftwrap&#xa;เอง?" vertex="1">
+          <mxGeometry height="70" width="175" x="465" y="2300" as="geometry" />
+        </mxCell>
+        <mxCell id="K_kw3a" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=9;" value="layer = ceil(qty_kw × weight_piece / weight_per_layer)" vertex="1">
+          <mxGeometry height="40" width="220" x="300" y="2420" as="geometry" />
+        </mxCell>
+        <mxCell id="K_kw3b" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=9;" value="do-while: layer++ จนถึง&#xa;limit_weight = 5 kg&#xa;หรือ height = A3 size&#xa;ปัดเป็น 10 layer" vertex="1">
+          <mxGeometry height="70" width="170" x="595" y="2390" as="geometry" />
+        </mxCell>
+        <mxCell id="K_kw4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;" value="qty_per_pack = layer × num_per_layer&#xa;net_weight = weight × qty_per_pack&#xa;gross_weight = net_weight&#xa;คำนวณ inner_size, outer_size" vertex="1">
+          <mxGeometry height="70" width="310" x="400" y="2510" as="geometry" />
+        </mxCell>
+        <mxCell id="K_kw5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;" value="num_kraftwrap = ceil(qty / qty_per_pack)&#xa;price = num × unit_price × (1 + packing_marking%)" vertex="1">
+          <mxGeometry height="50" width="310" x="400" y="2600" as="geometry" />
+        </mxCell>
+        <mxCell id="K_ct_title" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontStyle=1;fontSize=11;" value="Carton (กล่องลูกฟูก)" vertex="1">
+          <mxGeometry height="40" width="310" x="775" y="2070" as="geometry" />
+        </mxCell>
+        <mxCell id="K_ct1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;" value="กำหนด Bulk Unit&#xa;piece / paperband / kraftwrap" vertex="1">
+          <mxGeometry height="50" width="310" x="775" y="2140" as="geometry" />
+        </mxCell>
+        <mxCell id="K_ct2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;" value="หา Carton Layout (Vertical / Horizontal)&#xa;qty_per_layer = max layout&#xa;layer_per_carton จาก limit_carton_weight = 15 kg&#xa;qty_per_carton = qty_per_layer × layer_per_carton" vertex="1">
+          <mxGeometry height="80" width="310" x="775" y="2210" as="geometry" />
+        </mxCell>
+        <mxCell id="K_ct3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;" value="net_weight = weight_per_bulk × qty_per_carton&#xa;gross_weight = net_weight + 1 kg (น้ำหนักกล่อง)" vertex="1">
+          <mxGeometry height="55" width="310" x="775" y="2310" as="geometry" />
+        </mxCell>
+        <mxCell id="K_ct4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;" value="คำนวณ Corrugated Board Carton&#xa;area = ผลรวมพื้นที่หน้า WxLxH&#xa;board_price = area × price/sqft × corrugated_marking%" vertex="1">
+          <mxGeometry height="65" width="310" x="775" y="2385" as="geometry" />
+        </mxCell>
+        <mxCell id="K_ct5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;" value="unit_price = carton_price (5 THB)&lt;br&gt;            + board_price_per_carton&lt;br&gt;            + markup_price (15 THB)&lt;br&gt;            + carton_printing_price (3 THB) [ถ้าพิมพ์บน carton]" vertex="1">
+          <mxGeometry height="80" width="310" x="775" y="2470" as="geometry" />
+        </mxCell>
+        <mxCell id="K_ct6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;" value="num_carton = ceil(qty / qty_per_carton)&#xa;price = num × unit_price × (1 + packing_marking%)" vertex="1">
+          <mxGeometry height="50" width="310" x="775" y="2570" as="geometry" />
+        </mxCell>
+        <mxCell id="K_pl_title" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontStyle=1;fontSize=11;" value="Pallet" vertex="1">
+          <mxGeometry height="40" width="310" x="1150" y="2070" as="geometry" />
+        </mxCell>
+        <mxCell id="K_pl1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;" value="หา Palletization Layout (2-zone packing)&#xa;คำนวณ 4 แบบ: h1, h2, v1, v2&#xa;→ เลือก qty_per_layer สูงสุด" vertex="1">
+          <mxGeometry height="70" width="310" x="1150" y="2140" as="geometry" />
+        </mxCell>
+        <mxCell id="K_pl2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;" value="layer_limit = floor(44 inch / bulk_height)&#xa;[config: limit_pallet_height = 44 inch]&#xa;qty_per_pallet = qty_per_layer × layer_limit" vertex="1">
+          <mxGeometry height="65" width="310" x="1150" y="2230" as="geometry" />
+        </mxCell>
+        <mxCell id="K_pl3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;" value="pallet_weight = qty_per_pallet × weight + 25 kg (pallet)&#xa;[config: empty_pallet_weight = 25 kg]" vertex="1">
+          <mxGeometry height="55" width="310" x="1150" y="2315" as="geometry" />
+        </mxCell>
+        <mxCell id="K_pl_dec" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="pallet_weight&#xa;&gt; 750 kg?" vertex="1">
+          <mxGeometry height="70" width="150" x="1230" y="2405" as="geometry" />
+        </mxCell>
+        <mxCell id="K_pl4a" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" value="ลด layer ลง&#xa;จนน้ำหนัก ≤ 750 kg" vertex="1">
+          <mxGeometry height="60" width="70" x="1120" y="2410" as="geometry" />
+        </mxCell>
+        <mxCell id="K_pl5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;" value="num_pallet = ceil(total_qty / qty_per_pallet)&#xa;price = num_pallet × 1,100 THB (MIF unit)&#xa;[config: mif_unit_price = 1,100 THB]" vertex="1">
+          <mxGeometry height="65" width="310" x="1150" y="2530" as="geometry" />
+        </mxCell>
+        <mxCell id="K_output" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" value="[Output] packing_qty, net_weight, gross_weight, price per packing type&#xa;→ ส่งต่อให้ Delivery (C16)" vertex="1">
+          <mxGeometry height="60" width="630" x="580" y="2720" as="geometry" />
+        </mxCell>
+        <mxCell id="K_end" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=12;" value="END" vertex="1">
+          <mxGeometry height="40" width="100" x="845" y="2820" as="geometry" />
+        </mxCell>
+        <mxCell id="Ke1" edge="1" parent="1" source="K_start" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="K_input" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ke2" edge="1" parent="1" source="K_input" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="K_dec_type" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ke3" edge="1" parent="1" source="K_dec_type" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="K_pb_title" value="Paperband">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="700" y="1980" />
+              <mxPoint x="200" y="1980" />
+              <mxPoint x="200" y="2090" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Ke4" edge="1" parent="1" source="K_dec_type" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;" target="K_kw_title" value="Kraftwrap">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="860" y="2030" />
+              <mxPoint x="555" y="2030" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Ke5" edge="1" parent="1" source="K_dec_type" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;" target="K_ct_title" value="Carton">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="948" y="2060" />
+              <mxPoint x="930" y="2060" />
+              <mxPoint x="930" y="2070" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Ke6" edge="1" parent="1" source="K_dec_type" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="K_pl_title" value="Pallet">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1100" y="1980" />
+              <mxPoint x="1305" y="1980" />
+              <mxPoint x="1305" y="2090" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Ke7" edge="1" parent="1" source="K_pb_title" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="K_pb1" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ke8" edge="1" parent="1" source="K_pb1" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="K_pb2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ke9" edge="1" parent="1" source="K_pb2" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="K_pb3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ke10" edge="1" parent="1" source="K_pb3" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="K_output" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="200" y="2750" />
+              <mxPoint x="580" y="2750" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Ke11" edge="1" parent="1" source="K_kw_title" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="K_kw1" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ke12" edge="1" parent="1" source="K_kw1" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="K_kw2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ke13" edge="1" parent="1" source="K_kw2" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="K_kw_dec" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ke14" edge="1" parent="1" source="K_kw_dec" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="K_kw3a" value="Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ke15" edge="1" parent="1" source="K_kw_dec" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="K_kw3b" value="No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ke16" edge="1" parent="1" source="K_kw3a" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="K_kw4" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ke17" edge="1" parent="1" source="K_kw3b" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="K_kw4" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ke18" edge="1" parent="1" source="K_kw4" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="K_kw5" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ke19" edge="1" parent="1" source="K_kw5" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="K_output" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="555" y="2690" />
+              <mxPoint x="895" y="2690" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Ke20" edge="1" parent="1" source="K_ct_title" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="K_ct1" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ke21" edge="1" parent="1" source="K_ct1" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="K_ct2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ke22" edge="1" parent="1" source="K_ct2" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="K_ct3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ke23" edge="1" parent="1" source="K_ct3" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="K_ct4" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ke24" edge="1" parent="1" source="K_ct4" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="K_ct5" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ke25" edge="1" parent="1" source="K_ct5" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="K_ct6" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ke26" edge="1" parent="1" source="K_ct6" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="K_output" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="930" y="2690" />
+              <mxPoint x="895" y="2690" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Ke27" edge="1" parent="1" source="K_pl_title" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="K_pl1" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ke28" edge="1" parent="1" source="K_pl1" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="K_pl2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ke29" edge="1" parent="1" source="K_pl2" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="K_pl3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ke30" edge="1" parent="1" source="K_pl3" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="K_pl_dec" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ke31" edge="1" parent="1" source="K_pl_dec" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="K_pl4a" value="Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ke32" edge="1" parent="1" source="K_pl_dec" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="K_pl5" value="No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ke33" edge="1" parent="1" source="K_pl4a" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="K_pl5" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ke34" edge="1" parent="1" source="K_pl5" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="K_output" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1305" y="2750" />
+              <mxPoint x="1210" y="2750" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Ke35" edge="1" parent="1" source="K_output" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="K_end" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="D_title" parent="1" style="text;html=1;strokeColor=#9673a6;fillColor=#e1d5e7;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=14;fontStyle=1;" value="C16. Delivery (การจัดส่ง)" vertex="1">
+          <mxGeometry height="50" width="720" x="2050" y="1700" as="geometry" />
+        </mxCell>
+        <mxCell id="D_start" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=12;" value="START" vertex="1">
+          <mxGeometry height="40" width="100" x="2360" y="1780" as="geometry" />
+        </mxCell>
+        <mxCell id="D_input" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" value="[Input] packing results (carton / kraftwrap / pallet)&#xa;gross_weight per unit, delivery_rounds&#xa;delivery_rate = 1,500 THB/ton [config: default.js]" vertex="1">
+          <mxGeometry height="65" width="490" x="2165" y="1850" as="geometry" />
+        </mxCell>
+        <mxCell id="D_step1_hdr" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=12;" value="Step 1: คำนวณ Packing ต่อรอบส่ง" vertex="1">
+          <mxGeometry height="45" width="420" x="2200" y="1960" as="geometry" />
+        </mxCell>
+        <mxCell id="D_step1_det" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" value="แยก component ตาม delivery_round (compDeliveryInfo)&#xa;หา qty ต่อรอบส่งแต่ละรอบ&#xa;packQty = ceil(qty_per_round / qty_per_pack)&#xa;→ จำนวน carton / kraftwrap / pallet ต่อรอบส่ง" vertex="1">
+          <mxGeometry height="80" width="420" x="2200" y="2025" as="geometry" />
+        </mxCell>
+        <mxCell id="D_step2_hdr" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=12;" value="Step 2: คำนวณน้ำหนักต่อรอบส่ง" vertex="1">
+          <mxGeometry height="45" width="420" x="2200" y="2150" as="geometry" />
+        </mxCell>
+        <mxCell id="D_dec_pack" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" value="Packing Type?" vertex="1">
+          <mxGeometry height="70" width="160" x="2330" y="2228" as="geometry" />
+        </mxCell>
+        <mxCell id="D_w_carton" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" value="Carton:&#xa;gross_weight =&#xa;net_weight + 1 kg" vertex="1">
+          <mxGeometry height="60" width="160" x="2070" y="2233" as="geometry" />
+        </mxCell>
+        <mxCell id="D_w_kw" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" value="Kraftwrap:&#xa;gross_weight =&#xa;net_weight" vertex="1">
+          <mxGeometry height="60" width="160" x="2330" y="2340" as="geometry" />
+        </mxCell>
+        <mxCell id="D_w_pallet" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" value="Pallet only:&#xa;gross_weight =&#xa;pallet_weight" vertex="1">
+          <mxGeometry height="60" width="160" x="2585" y="2232.5" as="geometry" />
+        </mxCell>
+        <mxCell id="D_total_weight" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" value="total_weight_per_round = gross_weight × packQty" vertex="1">
+          <mxGeometry height="45" width="420" x="2200" y="2445" as="geometry" />
+        </mxCell>
+        <mxCell id="D_step3_hdr" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=12;" value="Step 3: คำนวณเที่ยวรถ (Delivery Trips)" vertex="1">
+          <mxGeometry height="45" width="420" x="2200" y="2535" as="geometry" />
+        </mxCell>
+        <mxCell id="D_step3_det" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" value="แต่ละ delivery_round = 1 เที่ยวรถ&#xa;จำนวนเที่ยวรถ = จำนวน delivery round ทั้งหมด&#xa;(แบ่งส่งหลายรอบ → หลายเที่ยว)" vertex="1">
+          <mxGeometry height="70" width="420" x="2200" y="2600" as="geometry" />
+        </mxCell>
+        <mxCell id="D_step4_hdr" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=12;" value="Step 4: คำนวณค่าส่ง (Delivery Cost)" vertex="1">
+          <mxGeometry height="45" width="420" x="2200" y="2720" as="geometry" />
+        </mxCell>
+        <mxCell id="Uie43r7ikGTTsyTnrPTX-4" edge="1" parent="1" source="D_step4_det" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;dashed=1;fillColor=#ffe6cc;strokeColor=#d79b00;" target="D_markup_note">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="D_step4_det" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" value="unit_price = delivery_rate × gross_weight / 1,000&#xa;           = 1,500 × gross_weight / 1,000  (THB/round)&#xa;&#xa;price = unit_price × num_rounds" vertex="1">
+          <mxGeometry height="80" width="420" x="2200" y="2800" as="geometry" />
+        </mxCell>
+        <mxCell id="D_markup_note" parent="1" style="text;html=1;strokeColor=#d79b00;fillColor=#ffe6cc;align=left;verticalAlign=top;whiteSpace=wrap;rounded=1;fontSize=9;spacingLeft=5;spacingTop=5;" value="&lt;b&gt;Markup (delivery_marking):&lt;/b&gt;&#xa;Standard mode: 0%&#xa;Profit Sharing mode: 20%&#xa;&#xa;final_price = price × (1 + delivery_marking%)" vertex="1">
+          <mxGeometry height="100" width="240" x="2670" y="2790" as="geometry" />
+        </mxCell>
+        <mxCell id="D_output" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" value="[Output] delivery_price per qty column&#xa;→ ส่งต่อให้ Total Price Calculation [D3]" vertex="1">
+          <mxGeometry height="60" width="420" x="2200" y="2910" as="geometry" />
+        </mxCell>
+        <mxCell id="D_end" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=12;" value="END" vertex="1">
+          <mxGeometry height="40" width="100" x="2360" y="3010" as="geometry" />
+        </mxCell>
+        <mxCell id="De1" edge="1" parent="1" source="D_start" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="D_input" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="De2" edge="1" parent="1" source="D_input" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="D_step1_hdr" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="De3" edge="1" parent="1" source="D_step1_hdr" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="D_step1_det" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="De4" edge="1" parent="1" source="D_step1_det" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="D_step2_hdr" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="De5" edge="1" parent="1" source="D_step2_hdr" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="D_dec_pack" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="De6" edge="1" parent="1" source="D_dec_pack" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="D_w_carton" value="Carton">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="De7" edge="1" parent="1" source="D_dec_pack" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="D_w_kw" value="Kraftwrap">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="De8" edge="1" parent="1" source="D_dec_pack" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="D_w_pallet" value="Pallet">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="De9" edge="1" parent="1" source="D_w_carton" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="D_total_weight" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2155" y="2467" />
+              <mxPoint x="2200" y="2467" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="De10" edge="1" parent="1" source="D_w_kw" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="D_total_weight" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="De11" edge="1" parent="1" source="D_w_pallet" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="D_total_weight" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2665" y="2467" />
+              <mxPoint x="2620" y="2467" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="De12" edge="1" parent="1" source="D_total_weight" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="D_step3_hdr" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="De13" edge="1" parent="1" source="D_step3_hdr" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="D_step3_det" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="De14" edge="1" parent="1" source="D_step3_det" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="D_step4_hdr" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="De15" edge="1" parent="1" source="D_step4_hdr" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="D_step4_det" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="De16" edge="1" parent="1" source="D_step4_det" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="D_output" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="De17" edge="1" parent="1" source="D_output" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="D_end" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

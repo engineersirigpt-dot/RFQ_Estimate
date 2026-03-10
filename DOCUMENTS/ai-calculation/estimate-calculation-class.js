@@ -42,7 +42,7 @@
  * @property {number} corrugated_assembly_markup_price   — [config: default.js > corrugated_assembly_markup_price]
  * @property {number} corrugated_tolerance               — [config: default.js > corrugated_tolerance] (inch)
  * @property {number} corrugated_glued_cost              — [config: default.js > corrugated_glued_cost] (THB/sq.in)
- * @property {number} delivery_rate                      — [config: default.js > delivery_rate] (THB/ton)
+ * @property {Array}  delivery_rate                      — [database: delivery_rate] ตาราง rate ตาม destination + ช่วงน้ำหนัก
  * @property {number} tax                                — [config: default.js > tax] อัตราภาษี (%)
  * @property {number} formula_value                      — [hardcoded] 1,550,000 ค่าแปลงหน่วย
  * @property {Array} assembly_size                       — [config: default.js > assembly_size] ช่วงขนาด S/M/L
@@ -1806,19 +1806,81 @@ class EstimateCalculation {
 
 	/**
 	 * [C16] คำนวณต้นทุนจัดส่ง
-	 * Source: setCalculateDelivery() — function_estimate_calculation.js:7303-7359
+	 * Source: setCalculateDeliveryPrice() — function_estimate_calculation.js:8536+
 	 *
-	 * สูตร: unit_price = delivery_rate × gross_weight / 1000
+	 * ขั้นตอน:
+	 *   1. กรอง delivery_rate_list ตาม destinationId
+	 *   2. หา rate_info ตาม net_weight (ช่วงน้ำหนักที่ match)
+	 *      — 4-wheel: 0–1,500 kg / 6-wheel: 1,500–5,500 kg
+	 *   3. qty = floor(net_weight / rate_info.max_weight_kg), ถ้า ≤0 → qty=1
+	 *   4. วนลูป balance_weight จนหมด (อาจใช้รถหลายประเภท)
+	 *   5. price = unit_price × qty × (1 + delivery_marking%)
 	 *
-	 * @param {number} grossWeight    — น้ำหนักรวม (kg) — จาก packing calculation
-	 * @returns {{ unit_price: number, price: number }}
+	 * @param {number} destinationId       — รหัสสถานที่จัดส่ง
+	 * @param {number} netWeight           — น้ำหนักรวม (kg) — จาก packing calculation
+	 * @param {Array}  deliveryRateList    — [database: delivery_rate] ตาราง rate ทั้งหมด
+	 * @param {number} deliveryMarking     — markup% (เช่น 10 = 10%) — จาก defaultData.delivery_marking
+	 * @returns {Array<{ net_weight, rate_id, unit_price, qty, additional_price, price }>}
 	 */
-	calculateDeliveryCost(grossWeight) {
-		// [config: default.js > delivery_rate] (THB/ton)
-		const deliveryRate = this.config.delivery_rate || 1500
-		const unit_price = parseFloat((deliveryRate * grossWeight / 1000).toFixed(2))
+	calculateDeliveryCost(destinationId, netWeight, deliveryRateList, deliveryMarking = 0) {
+		// กรอง rate ตาม destination
+		const ratesByDest = deliveryRateList.filter(r => r.destination_id === destinationId)
+		if (ratesByDest.length === 0) return []
 
-		return { unit_price, price: unit_price }
+		// หา rate ที่ตรงกับช่วงน้ำหนัก
+		const getRateInfo = (weight) =>
+			ratesByDest.find(r => weight > r.min_weight_kg && weight <= r.max_weight_kg)
+			|| ratesByDest[ratesByDest.length - 1] // fallback: rate สูงสุด
+
+		let rate_by_qty = []
+		let balance_weight = netWeight
+
+		// รอบแรก
+		const rate_info1 = getRateInfo(balance_weight)
+		let qty = Math.floor(balance_weight / rate_info1.max_weight_kg)
+		if (qty <= 0) {
+			qty = 1
+			balance_weight = 0
+		} else {
+			balance_weight = balance_weight % rate_info1.max_weight_kg
+		}
+		rate_by_qty.push({
+			net_weight: netWeight,
+			rate_id: rate_info1.id,
+			unit_price: rate_info1.price + rate_info1.additional_price,
+			qty,
+			additional_price: rate_info1.additional_price,
+			price: parseFloat((((rate_info1.price + rate_info1.additional_price) * qty) * (1 + deliveryMarking / 100)).toFixed(2)),
+		})
+
+		// วนลูป balance_weight
+		while (balance_weight > 0) {
+			const rate_info2 = getRateInfo(balance_weight)
+			let qty2 = Math.floor(balance_weight / rate_info1.max_weight_kg)
+			if (qty2 <= 0) {
+				qty2 = 1
+				balance_weight = 0
+			} else {
+				balance_weight = balance_weight % rate_info1.max_weight_kg
+			}
+
+			const existing = rate_by_qty.find(r => r.rate_id === rate_info2.id)
+			if (existing) {
+				existing.qty += qty2
+				existing.price = parseFloat(((existing.unit_price * existing.qty) * (1 + deliveryMarking / 100)).toFixed(2))
+			} else {
+				rate_by_qty.push({
+					net_weight: netWeight,
+					rate_id: rate_info2.id,
+					unit_price: rate_info2.price + rate_info2.additional_price,
+					qty: qty2,
+					additional_price: rate_info2.additional_price,
+					price: parseFloat((((rate_info2.price + rate_info2.additional_price) * qty2) * (1 + deliveryMarking / 100)).toFixed(2)),
+				})
+			}
+		}
+
+		return rate_by_qty
 	}
 
 	// ═══════════════════════════════════════════════════════════════════════

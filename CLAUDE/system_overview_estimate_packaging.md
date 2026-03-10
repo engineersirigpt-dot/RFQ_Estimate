@@ -37,7 +37,7 @@
 - กระดาษ/ลูกฟูก: คำนวณ paper usage, waste, split, net, ton
 - Process: diecut, chip, inspection, assembly, coating, foilstamp, emboss/deboss, corrugated glue, digital die‑cut
 - Packing: paperband, kraftwrap, carton, pallet
-- Delivery: คำนวณตามน้ำหนักและ rate ของปลายทาง
+- Delivery: lookup rate ตาม destination + ช่วงน้ำหนัก (delivery_rate table) → เลือกประเภทรถ → คำนวณจำนวนรถ → price × (1+markup)
 - Markup/Profit Sharing: ค่า default อยู่ใน `public/js/data/default.js`
 
 **รองรับหลาย F**
