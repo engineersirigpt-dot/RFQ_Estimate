@@ -361,12 +361,12 @@ function storeOtherProcess() {
         var otherProcess = `.otherProcess:eq(${index})`
 
         if ($(`${otherProcess} .is_fixedPrice`).prop('checked')) {
-            var unit_price = parseFloat($(`${otherProcess} .ppuProcess:eq(0) input`).val())
+            var unit_price = parseFloat($(`${otherProcess} .div_price .ppuInput:eq(0)`).val())
 
         } else {
             var unit_price = []
-            $(`${otherProcess} .ppuProcess`).each(function (index1) {
-                unit_price.push(parseFloat($(`${otherProcess} .ppuProcess:eq(${index1}) input`).val()))
+            $(`${otherProcess} .div_price .ppuInput`).each(function (index1) {
+                unit_price.push(parseFloat($(this).val()))
             })
         }
 
@@ -390,12 +390,12 @@ function storeHandworkProcess() {
         var handworkProcess = '.handworkProcess:eq(' + index + ')'
 
         if ($(`${handworkProcess} .is_fixedPrice`).prop('checked')) {
-            var unit_price = parseFloat($(`${handworkProcess} .ppuProcess:eq(0) input`).val())
+            var unit_price = parseFloat($(`${handworkProcess} .div_price .ppuInput:eq(0)`).val())
 
         } else {
             var unit_price = []
-            $(`${handworkProcess} .ppuProcess`).each(function (index1) {
-                unit_price.push(parseFloat($(`${handworkProcess} .ppuProcess:eq(${index1}) input`).val()))
+            $(`${handworkProcess} .div_price .ppuInput`).each(function (index1) {
+                unit_price.push(parseFloat($(this).val()))
             })
         }
 
@@ -419,12 +419,12 @@ function storeCustomProcess() {
         var customProcess = '.customProcess:eq(' + index + ')'
 
         if ($(`${customProcess} .is_fixedPrice`).prop('checked')) {
-            var unit_price = parseFloat($(`${customProcess} .ppuProcess:eq(0) input`).val())
+            var unit_price = parseFloat($(`${customProcess} .div_price .ppuInput:eq(0)`).val())
 
         } else {
             var unit_price = []
-            $(`${customProcess} .ppuProcess`).each(function (index1) {
-                unit_price.push(parseFloat($(`${customProcess} .ppuProcess:eq(${index1}) input`).val()))
+            $(`${customProcess} .div_price .ppuInput`).each(function (index1) {
+                unit_price.push(parseFloat($(this).val()))
             })
         }
 
@@ -448,12 +448,12 @@ function storeMaterial() {
     $('.materialProcess').each(function (index) {
         var materialProcess = `.materialProcess:eq(${index})`;
         if ($(`${materialProcess} .is_fixedPrice`).prop('checked')) {
-            var qty_material = parseFloat($(`${materialProcess} .numMat input`).val())
+            var qty_material = parseFloat($(`${materialProcess} .div_qty .numMatInput:eq(0)`).val())
 
         } else {
             var qty_material = []
-            $(`${materialProcess} .numMat`).each(function (index1) {
-                qty_material.push(parseFloat($(`${materialProcess} .numMat:eq(${index1}) input`).val()))
+            $(`${materialProcess} .div_qty .numMatInput`).each(function (index1) {
+                qty_material.push(parseFloat($(this).val()))
             })
 
         }
@@ -473,7 +473,7 @@ function storeMaterial() {
             type_id: 10,
             name: $(`${materialProcess} .nameProcess textarea`).val(),
             info: {
-                unit_price: parseFloat($(`${materialProcess} .ppuProcess input`).val()),
+                unit_price: parseFloat($(`${materialProcess} .div_price .ppuInput`).val()),
                 is_fixedPrice: $(`${materialProcess} .is_fixedPrice`).prop('checked'),
                 qty_material,
                 from_process,
@@ -530,12 +530,12 @@ function storeOtherCost() {
         var otherCostProcess = `.otherCostProcess:eq(${index})`;
 
         if ($(`${otherCostProcess} .is_fixedPrice`).prop('checked')) {
-            var qty_other = parseFloat($(otherCostProcess + ' .numMat input').val())
+            var qty_other = parseFloat($(`${otherCostProcess} .div_qty .numMatInput:eq(0)`).val())
         } else {
             var qty_other = []
 
-            $(`${otherCostProcess} .numMat`).each(function (index1) {
-                qty_other.push(parseFloat($(`${otherCostProcess} .numMat:eq(${index1}) input`).val()))
+            $(`${otherCostProcess} .div_qty .numMatInput`).each(function (index1) {
+                qty_other.push(parseFloat($(this).val()))
             })
         }
 
@@ -552,9 +552,9 @@ function storeOtherCost() {
             type_id: 13,
             name: $(otherCostProcess + ' .nameProcess textarea').val(),
             info: {
-                unit_price: parseFloat($(otherCostProcess + ' .ppuProcess input').val()),
+                unit_price: parseFloat($(`${otherCostProcess} .div_price .ppuInput`).val()),
                 qty_other: qty_other,
-                is_fixedPrice: $(otherCostProcess + ' .is_fixedPrice').prop('checked'),
+                is_fixedPrice: $(`${otherCostProcess} .is_fixedPrice`).prop('checked'),
                 from_process: from_process,
                 comp_index: comp_index,
                 process_index: process_index,
@@ -3949,8 +3949,8 @@ function getBlanketUVGap(index, process_index, type, side = 1) {
     $('.materialProcess:last').attr('comp-index', index)
     $('.materialProcess:last').attr('process-index', process_index)
     $('.materialProcess:last .nameProcess textarea').val(nameProc)
-    $('.materialProcess:last .ppuProcess input').val(process_price)
-    $('.materialProcess:last .numMat input').val(side)
+    $('.materialProcess:last .div_price .ppuInput').val(process_price)
+    $('.materialProcess:last .div_qty .numMatInput').val(side)
     $('.materialProcess:last input').prop('readonly', true)
     $('.materialProcess:last .deleteProcess').hide()
 }
@@ -4344,29 +4344,50 @@ function addProcess(id) {
         case 'other':
             var className = 'otherProcess'
             var label = "Process:"
-            var unit = `<td class="ppuProcess"><input class="required" style="width:80px;font-size:10px;text-align:center"></td>`
+            var unit = `<div class="div_fixed_price">
+                            <div class="div_checkbox_label"><input class="is_fixedPrice" type="checkbox" checked> ราคาต่อหน่วยคงที่</div>
+                            <div class="div_price"><input class="ppuInput required" style="width:80px;font-size:10px;text-align:center"></div>
+                        </div>`
             break
         case 'handwork':
             var className = 'handworkProcess'
             var label = "Process:"
-            var unit = `<td class="ppuProcess"><input class="required" style="width:80px;font-size:10px;text-align:center"></td>`
+            var unit = `<div class="div_fixed_price">
+                            <div class="div_checkbox_label"><input class="is_fixedPrice" type="checkbox" checked> ราคาต่อหน่วยคงที่</div>
+                            <div class="div_price"><input class="ppuInput required" style="width:80px;font-size:10px;text-align:center"></div>
+                        </div>`
             break
         case 'custom':
             var className = 'customProcess'
             var label = "จัดจ้าง:"
-            var unit = `<td class="ppuProcess"><input class="required" style="width:80px;font-size:10px;text-align:center"></td>`
+            var unit = `<div class="div_fixed_price">
+                            <div class="div_checkbox_label"><input class="is_fixedPrice" type="checkbox" checked> ราคาต่อหน่วยคงที่</div>
+                            <div class="div_price"><input class="ppuInput required" style="width:80px;font-size:10px;text-align:center"></div>
+                        </div>`
             break
         case 'material':
             var className = 'materialProcess'
             var label = "Material:"
-            var unit = `"<td><input class="is_fixedPrice" type="checkbox" checked>จำนวนคงที่</td>
-            <td class="numMat"><input class="required" style="width:80px;font-size:10px;text-align:center;"></td>`
+            var unit = `<div class="div_fixed_price">
+                            <div class="div_checkbox_label">ราคาต่อหน่วย:</div>
+                            <div class="div_price"><input class="ppuInput required" style="width:80px;font-size:10px;text-align:center"></div>
+                        </div>
+                        <div class="div_fixed_qty">
+                            <div class="div_checkbox_label"><input class="is_fixedPrice" type="checkbox" checked> จำนวนคงที่</div>
+                            <div class="div_qty"><input class="numMatInput required" style="width:80px;font-size:10px;text-align:center"></div>
+                        </div>`
             break
         case 'otherCost':
             var className = 'otherCostProcess'
             var label = "Other:"
-            var unit = `"<td><input class="is_fixedPrice" type="checkbox" checked>จำนวนคงที่</td>
-            <td class="numMat"><input class="required" style="width:80px;font-size:10px;text-align:center;"></td>`
+            var unit = `<div class="div_fixed_price">
+                            <div class="div_checkbox_label">ราคาต่อหน่วย:</div>
+                            <div class="div_price"><input class="ppuInput required" style="width:80px;font-size:10px;text-align:center"></div>
+                        </div>
+                        <div class="div_fixed_qty">
+                            <div class="div_checkbox_label"><input class="is_fixedPrice" type="checkbox" checked> จำนวนคงที่</div>
+                            <div class="div_qty"><input class="numMatInput required" style="width:80px;font-size:10px;text-align:center"></div>
+                        </div>`
             break
         case 'delivery':
             var className = 'deliveryProcess'
@@ -4443,28 +4464,24 @@ function addProcess(id) {
                 </td>
             </tr>`
         }
-    } else if (['other', 'handwork', 'custom'].includes(id)) {
-        var tr = `<tr class='${className}' style="vertical-align:top;">
-            <td style="width: 50px;"><div class="deleteProcess">ลบ</div></td>
-            <td><div class="nameProcess" style="display:flex;align-items:flex-start;"><span style="white-space:nowrap;margin-top:2px;">${label}&nbsp;</span><textarea class="required" style="width:350px;overflow-y:hidden;resize:vertical;" rows="1"></textarea></div></td>
-            <td><div class="processChecked"><input class="is_fixedPrice" type="checkbox" checked> ราคาต่อหน่วยคงที่:</div></td>
-            ${unit}
-        </tr>`
     } else {
-        var tr = `<tr class='${className}' style="vertical-align:top;">
+        var tr = `<tr class='${className}'>
             <td style="width: 50px;"><div class="deleteProcess">ลบ</div></td>
-            <td><div class="nameProcess" style="display:flex;align-items:flex-start;"><span style="white-space:nowrap;margin-top:2px;">${label}&nbsp;</span><textarea class="required" style="width:350px;overflow-y:hidden;resize:vertical;" rows="1"></textarea></div></td>
-            <td><div class="ppuProcess">ราคาต่อหน่วย: <input class="required" style="width:80px;font-size:10px;text-align:center"></div></td>
-            ${unit}
+            <td>
+                <div class="nameProcess"><span>${label}&nbsp;</span>
+                    <textarea class="required" rows="1"></textarea>
+                </div>
+            </td>
+            <td><div class="process_control_section">${unit}</div></td>
         </tr>`
     }
 
     $('#' + className + ' table:first').append(tr)
 
     if (['otherCostProcess', 'materialProcess'].includes(className)) {
-        $('.' + className + ':last .ppuProcess input').inputmask({ regex: "^-?[0-9]{1,10}(\\.\\d{1,4})?$", placeholder: "" })
+        $('.' + className + ':last .div_price .ppuInput').inputmask({ regex: "^-?[0-9]{1,10}(\\.\\d{1,4})?$", placeholder: "" })
     } else {
-        $('.' + className + ':last .ppuProcess input').inputmask({ regex: "^[0-9]{1,10}(\\.\\d{1,4})?$", placeholder: "" })
+        $('.' + className + ':last .div_price .ppuInput').inputmask({ regex: "^[0-9]{1,10}(\\.\\d{1,4})?$", placeholder: "" })
     }
 
     $('.deliveryQty input').inputmask({
@@ -4476,7 +4493,7 @@ function addProcess(id) {
         'placeholder': ''
     })
 
-    $('.' + className + ':last .numMat input').inputmask({ regex: "^[0-9]{1,10}(\\.\\d{1,2})?$", placeholder: "" })
+    $('.' + className + ':last .div_qty .numMatInput').inputmask({ regex: "^[0-9]{1,10}(\\.\\d{1,2})?$", placeholder: "" })
 
     $('.datepicker').datepicker({
         format: "dd/mm/yyyy",
@@ -4572,75 +4589,38 @@ function resetDelivery() {
 }
 
 function tdNumMaterial(action) {
+    const inputPrice = `<input class="ppuInput required" style="width:80px;font-size:10px;text-align:center;">`
+    const inputQty = `<input class="numMatInput required" style="width:80px;font-size:10px;text-align:center;">`
+    const mask4 = { regex: "^[0-9]{1,5}(\\.\\d{1,2})?$", placeholder: "" }
+
     switch (action) {
         case 'add':
-            var td = `<td class="numMat"><input class="required" style="width:80px;font-size:10px;text-align:center;"></td>`
-            var tdPrice = `<td class="ppuProcess"><input class="required" style="width:80px;font-size:10px;text-align:center;"></td>`
-            // other
-            $('.otherProcess').each(function (index) {
-                if ($('.otherProcess:eq(' + index + ') .is_fixedPrice').prop('checked') == false) {
-                    $('.otherProcess:eq(' + index + ')').append(tdPrice)
-                    $('.otherProcess:last .ppuProcess input:last').inputmask({ regex: "^[0-9]{1,5}(\\.\\d{1,2})?$", placeholder: "" })
+            // other / handwork / custom — add price input
+            $('.otherProcess, .handworkProcess, .customProcess').each(function () {
+                if ($(this).find('.is_fixedPrice').prop('checked') == false) {
+                    $(this).find('.div_price').append(inputPrice)
+                    $(this).find('.div_price .ppuInput:last').inputmask(mask4)
                 }
             })
-            // handwork
-            $('.handworkProcess').each(function (index) {
-                if ($('.handworkProcess:eq(' + index + ') .is_fixedPrice').prop('checked') == false) {
-                    $('.handworkProcess:eq(' + index + ')').append(tdPrice)
-                    $('.handworkProcess:last .ppuProcess input:last').inputmask({ regex: "^[0-9]{1,5}(\\.\\d{1,2})?$", placeholder: "" })
-                }
-            })
-            // custom
-            $('.customProcess').each(function (index) {
-                if ($('.customProcess:eq(' + index + ') .is_fixedPrice').prop('checked') == false) {
-                    $('.customProcess:eq(' + index + ')').append(tdPrice)
-                    $('.customProcess:last .ppuProcess input:last').inputmask({ regex: "^[0-9]{1,5}(\\.\\d{1,2})?$", placeholder: "" })
-                }
-            })
-            // material
-            $('.materialProcess').each(function (index) {
-                if ($('.materialProcess:eq(' + index + ') .is_fixedPrice').prop('checked') == false) {
-                    $('.materialProcess:eq(' + index + ')').append(td)
-                    $('.materialProcess:last .numMat input:last').inputmask({ regex: "^[0-9]{1,5}(\\.\\d{1,2})?$", placeholder: "" })
-                }
-            })
-            // other
-            $('.otherCostProcess').each(function (index) {
-                if ($('.otherCostProcess:eq(' + index + ') .is_fixedPrice').prop('checked') == false) {
-                    $('.otherCostProcess:eq(' + index + ')').append(td)
-                    $('.otherCostProcess:last .numMat input:last').inputmask({ regex: "^[0-9]{1,5}(\\.\\d{1,2})?$", placeholder: "" })
+            // material / otherCost — add qty input
+            $('.materialProcess, .otherCostProcess').each(function () {
+                if ($(this).find('.is_fixedPrice').prop('checked') == false) {
+                    $(this).find('.div_qty').append(inputQty)
+                    $(this).find('.div_qty .numMatInput:last').inputmask(mask4)
                 }
             })
             break
         case 'delete':
-            // other
-            $('.otherProcess').each(function (index) {
-                if ($('.otherProcess:eq(' + index + ') .is_fixedPrice').prop('checked') == false) {
-                    $('.otherProcess:eq(' + index + ') .ppuProcess:last').remove()
+            // other / handwork / custom — remove last price input
+            $('.otherProcess, .handworkProcess, .customProcess').each(function () {
+                if ($(this).find('.is_fixedPrice').prop('checked') == false) {
+                    $(this).find('.div_price .ppuInput:last').remove()
                 }
             })
-            // handwork
-            $('.handworkProcess').each(function (index) {
-                if ($('.handworkProcess:eq(' + index + ') .is_fixedPrice').prop('checked') == false) {
-                    $('.handworkProcess:eq(' + index + ') .ppuProcess:last').remove()
-                }
-            })
-            // custom
-            $('.customProcess').each(function (index) {
-                if ($('.customProcess:eq(' + index + ') .is_fixedPrice').prop('checked') == false) {
-                    $('.customProcess:eq(' + index + ') .ppuProcess:last').remove()
-                }
-            })
-            // material
-            $('.materialProcess').each(function (index) {
-                if ($('.materialProcess:eq(' + index + ') .is_fixedPrice').prop('checked') == false) {
-                    $('.materialProcess:eq(' + index + ') .numMat:last').remove()
-                }
-            })
-            // other
-            $('.otherCostProcess').each(function (index) {
-                if ($('.otherCostProcess:eq(' + index + ') .is_fixedPrice').prop('checked') == false) {
-                    $('.otherCostProcess:eq(' + index + ') .numMat:last').remove()
+            // material / otherCost — remove last qty input
+            $('.materialProcess, .otherCostProcess').each(function () {
+                if ($(this).find('.is_fixedPrice').prop('checked') == false) {
+                    $(this).find('.div_qty .numMatInput:last').remove()
                 }
             })
             break
@@ -4649,56 +4629,36 @@ function tdNumMaterial(action) {
 
 function createTdNumInput(index, is_fixedPrice, classProcess) {
     const is_multiple_f = getIsMultipleF()
-    let td = ''
+    const row = $(`.${classProcess}:eq(${index})`)
 
     if (['otherProcess', 'handworkProcess', 'customProcess'].includes(classProcess)) {
-        $(`.${classProcess}:eq(${index}) td.ppuProcess`).remove()
-    } else {
-        $(`.${classProcess}:eq(${index}) .numMat`).remove()
-    }
-
-    if (is_fixedPrice) {
-        if (['otherProcess', 'handworkProcess', 'customProcess'].includes(classProcess)) {
-            td = `<td class="ppuProcess"><input class="required" style="width:80px;font-size:10px;text-align:center;"></td>`
-        } else {
-            td = `<td class="numMat"><input class="required" style="width:80px;font-size:10px;text-align:center;"></td>`
+        const container = row.find('.div_price')
+        let numberOfInputs = 1
+        if (!is_fixedPrice) {
+            numberOfInputs = is_multiple_f
+                ? $('#multiple_f_qty_info .f_table').length
+                : $('#qty_info .inputQty').length
         }
-
-    } else {
-        if (is_multiple_f) {
-            $('#multiple_f_qty_info .f_table').each(function () {
-                //var qty=$('.inputQty:eq('+index+') input').val()
-                if (['otherProcess', 'handworkProcess', 'customProcess'].includes(classProcess)) {
-                    td += `<td class="ppuProcess"><input class="required" style="width:80px;font-size:10px;text-align:center;"></td>`
-                } else {
-                    td += `
-                        <td class="numMat">
-                            <input class="required" style="width:80px;font-size:10px;text-align:center;" >
-                        </td>
-                    `
-                }
-            })
-        } else {
-            $('#qty_info .inputQty').each(function () {
-                //var qty=$('.inputQty:eq('+index+') input').val()
-                if (['otherProcess', 'handworkProcess', 'customProcess'].includes(classProcess)) {
-                    td += `<td class="ppuProcess"><input class="required" style="width:80px;font-size:10px;text-align:center;"></td>`
-                } else {
-                    td += `
-                    <td class="numMat">
-                        <input class="required" style="width:80px;font-size:10px;text-align:center;" >
-                    </td>
-                `}
-            })
+        let inputs = ''
+        for (let i = 0; i < numberOfInputs; i++) {
+            inputs += `<input class="ppuInput required" style="width:80px;font-size:10px;text-align:center;">`
         }
-    }
-
-    $(`.${classProcess}:eq(${index})`).append(td)
-
-    if (['otherProcess', 'handworkProcess', 'customProcess'].includes(classProcess)) {
-        $(`.${classProcess}:eq(${index}) .ppuProcess input`).inputmask({ regex: "^[0-9]{1,10}(\\.\\d{1,4})?$", placeholder: "" })
+        container.html(inputs)
+        container.find('input.ppuInput').inputmask({ regex: "^[0-9]{1,10}(\\.\\d{1,4})?$", placeholder: "" })
     } else {
-        $(`.${classProcess}:eq(${index}) .numMat input`).inputmask({ regex: "^[0-9]{1,10}(\\.\\d{1,2})?$", placeholder: "" })
+        const container = row.find('.div_qty')
+        let numberOfInputs = 1
+        if (!is_fixedPrice) {
+            numberOfInputs = is_multiple_f
+                ? $('#multiple_f_qty_info .f_table').length
+                : $('#qty_info .inputQty').length
+        }
+        let inputs = ''
+        for (let i = 0; i < numberOfInputs; i++) {
+            inputs += `<input class="numMatInput required" style="width:80px;font-size:10px;text-align:center;">`
+        }
+        container.html(inputs)
+        container.find('input.numMatInput').inputmask({ regex: "^[0-9]{1,10}(\\.\\d{1,2})?$", placeholder: "" })
     }
 }
 

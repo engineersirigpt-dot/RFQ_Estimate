@@ -755,8 +755,12 @@ button[disabled="disabled"] {
 
 .snackbar.show {
   visibility: visible;
-  -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
-  animation: fadein 0.5s, fadeout 0.5s 2.5s;
+  -webkit-animation:
+    fadein 0.5s,
+    fadeout 0.5s 2.5s;
+  animation:
+    fadein 0.5s,
+    fadeout 0.5s 2.5s;
 }
 
 #view-only {
@@ -1349,4 +1353,74 @@ tr.totalMarkingPercentMaterial_tr {
 tr.totalMarkingPercentProduction_tr,
 tr.totalSubtotalPriceProduction_tr {
   background-color: #a6caec !important;
+}
+
+/* Other Process / Handwork / Outsource / Materials / Other — textarea rows */
+tr.otherProcess,
+tr.handworkProcess,
+tr.customProcess,
+tr.materialProcess,
+tr.otherCostProcess {
+  vertical-align: top;
+}
+
+tr.otherProcess .nameProcess,
+tr.handworkProcess .nameProcess,
+tr.customProcess .nameProcess,
+tr.materialProcess .nameProcess,
+tr.otherCostProcess .nameProcess {
+  display: flex;
+  align-items: flex-start;
+}
+
+tr.otherProcess .nameProcess > span,
+tr.handworkProcess .nameProcess > span,
+tr.customProcess .nameProcess > span,
+tr.materialProcess .nameProcess > span,
+tr.otherCostProcess .nameProcess > span {
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+tr.otherProcess .nameProcess textarea,
+tr.handworkProcess .nameProcess textarea,
+tr.customProcess .nameProcess textarea,
+tr.materialProcess .nameProcess textarea,
+tr.otherCostProcess .nameProcess textarea {
+  width: 350px;
+  min-width: 350px;
+  flex-shrink: 0;
+  overflow-y: hidden;
+  resize: vertical;
+}
+
+.process_control_section {
+  display: flex;
+  /* flex-direction: column; */
+  gap: 4px;
+}
+
+.div_fixed_price,
+.div_fixed_qty {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.div_checkbox_label {
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 4px;
+  line-height: 26px;
+}
+
+.div_price,
+.div_qty {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  max-width: 280px;
 }

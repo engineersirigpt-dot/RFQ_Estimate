@@ -845,15 +845,15 @@ function displayProcess(mainData, process) {
 
 			addProcess(process)
 			$('.' + processTr + ' .nameProcess textarea').val(item.name)
-			$('.' + processTr + ' .ppuProcess input').val(item?.info?.unit_price || item?.info?.unit_price[0] || 0)
+			$('.' + processTr + ' .div_price .ppuInput').val(item?.info?.unit_price || item?.info?.unit_price[0] || 0)
 			$('.' + processTr + ' .is_fixedPrice').prop('checked', is_fixedPrice)
 
 			createTdNumInput(process_index, is_fixedPrice, processName)
 
 			if (is_fixedPrice) {
-				$('.' + processTr + ' .ppuProcess input').val(item?.info?.unit_price || item?.info?.unit_price[0] || 0)
+				$('.' + processTr + ' .div_price .ppuInput').val(item?.info?.unit_price || item?.info?.unit_price[0] || 0)
 			} else {
-				$('.' + processTr + ' .ppuProcess input').each(((index1, ele) => $(ele).val(item?.info?.unit_price[index1] || 0)))
+				$('.' + processTr + ' .div_price .ppuInput').each(((index1, ele) => $(ele).val(item?.info?.unit_price[index1] || 0)))
 			}
 
 			if (item.info.from_process != null) {
@@ -874,13 +874,13 @@ function displayMaterial(mainData) {
 		addProcess('material')
 		var materialProcess = '.materialProcess:eq(' + process_index + ')'
 		$(materialProcess + ' .nameProcess textarea').val(item.name)
-		$(materialProcess + ' .ppuProcess input').val(item.info.unit_price)
+		$(materialProcess + ' .div_price .ppuInput').val(item.info.unit_price)
 		$(materialProcess + ' .is_fixedPrice').prop('checked', item.info.is_fixedPrice)
 		createTdNumInput(process_index, item.info.is_fixedPrice, "materialProcess")
 		if (item.info.is_fixedPrice) {
-			$(materialProcess + ' .numMat input').val(item.info.qty_material)
+			$(materialProcess + ' .div_qty .numMatInput').val(item.info.qty_material)
 		} else {
-			$(materialProcess + ' .numMat input').each((index1) => $(materialProcess + ' .numMat input:eq(' + index1 + ')').val(item.info.qty_material[index1]))
+			$(materialProcess + ' .div_qty .numMatInput').each((index1, ele) => $(ele).val(item.info.qty_material[index1]))
 		}
 		if (item.info.from_process != null) {
 			$(materialProcess).attr('from-process', item.info.from_process)
@@ -904,13 +904,13 @@ function displayOtherCost(mainData) {
 		createTdNumInput(process_index, item.info.is_fixedPrice, "otherCostProcess")
 
 		$(otherCostProcess + ' .nameProcess textarea').val(item.name)
-		$(otherCostProcess + ' .ppuProcess input').val(item.info.unit_price)
+		$(otherCostProcess + ' .div_price .ppuInput').val(item.info.unit_price)
 		$(otherCostProcess + ' .is_fixedPrice').attr('checked', item.info.is_fixedPrice)
 
 		if (item.info.is_fixedPrice) {
-			$(otherCostProcess + ' .numMat input').val(item.info.qty_other)
+			$(otherCostProcess + ' .div_qty .numMatInput').val(item.info.qty_other)
 		} else {
-			$(otherCostProcess + ' .numMat input').each((index1) => $(otherCostProcess + ' .numMat input:eq(' + index1 + ')').val(item.info.qty_other[index1]))
+			$(otherCostProcess + ' .div_qty .numMatInput').each((index1, ele) => $(ele).val(item.info.qty_other[index1]))
 		}
 
 		if (item.info.from_process != null) {

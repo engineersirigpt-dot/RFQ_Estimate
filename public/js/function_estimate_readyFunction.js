@@ -1044,6 +1044,12 @@ $(function () {
             // showRecalcPaperUsage(index)
             showRecalcPaperUsage(index)
         })
+
+        // re-resize textareas after DOM change
+        $('.nameProcess textarea').each(function () {
+            this.style.height = '0'
+            this.style.height = this.scrollHeight + 'px'
+        })
     })
 
     $('body').on('click', ('#addComp'), function () {
@@ -2847,7 +2853,8 @@ $(function () {
     })
 
     $('body').on('keyup', ('textarea'), function () {
-        $(this).css('height', this.scrollHeight - 4 + 'px')
+        this.style.height = '0'
+        this.style.height = this.scrollHeight + 'px'
     })
 
 

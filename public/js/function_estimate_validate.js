@@ -684,9 +684,9 @@ function checkValidateProcess() {
             return false
         }
 
-        $('.otherProcess:eq(' + i + ') .ppuProcess').each((index, td) => {
-            if ($(td).find('input').val() == '') {
-                $(td).find('input').focus()
+        $('.otherProcess:eq(' + i + ') .div_price .ppuInput').each((index, input) => {
+            if ($(input).val() == '') {
+                $(input).focus()
                 alert('กรุณาใส่ ราคาต่อหน่วย')
                 check_input = false
                 return false
@@ -696,12 +696,6 @@ function checkValidateProcess() {
         if (check_input == false) {
             return false
         }
-
-        // if ($('.otherProcess:eq(' + i + ') .ppuProcess input').val() == "") {
-        //     alert('กรุณาใส่ ราคาต่อหน่วย')
-        //     $('.otherProcess:eq(' + i + ') .ppuProcess input').focus()
-        //     return false
-        // }
     }
     for (var j = 0; j < handwork_length; j++) {
         if ($('.handworkProcess:eq(' + j + ') .nameProcess textarea').val() == "") {
@@ -709,14 +703,9 @@ function checkValidateProcess() {
             $('.handworkProcess:eq(' + j + ') .nameProcess textarea').focus()
             return false
         }
-        // if ($('.handworkProcess:eq(' + j + ') .ppuProcess input').val() == "") {
-        //     alert('กรุณาใส่ ราคาต่อหน่วย')
-        //     $('.handworkProcess:eq(' + j + ') .ppuProcess input').focus()
-        //     return false
-        // }
-        $('.handworkProcess:eq(' + i + ') .ppuProcess').each((index, td) => {
-            if ($(td).find('input').val() == '') {
-                $(td).find('input').focus()
+        $('.handworkProcess:eq(' + j + ') .div_price .ppuInput').each((index, input) => {
+            if ($(input).val() == '') {
+                $(input).focus()
                 alert('กรุณาใส่ ราคาต่อหน่วย')
                 check_input = false
                 return false
@@ -733,14 +722,9 @@ function checkValidateProcess() {
             $('.customProcess:eq(' + i + ') .nameProcess textarea').focus()
             return false
         }
-        // if ($('.customProcess:eq(' + i + ') .ppuProcess input').val() == "") {
-        //     alert('กรุณาใส่ ราคาต่อหน่วย')
-        //     $('.customProcess:eq(' + i + ') .ppuProcess input').focus()
-        //     return false
-        // }
-        $('.customProcess:eq(' + i + ') .ppuProcess').each((index, td) => {
-            if ($(td).find('input').val() == '') {
-                $(td).find('input').focus()
+        $('.customProcess:eq(' + i + ') .div_price .ppuInput').each((index, input) => {
+            if ($(input).val() == '') {
+                $(input).focus()
                 alert('กรุณาใส่ ราคาต่อหน่วย')
                 check_input = false
                 return false
@@ -751,41 +735,29 @@ function checkValidateProcess() {
             return false
         }
     }
-    for (var i = 0; i < handwork_length; i++) {
-        if ($('.customProcess:eq(' + i + ') .nameProcess textarea').val() == "") {
-            alert('กรุณาใส่ ชื่อ Process')
-            $('.customProcess:eq(' + i + ') .nameProcess textarea').focus()
-            return false
-        }
-        if ($('.customProcess:eq(' + i + ') .ppuProcess input').val() == "") {
-            alert('กรุณาใส่ ราคาต่อหน่วย')
-            $('.customProcess:eq(' + i + ') .ppuProcess input').focus()
-            return false
-        }
-    }
     for (var k = 0; k < material_length; k++) {
         if ($('.materialProcess:eq(' + k + ') .nameProcess textarea').val() == "") {
             alert('กรุณาใส่ ชื่อ Process')
             $('.materialProcess:eq(' + k + ') .nameProcess textarea').focus()
             return false
         }
-        if ($('.materialProcess:eq(' + k + ') .ppuProcess input').val() == "") {
+        if ($('.materialProcess:eq(' + k + ') .div_price .ppuInput').val() == "") {
             alert('กรุณาใส่ ราคาต่อหน่วย')
-            $('.materialProcess:eq(' + k + ') .ppuProcess input').focus()
+            $('.materialProcess:eq(' + k + ') .div_price .ppuInput').focus()
             return false
         }
         if ($('.materialProcess:eq(' + k + ') .is_fixedPrice').prop('checked')) {
-            if ($('.materialProcess:eq(' + k + ') .numMat input').val() == "") {
+            if ($('.materialProcess:eq(' + k + ') .div_qty .numMatInput').val() == "") {
                 alert('กรุณาใส่ จำนวน Material')
-                $('.materialProcess:eq(' + k + ') .numMat input').focus()
+                $('.materialProcess:eq(' + k + ') .div_qty .numMatInput').focus()
                 return false
             }
         } else {
-            var mat_length = $('.materialProcess:eq(' + k + ') .numMat').length
+            var mat_length = $('.materialProcess:eq(' + k + ') .div_qty .numMatInput').length
             for (var m = 0; m < mat_length; m++) {
-                if ($('.materialProcess:eq(' + k + ') .numMat:eq(' + m + ') input').val() == "") {
+                if ($('.materialProcess:eq(' + k + ') .div_qty .numMatInput:eq(' + m + ')').val() == "") {
                     alert('กรุณาใส่ จำนวน Material')
-                    $('.materialProcess:eq(' + k + ') .numMat:eq(' + m + ') input').focus()
+                    $('.materialProcess:eq(' + k + ') .div_qty .numMatInput:eq(' + m + ')').focus()
                     return false
                 }
             }
@@ -797,23 +769,23 @@ function checkValidateProcess() {
             $('.otherCostProcess:eq(' + k + ') .nameProcess textarea').focus()
             return false
         }
-        if ($('.otherCostProcess:eq(' + k + ') .ppuProcess input').val() == "") {
+        if ($('.otherCostProcess:eq(' + k + ') .div_price .ppuInput').val() == "") {
             alert('กรุณาใส่ ราคาต่อหน่วย')
-            $('.otherCostProcess:eq(' + k + ') .ppuProcess input').focus()
+            $('.otherCostProcess:eq(' + k + ') .div_price .ppuInput').focus()
             return false
         }
         if ($('.otherCostProcess:eq(' + k + ') .is_fixedPrice').prop('checked')) {
-            if ($('.otherCostProcess:eq(' + k + ') .numMat input').val() == "") {
+            if ($('.otherCostProcess:eq(' + k + ') .div_qty .numMatInput').val() == "") {
                 alert('กรุณาใส่ จำนวน Other')
-                $('.otherCostProcess:eq(' + k + ') .numMat input').focus()
+                $('.otherCostProcess:eq(' + k + ') .div_qty .numMatInput').focus()
                 return false
             }
         } else {
-            var mat_length = $('.otherCostProcess:eq(' + k + ') .numMat').length
+            var mat_length = $('.otherCostProcess:eq(' + k + ') .div_qty .numMatInput').length
             for (var m = 0; m < mat_length; m++) {
-                if ($('.otherCostProcess:eq(' + k + ') .numMat:eq(' + m + ') input').val() == "") {
+                if ($('.otherCostProcess:eq(' + k + ') .div_qty .numMatInput:eq(' + m + ')').val() == "") {
                     alert('กรุณาใส่ จำนวน Other')
-                    $('.otherCostProcess:eq(' + k + ') .numMat:eq(' + m + ') input').focus()
+                    $('.otherCostProcess:eq(' + k + ') .div_qty .numMatInput:eq(' + m + ')').focus()
                     return false
                 }
             }
