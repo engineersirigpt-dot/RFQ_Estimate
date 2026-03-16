@@ -373,7 +373,7 @@ function storeOtherProcess() {
         arr.push({
             type: 'other',
             type_id: 8,
-            name: $(`${otherProcess} .nameProcess input`).val(),
+            name: $(`${otherProcess} .nameProcess textarea`).val(),
             info: {
                 is_fixedPrice: $(`${otherProcess} .is_fixedPrice`).prop('checked'),
                 unit_price
@@ -402,7 +402,7 @@ function storeHandworkProcess() {
         arr.push({
             type: 'handwork',
             type_id: 9,
-            name: $(handworkProcess + ' .nameProcess input').val(),
+            name: $(handworkProcess + ' .nameProcess textarea').val(),
             info: {
                 is_fixedPrice: $(`${handworkProcess} .is_fixedPrice`).prop('checked'),
                 unit_price
@@ -431,7 +431,7 @@ function storeCustomProcess() {
         arr.push({
             type: 'custom',
             type_id: 9,
-            name: $(customProcess + ' .nameProcess input').val(),
+            name: $(customProcess + ' .nameProcess textarea').val(),
             info: {
                 is_fixedPrice: $(`${customProcess} .is_fixedPrice`).prop('checked'),
                 unit_price
@@ -471,7 +471,7 @@ function storeMaterial() {
         arr.push({
             type: 'material',
             type_id: 10,
-            name: $(`${materialProcess} .nameProcess input`).val(),
+            name: $(`${materialProcess} .nameProcess textarea`).val(),
             info: {
                 unit_price: parseFloat($(`${materialProcess} .ppuProcess input`).val()),
                 is_fixedPrice: $(`${materialProcess} .is_fixedPrice`).prop('checked'),
@@ -550,7 +550,7 @@ function storeOtherCost() {
         arr.push({
             type: 'otherCost',
             type_id: 13,
-            name: $(otherCostProcess + ' .nameProcess input').val(),
+            name: $(otherCostProcess + ' .nameProcess textarea').val(),
             info: {
                 unit_price: parseFloat($(otherCostProcess + ' .ppuProcess input').val()),
                 qty_other: qty_other,
@@ -3948,7 +3948,7 @@ function getBlanketUVGap(index, process_index, type, side = 1) {
     $('.materialProcess:last').attr('from-process', 'coating')
     $('.materialProcess:last').attr('comp-index', index)
     $('.materialProcess:last').attr('process-index', process_index)
-    $('.materialProcess:last .nameProcess input').val(nameProc)
+    $('.materialProcess:last .nameProcess textarea').val(nameProc)
     $('.materialProcess:last .ppuProcess input').val(process_price)
     $('.materialProcess:last .numMat input').val(side)
     $('.materialProcess:last input').prop('readonly', true)
@@ -4444,16 +4444,16 @@ function addProcess(id) {
             </tr>`
         }
     } else if (['other', 'handwork', 'custom'].includes(id)) {
-        var tr = `<tr class='${className}'> 
+        var tr = `<tr class='${className}' style="vertical-align:top;">
             <td style="width: 50px;"><div class="deleteProcess">ลบ</div></td>
-            <td><div class="nameProcess">${label} <input class="required" style="width:350px"></div></td>
+            <td><div class="nameProcess" style="display:flex;align-items:flex-start;"><span style="white-space:nowrap;margin-top:2px;">${label}&nbsp;</span><textarea class="required" style="width:350px;overflow-y:hidden;resize:vertical;" rows="1"></textarea></div></td>
             <td><div class="processChecked"><input class="is_fixedPrice" type="checkbox" checked> ราคาต่อหน่วยคงที่:</div></td>
             ${unit}
         </tr>`
     } else {
-        var tr = `<tr class='${className}'> 
+        var tr = `<tr class='${className}' style="vertical-align:top;">
             <td style="width: 50px;"><div class="deleteProcess">ลบ</div></td>
-            <td><div class="nameProcess">${label} <input class="required" style="width:350px"></div></td>
+            <td><div class="nameProcess" style="display:flex;align-items:flex-start;"><span style="white-space:nowrap;margin-top:2px;">${label}&nbsp;</span><textarea class="required" style="width:350px;overflow-y:hidden;resize:vertical;" rows="1"></textarea></div></td>
             <td><div class="ppuProcess">ราคาต่อหน่วย: <input class="required" style="width:80px;font-size:10px;text-align:center"></div></td>
             ${unit}
         </tr>`

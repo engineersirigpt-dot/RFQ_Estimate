@@ -844,7 +844,7 @@ function displayProcess(mainData, process) {
 			const is_fixedPrice = item.info.is_fixedPrice === undefined ? true : item.info.is_fixedPrice
 
 			addProcess(process)
-			$('.' + processTr + ' .nameProcess input').val(item.name)
+			$('.' + processTr + ' .nameProcess textarea').val(item.name)
 			$('.' + processTr + ' .ppuProcess input').val(item?.info?.unit_price || item?.info?.unit_price[0] || 0)
 			$('.' + processTr + ' .is_fixedPrice').prop('checked', is_fixedPrice)
 
@@ -860,7 +860,7 @@ function displayProcess(mainData, process) {
 				$(`.${processTr}`).attr('from-process', item.info.from_process)
 				$(`.${processTr}`).attr('comp-index', item.info.comp_index)
 				$(`.${processTr}`).attr('process-index', item.info.process_index)
-				$(`.${processTr}` + ' input').prop('readonly', true)
+				$(`.${processTr}` + ' input, ' + `.${processTr}` + ' textarea').prop('readonly', true)
 				$(`.${processTr}` + ' .deleteProcess').hide()
 			}
 		}
@@ -873,7 +873,7 @@ function displayMaterial(mainData) {
 		process_index += 1
 		addProcess('material')
 		var materialProcess = '.materialProcess:eq(' + process_index + ')'
-		$(materialProcess + ' .nameProcess input').val(item.name)
+		$(materialProcess + ' .nameProcess textarea').val(item.name)
 		$(materialProcess + ' .ppuProcess input').val(item.info.unit_price)
 		$(materialProcess + ' .is_fixedPrice').prop('checked', item.info.is_fixedPrice)
 		createTdNumInput(process_index, item.info.is_fixedPrice, "materialProcess")
@@ -886,7 +886,7 @@ function displayMaterial(mainData) {
 			$(materialProcess).attr('from-process', item.info.from_process)
 			$(materialProcess).attr('comp-index', item.info.comp_index)
 			$(materialProcess).attr('process-index', item.info.process_index)
-			$(materialProcess + ' input').prop('readonly', true)
+			$(materialProcess + ' input, ' + materialProcess + ' textarea').prop('readonly', true)
 			$(materialProcess + ' .deleteProcess').hide()
 		}
 	})
@@ -903,7 +903,7 @@ function displayOtherCost(mainData) {
 
 		createTdNumInput(process_index, item.info.is_fixedPrice, "otherCostProcess")
 
-		$(otherCostProcess + ' .nameProcess input').val(item.name)
+		$(otherCostProcess + ' .nameProcess textarea').val(item.name)
 		$(otherCostProcess + ' .ppuProcess input').val(item.info.unit_price)
 		$(otherCostProcess + ' .is_fixedPrice').attr('checked', item.info.is_fixedPrice)
 
@@ -917,7 +917,7 @@ function displayOtherCost(mainData) {
 			$(otherCostProcess).attr('from-process', item.info.from_process)
 			$(otherCostProcess).attr('comp-index', item.info.comp_index)
 			$(otherCostProcess).attr('process-index', item.info.process_index)
-			$(otherCostProcess + ' input').prop('readonly', true)
+			$(otherCostProcess + ' input, ' + otherCostProcess + ' textarea').prop('readonly', true)
 			$(otherCostProcess + ' .deleteProcess').hide()
 		}
 	})

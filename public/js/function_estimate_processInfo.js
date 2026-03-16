@@ -153,16 +153,18 @@ class ProcessInfoBuilder {
     //* ==================== Add Process Methods ====================
 
     addPaperProcess(comp, compIndex, targetLength) {
+        console.log("addPaperProcess", comp, compIndex, targetLength)
         if (!comp.paper_usage?.line) return
 
         const processInfo = this.getPackagingProcessId('paper')
         const unitId = this.getUnitId(processInfo.unit_name)
 
-        const paperLine = comp.paper_usage.line.map(item => ({
-            process_qty: item.paper_print || 0,
-            unit_price: item.paper?.unit_price || 0,
-            price: item.paper?.price || 0
+        const paperLine = comp.paper_usage.line.map(obj => ({
+            process_qty: obj?.price?.paper?.qty || 0,
+            unit_price: obj?.price?.paper?.unit_price || 0,
+            price: obj?.price?.paper?.price || 0
         }))
+        console.log("paperLine", paperLine)
 
         comp.process_info.material.push({
             process_id: processInfo.mi2_process_id,
@@ -200,7 +202,7 @@ class ProcessInfoBuilder {
         comp.process_info.material.push({
             process_id: processInfo.mi2_process_id,
             unit_id: unitId,
-            process_name: `Corrugated Board ลอน ${layerType} ${numLayer} ชั้น ${grade}`.trim(),
+            process_name: `ลูกฟูก ลอน ${layerType} ${numLayer} ชั้น ${grade}`.trim(),
             remark: `${comp.corrugated_layer?.info?.flute_side || 0} x ${comp.corrugated_layer?.info?.cut_off || 0}`,
             is_apply_all_edition: true,
             info: {
@@ -222,7 +224,8 @@ class ProcessInfoBuilder {
             outside: []
         }
 
-        comp.paper_usage.line.forEach((item, qIndex) => {
+        comp.paper_usage.line.forEach((obj, qIndex) => {
+            const item = obj?.price
             if (item.plate?.inside) {
                 plateData.inside.push({
                     qIndex,
@@ -250,7 +253,7 @@ class ProcessInfoBuilder {
             comp.process_info.plate.push({
                 process_id: processInfo.mi2_process_id,
                 unit_id: unitId,
-                process_name: `${fCodes.join(', ') || 'All'} Inside ${numColor} cols ${this.getPrintType()}`.trim(),
+                process_name: `Plate ${fCodes.join(', ') || ''} Inside ${numColor} cols ${this.getPrintType()}`.trim(),
                 remark: 'Inside',
                 is_apply_all_edition: fCodes.length === 0,
                 info: {
@@ -270,7 +273,7 @@ class ProcessInfoBuilder {
             comp.process_info.plate.push({
                 process_id: processInfo.mi2_process_id,
                 unit_id: unitId,
-                process_name: `${fCodes.join(', ') || 'All'} Outside ${numColor} cols ${this.getPrintType()}`.trim(),
+                process_name: `Plate ${fCodes.join(', ') || ''} Outside ${numColor} cols ${this.getPrintType()}`.trim(),
                 remark: 'Outside',
                 is_apply_all_edition: fCodes.length === 0,
                 info: {
@@ -321,7 +324,9 @@ class ProcessInfoBuilder {
             outside: []
         }
 
-        comp.paper_usage.line.forEach((item, qIndex) => {
+        comp.paper_usage.line.forEach((obj, qIndex) => {
+            const item = obj?.price
+
             if (item.print?.inside) {
                 printData.inside.push({
                     qIndex,
@@ -349,7 +354,7 @@ class ProcessInfoBuilder {
             comp.process_info.print.push({
                 process_id: processInfo.mi2_process_id,
                 unit_id: unitId,
-                process_name: `${fCodes.join(', ') || 'All'} Inside ${numColor} cols ${this.getPrintType()}`.trim(),
+                process_name: `Print ${fCodes.join(', ') || ''} Inside ${numColor} cols ${this.getPrintType()}`.trim(),
                 remark: 'Inside',
                 is_apply_all_edition: fCodes.length === 0,
                 info: {
@@ -369,7 +374,7 @@ class ProcessInfoBuilder {
             comp.process_info.print.push({
                 process_id: processInfo.mi2_process_id,
                 unit_id: unitId,
-                process_name: `${fCodes.join(', ') || 'All'} Outside ${numColor} cols ${this.getPrintType()}`.trim(),
+                process_name: `Print ${fCodes.join(', ') || ''} Outside ${numColor} cols ${this.getPrintType()}`.trim(),
                 remark: 'Outside',
                 is_apply_all_edition: fCodes.length === 0,
                 info: {

@@ -678,9 +678,9 @@ function checkValidateProcess() {
     var custom_length = $('.customProcess').length
     var otherCost_length = $('.otherCostProcess').length
     for (var i = 0; i < process_length; i++) {
-        if ($('.otherProcess:eq(' + i + ') .nameProcess input').val() == "") {
+        if ($('.otherProcess:eq(' + i + ') .nameProcess textarea').val() == "") {
             alert('กรุณาใส่ ชื่อ Process')
-            $('.otherProcess:eq(' + i + ') .nameProcess input').focus()
+            $('.otherProcess:eq(' + i + ') .nameProcess textarea').focus()
             return false
         }
 
@@ -704,9 +704,9 @@ function checkValidateProcess() {
         // }
     }
     for (var j = 0; j < handwork_length; j++) {
-        if ($('.handworkProcess:eq(' + j + ') .nameProcess input').val() == "") {
+        if ($('.handworkProcess:eq(' + j + ') .nameProcess textarea').val() == "") {
             alert('กรุณาใส่ ชื่อ Process')
-            $('.handworkProcess:eq(' + j + ') .nameProcess input').focus()
+            $('.handworkProcess:eq(' + j + ') .nameProcess textarea').focus()
             return false
         }
         // if ($('.handworkProcess:eq(' + j + ') .ppuProcess input').val() == "") {
@@ -728,9 +728,9 @@ function checkValidateProcess() {
         }
     }
     for (var i = 0; i < custom_length; i++) {
-        if ($('.customProcess:eq(' + i + ') .nameProcess input').val() == "") {
+        if ($('.customProcess:eq(' + i + ') .nameProcess textarea').val() == "") {
             alert('กรุณาใส่ ชื่อ Process')
-            $('.customProcess:eq(' + i + ') .nameProcess input').focus()
+            $('.customProcess:eq(' + i + ') .nameProcess textarea').focus()
             return false
         }
         // if ($('.customProcess:eq(' + i + ') .ppuProcess input').val() == "") {
@@ -752,9 +752,9 @@ function checkValidateProcess() {
         }
     }
     for (var i = 0; i < handwork_length; i++) {
-        if ($('.customProcess:eq(' + i + ') .nameProcess input').val() == "") {
+        if ($('.customProcess:eq(' + i + ') .nameProcess textarea').val() == "") {
             alert('กรุณาใส่ ชื่อ Process')
-            $('.customProcess:eq(' + i + ') .nameProcess input').focus()
+            $('.customProcess:eq(' + i + ') .nameProcess textarea').focus()
             return false
         }
         if ($('.customProcess:eq(' + i + ') .ppuProcess input').val() == "") {
@@ -764,9 +764,9 @@ function checkValidateProcess() {
         }
     }
     for (var k = 0; k < material_length; k++) {
-        if ($('.materialProcess:eq(' + k + ') .nameProcess input').val() == "") {
+        if ($('.materialProcess:eq(' + k + ') .nameProcess textarea').val() == "") {
             alert('กรุณาใส่ ชื่อ Process')
-            $('.materialProcess:eq(' + k + ') .nameProcess input').focus()
+            $('.materialProcess:eq(' + k + ') .nameProcess textarea').focus()
             return false
         }
         if ($('.materialProcess:eq(' + k + ') .ppuProcess input').val() == "") {
@@ -792,9 +792,9 @@ function checkValidateProcess() {
         }
     }
     for (var k = 0; k < otherCost_length; k++) {
-        if ($('.otherCostProcess:eq(' + k + ') .nameProcess input').val() == "") {
+        if ($('.otherCostProcess:eq(' + k + ') .nameProcess textarea').val() == "") {
             alert('กรุณาใส่ ชื่อ Other')
-            $('.otherCostProcess:eq(' + k + ') .nameProcess input').focus()
+            $('.otherCostProcess:eq(' + k + ') .nameProcess textarea').focus()
             return false
         }
         if ($('.otherCostProcess:eq(' + k + ') .ppuProcess input').val() == "") {

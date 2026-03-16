@@ -3422,7 +3422,7 @@ function prepareComponentPaperDataToDB(jobData = {}) {
     } = jobData || {}
 
     component1?.forEach((comp, cIndex) => {
-
+        const compType = comp?.component_type?.type
         const mainQty = totalqty[0]
 
         comp?.paper_usage?.line?.forEach((paper, pIndex) => {
@@ -3467,6 +3467,23 @@ function prepareComponentPaperDataToDB(jobData = {}) {
 
 
             if (comp?.corrugated_layer) {
+
+                let _waste = paper?.waste || 0
+                let _after_waste = paper?.after_waste || 0
+                let _sig = comp?.paper_usage?.sig
+                let _paper_print = paper?.paper_print || 0
+                let _split = comp?.paper_usage?.split
+                let _paper_qty = paper?.paper_qty || 0
+                let _paper_net = paper?.paper_net || 0
+
+                if (compType != 3) { //* กรณีประกบลูกฟูก
+                    _waste = comp?.waste?.waste_corrugated_board?.[pIndex] || 0;
+                    _after_waste = _paper_print = _paper_qty = ((paper?.after_ups || 0) + _waste);
+                    _sig = 1
+                    _split = 1
+                    _paper_net = roundCorrugated(_paper_qty)
+                }
+
                 arr.push({
                     component_id: cIndex + 1 || null,
                     component_name: comp?.component_name || null,
@@ -3483,7 +3500,7 @@ function prepareComponentPaperDataToDB(jobData = {}) {
 
                     paper_type: `ลอน ${comp?.corrugated_layer?.info?.flute_type} ${comp?.corrugated_layer?.info?.num_layer} ชั้น : ${comp?.corrugated_layer.info.name}`,
                     paper_gram: comp?.corrugated_layer.info.all_gram,
-                    paper_cost: comp?.corrugated_layer?.info?.unit_price[pIndex] || 0,
+                    paper_cost: comp?.corrugated_layer?.info?.cost[pIndex] || 0,
                     paper_markup_percent: comp?.corrugated_layer?.info?.corrugated_markup,
                     paper_cut: 0,
                     paper_sales: comp?.corrugated_layer?.info?.unit_price[pIndex] || 0,
@@ -3493,17 +3510,17 @@ function prepareComponentPaperDataToDB(jobData = {}) {
                     width: comp?.corrugated_layer.info.flute_side,
                     length: comp?.corrugated_layer.info.cut_off,
 
-                    paper_net: paper?.paper_net || 0,
                     weight_kg: paper?.kilogram || 0,
                     weight_tons: paper?.ton || 0,
                     ups: comp?.paper_usage?.ups || 0,
                     after_ups: paper?.after_ups || 0,
-                    waste: paper?.waste || 0,
-                    after_waste: paper?.after_waste || 0,
-                    sig: comp?.paper_usage?.sig || 0,
-                    paper_print: paper?.paper_print || 0,
-                    split: comp?.paper_usage?.split || 0,
-                    paper_qty: paper?.paper_qty || 0,
+                    waste: _waste,
+                    after_waste: _after_waste,
+                    sig: _sig,
+                    paper_print: _paper_print,
+                    split: _split,
+                    paper_qty: _paper_qty,
+                    paper_net: _paper_net,
                     lay_width: comp?.layout?.selected_layout ? comp?.layout?.selected_layout?.layout[0] : 0,
                     lay_cut_off: comp?.layout?.selected_layout ? comp?.layout?.selected_layout?.layout[1] : 0,
                 })
