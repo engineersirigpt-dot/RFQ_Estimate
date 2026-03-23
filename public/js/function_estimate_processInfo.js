@@ -596,13 +596,18 @@ class ProcessInfoBuilder {
                 process_id: rollProcessInfo.mi2_process_id,
                 unit_id: rollUnitId,
                 process_name: `Foil หน้าม้วน ${info?.foil_width || 0}" ความยาว ${info?.foil_length || 0} ft`,
-                remark: `สีเงิน ${info?.foil_code || ''}`,
+                remark: `สี${info?.color_th || 'เงิน'} ${info?.code || ''}`.trim(),
                 is_apply_all_edition: fCodes.length === 0,
                 info: {
                     f_code: fCodes,
                     foil_code: info?.foil_code,
                     foil_length: info?.foil_length,
-                    process_name_arr: [`Foil หน้าม้วน ${info?.foil_width || 0}" ความยาว ${info?.foil_length || 0} ft`]
+                    color_code: info?.code,
+                    color_th: info?.color_th,
+                    process_name_arr: [
+                        `Foil หน้าม้วน ${info?.foil_width || 0}" ความยาว ${info?.foil_length || 0} ft`,
+                        [info?.color_th ? `สี${info.color_th}` : '', info?.code || ''].filter(Boolean).join(' ')
+                    ].filter(p => p)
                 },
                 line: this.normalizeLineArray(rollLine, targetLength)
             })
@@ -690,7 +695,8 @@ class ProcessInfoBuilder {
                         info: {
                             f_code: fCodes,
                             size: [width, length],
-                            process_name_arr: [`Block ${isEmboss ? 'Emboss' : 'Deboss'}`, `Area (in²) : ${width} x ${length}`]
+                            component_name: comp.component_name || '',
+                            process_name_arr: [`Block ${isEmboss ? 'Emboss' : 'Deboss'}`, comp.component_name || '', `Area (in²) : ${width} x ${length}`]
                         },
                         line: this.normalizeLineArray(blockItem.line, targetLength)
                     })
@@ -738,12 +744,12 @@ class ProcessInfoBuilder {
             comp.process_info.process.push({
                 process_id: processInfo.mi2_process_id,
                 unit_id: unitId,
-                process_name: `Assembly (ประกบ/ติดลิ้นกาว) ${comp?.box_type?.glued_spot || '-'} จุด`.trim(),
+                process_name: `Assembly (ประกบ/ติดลิ้นกาว) ติดกาว ${comp?.box_type?.glued_spot || '-'} จุด`.trim(),
                 remark: proc.info?.description || null,
                 is_apply_all_edition: true,
                 info: {
                     ...(proc.info || {}),
-                    process_name_arr: [`Assembly (ประกบ/ติดลิ้นกาว) ${comp?.box_type?.glued_spot || '-'} จุด`]
+                    process_name_arr: ['Assembly (ประกบ/ติดลิ้นกาว)', `ติดกาว ${comp?.box_type?.glued_spot || '-'} จุด`]
                 },
                 line: this.normalizeLineArray(proc.line, targetLength)
             })
@@ -1021,6 +1027,12 @@ class ProcessInfoBuilder {
                     processNameArr.push(`${packInfo.qty_per_paperband} Cps/band`)
                 } else if (packItem.name === 'carton' && packInfo.qty_per_carton) {
                     processNameArr.push(`${packInfo.qty_per_carton} Cps/carton`)
+                } else if (packItem.name === 'pallet' && packInfo.bulk_qty_pallet) {
+                    const packingArr = comp.packing?.[fIndex] || []
+                    const hasCarton = packingArr.some(p => p.name === 'carton')
+                    const hasKraftwrap = packingArr.some(p => p.name === 'kraftwrap')
+                    const palletUnit = hasCarton ? 'Carton/Pallet' : hasKraftwrap ? 'Pack/Pallet' : 'Cps/Pallet'
+                    processNameArr.push(`${packInfo.bulk_qty_pallet} ${palletUnit}`)
                 }
 
                 comp.process_info.packing.push({
