@@ -153,34 +153,66 @@ class ProcessInfoBuilder {
     //* ==================== Add Process Methods ====================
 
     addPaperProcess(comp, compIndex, targetLength) {
-        console.log("addPaperProcess", comp, compIndex, targetLength)
         if (!comp.paper_usage?.line) return
 
         const processInfo = this.getPackagingProcessId('paper')
         const unitId = this.getUnitId(processInfo.unit_name)
+        const paperName = comp.paper?.paper_name || ''
+        const paperGram = comp.paper?.paper_gram || 0
+        const isMultipleF = this.mainData?.job?.is_multiple_f
+        const f_list = comp?.f_detail?.f_list || []
 
-        const paperLine = comp.paper_usage.line.map(obj => ({
-            process_qty: obj?.price?.paper?.qty || 0,
-            unit_price: obj?.price?.paper?.unit_price || 0,
-            price: obj?.price?.paper?.price || 0
-        }))
-        console.log("paperLine", paperLine)
-
-        comp.process_info.material.push({
-            process_id: processInfo.mi2_process_id,
-            unit_id: unitId,
-            process_name: `Paper ${comp.paper?.paper_name || ''} ${comp.paper?.paper_gram || 0} gram`.trim(),
-            remark: comp?.paper?.remark,
-            is_apply_all_edition: true,
-            info: {
-                paper_info: comp.paper_info,
-                paper_size: comp.paperSize,
-                ups: comp.paper_usage.ups,
-                split: comp.paper_usage.line[0]?.split || 1,
-                sig: comp.paper_usage.sig
-            },
-            line: this.normalizeLineArray(paperLine, targetLength)
-        })
+        if (isMultipleF && f_list.length > 0) {
+            // Per f_code entry
+            f_list.forEach((fInfo, fIndex) => {
+                const lineItem = comp.paper_usage.line[fIndex]
+                const paperLine = [{
+                    process_qty: lineItem?.price?.paper?.qty || 0,
+                    unit_price: lineItem?.price?.paper?.unit_price || 0,
+                    price: lineItem?.price?.paper?.price || 0,
+                    f_code: [fInfo.f_code]
+                }]
+                comp.process_info.material.push({
+                    process_id: processInfo.mi2_process_id,
+                    unit_id: unitId,
+                    process_name: `Paper ${fInfo.f_code} ${paperName} ${paperGram} gsm`.trim(),
+                    remark: comp?.paper?.remark,
+                    is_apply_all_edition: false,
+                    info: {
+                        paper_info: comp.paper_info,
+                        paper_size: comp.paperSize,
+                        ups: comp.paper_usage.ups,
+                        split: lineItem?.split || 1,
+                        sig: comp.paper_usage.sig,
+                        process_name_arr: ['Paper', fInfo.f_code, paperName, `${paperGram} gsm`]
+                    },
+                    line: this.normalizeLineArray(paperLine, 1)
+                })
+            })
+        } else {
+            // Original: single entry, N lines
+            const paperLine = comp.paper_usage.line.map(obj => ({
+                process_qty: obj?.price?.paper?.qty || 0,
+                unit_price: obj?.price?.paper?.unit_price || 0,
+                price: obj?.price?.paper?.price || 0
+            }))
+            comp.process_info.material.push({
+                process_id: processInfo.mi2_process_id,
+                unit_id: unitId,
+                process_name: `Paper ${paperName} ${paperGram} gsm`.trim(),
+                remark: comp?.paper?.remark,
+                is_apply_all_edition: true,
+                info: {
+                    paper_info: comp.paper_info,
+                    paper_size: comp.paperSize,
+                    ups: comp.paper_usage.ups,
+                    split: comp.paper_usage.line[0]?.split || 1,
+                    sig: comp.paper_usage.sig,
+                    process_name_arr: ['Paper', paperName, `${paperGram} gsm`]
+                },
+                line: this.normalizeLineArray(paperLine, targetLength)
+            })
+        }
     }
 
     addCorrugatedProcess(comp, compIndex, targetLength) {
@@ -209,7 +241,8 @@ class ProcessInfoBuilder {
                 corrugated_layer: comp.corrugated_layer?.info,
                 flute_side: comp.corrugated_layer?.info?.flute_side,
                 cut_off: comp.corrugated_layer?.info?.cut_off,
-                component_type: comp.component_type?.type
+                component_type: comp.component_type?.type,
+                process_name_arr: ['Corrugated Board', layerType ? `ลอน ${layerType}` : '', numLayer ? `${numLayer} ชั้น` : '', grade]
             },
             line: this.normalizeLineArray(corrugatedLine, targetLength)
         })
@@ -218,71 +251,118 @@ class ProcessInfoBuilder {
     addPlateProcess(comp, compIndex, targetLength) {
         if (!comp.paper_usage?.line) return
 
-        // Group by inside/outside
-        const plateData = {
-            inside: [],
-            outside: []
-        }
-
-        comp.paper_usage.line.forEach((obj, qIndex) => {
-            const item = obj?.price
-            if (item.plate?.inside) {
-                plateData.inside.push({
-                    qIndex,
-                    ...item.plate.inside,
-                    f_code: item.f_code
-                })
-            }
-            if (item.plate?.outside) {
-                plateData.outside.push({
-                    qIndex,
-                    ...item.plate.outside,
-                    f_code: item.f_code
-                })
-            }
-        })
-
         const processInfo = this.getPackagingProcessId('plate')
         const unitId = this.getUnitId(processInfo.unit_name)
+        const printType = this.getPrintType()
+        const isMultipleF = this.mainData?.job?.is_multiple_f
+        const f_list = comp?.f_detail?.f_list || []
+        const colorArr = comp?.color || []
 
-        // Add inside plate
-        if (plateData.inside.length > 0) {
-            const fCodes = [...new Set(plateData.inside.map(p => p.f_code).filter(Boolean))]
-            const numColor = plateData.inside[0]?.num_color || 0
+        if (isMultipleF && f_list.length > 0) {
+            // Per f_code per side
+            f_list.forEach((fInfo, fIndex) => {
+                const lineItem = comp.paper_usage.line[fIndex]?.price
+                const fColor = colorArr.find(c => c.f_code === fInfo.f_code) || colorArr[fIndex] || {}
 
-            comp.process_info.plate.push({
-                process_id: processInfo.mi2_process_id,
-                unit_id: unitId,
-                process_name: `Plate ${fCodes.join(', ') || ''} Inside ${numColor} cols ${this.getPrintType()}`.trim(),
-                remark: 'Inside',
-                is_apply_all_edition: fCodes.length === 0,
-                info: {
-                    side: 'inside',
-                    num_color: numColor,
-                    f_code: fCodes
-                },
-                line: this.normalizeLineArray(plateData.inside, targetLength)
+                // Outside
+                if (lineItem?.plate?.outside) {
+                    const numColor = fColor.outside || lineItem.plate.outside.num_color || 0
+                    comp.process_info.plate.push({
+                        process_id: processInfo.mi2_process_id,
+                        unit_id: unitId,
+                        process_name: `Plate ${fInfo.f_code} Outside ${numColor} cols ${printType}`.trim(),
+                        remark: 'Outside',
+                        is_apply_all_edition: false,
+                        info: {
+                            side: 'outside',
+                            num_color: numColor,
+                            f_code: [fInfo.f_code],
+                            process_name_arr: ['Plate', `${fInfo.f_code} Outside`, `${numColor} cols`, printType]
+                        },
+                        line: this.normalizeLineArray([{
+                            ...lineItem.plate.outside,
+                            f_code: [fInfo.f_code]
+                        }], 1)
+                    })
+                }
+
+                // Inside
+                if (lineItem?.plate?.inside) {
+                    const numColor = fColor.inside || lineItem.plate.inside.num_color || 0
+                    comp.process_info.plate.push({
+                        process_id: processInfo.mi2_process_id,
+                        unit_id: unitId,
+                        process_name: `Plate ${fInfo.f_code} Inside ${numColor} cols ${printType}`.trim(),
+                        remark: 'Inside',
+                        is_apply_all_edition: false,
+                        info: {
+                            side: 'inside',
+                            num_color: numColor,
+                            f_code: [fInfo.f_code],
+                            process_name_arr: ['Plate', `${fInfo.f_code} Inside`, `${numColor} cols`, printType]
+                        },
+                        line: this.normalizeLineArray([{
+                            ...lineItem.plate.inside,
+                            f_code: [fInfo.f_code]
+                        }], 1)
+                    })
+                }
             })
-        }
+        } else {
+            // Original: group by inside/outside
+            const plateData = { inside: [], outside: [] }
 
-        // Add outside plate
-        if (plateData.outside.length > 0) {
-            const fCodes = [...new Set(plateData.outside.map(p => p.f_code).filter(Boolean))]
-            const numColor = plateData.outside[0]?.num_color || 0
-
-            comp.process_info.plate.push({
-                process_id: processInfo.mi2_process_id,
-                unit_id: unitId,
-                process_name: `Plate ${fCodes.join(', ') || ''} Outside ${numColor} cols ${this.getPrintType()}`.trim(),
-                remark: 'Outside',
-                is_apply_all_edition: fCodes.length === 0,
-                info: {
-                    side: 'outside',
-                    num_color: numColor,
-                    f_code: fCodes
-                },
-                line: this.normalizeLineArray(plateData.outside, targetLength)
+            comp.paper_usage.line.forEach((obj, qIndex) => {
+                const item = obj?.price
+                if (item.plate?.inside) {
+                    plateData.inside.push({ qIndex, ...item.plate.inside, f_code: item.f_code })
+                }
+                if (item.plate?.outside) {
+                    plateData.outside.push({ qIndex, ...item.plate.outside, f_code: item.f_code })
+                }
             })
+
+            // Add inside plate
+            if (plateData.inside.length > 0) {
+                const fCodes = [...new Set(plateData.inside.map(p => p.f_code).filter(Boolean))]
+                const numColor = plateData.inside[0]?.num_color || 0
+
+                comp.process_info.plate.push({
+                    process_id: processInfo.mi2_process_id,
+                    unit_id: unitId,
+                    process_name: `Plate ${fCodes.join(', ') || ''} Inside ${numColor} cols ${printType}`.trim(),
+                    remark: 'Inside',
+                    is_apply_all_edition: fCodes.length === 0,
+                    info: {
+                        side: 'inside',
+                        num_color: numColor,
+                        f_code: fCodes,
+                        process_name_arr: ['Plate', 'Inside', `${numColor} cols`, printType]
+                    },
+                    line: this.normalizeLineArray(plateData.inside, targetLength)
+                })
+            }
+
+            // Add outside plate
+            if (plateData.outside.length > 0) {
+                const fCodes = [...new Set(plateData.outside.map(p => p.f_code).filter(Boolean))]
+                const numColor = plateData.outside[0]?.num_color || 0
+
+                comp.process_info.plate.push({
+                    process_id: processInfo.mi2_process_id,
+                    unit_id: unitId,
+                    process_name: `Plate ${fCodes.join(', ') || ''} Outside ${numColor} cols ${printType}`.trim(),
+                    remark: 'Outside',
+                    is_apply_all_edition: fCodes.length === 0,
+                    info: {
+                        side: 'outside',
+                        num_color: numColor,
+                        f_code: fCodes,
+                        process_name_arr: ['Plate', 'Outside', `${numColor} cols`, printType]
+                    },
+                    line: this.normalizeLineArray(plateData.outside, targetLength)
+                })
+            }
         }
     }
 
@@ -311,7 +391,9 @@ class ProcessInfoBuilder {
             process_name: 'Proof',
             remark: null,
             is_apply_all_edition: true,
-            info: {},
+            info: {
+                process_name_arr: ['Proof']
+            },
             line: this.normalizeLineArray(proofLine, targetLength)
         })
     }
@@ -319,71 +401,118 @@ class ProcessInfoBuilder {
     addPrintProcess(comp, compIndex, targetLength) {
         if (!comp.paper_usage?.line) return
 
-        const printData = {
-            inside: [],
-            outside: []
-        }
-
-        comp.paper_usage.line.forEach((obj, qIndex) => {
-            const item = obj?.price
-
-            if (item.print?.inside) {
-                printData.inside.push({
-                    qIndex,
-                    ...item.print.inside,
-                    f_code: item.f_code
-                })
-            }
-            if (item.print?.outside) {
-                printData.outside.push({
-                    qIndex,
-                    ...item.print.outside,
-                    f_code: item.f_code
-                })
-            }
-        })
-
         const processInfo = this.getPackagingProcessId('print')
         const unitId = this.getUnitId(processInfo.unit_name)
+        const printType = this.getPrintType()
+        const isMultipleF = this.mainData?.job?.is_multiple_f
+        const f_list = comp?.f_detail?.f_list || []
+        const colorArr = comp?.color || []
 
-        // Add inside print
-        if (printData.inside.length > 0) {
-            const fCodes = [...new Set(printData.inside.map(p => p.f_code).filter(Boolean))]
-            const numColor = printData.inside[0]?.num_color || 0
+        if (isMultipleF && f_list.length > 0) {
+            // Per f_code per side
+            f_list.forEach((fInfo, fIndex) => {
+                const lineItem = comp.paper_usage.line[fIndex]?.price
+                const fColor = colorArr.find(c => c.f_code === fInfo.f_code) || colorArr[fIndex] || {}
 
-            comp.process_info.print.push({
-                process_id: processInfo.mi2_process_id,
-                unit_id: unitId,
-                process_name: `Print ${fCodes.join(', ') || ''} Inside ${numColor} cols ${this.getPrintType()}`.trim(),
-                remark: 'Inside',
-                is_apply_all_edition: fCodes.length === 0,
-                info: {
-                    side: 'inside',
-                    num_color: numColor,
-                    f_code: fCodes
-                },
-                line: this.normalizeLineArray(printData.inside, targetLength)
+                // Outside
+                if (lineItem?.print?.outside) {
+                    const numColor = fColor.outside || lineItem.print.outside.num_color || 0
+                    comp.process_info.print.push({
+                        process_id: processInfo.mi2_process_id,
+                        unit_id: unitId,
+                        process_name: `Print ${fInfo.f_code} Outside ${numColor} cols ${printType}`.trim(),
+                        remark: 'Outside',
+                        is_apply_all_edition: false,
+                        info: {
+                            side: 'outside',
+                            num_color: numColor,
+                            f_code: [fInfo.f_code],
+                            process_name_arr: ['Print', `${fInfo.f_code} Outside`, `${numColor} cols`, printType]
+                        },
+                        line: this.normalizeLineArray([{
+                            ...lineItem.print.outside,
+                            f_code: [fInfo.f_code]
+                        }], 1)
+                    })
+                }
+
+                // Inside
+                if (lineItem?.print?.inside) {
+                    const numColor = fColor.inside || lineItem.print.inside.num_color || 0
+                    comp.process_info.print.push({
+                        process_id: processInfo.mi2_process_id,
+                        unit_id: unitId,
+                        process_name: `Print ${fInfo.f_code} Inside ${numColor} cols ${printType}`.trim(),
+                        remark: 'Inside',
+                        is_apply_all_edition: false,
+                        info: {
+                            side: 'inside',
+                            num_color: numColor,
+                            f_code: [fInfo.f_code],
+                            process_name_arr: ['Print', `${fInfo.f_code} Inside`, `${numColor} cols`, printType]
+                        },
+                        line: this.normalizeLineArray([{
+                            ...lineItem.print.inside,
+                            f_code: [fInfo.f_code]
+                        }], 1)
+                    })
+                }
             })
-        }
+        } else {
+            // Original: group by inside/outside
+            const printData = { inside: [], outside: [] }
 
-        // Add outside print
-        if (printData.outside.length > 0) {
-            const fCodes = [...new Set(printData.outside.map(p => p.f_code).filter(Boolean))]
-            const numColor = printData.outside[0]?.num_color || 0
-
-            comp.process_info.print.push({
-                process_id: processInfo.mi2_process_id,
-                unit_id: unitId,
-                process_name: `Print ${fCodes.join(', ') || ''} Outside ${numColor} cols ${this.getPrintType()}`.trim(),
-                remark: 'Outside',
-                is_apply_all_edition: fCodes.length === 0,
-                info: {
-                    side: 'outside',
-                    num_color: numColor,
-                    f_code: fCodes
-                },
-                line: this.normalizeLineArray(printData.outside, targetLength)
+            comp.paper_usage.line.forEach((obj, qIndex) => {
+                const item = obj?.price
+                if (item.print?.inside) {
+                    printData.inside.push({ qIndex, ...item.print.inside, f_code: item.f_code })
+                }
+                if (item.print?.outside) {
+                    printData.outside.push({ qIndex, ...item.print.outside, f_code: item.f_code })
+                }
             })
+
+            // Add inside print
+            if (printData.inside.length > 0) {
+                const fCodes = [...new Set(printData.inside.map(p => p.f_code).filter(Boolean))]
+                const numColor = printData.inside[0]?.num_color || 0
+
+                comp.process_info.print.push({
+                    process_id: processInfo.mi2_process_id,
+                    unit_id: unitId,
+                    process_name: `Print ${fCodes.join(', ') || ''} Inside ${numColor} cols ${printType}`.trim(),
+                    remark: 'Inside',
+                    is_apply_all_edition: fCodes.length === 0,
+                    info: {
+                        side: 'inside',
+                        num_color: numColor,
+                        f_code: fCodes,
+                        process_name_arr: ['Print', 'Inside', `${numColor} cols`, printType]
+                    },
+                    line: this.normalizeLineArray(printData.inside, targetLength)
+                })
+            }
+
+            // Add outside print
+            if (printData.outside.length > 0) {
+                const fCodes = [...new Set(printData.outside.map(p => p.f_code).filter(Boolean))]
+                const numColor = printData.outside[0]?.num_color || 0
+
+                comp.process_info.print.push({
+                    process_id: processInfo.mi2_process_id,
+                    unit_id: unitId,
+                    process_name: `Print ${fCodes.join(', ') || ''} Outside ${numColor} cols ${printType}`.trim(),
+                    remark: 'Outside',
+                    is_apply_all_edition: fCodes.length === 0,
+                    info: {
+                        side: 'outside',
+                        num_color: numColor,
+                        f_code: fCodes,
+                        process_name_arr: ['Print', 'Outside', `${numColor} cols`, printType]
+                    },
+                    line: this.normalizeLineArray(printData.outside, targetLength)
+                })
+            }
         }
     }
 
@@ -412,7 +541,8 @@ class ProcessInfoBuilder {
                 info: {
                     ...info,
                     width,
-                    length
+                    length,
+                    process_name_arr: [info?.name !== 'Other' ? (info?.name || '') : '', info?.code || '', info?.side ? `${info.side} s` : '', sizeText, materialType, number]
                 },
                 line: this.normalizeLineArray(addon.line, targetLength)
             })
@@ -446,7 +576,8 @@ class ProcessInfoBuilder {
                 is_apply_all_edition: fCodes.length === 0,
                 info: {
                     f_code: fCodes,
-                    sizes: [info?.width && info?.length ? [info.width, info.length] : []]
+                    sizes: [info?.width && info?.length ? [info.width, info.length] : []],
+                    process_name_arr: ['Foil Stamp']
                 },
                 line: this.normalizeLineArray(laborLine, targetLength)
             })
@@ -470,7 +601,8 @@ class ProcessInfoBuilder {
                 info: {
                     f_code: fCodes,
                     foil_code: info?.foil_code,
-                    foil_length: info?.foil_length
+                    foil_length: info?.foil_length,
+                    process_name_arr: [`Foil หน้าม้วน ${info?.foil_width || 0}" ความยาว ${info?.foil_length || 0} ft`]
                 },
                 line: this.normalizeLineArray(rollLine, targetLength)
             })
@@ -496,7 +628,8 @@ class ProcessInfoBuilder {
                 is_apply_all_edition: fCodes.length === 0,
                 info: {
                     f_code: fCodes,
-                    size: [width, length]
+                    size: [width, length],
+                    process_name_arr: ['Block Foil Stamp', fCodes.join(', ') || 'All', `Area (in²) : ${width} x ${length}`]
                 },
                 line: this.normalizeLineArray(blockLine, targetLength)
             })
@@ -533,7 +666,8 @@ class ProcessInfoBuilder {
                     remark: 'Labor',
                     is_apply_all_edition: fCodes.length === 0,
                     info: {
-                        f_code: fCodes
+                        f_code: fCodes,
+                        process_name_arr: [isEmboss ? 'Emboss' : 'Deboss']
                     },
                     line: this.normalizeLineArray(laborLine, targetLength)
                 })
@@ -555,7 +689,8 @@ class ProcessInfoBuilder {
                         is_apply_all_edition: fCodes.length === 0,
                         info: {
                             f_code: fCodes,
-                            size: [width, length]
+                            size: [width, length],
+                            process_name_arr: [`Block ${isEmboss ? 'Emboss' : 'Deboss'}`, `Area (in²) : ${width} x ${length}`]
                         },
                         line: this.normalizeLineArray(blockItem.line, targetLength)
                     })
@@ -582,7 +717,8 @@ class ProcessInfoBuilder {
                     is_apply_all_edition: false,
                     info: {
                         ...speInk.info,
-                        f_code: colorInfo.f_code ? [colorInfo.f_code] : []
+                        f_code: colorInfo.f_code ? [colorInfo.f_code] : [],
+                        process_name_arr: [`${speInk.info?.name || 'Special Ink'} ${speInk?.name} : ${speInk?.info?.ink_name || '-'}`]
                     },
                     line: this.normalizeLineArray(speInk.line, targetLength)
                 })
@@ -605,7 +741,10 @@ class ProcessInfoBuilder {
                 process_name: `Assembly (ประกบ/ติดลิ้นกาว) ${comp?.box_type?.glued_spot || '-'} จุด`.trim(),
                 remark: proc.info?.description || null,
                 is_apply_all_edition: true,
-                info: proc.info || {},
+                info: {
+                    ...(proc.info || {}),
+                    process_name_arr: [`Assembly (ประกบ/ติดลิ้นกาว) ${comp?.box_type?.glued_spot || '-'} จุด`]
+                },
                 line: this.normalizeLineArray(proc.line, targetLength)
             })
         })
@@ -635,7 +774,8 @@ class ProcessInfoBuilder {
                 remark: 'Labor',
                 is_apply_all_edition: true,
                 info: {
-                    is_reprint: isReprint
+                    is_reprint: isReprint,
+                    process_name_arr: ['Diecut', isReprint ? '(Reprint)' : ''].filter(Boolean)
                 },
                 line: this.normalizeLineArray(laborLine, targetLength)
             })
@@ -656,7 +796,8 @@ class ProcessInfoBuilder {
                 remark: 'Block',
                 is_apply_all_edition: true,
                 info: {
-                    is_reprint: isReprint
+                    is_reprint: isReprint,
+                    process_name_arr: ['Block Diecut', isReprint ? '(Reprint)' : ''].filter(Boolean)
                 },
                 line: this.normalizeLineArray(blockLine, targetLength)
             })
@@ -678,7 +819,9 @@ class ProcessInfoBuilder {
                 process_name: 'Digital Diecut',
                 remark: null,
                 is_apply_all_edition: true,
-                info: {},
+                info: {
+                    process_name_arr: ['Digital Diecut']
+                },
                 line: this.normalizeLineArray(proc.line, targetLength)
             })
         })
@@ -699,7 +842,9 @@ class ProcessInfoBuilder {
                 process_name: 'ทากาวประกบลูกฟูกกับกระดาษ',
                 remark: null,
                 is_apply_all_edition: true,
-                info: {},
+                info: {
+                    process_name_arr: ['ทากาวประกบลูกฟูกกับกระดาษ']
+                },
                 line: this.normalizeLineArray(proc.line, targetLength)
             })
         })
@@ -720,7 +865,10 @@ class ProcessInfoBuilder {
                 process_name: proc.info?.name || 'แกะ',
                 remark: null,
                 is_apply_all_edition: true,
-                info: proc.info || {},
+                info: {
+                    ...(proc.info || {}),
+                    process_name_arr: [proc.info?.name || 'แกะ']
+                },
                 line: this.normalizeLineArray(proc.line, targetLength)
             })
         })
@@ -741,7 +889,10 @@ class ProcessInfoBuilder {
                 process_name: proc.info?.name || 'Inspection',
                 remark: null,
                 is_apply_all_edition: true,
-                info: proc.info || {},
+                info: {
+                    ...(proc.info || {}),
+                    process_name_arr: [proc.info?.name || 'Inspection']
+                },
                 line: this.normalizeLineArray(proc.line, targetLength)
             })
         })
@@ -762,7 +913,10 @@ class ProcessInfoBuilder {
                 process_name: proc.info?.name || 'Shrinkwrap',
                 remark: null,
                 is_apply_all_edition: true,
-                info: proc.info || {},
+                info: {
+                    ...(proc.info || {}),
+                    process_name_arr: [proc.info?.name || 'Shrinkwrap']
+                },
                 line: this.normalizeLineArray(proc.line, targetLength)
             })
         })
@@ -783,7 +937,10 @@ class ProcessInfoBuilder {
                 process_name: proc.info?.name || 'Bag',
                 remark: null,
                 is_apply_all_edition: true,
-                info: proc.info || {},
+                info: {
+                    ...(proc.info || {}),
+                    process_name_arr: [proc.info?.name || 'Bag']
+                },
                 line: this.normalizeLineArray(proc.line, targetLength)
             })
         })
@@ -804,7 +961,10 @@ class ProcessInfoBuilder {
                 process_name: proc.info?.name || 'Trim',
                 remark: null,
                 is_apply_all_edition: true,
-                info: proc.info || {},
+                info: {
+                    ...(proc.info || {}),
+                    process_name_arr: [proc.info?.name || 'Trim']
+                },
                 line: this.normalizeLineArray(proc.line, targetLength)
             })
         })
@@ -815,10 +975,13 @@ class ProcessInfoBuilder {
 
         const isDiffPacking = getIsDifferentPacking()
         const isMultipleF = getIsMultipleF()
+        const f_list = comp?.f_detail?.f_list || []
         const fIndexesToProcess = isDiffPacking && isMultipleF ? comp.packing.length : 1
 
         for (let fIndex = 0; fIndex < fIndexesToProcess; fIndex++) {
             if (!comp.packing[fIndex]) continue
+
+            const fCode = (isMultipleF && f_list[fIndex]) ? f_list[fIndex].f_code : ''
 
             comp.packing[fIndex].forEach(packItem => {
                 let processInfo, unitId, processName
@@ -848,6 +1011,18 @@ class ProcessInfoBuilder {
                         return
                 }
 
+                // Build process_name_arr based on packing type
+                const packInfo = packItem.info || {}
+                let processNameArr = [processName]
+                if (fCode) processNameArr.push(fCode)
+                if (packItem.name === 'kraftwrap' && packInfo.qty_per_pack) {
+                    processNameArr.push(`${packInfo.qty_per_pack} Cps/pack`)
+                } else if (packItem.name === 'paperband' && packInfo.qty_per_paperband) {
+                    processNameArr.push(`${packInfo.qty_per_paperband} Cps/band`)
+                } else if (packItem.name === 'carton' && packInfo.qty_per_carton) {
+                    processNameArr.push(`${packInfo.qty_per_carton} Cps/carton`)
+                }
+
                 comp.process_info.packing.push({
                     process_id: processInfo.mi2_process_id,
                     unit_id: unitId,
@@ -855,8 +1030,9 @@ class ProcessInfoBuilder {
                     remark: null,
                     is_apply_all_edition: true,
                     info: {
-                        ...packItem.info,
-                        fIndex
+                        ...packInfo,
+                        fIndex,
+                        process_name_arr: processNameArr
                     },
                     line: this.normalizeLineArray(packItem.line, targetLength)
                 })
@@ -877,7 +1053,10 @@ class ProcessInfoBuilder {
                 process_name: proc.name || 'Material',
                 remark: null,
                 is_apply_all_edition: true,
-                info: proc.info || {},
+                info: {
+                    ...(proc.info || {}),
+                    process_name_arr: ['Material', proc.name || 'Material']
+                },
                 line: this.normalizeLineArray(proc.line, targetLength)
             })
         })
@@ -898,7 +1077,10 @@ class ProcessInfoBuilder {
                 process_name: proc.info?.name || 'Component Material',
                 remark: null,
                 is_apply_all_edition: true,
-                info: proc.info || {},
+                info: {
+                    ...(proc.info || {}),
+                    process_name_arr: ['Material', proc.info?.name || 'Component Material']
+                },
                 line: this.normalizeLineArray(proc.line, targetLength)
             })
         })
@@ -933,7 +1115,10 @@ class ProcessInfoBuilder {
                 process_name: proc.info?.name || proc.name || proc.type,
                 remark: null,
                 is_apply_all_edition: proc.info?.is_fixedPrice || false,
-                info: proc.info || {},
+                info: {
+                    ...(proc.info || {}),
+                    process_name_arr: [proc.info?.name || proc.name || proc.type]
+                },
                 line: this.normalizeLineArray(proc.line, targetLength)
             })
         })
@@ -964,7 +1149,10 @@ class ProcessInfoBuilder {
                 process_name: other.info?.name || 'Other Cost',
                 remark: null,
                 is_apply_all_edition: other.info?.is_fixedPrice || false,
-                info: other.info || {},
+                info: {
+                    ...(other.info || {}),
+                    process_name_arr: [other.info?.name || 'Other Cost']
+                },
                 line: this.normalizeLineArray(other.line, targetLength)
             })
         })
