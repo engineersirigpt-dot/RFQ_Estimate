@@ -793,11 +793,6 @@ const calculateCorrugatedBoardSize = (size, laying, flute_side, is_manual_size) 
 		} else {
 			corrugatedSize = [roundToEven(size[0]), roundDecimal(size[1])]
 		}
-		// if (laying === 'vertical') {
-		// 	corrugatedSize = [roundToEven(size[0]), roundDecimal(size[1])]
-		// } else {
-		// 	corrugatedSize = [roundDecimal(size[0]), roundToEven(size[1])]
-		// }
 	}
 
 	if (is_manual_size) {

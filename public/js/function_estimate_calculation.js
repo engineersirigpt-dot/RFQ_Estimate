@@ -3273,15 +3273,13 @@ class Estimate {
 	}
 
 	setCalculateWSide(w_case, n, w, l, d, b, dust, ol, g, t) {
-		console.log("setCalculateWSide", w_case, n, w, l, d, b, dust, ol, g, t)
+
 		switch (w_case) {
 			case 1.1: //* dust<=(w+t)/2
 				var side = (n + 1) * (w + t) + n * (2 * b + d)
-				console.log("formula : ", ` side = (${n} + 1) * (${w} + ${t}) + ${n} * (2 * ${b} + ${d})`)
 				break
 			case 1.2: //* dust>(w+t)/2
 				var side = 2 * (w + t) + n * (2 * b + d) + (n - 1) * (2 * dust)
-				console.log("formula : ", ` side = 2 * (${w} + ${t}) + ${n} * (2 * ${b} + ${d}) + (${n} - 1) * (2 * ${dust})`)
 				break
 			case 2.1: //* align: straight
 				var side = 2 * (w + t) + n * (2 * b + d) + (n - 1) * (dust + w + t)
@@ -3339,7 +3337,7 @@ class Estimate {
 	}
 
 	setCalculateLSide(l_case, n, w, l, d, b, dust, ol, g) {
-		//! recheck ว่ารับ parameter ครบมั้ย
+
 		switch (l_case) {
 			case 1.0:
 				var side = n * (2 * (w + l + b) + g)
@@ -6578,38 +6576,48 @@ class Estimate {
 		const {
 			material_price_marking = 0
 		} = defaultData || {}
+
+		const _self = this
+
 		const isMultipleF = getIsMultipleF()
 		//* calculate cost for materials
 		this.mainData.material.forEach((item) => {
 			let unit_price = item.info.unit_price
-			unit_price = parseFloat((unit_price * (1 + (material_price_marking / 100))).toFixed(4))
+
+			const is_markup = unit_price > 0
 
 			item.line = []
 
 			this.mainData.qty.totalqty.forEach((_, index1) => {
 
 				if (item.info.is_fixedPrice) {
+					const proc_qty = item.info.qty_material
+
 					item.line.push({
-						qty: item.info.qty_material,
+						qty: proc_qty,
 						unit_price: unit_price,
-						price: parseFloat((item.info.qty_material * unit_price).toFixed(2))
+						price: _self._calculateTotalPriceMarkup(proc_qty, unit_price, material_price_marking, is_markup)
 					})
 				} else {
 					if (isMultipleF) {
 						this.mainData.component1?.forEach((comp, compIndex) => {
 							comp?.f_detail?.f_list?.forEach((fInfo, fIndex) => {
+								const proc_qty = item.info.qty_material[fIndex]
+
 								item.line.push({
 									qty: item.info.qty_material[fIndex], //qty_material number from input qty.
 									unit_price: unit_price,
-									price: parseFloat((item.info.qty_material[fIndex] * unit_price).toFixed(2))
+									price: _self._calculateTotalPriceMarkup(proc_qty, unit_price, material_price_marking, is_markup)
 								})
 							})
 						})
 					} else {
+						const proc_qty = item.info.qty_material[index1]
+
 						item.line.push({
 							qty: item.info.qty_material[index1], //qty_material number from input qty.
 							unit_price: unit_price,
-							price: parseFloat((item.info.qty_material[index1] * unit_price).toFixed(2))
+							price: _self._calculateTotalPriceMarkup(proc_qty, unit_price, material_price_marking, is_markup)
 						})
 					}
 				}
@@ -6679,10 +6687,22 @@ class Estimate {
 		})
 	}
 
+	_calculateTotalPriceMarkup(qty, unit_price, markup_percentage, is_markup = false) {
+		let price = parseFloat((qty * unit_price).toFixed(2))
+
+		if (is_markup) {
+			price = parseFloat((price * (1 + (markup_percentage / 100))).toFixed(2))
+		}
+
+		return price
+	}
+
 	setCalculateOtherCostCost() {
 		const {
 			outsouce_price_marking = 0
 		} = defaultData || {}
+
+		const _self = this
 
 		const isMultipleF = getIsMultipleF()
 		//* calculate cost for other cost
@@ -6691,32 +6711,38 @@ class Estimate {
 			this.mainData.qty.totalqty.forEach((_, index1) => {
 				let unit_price = parseFloat((item.info.unit_price).toFixed(2))
 
-				if (item.info.unit_price > 0) {
-					unit_price = parseFloat((unit_price * (1 + (outsouce_price_marking / 100))).toFixed(4))
-				}
+				const is_markup = unit_price > 0
 
 				if (item.info.is_fixedPrice) {
+
+					const proc_qty = item.info.qty_other
+
 					item.line.push({
-						qty: item.info.qty_other,
+						qty: proc_qty,
 						unit_price: unit_price,
-						price: parseFloat((item.info.qty_other * unit_price).toFixed(2))
+						price: _self._calculateTotalPriceMarkup(proc_qty, unit_price, outsouce_price_marking, is_markup)
 					})
 				} else {
 					if (isMultipleF) {
 						this.mainData.component1?.forEach((comp, compIndex) => {
 							comp?.f_detail?.f_list?.forEach((fInfo, fIndex) => {
+
+								const proc_qty = item.info.qty_other[fIndex]
+
 								item.line.push({
-									qty: item.info.qty_other[fIndex],
+									qty: proc_qty,
 									unit_price: unit_price,
-									price: parseFloat((item.info.qty_other[fIndex] * unit_price).toFixed(2))
+									price: _self._calculateTotalPriceMarkup(proc_qty, unit_price, outsouce_price_marking, is_markup)
 								})
 							})
 						})
 					} else {
+						const proc_qty = item.info.qty_other[index1]
+
 						item.line.push({
-							qty: item.info.qty_other[index1],
+							qty: proc_qty,
 							unit_price: unit_price,
-							price: parseFloat((item.info.qty_other[index1] * unit_price).toFixed(2))
+							price: _self._calculateTotalPriceMarkup(proc_qty, unit_price, outsouce_price_marking, is_markup)
 						})
 					}
 
@@ -7911,14 +7937,15 @@ class Estimate {
 	}
 
 	setCalculateTax() {
+		// * คำนวณ Profit Sharing ก่อน Tax
+		this.setCalculateProfitSharingTotalPrice()
+
 		this.mainData.totalprice.forEach((item) => {
-			const total_with_price_diff = item?.total_with_price_diff || 0
-			item.tax = parseFloat((total_with_price_diff * this.mainData.tax / 100).toFixed(2))
-			item.final_price = parseFloat((total_with_price_diff + item.tax).toFixed(2))
+			const total_with_ps = item?.total_with_ps || item?.total_with_price_diff || 0
+			item.tax = parseFloat((total_with_ps * this.mainData.tax / 100).toFixed(2))
+			item.final_price = parseFloat((total_with_ps + item.tax).toFixed(2))
 		})
 
-		// * cancel 21.09.23 ยกเลิกการคิด profit sharing จากยอดรวม
-		this.setCalculateProfitSharingTotalPrice()
 		this.setCalculateUnitPrice()
 		this.setCalculateUnitPriceExchangeRate(this.mainData?.exchange_rate || 1)
 		setDefaultLoss()
@@ -7936,14 +7963,18 @@ class Estimate {
 			}
 		} = defaultData || {}
 
-		if (is_cancel_total_profit_sharing) {
-			return false
-		}
-
 		this.mainData.totalprice.forEach((item) => {
-			const profit_sharing = Math.max(min, (item.final_price * (percent / 100)))
+			const total_with_price_diff = item?.total_with_price_diff || 0
+
+			if (is_cancel_total_profit_sharing) {
+				item.profit_sharing = 0
+				item.total_with_ps = total_with_price_diff
+				return
+			}
+
+			const profit_sharing = Math.max(min, (total_with_price_diff * (percent / 100)))
 			item.profit_sharing = parseFloat((profit_sharing).toFixed(2))
-			item.final_price = item.final_price + item.profit_sharing
+			item.total_with_ps = parseFloat((total_with_price_diff + item.profit_sharing).toFixed(2))
 		})
 	}
 

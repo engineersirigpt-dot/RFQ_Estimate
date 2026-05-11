@@ -251,8 +251,9 @@ function PrepareSummaryData(data, startIndex, lastIndex) {
   addSummaryContent(getRowTotal(data, "Gift", startIndex, lastIndex))
   addSummaryContent(getRowTotal(data, "CustomerPriceDiff", startIndex, lastIndex))
   addSummaryContent(getRowTotal(data, "DiffPrice", startIndex, lastIndex))
-  addSummaryContent(getRowTotal(data, "Tax", startIndex, lastIndex))
   !is_cancel_total_profit_sharing && addSummaryContent(getRowTotal(data, "ProfitSharing", startIndex, lastIndex))
+  !is_cancel_total_profit_sharing && addSummaryContent(getRowTotal(data, "TotalWithPS", startIndex, lastIndex))
+  addSummaryContent(getRowTotal(data, "Tax", startIndex, lastIndex))
   addSummaryContent(getRowTotal(data, "FinalPrice", startIndex, lastIndex))
   addSummaryContent(getRowTotal(data, "UnitPrice", startIndex, lastIndex))
   addSummaryContent(getRowTotal(data, "UnitPriceExchange", startIndex, lastIndex))
@@ -3743,6 +3744,13 @@ function getRowTotal(data = {}, tb_total_row, startIndex, lastIndex) {
       case "ProfitSharing":
         totalPrice = item?.profit_sharing || 0;
         totalLabel = "Profit Sharing";
+        align1 = "center";
+        align2 = "center";
+        align3 = "";
+        break;
+      case "TotalWithPS":
+        totalPrice = item?.total_with_ps || 0;
+        totalLabel = "Subtotal Price + ค่าของขวัญลูกค้า + ส่วนต่างลูกค้า + Profit Sharing";
         align1 = "center";
         align2 = "center";
         align3 = "";

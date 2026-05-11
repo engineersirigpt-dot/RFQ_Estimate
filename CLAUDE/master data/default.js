@@ -518,7 +518,7 @@ const defaultData = {
 		carton_printing_price: 3, // THB/carton
 		markup_price: 15, // update 26.01.24 เพิ่ม 5 + 10 บาท / กล่องไปตอนท้าย
 		limit_carton_weight: 15,//kg
-		corrugated_marking: 10, //* Percent
+		corrugated_marking: 10, //* Percent ไม่ได้ใช้ --> เปลี่ยนไปใช้ material markup
 	},
 	delivery_rate: 1500, //THB/ton
 	component_type: [

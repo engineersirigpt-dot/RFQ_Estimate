@@ -89,7 +89,7 @@ function storeJob() {
         is_request_approve,
         approve_status,
         is_profit_sharing,
-        is_cancel_total_profit_sharing: true,
+        is_cancel_total_profit_sharing: !is_profit_sharing,
         credit_term_id,
         credit_term_name,
     })
@@ -2670,8 +2670,9 @@ function changeTaxEvent() {
     storeExchangeRate()
     est.setCalculateTax()
     $('body #summary .totalTax').each(function (index) {
-        $('body #summary .totalTax:eq(' + index + ')').text(numeral(est.mainData.totalprice[index].tax).format('0,0.00'))
         $('body #summary .totalProfitSharing:eq(' + index + ')').text(numeral(est.mainData.totalprice[index]?.profit_sharing || 0).format('0,0.00'))
+        $('body #summary .totalTotalWithPS:eq(' + index + ')').text(numeral(est.mainData.totalprice[index]?.total_with_ps || 0).format('0,0.00'))
+        $('body #summary .totalTax:eq(' + index + ')').text(numeral(est.mainData.totalprice[index].tax).format('0,0.00'))
         $('body #summary .totalFinalPrice:eq(' + index + ')').text(numeral(est.mainData.totalprice[index].final_price).format('0,0.00'))
         $('body #summary .totalUnitPrice:eq(' + index + ')').text(numeral(est.mainData.totalprice[index].unit_price).format('0,0.00'))
         $('body #summary .totalUnitPriceExchange:eq(' + index + ')').text(numeral(est.mainData.totalprice[index]?.unit_price_exchange || est.mainData.totalprice[index].unit_price).format('0,0.0000'))
@@ -2717,10 +2718,11 @@ function changeMarkingEvent(index1) {
 
     $(`body #summary .totalPrice[indexqty=${index1}]`).text(numeral(item.total_price).format('0,0.00'))
     $(`body #summary .totalDiffPrice[indexqty=${index1}]`).text(numeral(item.total_with_price_diff).format('0,0.00'))
+    $(`body #summary .totalProfitSharing[indexqty=${index1}]`).text(numeral(item?.profit_sharing || 0).format('0,0.00'))
+    $(`body #summary .totalTotalWithPS[indexqty=${index1}]`).text(numeral(item?.total_with_ps || 0).format('0,0.00'))
     $(`body #summary .totalTax[indexqty=${index1}]`).text(numeral(item.tax).format('0,0.00'))
     $(`body #summary .totalFinalPrice[indexqty=${index1}]`).text(numeral(item.final_price).format('0,0.00'))
     $(`body #summary .totalUnitPrice[indexqty=${index1}]`).text(numeral(item.unit_price).format('0,0.00'))
-    $(`body #summary .totalProfitSharing[indexqty=${index1}]`).text(numeral(item?.profit_sharing).format('0,0.00'))
     $(`body #summary .totalUnitPriceExchange[indexqty=${index1}]`).text(numeral(item?.unit_price_exchange || item.unit_price).format('0,0.0000'))
 
     setDefaultLoss()
@@ -7004,8 +7006,9 @@ function summary(is_forDisplay) {
         summary_total_tr('Gift'),
         summary_total_tr('CustomerPriceDiff'),
         summary_total_tr('DiffPrice'),
-        summary_total_tr('Tax'),
         is_cancel_total_profit_sharing ? '' : summary_total_tr('ProfitSharing'),
+        is_cancel_total_profit_sharing ? '' : summary_total_tr('TotalWithPS'),
+        summary_total_tr('Tax'),
         summary_total_tr('FinalPrice'),
         summary_total_tr('UnitPrice'),
         summary_total_tr('UnitPriceExchange'),
@@ -7952,6 +7955,8 @@ function summary_tr_for_f(tb_row, sub_proc) {
 
     const printType = mainData.job.print_type
 
+    const { material_price_marking = 0 } = defaultData || {}
+
     switch (tb_row) {
         case 'paper':
             var paperColumn_arr = [],
@@ -8562,13 +8567,13 @@ function summary_tr_for_f(tb_row, sub_proc) {
                     //* check min price
                     foilstampSize.forEach((size, sizeIndex) => {
                         const { line, info: { foil_roll_min_price = 0 } } = size
+
+                        let roll_min_price = parseFloat((foil_roll_min_price * (1 + (material_price_marking / 100))).toFixed(2))
+
                         line.forEach((qtyDetail, qtyIndex) => {
-                            summary.foilRoll[qtyIndex].price = summary.foilRoll[qtyIndex].price < foil_roll_min_price ? foil_roll_min_price : summary.foilRoll[qtyIndex].price
+                            summary.foilRoll[qtyIndex].price = summary.foilRoll[qtyIndex].price < foil_roll_min_price ? roll_min_price : summary.foilRoll[qtyIndex].price
                         })
                     })
-
-
-
 
                     let foilRollColumn = "",
                         foilStampColumn = ""
@@ -9743,6 +9748,13 @@ function summary_total_tr(tb_total_row) {
                 align_class1 = "alCenter"
                 align_class2 = "alCenter"
                 break
+            case 'TotalWithPS':
+                total_price = item?.total_with_ps || 0
+                total_label = 'Subtotal Price + ค่าของขวัญลูกค้า + ส่วนต่างลูกค้า + Profit Sharing'
+                align_class1 = "alCenter"
+                align_class2 = "alCenter"
+                align_class3 = ""
+                break
             case 'UnitPrice':
                 total_price = item.unit_price
                 total_label = 'Unit Price/cps'
@@ -10063,6 +10075,7 @@ function summary_after_packing() {
         $('#summary .totalDiffPrice[indexqty=' + index + ']').text(numeral(item?.total_with_price_diff || 0).format('0,0.00'))
         $('#summary .totalTax[indexqty=' + index + ']').text(numeral(item.tax).format('0,0.00'))
         $('#summary .totalProfitSharing[indexqty=' + index + ']').text(numeral(item?.profit_sharing || 0).format('0,0.00'))
+        $('#summary .totalTotalWithPS[indexqty=' + index + ']').text(numeral(item?.total_with_ps || 0).format('0,0.00'))
         $('#summary .totalFinalPrice[indexqty=' + index + ']').text(numeral(item.final_price).format('0,0.00'))
         $('#summary .totalUnitPrice[indexqty=' + index + ']').text(numeral(item.unit_price).format('0,0.00'))
         $('#summary .totalUnitPriceExchange[indexqty=' + index + ']').text(numeral(item?.unit_price_exchange || item?.unit_price).format('0,0.0000'))

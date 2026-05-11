@@ -526,6 +526,7 @@ $(function () {
         }
         if (storeDeliveryData()) {
             if ($('#tax input').val() != "") {
+                storeJob()
                 storeTax()
                 storeExchangeRate()
                 storePriceDifference()
@@ -1349,6 +1350,13 @@ $(function () {
         const authData = localStorage.getItem('data') || {}
 
         const { is_super_admin = false } = JSON.parse(authData) || {}
+
+        // * ป้องกัน Mark Down เมื่อเลือก Profit Sharing
+        if (getIsProfitSharing() && value < 0) {
+            snackAlert('ไม่สามารถ Mark Down ได้ เนื่องจากเป็นงาน Profit Sharing', 'warning', 5000)
+            $(thisInput).val(0)
+            return false
+        }
 
         console.log("markup/down", isRequestCustomerCommission && value < 0 && !is_super_admin, isRequestCustomerCommission, value, !is_super_admin)
         if (isRequestCustomerCommission && value < 0 && !is_super_admin) {
