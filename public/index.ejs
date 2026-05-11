@@ -5,7 +5,9 @@
     <%- include('header') -%>
     <link rel="icon" href="./img/estimate.png" type="image/png" sizes="16x16" />
     <link rel="stylesheet" href="./css/style.css" />
+    <link rel="stylesheet" href="./css/style_ai.css" />
     <script src="./js/function_index.js"></script>
+    <script src="./js/function_ai_rfq.js"></script>
   </head>
   <body>
     <div class="export-loading">
@@ -61,6 +63,39 @@
     <div id="frame">
       <div id="newRFQ">
         <button>Add New RFQ</button>
+        <button id="newRFQ-ai" type="button"><i class="fa fa-magic" style="margin-right:6px"></i>Add New RFQ with AI</button>
+      </div>
+      <div id="ai-rfq-modal" class="ai-modal" style="display:none">
+        <div class="ai-modal-content">
+          <div class="ai-modal-header">
+            <span><i class="fa fa-magic"></i> สร้าง RFQ ด้วย AI</span>
+            <span id="ai-modal-close" class="ai-modal-close">&times;</span>
+          </div>
+          <div class="ai-modal-body">
+            <p style="margin:0 0 8px 0;color:#555;font-size:13px">วาง spec จากลูกค้า หรืออัพโหลดไฟล์ PDF / รูป / Word / Excel — AI จะอ่านแล้วเติมข้อมูลในฟอร์ม RFQ ให้อัตโนมัติ</p>
+            <label style="display:block;font-weight:bold;margin-top:8px">วางข้อความ (ถ้ามี)</label>
+            <textarea id="ai-rfq-text" placeholder="เช่น Customer ABC, จำนวน 10,000 ใบ, Box ขนาด 80x100x60 mm, กระดาษอาร์ตการ์ด 350 gsm, พิมพ์ 4+0, เคลือบเงา..." rows="6"></textarea>
+
+            <label style="display:block;font-weight:bold;margin-top:12px">แนบไฟล์ (เลือกได้หลายไฟล์)</label>
+            <div id="ai-drop-zone" class="ai-drop-zone">
+              <i class="fa fa-cloud-upload" style="font-size:32px;color:#888"></i>
+              <div>ลากไฟล์มาที่นี่ หรือ <span id="ai-pick-files" style="color:#1a73e8;text-decoration:underline;cursor:pointer">เลือกไฟล์</span></div>
+              <div style="font-size:11px;color:#999;margin-top:4px">รองรับ: PDF, JPG, PNG, DOCX, XLSX, CSV, TXT (สูงสุด 25MB/ไฟล์)</div>
+              <input id="ai-rfq-files" type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.docx,.xlsx,.xls,.csv,.txt,.md" style="display:none">
+            </div>
+            <ul id="ai-file-list" class="ai-file-list"></ul>
+
+            <div id="ai-error" class="ai-error" style="display:none"></div>
+          </div>
+          <div class="ai-modal-footer">
+            <button id="ai-submit-btn" type="button"><i class="fa fa-paper-plane"></i> ส่งให้ AI วิเคราะห์</button>
+            <button id="ai-cancel-btn" type="button">ยกเลิก</button>
+          </div>
+          <div id="ai-loading" class="ai-loading" style="display:none">
+            <i class="fa fa-spinner fa-pulse" style="font-size:36px"></i>
+            <div style="margin-top:8px">กำลังวิเคราะห์ spec... อาจใช้เวลาสักครู่</div>
+          </div>
+        </div>
       </div>
       <div id="search" class="relative">
         <table>

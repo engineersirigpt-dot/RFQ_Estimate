@@ -39,7 +39,7 @@ $(function () {
         //$.unblockUI();
     })
 
-    $('body').on('click', ('#newRFQ button'), function () {
+    $('body').on('click', ('#newRFQ button:not(#newRFQ-ai)'), function () {
         window.location = '/estimate'
     })
 

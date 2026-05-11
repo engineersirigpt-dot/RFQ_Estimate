@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require('express')
 const app = express();
 const path = require('path')
@@ -8,6 +9,7 @@ const config = require('config')
 const PORT = config.get('data').port
 const data = config.get('data')
 const productRouter = require('./router/product')
+const aiRouter = require('./router/ai')
 const { checkAuth } = require('./public/js/includes/auth')
 
 app.locals = { data }
@@ -18,6 +20,7 @@ app.use(express.json())
 app.use(cookieParser())
 
 app.use('/product', productRouter)
+app.use('/ai', checkAuth, aiRouter)
 
 app.get('/login', (req, res) => {
 	res.render('login')
