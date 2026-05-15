@@ -4300,7 +4300,7 @@ class Estimate {
 
 		if ([2, 3].includes(compType)) {
 			// * with corrugated  , corrugated only
-			corrugated_weight = parseFloat((area_box * corrugated_layer.info.all_gram * corrugated_layer.info.num_layer / 1000000000).toFixed(4))
+			corrugated_weight = parseFloat((area_box * corrugated_layer.info.all_gram * corrugated_layer.info.num_layer / 1000000000).toFixed(6))
 			if ([2].includes(compType)) {
 				paper_weight = parseFloat((area_box * gram / 1000000000).toFixed(6))
 			}
