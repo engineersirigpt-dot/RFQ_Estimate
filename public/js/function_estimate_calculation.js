@@ -6315,6 +6315,8 @@ class Estimate {
 						qty = item.paper_usage.line[qtyIndex].after_ups + item.waste.waste_corrugated_board[qtyIndex]
 					}
 
+					// qty = roundCorrugated(qty)
+
 					//* profit sharing
 					unit_price = parseFloat((unit_price * (1 + (afterpress_price_marking / 100))).toFixed(2))
 
@@ -7783,6 +7785,7 @@ class Estimate {
 		processInfoBuilder.addShrinkwrapProcess(null, targetLength)
 		processInfoBuilder.addBagProcess(null, targetLength)
 		processInfoBuilder.addTrimProcess(null, targetLength)
+		processInfoBuilder.addDeliveryProcess(targetLength)
 	}
 
 	setSystemVersion(version) {
@@ -7935,6 +7938,7 @@ class Estimate {
 			total_price_marking_material_production //* "total" production + material
 		}
 	}
+
 
 	setCalculateTax() {
 		// * คำนวณ Profit Sharing ก่อน Tax

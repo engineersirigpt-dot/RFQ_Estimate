@@ -857,10 +857,22 @@ function save_quotation(action, quotation_obj) {
                 window.location = '/quote?rfqid=' + (parseURLParams(window.location.href)).rfqid[0]
             } else {
                 console.log('error', res)
+                Swal.fire({
+                    icon: 'error',
+                    title: 'บันทึกใบเสนอราคาไม่สำเร็จ',
+                    text: typeof res?.message === 'string' ? res.message : 'เกิดข้อผิดพลาด ไม่สามารถบันทึกได้',
+                    confirmButtonText: 'ตกลง',
+                })
             }
         },
         error: function (error) {
             console.log('save quotaton ERROR')
+            Swal.fire({
+                icon: 'error',
+                title: 'บันทึกใบเสนอราคาไม่สำเร็จ',
+                text: 'เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง',
+                confirmButtonText: 'ตกลง',
+            })
         }
     })
 }
