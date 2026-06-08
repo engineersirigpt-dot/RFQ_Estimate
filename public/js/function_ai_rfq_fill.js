@@ -24,6 +24,11 @@ $(function () {
 	sessionStorage.removeItem('ai_rfq_data')
 	sessionStorage.removeItem('ai_rfq_input')
 
+	$('<style>').text(
+		'.ai-uncertain { outline: 2px solid #f59e0b !important; background-color: #fffbeb !important; border-radius: 3px; }' +
+		'.ai-uncertain-wrap { outline: 2px solid #f59e0b !important; background-color: #fffbeb !important; border-radius: 4px; padding: 2px; }'
+	).appendTo('head')
+
 	waitForReady().then(() => fillForm(aiData, aiInput))
 
 	function waitForReady() {
@@ -97,12 +102,44 @@ $(function () {
 			fillComponents(d)
 			fillProcesses(d)
 			fillDeliveries(d)
-			showAIBanner(d, input)
+			const uncertainCount = highlightUncertain(d)
+			showAIBanner(d, input, uncertainCount)
 			if (typeof checkRequiredInput === 'function') checkRequiredInput()
 		} catch (e) {
 			console.error('AI auto-fill error', e)
 			alert('AI กรอกข้อมูลไม่สำเร็จบางส่วน: ' + e.message + '\nกรุณาตรวจสอบฟอร์ม')
 		}
+	}
+
+	function highlightUncertain(d) {
+		const fields = Array.isArray(d._uncertain) ? d._uncertain : []
+		if (fields.length === 0) return 0
+		const MAP = {
+			job_name:        () => $('#jobName input'),
+			customer_name:   () => $('#customerLabel'),
+			ae_name:         () => $('#aeLabel'),
+			print_type:      () => $('#print_type select'),
+			ink_type:        () => $('#ink_type select'),
+			quantities:      () => $('#qty_info .inputQty input'),
+			paper_type:      () => $('.paperType'),
+			paper_gram:      () => $('.paperGram'),
+			box_template_id: () => $('.boxType'),
+			color_outside:   () => $('.colorOutside'),
+			color_inside:    () => $('.colorInside'),
+			coatings:        () => $('.coatingInput'),
+			corrugated:      () => $('.corrugatedInput'),
+			dimensions_mm:   () => $('.specmm'),
+			deliveries:      () => $('.deliveryDestinationName'),
+		}
+		// Delay until all fills + their internal setTimeouts complete
+		setTimeout(() => {
+			fields.forEach((field) => {
+				const fn = MAP[field]
+				if (!fn) return
+				fn().addClass('ai-uncertain')
+			})
+		}, 1500)
+		return fields.length
 	}
 
 	function fillDeliveries(d) {
@@ -684,7 +721,10 @@ $(function () {
 		}
 	}
 
-	function showAIBanner(d, input) {
+	function showAIBanner(d, input, uncertainCount) {
+		const uncertainMsg = uncertainCount > 0
+			? ' — <b style="color:#fde68a">⚠ ' + uncertainCount + ' field ไฮไลต์สีเหลือง</b> ต้องกรอกเพิ่มเติม'
+			: ''
 		const notes = d.notes ? '<div style="margin-top:6px;font-size:12px;color:#444"><b>หมายเหตุจาก AI:</b> ' + escapeHtml(d.notes) + '</div>' : ''
 		const btnStyle =
 			'background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.5);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px;margin-left:8px'
@@ -692,7 +732,7 @@ $(function () {
 			<div id="ai-fill-banner" style="position:fixed;top:0;left:0;right:0;background:linear-gradient(90deg,#6a5af9,#a855f7);color:#fff;padding:10px 20px;z-index:9998;box-shadow:0 2px 6px rgba(0,0,0,0.2)">
 				<div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
 					<div style="flex:1">
-						<i class="fa fa-magic"></i> <b>AI ได้กรอกข้อมูลให้แล้ว</b> — กรุณาตรวจสอบทุกฟิลด์ โดยเฉพาะ <b>AE</b>, <b>Customer</b>, และ <b>จังหวัดส่งงาน</b> ต้องเลือกจากรายการ autocomplete อีกครั้ง
+						<i class="fa fa-magic"></i> <b>AI ได้กรอกข้อมูลให้แล้ว</b> — กรุณาตรวจสอบทุกฟิลด์ โดยเฉพาะ <b>AE</b>, <b>Customer</b>, และ <b>จังหวัดส่งงาน</b> ต้องเลือกจากรายการ autocomplete อีกครั้ง${uncertainMsg}
 						${notes}
 					</div>
 					<div style="white-space:nowrap">

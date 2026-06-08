@@ -7,7 +7,7 @@
   const hostname = window.location.hostname;
   const SYSTEM_VERSION = "<%= data.version %>";
   const api_url = "<%= data.api_url %>".replace("hostname", hostname);
-  const node_api = "<%= data.node_api %>".replace("hostname", hostname);
+  const node_api = window.location.origin;
   const base_url = "<%= data.base_url %>".replace("hostname", hostname);
   const report_url = "<%= data.report_url %>".replace("hostname", hostname);
   const wizard_api = "<%= data.wizard_api %>".replace("hostname", hostname);

@@ -143,7 +143,7 @@
     <script>
       const hostname = window.location.hostname;
       const api_url = "<%= data.api_url %>".replace("hostname", hostname);
-      const node_api = "<%= data.node_api %>".replace("hostname", hostname);
+      const node_api = window.location.origin;
       const base_url = "<%= data.base_url %>".replace("hostname", hostname);
 
       document.write(`<base href=${base_url}>`);
@@ -301,11 +301,13 @@
 
               // localStorage.setItem("user", JSON.stringify(res.user));
 
-              if (success && user?.isPassed) {
-                const checkAuth = user?.roles?.some((role) => role.authorized);
+              if (success) {
+                const checkAuth = user?.roles?.some((role) => role.authorized) || user?.isPassed === 0;
                 if (checkAuth) {
                   const { roles, data: emp_data, username } = user || {};
-                  const { emp_id, emp_name } = emp_data[0] || {};
+                  const { emp_id: _emp_id, emp_name: _emp_name } = emp_data?.[0] || {};
+                  const emp_id = _emp_id || username;
+                  const emp_name = _emp_name || username;
 
                   const { data: cookieResp } = await axios.post(
                     `${base_url}/set-cookie`,
@@ -325,10 +327,10 @@
                       roles,
                       user_group_id: roles?.map((role) => role.user_group_id),
                       sale_group_id: roles?.map((role) => role.sale_group_id),
-                      enable_price_check: roles.some(
+                      enable_price_check: roles?.some(
                         (role) => role.enable_price_check
                       ),
-                      is_super_admin: roles.some((role) => role.is_super_admin),
+                      is_super_admin: roles?.some((role) => role.is_super_admin),
                     };
 
                     localStorage.setItem("data", JSON.stringify(data));

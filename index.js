@@ -6,11 +6,14 @@ const moment = require('moment')
 const cookieParser = require('cookie-parser')
 const { Server } = require('socket.io')
 const config = require('config')
+const axios = require('axios')
 const PORT = config.get('data').port
 const data = config.get('data')
 const productRouter = require('./router/product')
 const aiRouter = require('./router/ai')
 const { checkAuth } = require('./public/js/includes/auth')
+
+const PROD_API = 'http://192.168.5.32:4010'
 
 app.locals = { data }
 app.set('view engine', 'ejs')
@@ -21,6 +24,39 @@ app.use(cookieParser())
 
 app.use('/product', productRouter)
 app.use('/ai', checkAuth, aiRouter)
+
+// Mock auth for local dev — no external service needed
+app.post('/user/login', (req, res) => {
+	const { username, password } = req.body || {}
+	if (username === 'Admin' && password === 'Admin1234') {
+		const token = 'test.' + Date.now()
+		const roles = [{ user_group_id: 1, sale_group_id: null, enable_price_check: 1, is_super_admin: 0, authorized: 1 }]
+		const data = [{ emp_id: 'Admin', emp_name: 'Admin' }]
+		return res.json({
+			success: true, isPassed: 1, accessToken: token, refreshToken: token, roles, data,
+			user: { username: 'Admin', isPassed: 1, roles, data }
+		})
+	}
+	res.json({ success: false, isPassed: 0, message: 'username หรือ password ไม่ถูกต้อง' })
+})
+app.get('/user/check-auth', (_req, res) => {
+	res.json({ valid: true, expires_at: Date.now() + 24 * 3600 * 1000 })
+})
+app.post('/user/token', (_req, res) => {
+	res.json({ accessToken: 'test.' + Date.now() })
+})
+
+// Proxy data endpoints to production (API calls only, not page renders)
+app.use(['/estimate/list', '/estimate/master_data', '/estimate/save_rfq', '/estimate/get_rfq', '/estimate/delete_rfq', '/customer', '/user/ae', '/user/qt_approver'], async (req, res) => {
+	try {
+		const url = PROD_API + req.originalUrl
+		const resp = await axios({ method: req.method, url, data: req.body, timeout: 8000 })
+		res.json(resp.data)
+	} catch (e) {
+		console.error('proxy error:', req.originalUrl, e.message)
+		res.json({ success: true, data: [] })
+	}
+})
 
 app.get('/login', (req, res) => {
 	res.render('login')
