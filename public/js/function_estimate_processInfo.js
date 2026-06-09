@@ -62,7 +62,7 @@ class ProcessInfoBuilder {
             'diecut': { mi2_process_id: 3, unit_name: 'unit', process_group: 'process' },
             'block_diecut': { mi2_process_id: 98, unit_name: 'block', process_group: 'process' },
             'digital_diecut': { mi2_process_id: 80, unit_name: 'unit', process_group: 'process' },
-            'corrugated_glue': { mi2_process_id: 103, unit_name: 'pcs', process_group: 'process' }, // tm_process[103]=ปะลูกฟูก (เดิม 17=แกะ ผิด ชนกับ chip)
+            'corrugated_glue': { mi2_process_id: 17, unit_name: 'pcs', process_group: 'process' },
             'chip': { mi2_process_id: 17, unit_name: 'pcs', process_group: 'handwork' },
             'inspection': { mi2_process_id: 82, unit_name: 'pcs', process_group: 'process' },
             'assembly': { mi2_process_id: 104, unit_name: 'unit', process_group: 'process' },
@@ -110,8 +110,7 @@ class ProcessInfoBuilder {
     }
 
     getPrintType() {
-        // print_type ที่ถูกต้องอยู่ที่ mainData.job.print_type (string "Flexo"/"Offset") ตาม prepare_data.js
-        return this.mainData.job?.print_type || this.mainData.print_type?.name || ''
+        return this.mainData.print_type?.name || ''
     }
 
     //* ==================== Main Build Function ====================
@@ -155,7 +154,6 @@ class ProcessInfoBuilder {
 
     addPaperProcess(comp, compIndex, targetLength) {
         if (!comp.paper_usage?.line) return
-        if (!comp.paper) return // งานลูกฟูกล้วนไม่มี paper จริง — ไม่สร้างแถว "Paper 0 gsm" ว่าง
 
         const processInfo = this.getPackagingProcessId('paper')
         const unitId = this.getUnitId(processInfo.unit_name)
@@ -256,10 +254,6 @@ class ProcessInfoBuilder {
         const processInfo = this.getPackagingProcessId('plate')
         const unitId = this.getUnitId(processInfo.unit_name)
         const printType = this.getPrintType()
-        // * Flexo ใช้ชื่อ "Plate Polymer (กว้าง x ยาว in²)" + ขนาด เหมือนใน Estimate (function_estimate.js print_plate)
-        const plateLabel = printType === 'Flexo'
-            ? `Plate Polymer (${this.mainData?.job?.flexo_size?.[0] ?? 0} x ${this.mainData?.job?.flexo_size?.[1] ?? 0} in²)`
-            : 'Plate'
         const isMultipleF = this.mainData?.job?.is_multiple_f
         const f_list = comp?.f_detail?.f_list || []
         const colorArr = comp?.color || []
@@ -331,19 +325,19 @@ class ProcessInfoBuilder {
             // Add inside plate
             if (plateData.inside.length > 0) {
                 const fCodes = [...new Set(plateData.inside.map(p => p.f_code).filter(Boolean))]
-                const numColor = colorArr[0]?.inside || plateData.inside[0]?.num_color || 0
+                const numColor = plateData.inside[0]?.num_color || 0
 
                 comp.process_info.plate.push({
                     process_id: processInfo.mi2_process_id,
                     unit_id: unitId,
-                    process_name: `${plateLabel} ${fCodes.join(', ') || ''} Inside ${numColor} cols ${printType}`.trim(),
+                    process_name: `Plate ${fCodes.join(', ') || ''} Inside ${numColor} cols ${printType}`.trim(),
                     remark: 'Inside',
                     is_apply_all_edition: fCodes.length === 0,
                     info: {
                         side: 'inside',
                         num_color: numColor,
                         f_code: fCodes,
-                        process_name_arr: [plateLabel, 'Inside', `${numColor} cols`, printType]
+                        process_name_arr: ['Plate', 'Inside', `${numColor} cols`, printType]
                     },
                     line: this.normalizeLineArray(plateData.inside, targetLength)
                 })
@@ -352,19 +346,19 @@ class ProcessInfoBuilder {
             // Add outside plate
             if (plateData.outside.length > 0) {
                 const fCodes = [...new Set(plateData.outside.map(p => p.f_code).filter(Boolean))]
-                const numColor = colorArr[0]?.outside || plateData.outside[0]?.num_color || 0
+                const numColor = plateData.outside[0]?.num_color || 0
 
                 comp.process_info.plate.push({
                     process_id: processInfo.mi2_process_id,
                     unit_id: unitId,
-                    process_name: `${plateLabel} ${fCodes.join(', ') || ''} Outside ${numColor} cols ${printType}`.trim(),
+                    process_name: `Plate ${fCodes.join(', ') || ''} Outside ${numColor} cols ${printType}`.trim(),
                     remark: 'Outside',
                     is_apply_all_edition: fCodes.length === 0,
                     info: {
                         side: 'outside',
                         num_color: numColor,
                         f_code: fCodes,
-                        process_name_arr: [plateLabel, 'Outside', `${numColor} cols`, printType]
+                        process_name_arr: ['Plate', 'Outside', `${numColor} cols`, printType]
                     },
                     line: this.normalizeLineArray(plateData.outside, targetLength)
                 })
@@ -481,7 +475,7 @@ class ProcessInfoBuilder {
             // Add inside print
             if (printData.inside.length > 0) {
                 const fCodes = [...new Set(printData.inside.map(p => p.f_code).filter(Boolean))]
-                const numColor = colorArr[0]?.inside || printData.inside[0]?.num_color || 0
+                const numColor = printData.inside[0]?.num_color || 0
 
                 comp.process_info.print.push({
                     process_id: processInfo.mi2_process_id,
@@ -502,7 +496,7 @@ class ProcessInfoBuilder {
             // Add outside print
             if (printData.outside.length > 0) {
                 const fCodes = [...new Set(printData.outside.map(p => p.f_code).filter(Boolean))]
-                const numColor = colorArr[0]?.outside || printData.outside[0]?.num_color || 0
+                const numColor = printData.outside[0]?.num_color || 0
 
                 comp.process_info.print.push({
                     process_id: processInfo.mi2_process_id,
@@ -993,8 +987,7 @@ class ProcessInfoBuilder {
         for (let fIndex = 0; fIndex < fIndexesToProcess; fIndex++) {
             if (!comp.packing[fIndex]) continue
 
-            // ใส่ label F-code เฉพาะตอน packing แยกตาม F จริง (is_different_packing) — ถ้า shared (false) packing รวมทุก F อยู่แล้ว ไม่ควรติด "F1" (slide 29: ดูเหมือนมีแค่ F1)
-            const fCode = (isMultipleF && isDiffPacking && f_list[fIndex]) ? f_list[fIndex].f_code : ''
+            const fCode = (isMultipleF && f_list[fIndex]) ? f_list[fIndex].f_code : ''
 
             comp.packing[fIndex].forEach(packItem => {
                 let processInfo, unitId, processName
@@ -1032,8 +1025,8 @@ class ProcessInfoBuilder {
                     processNameArr.push(`${packInfo.qty_per_pack} Cps/pack`)
                 } else if (packItem.name === 'paperband' && packInfo.qty_per_paperband) {
                     processNameArr.push(`${packInfo.qty_per_paperband} Cps/band`)
-                } else if (packItem.name === 'carton' && packInfo.carton?.qty_per_carton) {
-                    processNameArr.push(`${packInfo.carton.qty_per_carton} Cps/carton`)
+                } else if (packItem.name === 'carton' && packInfo.qty_per_carton) {
+                    processNameArr.push(`${packInfo.qty_per_carton} Cps/carton`)
                 } else if (packItem.name === 'pallet' && packInfo.bulk_qty_pallet) {
                     const packingArr = comp.packing?.[fIndex] || []
                     const hasCarton = packingArr.some(p => p.name === 'carton')
@@ -1042,55 +1035,19 @@ class ProcessInfoBuilder {
                     processNameArr.push(`${packInfo.bulk_qty_pallet} ${palletUnit}`)
                 }
 
-                // * งานแบ่งส่ง (split delivery): packItem.detail แตกตามรอบส่ง แต่ละรอบมี unit_price/qty/price ของตัวเอง
-                // * (unit price packing ไม่เป็นเชิงเส้นต่อรอบ — ห้ามยุบเป็น packItem.line ยอดรวม ไม่งั้น total เพี้ยน)
-                // * emit 1 แถว process ต่อ 1 รอบ (ตรงกับที่ Estimate summary_packing_tr2 แสดงต่อรอบ)
-                const rounds = Array.isArray(packItem.detail) ? packItem.detail : []
-                const deliveryRounds = this.mainData?.delivery || []
-
-                if (rounds.length > 1) {
-                    rounds.forEach((round, rIndex) => {
-                        const roundLine = (round.detail || []).map(d => ({
-                            qty: d.qty,
-                            unit_price: d.unit_price,
-                            price: d.price
-                        }))
-                        if (roundLine.length === 0) return
-
-                        const deliveryRound = deliveryRounds.find(d => d.round === round.roundId) || deliveryRounds[rIndex] || {}
-                        const roundNo = round.roundId ?? (rIndex + 1)
-                        const roundLabel = `รอบ ${roundNo}${deliveryRound.destinationName ? ` ${deliveryRound.destinationName}` : ''}`
-
-                        comp.process_info.packing.push({
-                            process_id: processInfo.mi2_process_id,
-                            unit_id: unitId,
-                            process_name: `${processName}`,
-                            remark: roundLabel,
-                            is_apply_all_edition: true,
-                            info: {
-                                ...packInfo,
-                                fIndex,
-                                round_id: round.roundId,
-                                process_name_arr: [...processNameArr, roundLabel]
-                            },
-                            line: this.normalizeLineArray(roundLine, roundLine.length)
-                        })
-                    })
-                } else {
-                    comp.process_info.packing.push({
-                        process_id: processInfo.mi2_process_id,
-                        unit_id: unitId,
-                        process_name: `${processName}`,
-                        remark: null,
-                        is_apply_all_edition: true,
-                        info: {
-                            ...packInfo,
-                            fIndex,
-                            process_name_arr: processNameArr
-                        },
-                        line: this.normalizeLineArray(packItem.line, targetLength)
-                    })
-                }
+                comp.process_info.packing.push({
+                    process_id: processInfo.mi2_process_id,
+                    unit_id: unitId,
+                    process_name: `${processName}`,
+                    remark: null,
+                    is_apply_all_edition: true,
+                    info: {
+                        ...packInfo,
+                        fIndex,
+                        process_name_arr: processNameArr
+                    },
+                    line: this.normalizeLineArray(packItem.line, targetLength)
+                })
             })
         }
     }
@@ -1209,41 +1166,6 @@ class ProcessInfoBuilder {
                     process_name_arr: [other.info?.name || 'Other Cost']
                 },
                 line: this.normalizeLineArray(other.line, targetLength)
-            })
-        })
-    }
-
-    // * Delivery เป็น process ระดับ job (1 แถวต่อรอบส่ง) — เดิม delivery ไม่ถูก emit เป็น process เลย (slide 23/29)
-    addDeliveryProcess(targetLength) {
-        const deliveryRounds = this.mainData?.delivery || []
-        if (!deliveryRounds.length) return
-
-        const processInfo = this.getPackagingProcessId('delivery')
-        const unitId = this.getUnitId(processInfo.unit_name)
-
-        deliveryRounds.forEach((round, rIndex) => {
-            // รวมเรทขนส่งของรอบนี้ (qty_rate = [[{qty,unit_price,price}]])
-            const rateLines = (round.qty_rate || []).flat(Infinity).filter(r => r && r.price != null)
-            const totalQty = rateLines.reduce((s, r) => s + (r.qty || 0), 0) || 1
-            const totalPrice = rateLines.reduce((s, r) => s + (r.price || 0), 0)
-            const unitPrice = totalQty ? parseFloat((totalPrice / totalQty).toFixed(6)) : totalPrice
-
-            const roundNo = round.round ?? (rIndex + 1)
-            const roundLabel = `รอบ ${roundNo}${round.destinationName ? ` ${round.destinationName}` : ''}`
-
-            this.mainData.process_info.packing.push({
-                process_id: processInfo.mi2_process_id,
-                unit_id: unitId,
-                process_name: 'Delivery',
-                remark: roundLabel,
-                is_apply_all_edition: true,
-                info: {
-                    round_id: round.round,
-                    destination: round.destinationName,
-                    due_date: round.dueDate,
-                    process_name_arr: ['Delivery', roundLabel]
-                },
-                line: this.normalizeLineArray([{ qty: totalQty, unit_price: unitPrice, price: totalPrice }], 1)
             })
         })
     }

@@ -60,43 +60,68 @@ $(function () {
 		return String(s || '').trim().toLowerCase().replace(/\s+/g, ' ')
 	}
 
+	// Remove a trailing side-count suffix: "1 s", "2 s", "1s", "1/s", "2/s".
+	// e.g. "water proof 1/s" → "water proof", "opp soft touch 30 mc 1 s" → "opp soft touch 30 mc"
+	function stripSideCount(s) {
+		return String(s || '').replace(/\s*\d+\s*\/?\s*s\s*$/i, '').trim()
+	}
+
 	function findOptionMatch($select, target) {
 		if (!target) return null
 		const t = normalize(target)
 		const tNoSpace = t.replace(/\s+/g, '')
+		const tStripped = stripSideCount(t)
+		// Tokenise the side-count-free target so a "1/s" vs "1 s" mismatch can't
+		// break token matching.
+		const tokens = tStripped.split(/\s+/).filter((x) => x.length > 1)
 		let exact = null,
+			strippedExact = null,
 			contains = null,
 			tokenMatch = null
-		const tokens = t.split(/\s+/).filter((x) => x.length > 1)
 		$select.find('option').each(function () {
 			const rawTxt = $(this).text()
 			const rawVal = $(this).val()
 			if (!rawTxt && !rawVal) return
 			const txt = normalize(rawTxt)
 			const txtNoSpace = txt.replace(/\s+/g, '')
+			const txtStripped = stripSideCount(txt)
 			const val = normalize(rawVal)
 			if (txt === t || val === t || txtNoSpace === tNoSpace) {
 				exact = rawVal
 				return false
 			}
+			if (!strippedExact && tStripped && txtStripped === tStripped) {
+				strippedExact = rawVal
+			}
 			if (!contains && txt && (txt.indexOf(t) !== -1 || t.indexOf(txt) !== -1)) {
 				contains = rawVal
 			}
-			if (!tokenMatch && tokens.length > 0 && tokens.every((tok) => txt.indexOf(tok) !== -1)) {
+			// Token match against the side-count-free option text.
+			if (!tokenMatch && tokens.length > 0 && tokens.every((tok) => txtStripped.indexOf(tok) !== -1)) {
 				tokenMatch = rawVal
 			}
 		})
-		return exact != null ? exact : contains != null ? contains : tokenMatch
+		return exact != null ? exact : strippedExact != null ? strippedExact : contains != null ? contains : tokenMatch
 	}
+
+	// Module-scope: F-codes for multi-F jobs, so addon fillers can populate
+	// each foil/emboss/deboss F-code list.
+	let multiFCodes = null
 
 	function fillForm(d, input) {
 		try {
+			multiFCodes = d.is_multiple_f && Array.isArray(d.f_codes) && d.f_codes.length > 0 ? d.f_codes : null
 			fillJobInfo(d)
 			fillJobDetail(d)
 			fillQuantities(d)
 			fillComponents(d)
 			fillProcesses(d)
 			fillDeliveries(d)
+			// In multi-F mode, each component needs one specialInk-container per
+			// F-code. Run after fillComponents has filled the first container.
+			if (d.is_multiple_f && Array.isArray(d.f_codes) && d.f_codes.length > 1) {
+				setTimeout(() => expandMultiFContainers(d.f_codes, d.components || []), 800)
+			}
 			showAIBanner(d, input)
 			if (typeof checkRequiredInput === 'function') checkRequiredInput()
 		} catch (e) {
@@ -105,27 +130,144 @@ $(function () {
 		}
 	}
 
+	// For each component, add one specialInk-container per F-code and select
+	// the F-code in its dropdown. Replicates the colors from container 0 so all
+	// F-codes share the same color set (typical case — only graphics differ).
+	function expandMultiFContainers(fCodes, comps) {
+		// Refresh F-code dropdown options across the form so the just-added
+		// F-codes appear in the .f-code-select dropdowns.
+		if (typeof getFCodeSelectOption === 'function') getFCodeSelectOption()
+
+		comps.forEach((c, ci) => {
+			const $section = $('.specialInkSection[index="' + ci + '"]')
+			if (!$section.length) return
+
+			// Capture the colors from the first (existing) container so we can
+			// replicate them across all F-codes for this component.
+			const $first = $section.find('.specialInk-container').first()
+			const baseOutside = $first.find('.colorOutside').first().val() || (c.color_outside != null ? c.color_outside : '')
+			const baseInside = $first.find('.colorInside').first().val() || (c.color_inside != null ? c.color_inside : 0)
+
+			// Add (N-1) more containers — the form starts with 1
+			const existing = $section.find('.specialInk-container').length
+			for (let k = existing; k < fCodes.length; k++) {
+				if (typeof addSpecialInkF === 'function') addSpecialInkF(ci)
+			}
+
+			// Refresh dropdowns again now that we added containers
+			if (typeof getFCodeSelectOption === 'function') getFCodeSelectOption()
+
+			// Select F-code + fill colors in each container
+			setTimeout(() => {
+				$section.find('.specialInk-container').each(function (idx) {
+					const fc = fCodes[idx]
+					if (!fc) return
+					const $box = $(this)
+					if (fc.code) {
+						$box.find('.specialInkFCode').first().val(fc.code).trigger('change')
+					}
+					if (baseOutside !== '' && baseOutside != null) {
+						$box.find('.colorOutside').first().val(baseOutside).trigger('change').trigger('input')
+					}
+					if (baseInside !== '' && baseInside != null) {
+						$box.find('.colorInside').first().val(baseInside).trigger('change').trigger('input')
+					}
+				})
+			}, 200)
+		})
+	}
+
 	function fillDeliveries(d) {
 		const list = Array.isArray(d.deliveries) ? d.deliveries.filter((x) => x && x.destination) : []
-		if (list.length === 0 || typeof addProcess !== 'function') return
-		// Wait briefly so the form's row template helpers (component dropdown,
-		// balance qty calc) have stable values to clone from.
+		if (list.length === 0) return
+		// Single delivery: fill the primary one-time row.
+		// Multi delivery: enable แบ่งส่ง mode, add rows, fill destination/date/qty per row.
+		if (list.length === 1) {
+			setTimeout(() => fillSingleDelivery(list[0]), 600)
+		} else {
+			// Longer wait — split-delivery requires qty + component name to be
+			// already filled (otherwise chk_split_delivery rejects with alert).
+			setTimeout(() => fillSplitDelivery(list), 1500)
+		}
+	}
+
+	function fillSingleDelivery(first) {
+		const $primary = $('#delivery .deliveryProcess[index="0"]').first()
+		if (!$primary.length) return
+		if (first.destination) {
+			$primary.find('.deliveryDestinationName').first().val(first.destination).trigger('change').trigger('input')
+		}
+		if (first.delivery_date) {
+			$primary.find('.deliveryDate').first().val(first.delivery_date).trigger('change').trigger('input')
+		}
+	}
+
+	function fillSplitDelivery(list) {
+		const $chk = $('.chk_split_delivery').first()
+		if (!$chk.length || $chk.prop('disabled')) {
+			// Form disabled split mode (e.g. multiple Quantity rows entered).
+			// Fall back: fill the first one and warn about the rest.
+			console.warn('AI: chk_split_delivery unavailable — falling back to single delivery')
+			fillSingleDelivery(list[0])
+			showSplitDeliveryWarning(list.slice(1))
+			return
+		}
+
+		if (!$chk.is(':checked')) {
+			$chk[0].click() // triggers toggleSplitDelivery → opens split UI, adds row 0
+		}
+
+		// Wait for split UI to render, then add remaining rows and fill each.
 		setTimeout(() => {
-			list.forEach((dlv) => {
-				addProcess('delivery')
-				const $row = $('#deliveryProcess tr.deliveryProcess').last()
-				if (!$row.length) return
-				if (dlv.destination) {
-					$row.find('.deliveryDestinationName').first().val(dlv.destination).trigger('change').trigger('input')
+			const $addBtn = $('.splitDelivery').first()
+			const existing = $('#deliveryProcess tr.deliveryProcess').length
+			for (let k = existing; k < list.length; k++) {
+				if ($addBtn.length) $addBtn[0].click()
+			}
+
+			setTimeout(() => {
+				const $rows = $('#deliveryProcess tr.deliveryProcess')
+				if ($rows.length === 0) {
+					// chk_split_delivery click didn't take effect (validation
+					// blocked it silently?) — fall back gracefully.
+					console.warn('AI: split-delivery rows did not render — fallback')
+					fillSingleDelivery(list[0])
+					showSplitDeliveryWarning(list.slice(1))
+					return
 				}
-				if (dlv.qty != null) {
-					$row.find('.deliveryQty input').first().val(dlv.qty).trigger('change').trigger('input')
-				}
-				if (dlv.delivery_date) {
-					$row.find('.deliveryDate').first().val(dlv.delivery_date).trigger('change').trigger('input')
-				}
+				list.forEach((entry, idx) => {
+					const $row = $rows.eq(idx)
+					if (!$row.length) return
+					if (entry.destination) {
+						$row.find('.deliveryDestinationName').first().val(entry.destination).trigger('change').trigger('input')
+					}
+					if (entry.delivery_date) {
+						$row.find('.deliveryDate').first().val(entry.delivery_date).trigger('change').trigger('input')
+					}
+					if (entry.qty != null) {
+						$row.find('.deliveryQty input').first().val(entry.qty).trigger('change').trigger('input').trigger('blur')
+					}
+				})
+			}, 450)
+		}, 450)
+	}
+
+	function showSplitDeliveryWarning(extras) {
+		if (!extras || extras.length === 0) return
+		const lines = extras
+			.map((x) => {
+				const parts = [escapeHtml(x.destination || '?')]
+				if (x.delivery_date) parts.push(escapeHtml(x.delivery_date))
+				if (x.qty != null) parts.push(Number(x.qty).toLocaleString() + ' กล่อง')
+				return parts.join(' / ')
 			})
-		}, 600)
+		console.warn('AI: extra delivery rows (need manual แบ่งส่ง): ' + lines.join(' | '))
+		$('#delivery').append(
+			'<div style="color:#b45309;font-size:12px;margin:4px 0 0 5px">' +
+				'⚠️ AI พบรายการส่งเพิ่มเติม: <b>' + lines.join('</b>, <b>') + '</b> — ' +
+				'กรุณาติ๊ก "แบ่งส่ง" แล้วเพิ่มเองหลังคำนวณ Layout' +
+			'</div>'
+		)
 	}
 
 	function fillJobInfo(d) {
@@ -156,11 +298,31 @@ $(function () {
 				if ($chk.length && !$chk.is(':checked')) $chk[0].click()
 			}, 400)
 		}
+
+		// ลิมิตสี N เล่ม — check the box (which reveals the qty input via its
+		// change handler), then fill the qty. Normal (non-multi-F) mode only;
+		// multi-F has per-row checkboxes which would need component-level data.
+		if (d.color_limit_qty != null && Number(d.color_limit_qty) > 0) {
+			setTimeout(() => {
+				const $chk = $('.chk_color_limit:visible').first()
+				if (!$chk.length) return
+				if (!$chk.is(':checked')) $chk[0].click()
+				setTimeout(() => {
+					const $input = $('.color_limit_normal.color_limit input').first()
+					if ($input.length) {
+						$input.val(d.color_limit_qty).trigger('change').trigger('input').trigger('blur')
+					}
+				}, 250)
+			}, 500)
+		}
 	}
 
 	function fillQuantities(d) {
+		// The form's run-on / qty handlers listen on 'keyup' (runonPercent) and
+		// 'blur' (inputQty), NOT 'change'. Trigger those so .runonQty input
+		// (the calculated extra qty cell) gets recomputed automatically.
 		if (d.runon_percent != null) {
-			$('.runonPercent').first().val(d.runon_percent).trigger('change')
+			$('.runonPercent').first().val(d.runon_percent).trigger('change').trigger('keyup')
 		}
 		if (d.paper_markup_percent != null) {
 			$('.paperMarkup input').first().val(d.paper_markup_percent).trigger('change')
@@ -183,8 +345,15 @@ $(function () {
 			else break
 		}
 		qtys.forEach((q, i) => {
-			$('#qty_info .inputQty').eq(i).find('input').val(q).trigger('change')
+			// Trigger BLUR so the form recalculates runon qty from this qty
+			// (handler in function_estimate_readyFunction.js binds on blur).
+			$('#qty_info .inputQty').eq(i).find('input').val(q).trigger('change').trigger('blur')
 		})
+		// One more keyup on runon to cover the case where qty was filled
+		// AFTER runon (the blur above also covers it, but keyup is idempotent).
+		if (d.runon_percent != null) {
+			$('.runonPercent').first().trigger('keyup')
+		}
 	}
 
 	function fillMultipleF(fCodes) {
@@ -224,10 +393,12 @@ $(function () {
 			if (typeof addComponent === 'function') addComponent(next)
 			else break
 		}
-		comps.forEach((c, i) => fillOneComponent(c, i))
+		// Pass top-level open_size_mm down so Custom template can use it.
+		const topOpen = d.open_size_mm || null
+		comps.forEach((c, i) => fillOneComponent(c, i, topOpen))
 	}
 
-	function fillOneComponent(c, i) {
+	function fillOneComponent(c, i, topOpenSize) {
 		const $comp = $('.component[index="' + i + '"]')
 		if (!$comp.length) return
 
@@ -237,10 +408,22 @@ $(function () {
 		if (c.color_inside != null) $comp.find('.colorInside').first().val(c.color_inside).trigger('change')
 
 		// If total colors per side exceed 4 (CMYK), the excess are special inks.
-		// Check the "มีสีพิเศษ" box (via native click so the form's existing
-		// click handler runs and reveals the special-ink section) and add empty
-		// rows for the user to fill in.
-		const extraSpecial = Math.max(0, (c.color_outside || 0) - 4) + Math.max(0, (c.color_inside || 0) - 4)
+		// Check the "มีสีพิเศษ" box, add the needed rows, and — if the AI
+		// extracted special-ink detail — fill name/type/filling-style too.
+		const aiSpecialInks = Array.isArray(c.special_inks) ? c.special_inks.filter(Boolean) : []
+		// A UV Drip-Off coating makes the form auto-add its own "Drip off" ink
+		// row. Detect it so we don't double-count that ink as a blank row.
+		const coatingsForCheck = toArray(c.coatings || c.coating)
+		const hasDripOffCoating = coatingsForCheck.some(
+			(co) => co && /drip\s*off|ดิฟออฟ|ดรอปออฟ/i.test(String(co.type || ''))
+		)
+		let extraSpecial = Math.max(
+			Math.max(0, (c.color_outside || 0) - 4) + Math.max(0, (c.color_inside || 0) - 4),
+			aiSpecialInks.length
+		)
+		// The Drip-off ink is auto-created by the coating logic — subtract it
+		// from the blank rows we add manually so the total comes out right.
+		if (hasDripOffCoating) extraSpecial = Math.max(0, extraSpecial - 1)
 		if (extraSpecial > 0) {
 			const $hasSpe = $comp.find('.has_speInk').first()
 			if ($hasSpe.length && !$hasSpe.is(':checked')) {
@@ -254,6 +437,29 @@ $(function () {
 					for (let k = existing; k < extraSpecial; k++) {
 						$addBtn[0].click()
 					}
+				}
+				// Fill detail rows that AI provided
+				if (aiSpecialInks.length > 0) {
+					setTimeout(() => {
+						const $rows = $comp.find('.div-speInk .table_speInk tbody .tr_speInk')
+						aiSpecialInks.forEach((ink, idx) => {
+							const $r = $rows.eq(idx)
+							if (!$r.length) return
+							if (ink.name) {
+								$r.find('.speInk_name').first().val(ink.name).trigger('change').trigger('input')
+							}
+							if (ink.ink_type) {
+								const $t = $r.find('.speInk_type').first()
+								const m = findOptionMatch($t, ink.ink_type)
+								if (m) $t.val(m).trigger('change')
+							}
+							if (ink.filling_style) {
+								const $f = $r.find('.speInk_fillingStyle').first()
+								const m = findOptionMatch($f, ink.filling_style)
+								if (m) $f.val(m).trigger('change')
+							}
+						})
+					}, 250)
 				}
 			}, 350)
 		}
@@ -273,7 +479,9 @@ $(function () {
 		}, 250)
 		if (c.paper_cost != null) $comp.find('.paperCost').first().val(c.paper_cost).trigger('change')
 		if (c.paper_percent != null) $comp.find('.paperPercent').first().val(c.paper_percent).trigger('change')
-		if (c.remark_paper) $comp.find('.remark-paper').first().val(c.remark_paper)
+		if (c.remark_paper) {
+			$comp.find('.remark-paper').first().val(c.remark_paper).trigger('change').trigger('input')
+		}
 
 		// Default paper source to "ในประเทศ" (value=1) — overridable by user.
 		const $paperSrc = $comp.find('.select_paper_source').first()
@@ -302,6 +510,12 @@ $(function () {
 		// Box template (1-12) — set after a brief delay so .boxType options
 		// loaded from get_box_template_arr() are available. Then fill the
 		// W×L×H dimensions and flap once the .inputType section renders.
+		// Prefer the component's own open_size if AI returned one; else use the
+		// top-level open_size_mm from the AI payload (per-component fallback).
+		const openSize = c.open_size_mm || topOpenSize || null
+
+		const extraSpec = { glue_mm: c.glue_mm, tuck_mm: c.tuck_mm }
+
 		if (c.box_template_id != null) {
 			setTimeout(() => {
 				const $box = $('.boxType[index="' + i + '"]')
@@ -312,15 +526,69 @@ $(function () {
 				}).length > 0
 				if (hasOpt) {
 					$box.val(tid).trigger('change')
-					if (c.dimensions_mm) fillDimensionsAfterTemplate(i, c.dimensions_mm, c.flap_mm)
+					if (c.dimensions_mm) fillDimensionsAfterTemplate(i, c.dimensions_mm, c.flap_mm, openSize, extraSpec)
+					if (c.glued_spots != null) fillGluedSpots(i, parseInt(c.glued_spots, 10))
 				}
 			}, 500)
 		} else if (c.dimensions_mm) {
-			fillDimensionsAfterTemplate(i, c.dimensions_mm, c.flap_mm)
+			fillDimensionsAfterTemplate(i, c.dimensions_mm, c.flap_mm, openSize, extraSpec)
+			if (c.glued_spots != null) fillGluedSpots(i, parseInt(c.glued_spots, 10))
 		}
 	}
 
-	function fillDimensionsAfterTemplate(componentIndex, dim, flap_mm) {
+	function fillGluedSpots(componentIndex, gluedSpots) {
+		// Wait briefly because the .inputType section (which contains the
+		// is_assembled checkbox + glued_spot input) renders after the template
+		// dropdown change event.
+		setTimeout(() => {
+			const $iType = $('.inputType[index="' + componentIndex + '"]')
+			if (!$iType.length) return
+			const $chk = $iType.find('.is_assembled').first()
+			const $td = $iType.find('.td-glued-spot').first()
+			const $spot = $iType.find('.glued_spot').first()
+			if (!$chk.length) return
+
+			if (gluedSpots <= 0) {
+				if ($chk.is(':checked')) $chk[0].click() // uncheck
+				return
+			}
+
+			const maxAllowed = parseInt($spot.attr('max')) || 4
+			const minAllowed = parseInt($spot.attr('min')) || 1
+
+			if (gluedSpots <= maxAllowed) {
+				// Normal case: fits in the form — tick is_assembled and set value
+				if (!$chk.is(':checked')) $chk[0].click()
+				$td.show()
+				const targetVal = Math.max(minAllowed, gluedSpots)
+				$spot.val(targetVal).trigger('change').trigger('input')
+			} else {
+				// Exceeds form max — uncheck is_assembled (template default may
+				// have ticked it) and surface as an Other Process row so the
+				// estimator prices the labor manually.
+				if ($chk.is(':checked')) $chk[0].click()
+				addExtraGluedSpotsAsOtherProcess(gluedSpots, maxAllowed)
+			}
+		}, 900)
+	}
+
+	function addExtraGluedSpotsAsOtherProcess(gluedSpots, maxAllowed) {
+		if (typeof addProcess !== 'function') return
+		const procName = 'ติดกาว ' + gluedSpots + ' จุด (เกินที่ฟอร์มกำหนด ' + maxAllowed + ' จุด)'
+		// Don't double-add if a row with this name already exists.
+		let alreadyExists = false
+		$('#otherProcess tr').each(function () {
+			const t = $(this).find('.nameProcess textarea').first().val() || ''
+			if (t.indexOf('ติดกาว ' + gluedSpots + ' จุด') !== -1) alreadyExists = true
+		})
+		if (alreadyExists) return
+		addProcess('other')
+		const $row = $('#otherProcess tr').last()
+		if (!$row.length) return
+		$row.find('.nameProcess textarea').first().val(procName).trigger('change').trigger('input')
+	}
+
+	function fillDimensionsAfterTemplate(componentIndex, dim, flap_mm, openSize, extraSpec) {
 		setTimeout(() => {
 			const $iType = $('.inputType[index="' + componentIndex + '"]')
 			if (!$iType.length) return
@@ -331,16 +599,21 @@ $(function () {
 			const isCustom = $width.length === 0 || !$width.is(':visible')
 
 			if (isCustom) {
-				// Fill open size (W x L) and packing size if available.
+				// For Custom template, prefer the OPEN size (flat sheet
+				// dimensions, e.g. 332 × 361.5 mm) — that's what the form
+				// expects. Fall back to dim (folded) if open size unavailable.
+				const openW = openSize && openSize.width != null ? openSize.width : (openSize && openSize.w != null ? openSize.w : dim.width)
+				const openL = openSize && openSize.length != null ? openSize.length : (openSize && openSize.l != null ? openSize.l : dim.length)
+
 				const $openMm = $iType.find('.openSizemm input')
 				if ($openMm.length >= 2) {
-					if (dim.width != null) $openMm.eq(0).val(dim.width).trigger('change')
-					if (dim.length != null) $openMm.eq(1).val(dim.length).trigger('change')
+					if (openW != null) $openMm.eq(0).val(openW).trigger('change')
+					if (openL != null) $openMm.eq(1).val(openL).trigger('change')
 				}
 				const $packMm = $iType.find('.packingsizemm input')
 				if ($packMm.length >= 2) {
-					if (dim.width != null && !$packMm.eq(0).val()) $packMm.eq(0).val(dim.width).trigger('change')
-					if (dim.length != null && !$packMm.eq(1).val()) $packMm.eq(1).val(dim.length).trigger('change')
+					if (openW != null && !$packMm.eq(0).val()) $packMm.eq(0).val(openW).trigger('change')
+					if (openL != null && !$packMm.eq(1).val()) $packMm.eq(1).val(openL).trigger('change')
 				}
 				return // no width/length/depth to fill on Custom
 			}
@@ -356,6 +629,19 @@ $(function () {
 				if ($dust.length && (!$dust.val() || $dust.val() === '')) {
 					$dust.val(flap_mm).trigger('change')
 				}
+			}
+
+			// ติดกาว (side glue tab) and ฝาเสียบ (tuck flap) — these have form
+			// defaults (15/15) which are often wrong. Always override when AI
+			// provides a measured value from the dieline (AI is instructed to
+			// only fill these when the dieline shows them explicitly).
+			if (extraSpec && extraSpec.glue_mm != null) {
+				const $glue = $iType.find('.specmm.glue').first()
+				if ($glue.length) $glue.val(extraSpec.glue_mm).trigger('change')
+			}
+			if (extraSpec && extraSpec.tuck_mm != null) {
+				const $tuck = $iType.find('.specmm.tuck').first()
+				if ($tuck.length) $tuck.val(extraSpec.tuck_mm).trigger('change')
 			}
 		}, 800)
 	}
@@ -421,7 +707,7 @@ $(function () {
 		if (t.indexOf('คราฟ') !== -1 || t.indexOf('kraft') !== -1) {
 			aliases.push('Kraft')
 		}
-		if (t.indexOf('ดูเพล็กซ์') !== -1 || t.indexOf('duplex') !== -1 || t.indexOf('gbb') !== -1) {
+		if (t.indexOf('ดูเพล็กซ์') !== -1 || t.indexOf('duplex') !== -1 || t.indexOf('gbb') !== -1 || t.indexOf('กล่องแป้ง') !== -1) {
 			aliases.push('Duplex GBB', 'Duplex', 'GBB')
 		}
 		for (const alias of aliases) {
@@ -458,72 +744,94 @@ $(function () {
 			}
 		}
 
-		// Parse "CA105/CA125" string fallback if AI didn't split it.
-		const top = corrugated.grade_top || parseGradePart(rawGrade, 0)
-		const bottom = corrugated.grade_bottom || parseGradePart(rawGrade, 1)
+		// Build the full list of grades. The raw grade string is the most
+		// reliable source — use it directly. Each grade = one type+gram pair.
+		// layer value = number of grades (the system supports 2, 3, 5).
+		let grades = Array.isArray(corrugated.grades)
+			? corrugated.grades
+					.filter((g) => g && g.type)
+					.map((g) => ({ type: String(g.type).toUpperCase(), gram: g.gram }))
+			: []
+		const parsed = parseAllGradeParts(rawGrade)
+		if (parsed.length > grades.length) grades = parsed // raw string wins if it has more
+		if (grades.length === 0) return
 
-		// Cascade: layer → flute → grade selects. Each select populates the
-		// next, so wait for options before matching.
-		const $layer = $cInput.find('.layerCorrugated').first()
-		const layerVal = matchLayer($layer, corrugated.layer, !!bottom)
-		if (layerVal) {
+		// Cascade: layer → flute → (type_1 → gram_1 → type_2 → gram_2 → ...).
+		// Each select populates the next on its change event, so we must wait
+		// for options before each match step.
+		;(async () => {
+			const $layer = $cInput.find('.layerCorrugated').first()
+			// layer dropdown values are 2, 3, 5 — match by grade count.
+			const layerVal = matchLayerByCount($layer, grades.length)
+			if (!layerVal) {
+				console.warn('fillCorrugated: no layer option for ' + grades.length + ' grades')
+				return
+			}
 			$layer.val(layerVal).trigger('change')
-			waitForOptions($cInput.find('.fluteCorrugated').first(), 1500).then(($flute) => {
-				if (corrugated.flute && $flute) {
-					const m = findOptionMatch($flute, corrugated.flute)
-					if (m) {
-						$flute.val(m).trigger('change')
-						waitForOptions($cInput.find('.type_1').first(), 1500).then(() => {
-							if (top) fillGradeFields($cInput, '1', top)
-							if (bottom) fillGradeFields($cInput, '2', bottom)
-						})
-					}
-				}
+
+			if (corrugated.flute) {
+				const $flute = await waitForOptions($cInput.find('.fluteCorrugated').first(), 2000)
+				if (!$flute) return
+				const fm = findOptionMatch($flute, corrugated.flute)
+				if (!fm) return
+				$flute.val(fm).trigger('change')
+			}
+
+			// Fill every grade pair in sequence (cascading dropdowns).
+			for (let i = 0; i < grades.length; i++) {
+				await fillGradeSlot($cInput, String(i + 1), grades[i])
+			}
+		})().catch((e) => console.warn('fillCorrugated cascade error', e))
+	}
+
+	// The corrugated "layer" dropdown uses numeric values equal to the number
+	// of paper plies (2, 3, 5). Match by exact count; if the exact count isn't
+	// available, fall back to the nearest supported value.
+	function matchLayerByCount($select, count) {
+		const opts = []
+		$select.find('option').each(function () {
+			const v = String($(this).val()).trim()
+			if (v) opts.push(v)
+		})
+		if (opts.includes(String(count))) return String(count)
+		// nearest fallback
+		const nums = opts.map((o) => parseInt(o, 10)).filter((n) => !isNaN(n))
+		if (nums.length === 0) return null
+		nums.sort((a, b) => Math.abs(a - count) - Math.abs(b - count))
+		return String(nums[0])
+	}
+
+	async function fillGradeSlot($cInput, slot, info) {
+		const $type = await waitForOptions($cInput.find('.type_' + slot).first(), 1500)
+		if ($type && info.type) {
+			const tm = findOptionMatch($type, info.type)
+			if (tm) {
+				$type.val(tm).trigger('change')
+			}
+		}
+		const $gram = await waitForOptions($cInput.find('.gram_' + slot).first(), 1500)
+		if ($gram && info.gram != null) {
+			const gm = findOptionMatch($gram, String(info.gram))
+			if (gm) {
+				$gram.val(gm).trigger('change')
+			}
+		}
+	}
+
+	// Parse a slash-separated grade string into an array of {type, gram}.
+	// "KS170/CA125/KI125" → [{KS,170},{CA,125},{KI,125}]
+	function parseAllGradeParts(s) {
+		if (!s) return []
+		return String(s)
+			.split(/[\/,]/)
+			.map((p) => p.trim())
+			.filter(Boolean)
+			.map((part) => {
+				const m = part.match(/^([a-zA-Z]+)[-\s]?(\d+)/i)
+				if (!m) return null
+				return { type: m[1].toUpperCase(), gram: parseInt(m[2], 10) }
 			})
-		}
-	}
-
-	// Parse "CA105/CA125" → ["CA", 105] for index 0; ["CA", 125] for index 1.
-	function parseGradePart(s, idx) {
-		if (!s) return null
-		const parts = String(s).split(/[\/,]/).map((p) => p.trim()).filter(Boolean)
-		const part = parts[idx]
-		if (!part) return null
-		const m = part.match(/^([a-zA-Z]+)[-\s]?(\d+)/i)
-		if (!m) return null
-		return { type: m[1].toUpperCase(), gram: parseInt(m[2], 10) }
-	}
-
-	// Layer: try direct match, then aliases. AI-text → numeric option fallback
-	// because the dropdown often uses numeric values like "1", "2", "3".
-	function matchLayer($select, layerHint, hasTwoGrades) {
-		if (!layerHint && !hasTwoGrades) return null
-		const tryMatch = (key) => findOptionMatch($select, key)
-
-		const direct = layerHint ? tryMatch(layerHint) : null
-		if (direct) return direct
-
-		const hint = normalize(layerHint || (hasTwoGrades ? 'single-wall' : 'single-face'))
-		const candidates = []
-		if (hint.indexOf('single-face') !== -1 || hint.indexOf('single face') !== -1 || hint === 'sf') {
-			candidates.push('Single Face', 'SF', '1')
-		}
-		if (hint.indexOf('single-wall') !== -1 || hint.indexOf('single wall') !== -1 || hint === 'sw') {
-			candidates.push('Single Wall', 'SW', '2')
-		}
-		if (hint.indexOf('double-wall') !== -1 || hint.indexOf('double wall') !== -1 || hint === 'dw') {
-			candidates.push('Double Wall', 'DW', '3')
-		}
-		// If we still have nothing but spec lists two grades, single-wall is
-		// the most likely answer (top + bottom liners with one medium).
-		if (candidates.length === 0 && hasTwoGrades) {
-			candidates.push('Single Wall', 'SW', '2')
-		}
-		for (const c of candidates) {
-			const v = tryMatch(c)
-			if (v) return v
-		}
-		return null
+			.filter(Boolean)
 	}
 
 	// Wait until a select has at least 2 options (placeholder + real values).
@@ -541,22 +849,6 @@ $(function () {
 		})
 	}
 
-	function fillGradeFields($cInput, slot, info) {
-		const $type = $cInput.find('.type_' + slot).first()
-		const $gram = $cInput.find('.gram_' + slot).first()
-		if ($type.length && info.type) {
-			const tm = findOptionMatch($type, info.type)
-			if (tm) $type.val(tm).trigger('change')
-		}
-		// gram dropdown depends on type — wait briefly
-		setTimeout(() => {
-			if ($gram.length && info.gram != null) {
-				const gm = findOptionMatch($gram, String(info.gram))
-				if (gm) $gram.val(gm).trigger('change')
-			}
-		}, 300)
-	}
-
 	function fillCoatings($comp, coatings, componentIndex) {
 		coatings.forEach((coating, idx) => {
 			if (!coating) return
@@ -566,6 +858,30 @@ $(function () {
 			// Target the LAST .coatingInput within this component (the just-added one).
 			fillCoating($comp.find('.coatingInput').last(), coating)
 		})
+	}
+
+	// In multi-F mode an addon (foil/emboss/deboss) has an F-code list — one
+	// row per F-code that the addon applies to. Add rows + select each F-code.
+	function fillAddonFCodes($addon, name) {
+		if (!multiFCodes || multiFCodes.length === 0 || !$addon || !$addon.length) return
+		setTimeout(() => {
+			if (typeof getFCodeSelectOption === 'function') getFCodeSelectOption()
+			const $addBtn = $addon.find('.add-addon-f-code').first()
+			const needed = multiFCodes.length
+			let existing = $addon.find('.' + name + 'FCode').length
+			for (let k = existing; k < needed; k++) {
+				if ($addBtn.length) $addBtn[0].click()
+			}
+			if (typeof getFCodeSelectOption === 'function') getFCodeSelectOption()
+			setTimeout(() => {
+				const $selects = $addon.find('.' + name + 'FCode')
+				multiFCodes.forEach((fc, idx) => {
+					if (fc && fc.code && $selects.eq(idx).length) {
+						$selects.eq(idx).val(fc.code).trigger('change')
+					}
+				})
+			}, 250)
+		}, 350)
 	}
 
 	function fillFoilstamps($comp, foilstamps, componentIndex) {
@@ -587,6 +903,7 @@ $(function () {
 				const m = findOptionMatch($col, fs.color)
 				if (m) $col.val(m).trigger('change')
 			}
+			fillAddonFCodes($fs, 'foilstamp')
 		})
 	}
 
@@ -605,6 +922,7 @@ $(function () {
 			if (w != null && $sizes.length >= 1) $sizes.eq(0).val(w).trigger('change')
 			if (h != null && $sizes.length >= 2) $sizes.eq(1).val(h).trigger('change')
 			if (e.depth) $e.find('.embossDepth').val(String(e.depth)).trigger('change')
+			fillAddonFCodes($e, 'emboss')
 		})
 	}
 
@@ -623,6 +941,7 @@ $(function () {
 			if (w != null && $sizes.length >= 1) $sizes.eq(0).val(w).trigger('change')
 			if (h != null && $sizes.length >= 2) $sizes.eq(1).val(h).trigger('change')
 			if (b.depth) $b.find('.debossDepth').val(String(b.depth)).trigger('change')
+			fillAddonFCodes($b, 'deboss')
 		})
 	}
 
@@ -647,9 +966,19 @@ $(function () {
 
 		const tryNext = (i) => {
 			if (i >= candidates.length) {
-				// nothing matched — leave the user-suggested option set so the
-				// dropdown is at least populated for manual choice
+				// Nothing matched any option's dropdown. Set the suggested
+				// option for context, then prepend a "needs review" placeholder
+				// to the coatingType so the form does NOT show a WRONG coating
+				// (otherwise it auto-selects the first option in the list).
 				if (coating.option) $opt.val(coating.option).trigger('change')
+				setTimeout(() => {
+					const $t = $container.find('.coatingType').first()
+					if ($t.length) {
+						const wantedLabel = wanted ? ' (spec: ' + wanted + ')' : ''
+						$t.prepend('<option value="" selected>— กรุณาเลือกเอง' + escapeHtml(wantedLabel) + ' —</option>')
+						$t.val('').trigger('change')
+					}
+				}, 400)
 				return
 			}
 			$opt.val(candidates[i]).trigger('change')
@@ -658,6 +987,22 @@ $(function () {
 				const m = findOptionMatch($type, wanted)
 				if (m) {
 					$type.val(m).trigger('change')
+					// For Spot UV / Spot UV Semi the form auto-renders a
+					// "Size (in²)" input via .coatingSize. Fill it if AI gave
+					// a size.
+					if (/spot\s*uv/i.test(wanted)) {
+						const w = coating.size_w_inch != null ? coating.size_w_inch : null
+						const h = coating.size_h_inch != null ? coating.size_h_inch : null
+						if (w != null || h != null) {
+							setTimeout(() => {
+								const $sizes = $container.find('.coatingSize')
+								if ($sizes.length >= 2) {
+									if (w != null) $sizes.eq(0).val(w).trigger('change').trigger('input')
+									if (h != null) $sizes.eq(1).val(h).trigger('change').trigger('input')
+								}
+							}, 400)
+						}
+					}
 				} else {
 					tryNext(i + 1)
 				}

@@ -3273,13 +3273,15 @@ class Estimate {
 	}
 
 	setCalculateWSide(w_case, n, w, l, d, b, dust, ol, g, t) {
-
+		console.log("setCalculateWSide", w_case, n, w, l, d, b, dust, ol, g, t)
 		switch (w_case) {
 			case 1.1: //* dust<=(w+t)/2
 				var side = (n + 1) * (w + t) + n * (2 * b + d)
+				console.log("formula : ", ` side = (${n} + 1) * (${w} + ${t}) + ${n} * (2 * ${b} + ${d})`)
 				break
 			case 1.2: //* dust>(w+t)/2
 				var side = 2 * (w + t) + n * (2 * b + d) + (n - 1) * (2 * dust)
+				console.log("formula : ", ` side = 2 * (${w} + ${t}) + ${n} * (2 * ${b} + ${d}) + (${n} - 1) * (2 * ${dust})`)
 				break
 			case 2.1: //* align: straight
 				var side = 2 * (w + t) + n * (2 * b + d) + (n - 1) * (dust + w + t)
@@ -3337,7 +3339,7 @@ class Estimate {
 	}
 
 	setCalculateLSide(l_case, n, w, l, d, b, dust, ol, g) {
-
+		//! recheck ว่ารับ parameter ครบมั้ย
 		switch (l_case) {
 			case 1.0:
 				var side = n * (2 * (w + l + b) + g)
@@ -4300,7 +4302,7 @@ class Estimate {
 
 		if ([2, 3].includes(compType)) {
 			// * with corrugated  , corrugated only
-			corrugated_weight = parseFloat((area_box * corrugated_layer.info.all_gram * corrugated_layer.info.num_layer / 1000000000).toFixed(6))
+			corrugated_weight = parseFloat((area_box * corrugated_layer.info.all_gram * corrugated_layer.info.num_layer / 1000000000).toFixed(4))
 			if ([2].includes(compType)) {
 				paper_weight = parseFloat((area_box * gram / 1000000000).toFixed(6))
 			}
@@ -6315,8 +6317,6 @@ class Estimate {
 						qty = item.paper_usage.line[qtyIndex].after_ups + item.waste.waste_corrugated_board[qtyIndex]
 					}
 
-					// qty = roundCorrugated(qty)
-
 					//* profit sharing
 					unit_price = parseFloat((unit_price * (1 + (afterpress_price_marking / 100))).toFixed(2))
 
@@ -7785,7 +7785,6 @@ class Estimate {
 		processInfoBuilder.addShrinkwrapProcess(null, targetLength)
 		processInfoBuilder.addBagProcess(null, targetLength)
 		processInfoBuilder.addTrimProcess(null, targetLength)
-		processInfoBuilder.addDeliveryProcess(targetLength)
 	}
 
 	setSystemVersion(version) {
@@ -7938,7 +7937,6 @@ class Estimate {
 			total_price_marking_material_production //* "total" production + material
 		}
 	}
-
 
 	setCalculateTax() {
 		// * คำนวณ Profit Sharing ก่อน Tax

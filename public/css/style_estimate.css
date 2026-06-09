@@ -1,4 +1,4 @@
-html {
+﻿html {
   scroll-behavior: smooth;
 }
 
@@ -802,7 +802,9 @@ button[disabled="disabled"] {
   }
 
   #view-only {
-    background-color: rgba(0, 0, 0, 0);
+	background-color: rgba(0, 0, 0, 0);
+    display: none;
+    visibility: hidden;
   }
 
   #job_detail {
