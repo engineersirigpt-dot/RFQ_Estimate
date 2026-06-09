@@ -5,10 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "SET NODE_ENV=development& nodemon index.js",
-    "production": "SET NODE_ENV=production& pm2 start index.js --name estimate_packaging",
-    "mac-dev": "NODE_ENV=development nodemon index.js",
-    "mac-production": "NODE_ENV=production pm2 start index.js --name estimate_packaging"
+    "local": "SET NODE_ENV=development& nodemon index.js",
+    "dev": "SET NODE_ENV=development&& pm2 restart Estimate-Packaging:3040 --update-env || pm2 start index.js --name Estimate-Packaging:3040",
+    "production": "SET NODE_ENV=production&& pm2 restart Estimate-Packaging:4040 --update-env || pm2 start index.js --name Estimate-Packaging:4040"
   },
   "keywords": [],
   "author": "",
