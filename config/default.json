@@ -3,9 +3,8 @@
     "port": 3040,
     "version": "3.1",
     "api_url": "http://192.168.5.3/estimate_packaging",
-    "-node_api": "http://192.168.5.3:3010",
-    "node_api": "http://localhost:3010",
-    "--node_api": "http://192.168.200.20:4010",
+    "--node_api": "http://localhost:3010",
+    "node_api": "http://192.168.200.20:4010",
     "wizard_api": "http://hostname:3000",
 
     "base_url": "http://hostname:3040",

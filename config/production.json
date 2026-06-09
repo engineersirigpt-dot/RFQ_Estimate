@@ -2,11 +2,11 @@
   "data": {
     "port": 4040,
     "version": "3.1",
-    "api_url": "http://hostname/estimate_packaging",
-    "node_api": "http://hostname:4010",
-    "base_url": "http://hostname:4040",
-    "report_url": "http://hostname:4051/estimate",
-    "wizard_api": "http://hostname:4060",
-    "costing_url": "http://hostname:4050/all"
+    "api_url": "http://192.168.200.20/estimate_packaging",
+    "node_api": "http://192.168.200.20:4010",
+    "base_url": "http://192.168.200.20:4040",
+    "report_url": "http://192.168.200.20:4051/estimate",
+    "wizard_api": "http://192.168.200.20:4060",
+    "costing_url": "http://192.168.200.20:4050/all"
   }
 }
