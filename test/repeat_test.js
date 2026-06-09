@@ -23,7 +23,7 @@ function extract(data) {
         paper_type:      c.paper_type,
         paper_gram:      c.paper_gram,
         color_outside:   c.color_outside,
-        coating:         JSON.stringify(c.coating),
+        coating:         JSON.stringify(c.coatings),
         width:           c.dimensions_mm?.width,
         length:          c.dimensions_mm?.length,
         height:          c.dimensions_mm?.height,

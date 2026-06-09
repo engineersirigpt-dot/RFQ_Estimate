@@ -1,0 +1,1490 @@
+[
+  {
+    "id": 1,
+    "label": "Trimmine/USA – B-Flute Tray, Offset 1-3 สี",
+    "status": "ok",
+    "elapsed": "13.1s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "Tri marine Shrine P5",
+        "customer_name": "Trimmine",
+        "print_type": "Offset",
+        "is_multiple_f": false,
+        "quantities": [],
+        "packing": {
+          "shrink_per_unit": 5,
+          "units_per_carton": 8
+        },
+        "components": [
+          {
+            "name": "Tray",
+            "type": 3,
+            "box_template_id": 12,
+            "dimensions_mm": {
+              "width": 175,
+              "length": 350,
+              "height": 76
+            },
+            "color_outside": 3,
+            "corrugated": {
+              "grade_top": {
+                "type": "KS",
+                "gram": 170
+              },
+              "grade_bottom": {
+                "type": "K125",
+                "gram": 125
+              },
+              "flute": "B",
+              "layer": "single-wall",
+              "raw_grade_string": "KS170CA125/K125-B"
+            }
+          }
+        ],
+        "deliveries": [
+          {
+            "destination": "ต่างประเทศ"
+          }
+        ],
+        "_uncertain": [
+          "quantities"
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 2,
+    "label": "KIBU – B-Flute FSC, Varnishing",
+    "status": "ok",
+    "elapsed": "15.4s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "E20220706",
+        "customer_name": "KIBU",
+        "print_type": "Offset",
+        "deliveries": [
+          {
+            "destination": "ต่างประเทศ"
+          },
+          {
+            "destination": "กรุงเทพ"
+          }
+        ],
+        "components": [
+          {
+            "name": "Tray",
+            "type": 2,
+            "box_template_id": 12,
+            "dimensions_mm": {
+              "width": 258,
+              "length": 340
+            },
+            "color_outside": 5,
+            "paper_type": "Duplex",
+            "paper_gram": 250,
+            "coatings": [
+              {
+                "option": "Gloss",
+                "type": "Varnish 1 s"
+              }
+            ],
+            "corrugated": {
+              "grade_top": {
+                "type": "DP",
+                "gram": 250
+              },
+              "grade_bottom": {
+                "type": "CA",
+                "gram": 125
+              },
+              "flute": "B",
+              "layer": "single-wall",
+              "raw_grade_string": "DP250CA125-B"
+            }
+          }
+        ],
+        "_uncertain": [
+          "box_template_id"
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 3,
+    "label": "MPM Top Dog – Inner box, E-Flute, Waterbase + Gloss Varnish",
+    "status": "ok",
+    "elapsed": "13.5s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "Top Dog Inner box",
+        "customer_name": "MPM",
+        "print_type": "Offset",
+        "is_multiple_f": false,
+        "components": [
+          {
+            "name": "Inner box",
+            "type": 2,
+            "box_template_id": 1,
+            "dimensions_mm": {
+              "width": 95,
+              "length": 112
+            },
+            "flap_mm": 8,
+            "color_outside": 8,
+            "paper_type": "Duplex",
+            "paper_gram": 250,
+            "corrugated": {
+              "grade_top": {
+                "type": "DP",
+                "gram": 250
+              },
+              "grade_bottom": {
+                "type": "CA",
+                "gram": 125
+              },
+              "flute": "E",
+              "layer": "single-wall",
+              "raw_grade_string": "DP250CA105/CA125-B"
+            },
+            "coatings": [
+              {
+                "option": "Gloss",
+                "type": "Waterbase 1 s"
+              },
+              {
+                "option": "Gloss",
+                "type": "Varnish 1 s"
+              }
+            ]
+          }
+        ],
+        "packing": {
+          "shrink_per_unit": 6,
+          "units_per_carton": 4,
+          "remark": "6 Pouches/Inner, 4 Inner/Shrink"
+        },
+        "deliveries": [
+          {
+            "destination": "ต่างประเทศ"
+          }
+        ],
+        "_uncertain": [
+          "box_template_id"
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 4,
+    "label": "P.O.CARE Oil Control Sachet – Offset, Gloss Waterbase Hi-Rub",
+    "status": "ok",
+    "elapsed": "9.2s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "E26090175 P.O.CARE PUREPERFECT OIL CONTROL SUNSCREEN SPF30+PA+++ 8 ML (Sachet) Pack 5",
+        "customer_name": "P.O.CARE",
+        "print_type": "Offset",
+        "quantities": [
+          3000,
+          5000,
+          10000,
+          20000,
+          50000
+        ],
+        "components": [
+          {
+            "name": "Sachet Pack 5",
+            "type": 1,
+            "box_template_id": 12,
+            "dimensions_mm": {
+              "width": 315.5,
+              "length": 298.5
+            },
+            "paper_type": "A/C",
+            "paper_gram": 350,
+            "coatings": [
+              {
+                "option": "Gloss",
+                "type": "Waterbase 1 s"
+              }
+            ]
+          }
+        ],
+        "_uncertain": [
+          "box_template_id",
+          "color_outside",
+          "color_inside"
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 5,
+    "label": "Display Box – ประกบลูกฟูก E, Offset, Waterbase, 4/6 สี",
+    "status": "ok",
+    "elapsed": "8.9s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "Display Box 9x255 E Brand",
+        "customer_name": "E Brand",
+        "print_type": "Offset",
+        "ink_type": "conventional",
+        "quantities": [
+          1000,
+          2000,
+          3000,
+          4000,
+          5000,
+          7000,
+          10000
+        ],
+        "components": [
+          {
+            "name": "Display Box",
+            "type": 2,
+            "box_template_id": 12,
+            "paper_type": "A/C",
+            "paper_gram": 310,
+            "color_outside": 6,
+            "color_inside": 4,
+            "coatings": [
+              {
+                "option": "Gloss",
+                "type": "Waterbase 1 s"
+              }
+            ],
+            "corrugated": {
+              "grade_top": {
+                "type": "CA",
+                "gram": 125
+              },
+              "grade_bottom": {
+                "type": "CA",
+                "gram": 125
+              },
+              "flute": "E",
+              "layer": "single-wall",
+              "raw_grade_string": "CA125/CA125-E"
+            }
+          }
+        ],
+        "_uncertain": [
+          "dimensions_mm",
+          "box_template_id"
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 6,
+    "label": "ART CARD 270GSM 1/S – 4 สี + ดำ, qty 5000-20000",
+    "status": "ok",
+    "elapsed": "6.6s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "E26020628",
+        "quantities": [
+          5000,
+          10000,
+          15000,
+          20000
+        ],
+        "components": [
+          {
+            "name": "Component 1",
+            "type": 1,
+            "paper_type": "A/C C1s",
+            "paper_gram": 270,
+            "color_outside": 5
+          }
+        ],
+        "_uncertain": [
+          "box_template_id",
+          "dimensions_mm",
+          "flap_mm",
+          "color_inside",
+          "coating type"
+        ],
+        "print_type": "Offset"
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 7,
+    "label": "เฉพาะลูกฟูก 400g – Gloss Waterbase, qty 20000-100000",
+    "status": "ok",
+    "elapsed": "7.7s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "E26030773",
+        "print_type": "Offset",
+        "quantities": [
+          20000,
+          50000,
+          100000
+        ],
+        "components": [
+          {
+            "type": 2,
+            "box_template_id": 12,
+            "dimensions_mm": {
+              "width": 350,
+              "length": 362
+            },
+            "color_outside": 4,
+            "color_inside": 0,
+            "paper_gram": 400,
+            "coatings": [
+              {
+                "option": "Gloss",
+                "type": "1 s"
+              },
+              {
+                "option": "Gloss",
+                "type": "Waterbase 1 s"
+              }
+            ],
+            "corrugated": {
+              "raw_grade_string": "เฉพาะลูกฟูก"
+            }
+          }
+        ],
+        "_uncertain": [
+          "box_template_id",
+          "paper_type",
+          "corrugated"
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 8,
+    "label": "หลาย F-code – foil หลาย spec, qty 394400",
+    "status": "ok",
+    "elapsed": "7.3s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "E26030013",
+        "is_multiple_f": true,
+        "f_codes": [
+          {
+            "code": "F017726",
+            "qty": 36400
+          },
+          {
+            "code": "F018021",
+            "qty": 25000
+          },
+          {
+            "code": "F018020",
+            "qty": 25000
+          },
+          {
+            "code": "F018019",
+            "qty": 25000
+          },
+          {
+            "code": "F017964",
+            "qty": 28000
+          },
+          {
+            "code": "F017965",
+            "qty": 28000
+          }
+        ],
+        "quantities": [],
+        "components": [
+          {
+            "name": "Box",
+            "type": 2,
+            "box_template_id": 12,
+            "dimensions_mm": {
+              "width": 424,
+              "length": 425,
+              "height": 72
+            },
+            "paper_type": "A/C",
+            "paper_gram": 310,
+            "corrugated": {
+              "raw_grade_string": "4.8 gram"
+            }
+          }
+        ],
+        "_uncertain": [
+          "box_template_id",
+          "paper_type",
+          "corrugated"
+        ],
+        "print_type": "Offset"
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 9,
+    "label": "ลูกฟูก CA125/CA125 B-flute 2 ชั้น – 180x280x260mm",
+    "status": "ok",
+    "elapsed": "8.6s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "E26040347",
+        "print_type": "Offset",
+        "quantities": [
+          3000,
+          5000,
+          8000,
+          10000
+        ],
+        "components": [
+          {
+            "type": 2,
+            "box_template_id": 12,
+            "dimensions_mm": {
+              "width": 180,
+              "length": 280,
+              "height": 260
+            },
+            "paper_gram": 270,
+            "corrugated": {
+              "grade_top": {
+                "type": "CA",
+                "gram": 125
+              },
+              "grade_bottom": {
+                "type": "CA",
+                "gram": 125
+              },
+              "flute": "B",
+              "layer": "single-wall",
+              "raw_grade_string": "CA125/CA125"
+            }
+          }
+        ],
+        "packing": {
+          "units_per_carton": 6
+        },
+        "_uncertain": [
+          "paper_type",
+          "box_template_id"
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 10,
+    "label": "Inner S.R.P. Jelly – DP350/DP400, sheet W360xL434mm, Waterbase",
+    "status": "ok",
+    "elapsed": "8.4s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "Inner S.R.P. Jelly 12P-Becover",
+        "customer_name": "S.R.P.",
+        "is_reprinted": "0",
+        "print_type": "Offset",
+        "quantities": [
+          5000,
+          5000,
+          10000,
+          50000
+        ],
+        "components": [
+          {
+            "name": "Inner S.R.P. Jelly 12P-Becover",
+            "type": 1,
+            "box_template_id": 12,
+            "open_size_mm": {
+              "w": 360,
+              "l": 434
+            },
+            "paper_type": "Duplex GBB",
+            "coatings": [
+              {
+                "option": "Gloss",
+                "type": "Waterbase 1 s"
+              }
+            ]
+          }
+        ],
+        "_uncertain": [
+          "box_template_id",
+          "color_outside",
+          "color_inside",
+          "paper_gram"
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 11,
+    "label": "300 gram, 2/0 สี, Spot UV, qty 10000-30000",
+    "status": "ok",
+    "elapsed": "6.5s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "E26050169",
+        "print_type": "Offset",
+        "quantities": [
+          10000,
+          20000,
+          30000
+        ],
+        "components": [
+          {
+            "type": 1,
+            "paper_gram": 300,
+            "color_outside": 2,
+            "color_inside": 0,
+            "coatings": [
+              {
+                "option": "Other",
+                "type": "Spot UV 1 s"
+              }
+            ]
+          }
+        ],
+        "_uncertain": [
+          "box_template_id",
+          "paper_type",
+          "dimensions_mm"
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 12,
+    "label": "Liquid Snack Tuck Box – Duplex 450gsm, OPP Window, 6-7 สี, Waterbase",
+    "status": "ok",
+    "elapsed": "7.3s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "E26050144",
+        "print_type": "Offset",
+        "quantities": [
+          1000,
+          5000,
+          7000,
+          10000
+        ],
+        "components": [
+          {
+            "name": "Liquid Snack 140X12",
+            "type": 1,
+            "box_template_id": 1,
+            "dimensions_mm": {
+              "width": 30,
+              "length": 95,
+              "height": 178
+            },
+            "flap_mm": 6,
+            "color_outside": 7,
+            "paper_type": "Duplex",
+            "paper_gram": 450,
+            "coatings": [
+              {
+                "option": "Gloss",
+                "type": "Waterbase 1 s"
+              },
+              {
+                "option": "Other",
+                "type": "OPP Window 1 s"
+              }
+            ]
+          }
+        ],
+        "_uncertain": [
+          "color_inside"
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 13,
+    "label": "ประกบลูกฟูก E 2 ชั้น CA125/K125 – 385x230x160mm",
+    "status": "ok",
+    "elapsed": "8.1s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "E26050018",
+        "print_type": "Offset",
+        "quantities": [
+          3000,
+          4000,
+          5000,
+          6000,
+          7000,
+          10000
+        ],
+        "components": [
+          {
+            "name": "E26050018",
+            "type": 2,
+            "box_template_id": 12,
+            "dimensions_mm": {
+              "width": 385,
+              "length": 230,
+              "height": 160
+            },
+            "corrugated": {
+              "grade_top": {
+                "type": "CA",
+                "gram": 125
+              },
+              "grade_bottom": {
+                "type": "K",
+                "gram": 125
+              },
+              "flute": "E",
+              "layer": "single-wall",
+              "raw_grade_string": "CA125/K125"
+            }
+          }
+        ],
+        "_uncertain": [
+          "paper_type",
+          "paper_gram",
+          "color_outside",
+          "color_inside"
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 14,
+    "label": "Eye Cream กล่องเล็ก – 350g, OPP 4 ส่วน, CMYK, qty 1000-5000",
+    "status": "ok",
+    "elapsed": "9.2s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "OIL/FOAM ANTI-WRINKLE FIRMING EYE CREAM",
+        "customer_name": "E26050007",
+        "print_type": "Offset",
+        "quantities": [
+          1000,
+          2000,
+          3000,
+          4000,
+          5000
+        ],
+        "components": [
+          {
+            "name": "E26050007",
+            "type": 1,
+            "box_template_id": 12,
+            "dimensions_mm": {
+              "width": 28,
+              "length": 124,
+              "height": null
+            },
+            "paper_type": "A/C",
+            "paper_gram": 350,
+            "color_outside": 4,
+            "coatings": [
+              {
+                "option": "Gloss",
+                "type": "OPP 2 s"
+              }
+            ]
+          }
+        ],
+        "_uncertain": [
+          "box_template_id",
+          "dimensions_mm"
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 15,
+    "label": "หลายโมเดล 7 แบบ – 250x250mm, 4/4 + OPP 2 ด้าน",
+    "status": "ok",
+    "elapsed": "8.5s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "E26040652",
+        "print_type": "Offset",
+        "ink_type": "conventional",
+        "is_multiple_f": true,
+        "f_codes": [
+          {
+            "code": "Wallet",
+            "qty": 2000
+          },
+          {
+            "code": "Sticker",
+            "qty": 500
+          },
+          {
+            "code": "Casa Lapin",
+            "qty": 500
+          },
+          {
+            "code": "Suki Teanol",
+            "qty": 1000
+          },
+          {
+            "code": "Jaymart Insurance",
+            "qty": 500
+          },
+          {
+            "code": "LAS Asset",
+            "qty": 100
+          },
+          {
+            "code": "SINGER",
+            "qty": 100
+          },
+          {
+            "code": "SG Controll",
+            "qty": 100
+          }
+        ],
+        "quantities": [],
+        "components": [
+          {
+            "type": 1,
+            "box_template_id": 12,
+            "dimensions_mm": {
+              "width": 120,
+              "length": 125
+            },
+            "color_outside": 4,
+            "color_inside": 4,
+            "coatings": [
+              {
+                "option": "Gloss",
+                "type": "OPP 2 s"
+              },
+              {
+                "option": "Gloss",
+                "type": "Spot UV 1 s"
+              }
+            ]
+          }
+        ],
+        "_uncertain": [
+          "paper_type",
+          "paper_gram",
+          "box_template_id"
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 16,
+    "label": "332x361.5mm – Gloss OPP Window 1/s + Water Proof 1/s",
+    "status": "ok",
+    "elapsed": "7.2s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "E26040575",
+        "print_type": "Offset",
+        "open_size_mm": {
+          "w": 332,
+          "l": 361.5
+        },
+        "components": [
+          {
+            "type": 1,
+            "box_template_id": 12,
+            "dimensions_mm": {
+              "width": 50,
+              "length": 230,
+              "height": 105
+            },
+            "coatings": [
+              {
+                "option": "Other",
+                "type": "OPP Window 1 s"
+              },
+              {
+                "option": "Other",
+                "type": "กันชื้น (Water Proof) 1 s"
+              }
+            ]
+          }
+        ],
+        "_uncertain": [
+          "box_template_id",
+          "paper_type",
+          "paper_gram",
+          "color_outside",
+          "color_inside",
+          "type"
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 17,
+    "label": "E30885 Berceges F018270 – 5 สี + Gloss Water Base, qty 5000-60000",
+    "status": "ok",
+    "elapsed": "18.5s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "E30885 Berceges - F018270",
+        "print_type": "Offset",
+        "ink_type": "conventional",
+        "is_reprinted": "0",
+        "quantities": [
+          5000,
+          10000,
+          20000,
+          25000,
+          30000,
+          35000,
+          60000
+        ],
+        "components": [
+          {
+            "name": "F018270",
+            "type": 1,
+            "dimensions_mm": {
+              "width": 17,
+              "length": 72,
+              "height": 110
+            },
+            "color_outside": 5,
+            "color_inside": 0,
+            "paper_type": "A/C",
+            "coatings": [
+              {
+                "option": "Gloss",
+                "type": "Waterbase 1 s"
+              }
+            ]
+          }
+        ],
+        "_uncertain": [
+          "box_template_id",
+          "paper_gram",
+          "flap_mm"
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 18,
+    "label": "400 gram, 55x64.5cm – UV 1 ด้าน, qty 120/24000",
+    "status": "ok",
+    "elapsed": "10.8s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "E26040504",
+        "print_type": "Offset",
+        "quantities": [
+          12000,
+          24000
+        ],
+        "components": [
+          {
+            "name": "กล่อง",
+            "type": 1,
+            "box_template_id": 12,
+            "dimensions_mm": {
+              "width": 535,
+              "length": 640
+            },
+            "color_outside": 5,
+            "color_inside": 0,
+            "paper_type": "A/C",
+            "paper_gram": 400,
+            "coatings": [
+              {
+                "option": "Gloss",
+                "type": "UV 1 s"
+              },
+              {
+                "option": "Other",
+                "type": "PVC 1 s"
+              }
+            ]
+          }
+        ],
+        "_uncertain": [
+          "box_template_id"
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 19,
+    "label": "[PASS] A/C C2s 300gsm – 500x503x150mm, qty 3000-30000",
+    "status": "ok",
+    "elapsed": "10.7s",
+    "result": {
+      "success": true,
+      "data": {
+        "print_type": "Offset",
+        "quantities": [
+          3000,
+          4000,
+          5000,
+          8000,
+          10000,
+          20000,
+          30000
+        ],
+        "components": [
+          {
+            "type": 1,
+            "dimensions_mm": {
+              "width": 500,
+              "length": 503,
+              "height": 150
+            },
+            "flap_mm": 12,
+            "paper_type": "A/C C2s",
+            "paper_gram": 300
+          }
+        ],
+        "_uncertain": [
+          "box_template_id"
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 20,
+    "label": "ลูกฟูก 300gram + UV – qty 20000/50000",
+    "status": "ok",
+    "elapsed": "8.8s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "E28030829",
+        "print_type": "Offset",
+        "ink_type": "UV",
+        "quantities": [
+          20000,
+          50000
+        ],
+        "components": [
+          {
+            "type": 3,
+            "box_template_id": 12,
+            "paper_gram": 300,
+            "corrugated": {
+              "raw_grade_string": "300 gram"
+            },
+            "color_outside": 4,
+            "coatings": [
+              {
+                "option": "Gloss",
+                "type": "UV 1 s"
+              }
+            ]
+          }
+        ],
+        "_uncertain": [
+          "box_template_id",
+          "corrugated",
+          "paper_type",
+          "dimensions_mm"
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 21,
+    "label": "[REPRINT] Rep. ใช้ Plate เก่า – A/C C1s, 4/0, Gloss OPP",
+    "status": "ok",
+    "elapsed": "9.2s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "Rep. E25041122",
+        "customer_name": "บริษัท ยูนิซัน จำกัด",
+        "is_reprinted": "1",
+        "use_previous_plate": true,
+        "print_type": "Offset",
+        "quantities": [
+          5000,
+          10000,
+          20000
+        ],
+        "components": [
+          {
+            "name": "กล่อง",
+            "type": 1,
+            "box_template_id": 12,
+            "dimensions_mm": {
+              "width": 80,
+              "length": 200,
+              "height": 30
+            },
+            "flap_mm": 8,
+            "color_outside": 4,
+            "color_inside": 0,
+            "paper_type": "A/C C1s",
+            "paper_gram": 300,
+            "coatings": [
+              {
+                "option": "Gloss",
+                "type": "OPP 1 s"
+              }
+            ]
+          }
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 22,
+    "label": "[KONICA] Digital พิมพ์ Konica – A/C 250g, 4/4, Matt OPP, qty น้อย",
+    "status": "ok",
+    "elapsed": "8.8s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "E26120222",
+        "print_type": "Konica",
+        "components": [
+          {
+            "type": 1,
+            "dimensions_mm": {
+              "width": 100,
+              "length": 150,
+              "height": 50
+            },
+            "flap_mm": 8,
+            "color_outside": 4,
+            "color_inside": 4,
+            "paper_type": "A/C",
+            "paper_gram": 250,
+            "coatings": [
+              {
+                "option": "Matt",
+                "type": "OPP 1 s"
+              }
+            ]
+          }
+        ],
+        "quantities": [
+          100,
+          200,
+          500
+        ],
+        "_uncertain": [
+          "box_template_id"
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 23,
+    "label": "[JET PRESS] HP Indigo / Jet Press – Ivory 350g, 4C, Waterbase",
+    "status": "ok",
+    "elapsed": "10.7s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "E26120333",
+        "customer_name": "Fancy Brand Co., Ltd.",
+        "print_type": "Jet Press",
+        "quantities": [
+          500,
+          1000,
+          2000
+        ],
+        "components": [
+          {
+            "type": 1,
+            "dimensions_mm": {
+              "width": 60,
+              "length": 200,
+              "height": 60
+            },
+            "flap_mm": 6,
+            "color_outside": 4,
+            "paper_type": "Ivory",
+            "paper_gram": 350,
+            "coatings": [
+              {
+                "option": "Gloss",
+                "type": "Waterbase 1 s"
+              }
+            ]
+          }
+        ],
+        "_uncertain": [
+          "box_template_id"
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 24,
+    "label": "[UV INK] กระดาษ A/C 300g, UV Ink 4/0, Gloss UV coating",
+    "status": "ok",
+    "elapsed": "8.4s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "E26120444",
+        "customer_name": "Pharma Pack Ltd.",
+        "print_type": "Offset",
+        "ink_type": "UV",
+        "quantities": [
+          10000,
+          20000,
+          50000
+        ],
+        "components": [
+          {
+            "type": 1,
+            "dimensions_mm": {
+              "width": 120,
+              "length": 80,
+              "height": 40
+            },
+            "flap_mm": 8,
+            "color_outside": 4,
+            "color_inside": 0,
+            "paper_type": "A/C",
+            "paper_gram": 300,
+            "coatings": [
+              {
+                "option": "Gloss",
+                "type": "UV 1 s"
+              }
+            ]
+          }
+        ],
+        "_uncertain": [
+          "box_template_id"
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 25,
+    "label": "[FOIL+EMBOSS] A/C C2s 350g, 4/0, Spot UV + Foil ทอง + Emboss",
+    "status": "ok",
+    "elapsed": "9.9s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "E26120555",
+        "customer_name": "Luxury Cosmetics Co.",
+        "print_type": "Offset",
+        "quantities": [
+          5000,
+          10000,
+          30000
+        ],
+        "components": [
+          {
+            "type": 1,
+            "dimensions_mm": {
+              "width": 70,
+              "length": 200,
+              "height": 70
+            },
+            "flap_mm": 8,
+            "color_outside": 4,
+            "color_inside": 0,
+            "paper_type": "A/C C2s",
+            "paper_gram": 350,
+            "coatings": [
+              {
+                "option": "Other",
+                "type": "Spot UV 1 s"
+              }
+            ],
+            "foilstamps": [
+              {
+                "size_w_inch": 2,
+                "size_h_inch": 1,
+                "color": "สีทอง"
+              }
+            ],
+            "embosses": [
+              {
+                "size_w_inch": 1.5,
+                "size_h_inch": 0.5,
+                "depth": "1.25"
+              }
+            ]
+          }
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 26,
+    "label": "[MULTI-DELIVERY] ส่ง 2 จังหวัด – สมุทรปราการ + ชลบุรี",
+    "status": "ok",
+    "elapsed": "7.0s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "E26120666",
+        "customer_name": "XYZ Food Co., Ltd.",
+        "print_type": "Offset",
+        "quantities": [
+          20000,
+          50000
+        ],
+        "components": [
+          {
+            "type": 1,
+            "dimensions_mm": {
+              "width": 200,
+              "length": 150,
+              "height": 100
+            },
+            "flap_mm": 10,
+            "color_outside": 4,
+            "color_inside": 0,
+            "paper_type": "A/C C1s",
+            "paper_gram": 300,
+            "coatings": [
+              {
+                "option": "Gloss",
+                "type": "Waterbase 1 s"
+              }
+            ]
+          }
+        ],
+        "deliveries": [
+          {
+            "destination": "สมุทรปราการ"
+          },
+          {
+            "destination": "ชลบุรี"
+          }
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 27,
+    "label": "[FLEXO] Flexo พิมพ์ลูกฟูก – KS/CA125/K125 B-flute, 2/0, Waterbase",
+    "status": "ok",
+    "elapsed": "8.6s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "E26120777",
+        "customer_name": "Agri Export Co.",
+        "print_type": "Flexo",
+        "quantities": [
+          10000,
+          20000,
+          50000
+        ],
+        "components": [
+          {
+            "name": "E26120777",
+            "type": 3,
+            "box_template_id": 12,
+            "dimensions_mm": {
+              "width": 300,
+              "length": 200,
+              "height": 150
+            },
+            "color_outside": 2,
+            "corrugated": {
+              "grade_top": {
+                "type": "KS",
+                "gram": 170
+              },
+              "grade_bottom": {
+                "type": "K125",
+                "gram": 125
+              },
+              "flute": "B",
+              "layer": "single-wall",
+              "raw_grade_string": "KS170/CA125/K125"
+            },
+            "coatings": [
+              {
+                "option": "Gloss",
+                "type": "Waterbase 1 s"
+              }
+            ]
+          }
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 28,
+    "label": "[SLEEVE] ปลอกกล่อง – A/C C2s 300g, 4/0, Scuff Free OPP",
+    "status": "ok",
+    "elapsed": "8.8s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "E26120888 ปลอกกล่อง (Sleeve)",
+        "customer_name": "Beauty Brand",
+        "print_type": "Offset",
+        "quantities": [
+          5000,
+          10000,
+          20000
+        ],
+        "components": [
+          {
+            "name": "ปลอกกล่อง",
+            "type": 1,
+            "box_template_id": 9,
+            "dimensions_mm": {
+              "width": 200,
+              "length": 500
+            },
+            "paper_type": "A/C C2s",
+            "paper_gram": 300,
+            "color_outside": 4,
+            "color_inside": 0,
+            "coatings": [
+              {
+                "option": "Matt",
+                "type": "OPP Scuff Free 30 mc 1 s"
+              }
+            ]
+          }
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 29,
+    "label": "[AUTO-BOTTOM] กล่องก้นล็อก – A/C 350g, 4/0, Soft Touch + Spot UV",
+    "status": "ok",
+    "elapsed": "13.6s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "E26120999",
+        "customer_name": "Premium Gift Box Co.",
+        "print_type": "Offset",
+        "quantities": [
+          10000,
+          20000,
+          50000
+        ],
+        "components": [
+          {
+            "name": "กล่องก้นล็อก",
+            "type": 1,
+            "box_template_id": 4,
+            "dimensions_mm": {
+              "width": 100,
+              "length": 100,
+              "height": 150
+            },
+            "flap_mm": 8,
+            "color_outside": 4,
+            "color_inside": 0,
+            "paper_type": "A/C",
+            "paper_gram": 350,
+            "coatings": [
+              {
+                "option": "Matt",
+                "type": "OPP Soft Touch 30 mc 1 s"
+              },
+              {
+                "option": "Other",
+                "type": "Spot UV 1 s"
+              }
+            ]
+          }
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  },
+  {
+    "id": 30,
+    "label": "[BASELINE] กล่องธรรมดา – A/C 300g, 4/0, Gloss WB, ส่งนครปฐม",
+    "status": "ok",
+    "elapsed": "10.1s",
+    "result": {
+      "success": true,
+      "data": {
+        "job_name": "กล่อง",
+        "customer_name": "Uni-President (Thailand) Co., Ltd.",
+        "print_type": "Offset",
+        "quantities": [
+          10000,
+          20000,
+          50000
+        ],
+        "components": [
+          {
+            "name": "กล่อง",
+            "type": 1,
+            "dimensions_mm": {
+              "width": 100,
+              "length": 200,
+              "height": 80
+            },
+            "flap_mm": 8,
+            "color_outside": 4,
+            "color_inside": 0,
+            "paper_type": "A/C",
+            "paper_gram": 300,
+            "coatings": [
+              {
+                "option": "Gloss",
+                "type": "Waterbase 1 s"
+              }
+            ]
+          }
+        ],
+        "deliveries": [
+          {
+            "destination": "นครปฐม"
+          }
+        ]
+      },
+      "model": "claude-sonnet-4-5"
+    }
+  }
+]

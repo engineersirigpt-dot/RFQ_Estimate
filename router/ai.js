@@ -347,10 +347,20 @@ function validateAndFix(data) {
 	// 3. components
 	if (Array.isArray(data.components)) {
 		data.components.forEach(comp => {
-			// box_template_id must be integer 1-12
-			if (comp.box_template_id !== undefined) {
-				const t = parseInt(comp.box_template_id, 10)
-				comp.box_template_id = (isNaN(t) || t < 1 || t > 12) ? 12 : t
+			// box_template_id must be integer 1-12. When the AI couldn't determine
+			// the box style (omitted or out of range), default to 12 (Custom) AND
+			// flag it for review — so the user always gets a populated style field
+			// plus a yellow highlight telling them to verify it.
+			{
+				const raw = comp.box_template_id
+				const t = parseInt(raw, 10)
+				if (raw === undefined || raw === null || isNaN(t) || t < 1 || t > 12) {
+					comp.box_template_id = 12
+					if (!Array.isArray(data._uncertain)) data._uncertain = []
+					if (!data._uncertain.includes('box_template_id')) data._uncertain.push('box_template_id')
+				} else {
+					comp.box_template_id = t
+				}
 			}
 
 			// paper_type too generic → remove (let user fill)

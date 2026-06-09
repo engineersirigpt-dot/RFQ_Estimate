@@ -726,6 +726,16 @@ $(function () {
 			? ' — <b style="color:#fde68a">⚠ ' + uncertainCount + ' field ไฮไลต์สีเหลือง</b> ต้องกรอกเพิ่มเติม'
 			: ''
 		const notes = d.notes ? '<div style="margin-top:6px;font-size:12px;color:#444"><b>หมายเหตุจาก AI:</b> ' + escapeHtml(d.notes) + '</div>' : ''
+		const packing = d.packing && (d.packing.shrink_per_unit != null || d.packing.units_per_carton != null || d.packing.carton_per_pallet != null || d.packing.remark)
+			? (() => {
+				const parts = []
+				if (d.packing.shrink_per_unit != null) parts.push(d.packing.shrink_per_unit + ' ชิ้น/Shrink')
+				if (d.packing.units_per_carton != null) parts.push(d.packing.units_per_carton + ' Shrink/ลัง')
+				if (d.packing.carton_per_pallet != null) parts.push(d.packing.carton_per_pallet + ' ลัง/พาเลท')
+				if (d.packing.remark) parts.push(d.packing.remark)
+				return '<div style="margin-top:6px;font-size:12px;color:#fde68a"><b>📦 ข้อมูลการบรรจุ (กรอกเองในส่วน Packing):</b> ' + escapeHtml(parts.join(' · ')) + '</div>'
+			  })()
+			: ''
 		const btnStyle =
 			'background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.5);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px;margin-left:8px'
 		const banner = $(`
@@ -734,6 +744,7 @@ $(function () {
 					<div style="flex:1">
 						<i class="fa fa-magic"></i> <b>AI ได้กรอกข้อมูลให้แล้ว</b> — กรุณาตรวจสอบทุกฟิลด์ โดยเฉพาะ <b>AE</b>, <b>Customer</b>, และ <b>จังหวัดส่งงาน</b> ต้องเลือกจากรายการ autocomplete อีกครั้ง${uncertainMsg}
 						${notes}
+						${packing}
 					</div>
 					<div style="white-space:nowrap">
 						<button id="ai-show-input" type="button" style="${btnStyle}"><i class="fa fa-file-text-o"></i> ดู input ที่ส่งให้ AI</button>
