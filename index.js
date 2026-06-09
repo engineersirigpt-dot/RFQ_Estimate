@@ -19,7 +19,7 @@ app.locals = { data }
 app.set('view engine', 'ejs')
 app.set('views', path.join(__dirname, 'public'))
 app.use(express.static(path.join(__dirname, 'public')))
-app.use(express.json())
+app.use(express.json({ limit: '25mb' }))
 app.use(cookieParser())
 
 app.use('/product', productRouter)
@@ -47,10 +47,10 @@ app.post('/user/token', (_req, res) => {
 })
 
 // Proxy data endpoints to production (API calls only, not page renders)
-app.use(['/estimate/list', '/estimate/master_data', '/estimate/save_rfq', '/estimate/get_rfq', '/estimate/delete_rfq', '/customer', '/user/ae', '/user/qt_approver'], async (req, res) => {
+app.use(['/estimate/list', '/estimate/master_data', '/estimate/autocomplete', '/estimate/save_rfq', '/estimate/get_rfq', '/estimate/delete_rfq', '/customer', '/user/ae', '/user/qt_approver'], async (req, res) => {
 	try {
 		const url = PROD_API + req.originalUrl
-		const resp = await axios({ method: req.method, url, data: req.body, timeout: 8000 })
+		const resp = await axios({ method: req.method, url, data: req.body, timeout: 8000, maxBodyLength: Infinity, maxContentLength: Infinity })
 		res.json(resp.data)
 	} catch (e) {
 		console.error('proxy error:', req.originalUrl, e.message)
