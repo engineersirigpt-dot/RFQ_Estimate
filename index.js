@@ -50,7 +50,7 @@ app.post('/user/token', (_req, res) => {
 app.use(['/estimate/list', '/estimate/master_data', '/estimate/autocomplete', '/estimate/save_rfq', '/estimate/get_rfq', '/estimate/delete_rfq', '/customer', '/user/ae', '/user/qt_approver'], async (req, res) => {
 	try {
 		const url = PROD_API + req.originalUrl
-		const resp = await axios({ method: req.method, url, data: req.body, timeout: 8000, maxBodyLength: Infinity, maxContentLength: Infinity })
+		const resp = await axios({ method: req.method, url, data: req.body, timeout: 20000, maxBodyLength: Infinity, maxContentLength: Infinity })
 		res.json(resp.data)
 	} catch (e) {
 		console.error('proxy error:', req.originalUrl, e.message)

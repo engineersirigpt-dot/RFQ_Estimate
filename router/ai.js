@@ -420,7 +420,15 @@ router.post('/parse-spec', upload.array('files', 10), async (req, res) => {
 			return res.status(400).json({ success: false, error: 'ต้องมีข้อความหรือไฟล์อย่างน้อย 1 อย่าง' })
 		}
 
-		const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+		// timeout 90s + extra retries: the request ships a ~2.4MB reference
+		// payload (PDF + 12 template images) which re-uploads on every cache
+		// miss (5-min TTL), so a slow network can stall it. Fail at 90s and let
+		// the SDK retry rather than hanging on the default 10-minute timeout.
+		const client = new Anthropic({
+			apiKey: process.env.ANTHROPIC_API_KEY,
+			timeout: 90000,
+			maxRetries: 3
+		})
 		const userContent = await buildContentFromUpload(text, files)
 
 		const msg = await client.messages.create({
@@ -467,7 +475,15 @@ router.post('/parse-spec', upload.array('files', 10), async (req, res) => {
 		res.json({ success: true, data: parsed, model: MODEL })
 	} catch (err) {
 		console.error('AI parse-spec error:', err)
-		res.status(500).json({ success: false, error: err.message || 'unknown error' })
+		const isTimeout =
+			err?.name === 'APIConnectionTimeoutError' ||
+			/timed out|timeout|ECONNRESET|ETIMEDOUT|ENETUNREACH/i.test(err?.message || '')
+		res.status(isTimeout ? 504 : 500).json({
+			success: false,
+			error: isTimeout
+				? 'AI ใช้เวลานานเกินไป (เครือข่ายช้าหรือ timeout) กรุณาลองใหม่อีกครั้ง'
+				: (err.message || 'unknown error')
+		})
 	}
 })
 
