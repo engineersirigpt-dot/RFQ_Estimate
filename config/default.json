@@ -9,6 +9,7 @@
     "wizard_api": "http://hostname:3000",
 
     "base_url": "http://hostname:3099",
-    "report_url": "http://192.168.5.3:3051/estimate"
+    "report_url": "http://192.168.5.3:3051/estimate",
+    "costing_url": "http://hostname:3050/all"
   }
 }

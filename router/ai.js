@@ -79,7 +79,7 @@ Return this exact schema (omit fields you cannot determine — DO NOT guess):
   ],
   "use_previous_plate": "true if this is a reprint that reuses the old printing plate (typical signal: title starts with 'Rep.' or 'Reprint' or doc says ใช้ Plate เก่า / ใช้เพลทเดิม)",
   "ink_type": "conventional | UV. Default to 'conventional'. Set to 'UV' ONLY when the doc EXPLICITLY says UV is the printing ink, e.g. 'พิมพ์ UV', 'หมึก UV', 'UV ink', 'UV offset', 'พิมพ์ด้วยหมึก UV'. DO NOT set to UV just because the coating is UV — 'เคลือบ UV' / 'UV coating' / 'Spot UV' / 'UV Drip Off' / 'UV varnish' are all COATINGS and have NOTHING to do with ink_type. The ink and the coating are separate layers.",
-  "print_type": "Offset or Flexo",
+  "print_type": "Offset | Flexo | Jet Press | Konica | Digital — default to Offset when not stated and job uses standard paper/ink.",
   "flexo_size": { "w": number, "h": number },
   "fold_size_mm": { "w": number, "l": number, "h": number },
   "open_size_mm": { "w": number, "l": number },
@@ -87,6 +87,12 @@ Return this exact schema (omit fields you cannot determine — DO NOT guess):
   "runon_percent": number,
   "color_limit_qty": "number, optional — the 'ลิมิตสี N เล่ม' value. Fill ONLY when the doc explicitly says color-limit. Triggers the form's ลิมิตสี checkbox + sets the เล่ม input. Keywords: 'ลิมิตสี N เล่ม', 'ลิมิต N เล่ม' (typed casually as 'ลิเบล' or 'ลิเมท' too), 'limit color N books', 'color limit N'. The number is in 'เล่ม' (books). Example: 'ลิมิตสี 3 เล่ม' → color_limit_qty=3. Omit if not mentioned.",
   "paper_markup_percent": number,
+  "packing": {
+    "shrink_per_unit": "number — ชิ้น/Shrink หรือ ชิ้น/Bag (e.g. '5 Cans/Shrink' → 5)",
+    "units_per_carton": "number — Shrink/ลัง หรือ ชิ้น/ลัง (e.g. '8 Shrink/Carton' → 8)",
+    "carton_per_pallet": "number — optional",
+    "remark": "string — any packing note not captured above"
+  },
   "components": [
     {
       "name": "string — IMPORTANT: if the doc lists components by F-code (e.g. 'F016194: ไม่ประกบลูกฟูก'), use the F-code (F016194) as the name, NOT the box style description from the title. Only fall back to a descriptive name when no F-code is given.",
@@ -141,7 +147,8 @@ Return this exact schema (omit fields you cannot determine — DO NOT guess):
   "deliveries":         [{ "destination": "Thai province name only, e.g. 'สมุทรปราการ', 'กรุงเทพ', 'นครปฐม', 'ชลบุรี'. Strip prefixes like 'จ.', 'จังหวัด'. Extract from clauses like 'ส่งงาน[จังหวัด] N จุด'.", "qty": "number, optional — qty for THIS specific delivery batch. Fill whenever the doc gives per-batch quantities (split shipments, multiple dates, multiple destinations).", "delivery_date": "DD/MM/YYYY in Thai Buddhist Era (พ.ศ.), optional. The form expects BE — e.g. CE 2022 → 2565, CE 2026 → 2569. If the doc gives a 2-digit year ('20/7/65'), assume BE: → '20/07/2565'. If the doc gives a clearly CE year (4-digit, year < 2200), add 543 to convert: '20/07/2022' → '20/07/2565'. Always output a 4-digit BE year." }],
   "handwork_processes": [{ "name": "string", "price_per_unit": number }],
   "materials":          [{ "name": "string", "price_per_unit": number, "is_fixed_price": true, "qty": number }],
-  "notes": "any free-text notes worth surfacing"
+  "notes": "any free-text notes worth surfacing",
+  "_uncertain": ["optional — list field names the AI was not confident about, e.g. ['paper_type','paper_gram','box_template_id','color_outside']. The UI highlights these in yellow so the user knows what to verify. Omit entirely when confident about all fields."]
 }
 
 Rules:
@@ -149,12 +156,26 @@ Rules:
 - All BOX sizes (dimensions_mm, fold_size_mm, open_size_mm) are in mm — convert from inches if needed.
 - BUT foilstamp / emboss / deboss sizes are ALWAYS in INCHES (the form labels them "Size (in²)"). Keep the original inches value, do NOT convert to mm. Field name is size_w_inch / size_h_inch to make this explicit.
 - ALL coatings/foilstamps/embosses/debosses are ARRAYS — include every item the doc mentions. Common multi-coating example: "matt OPP 1 s + gloss spot UV 1 s" → coatings has 2 entries (Matt OPP, Gloss Spot UV).
-- MULTI-DESIGN JOBS (multi-F): If the doc lists multiple design codes / SKUs that share the same physical specs but have their own quantities (e.g. "งานมี 8 แบบ", "02 จำนวน 10000 / 03 จำนวน 25000 / ...", "F016194 + F016195 + ..."):
+- COATINGS placement: coatings[] MUST always be inside a component object. NEVER place coatings at the job level.
+- COATING sides: "OPP N ด้าน" / "OPP N sides" / "N s" means N-sided coating — use ONE coating entry with "N s" suffix (e.g. "OPP 2 s"), NOT N separate entries.
+- COATING type field: the type field is ONLY the coating product name + sides. NEVER prepend the option value into the type. Examples:
+    ✓ CORRECT:  { "option": "Gloss", "type": "Waterbase 1 s" }
+    ✗ WRONG:    { "option": "Gloss", "type": "Gloss Waterbase 1 s" }
+    ✓ CORRECT:  { "option": "Other", "type": "OPP Window 1 s" }
+- MULTI-DESIGN JOBS (multi-F): If the doc lists multiple DIFFERENT design codes / SKUs that each have their own qty (e.g. "งานมี 8 แบบ", "design 02 = 10000 pcs, design 03 = 25000 pcs", "Wallet 2000 / Sticker 500 / ..."):
     * Set "is_multiple_f": true
     * Fill "f_codes" with one entry per design — the form will create one F-row per entry under the "งานมีหลาย F" section.
     * Use ONE component (single physical box). Do NOT duplicate the component for each design.
     * LEAVE the top-level "quantities" array EMPTY — the per-F qty inside f_codes is the source of truth.
     * The grand total is computed by the form (sum of f_codes[*].qty); do NOT put it in quantities.
+- QUANTITIES vs MULTI-F: A list of production quantities for the SAME design (e.g. "QTY: 5,000 / 10,000 / 20,000 / 50,000") is NOT multi-F. Set is_multiple_f=false and put all numbers in quantities[]. Only set is_multiple_f=true when each design/SKU variant has its own code.
+- PRODUCTION QUANTITY vs PACKING: Packing counts like "5 Cans/Shrink", "24 pcs/carton", "8 Shrink/Carton" are NOT production quantities — put them in packing, NOT in quantities[]. Production quantities are the total pieces to manufacture (typically thousands).
+- CUSTOMER NAME: customer_name = the actual brand or company name. Job reference numbers (formats like E26XXXXXX, TB26/XXX, TS25/XXX, E30XXX) belong in job_name, NEVER in customer_name. If no explicit customer name is given, omit customer_name.
+- COLOR COUNT vs MACHINE: Printing machine model names (e.g. "Ryo 70", "Ryobi 525", "Roland 700", machine serial numbers) are NOT color counts. Only extract color_outside/color_inside from explicit color statements like "4C", "4/0", "CMYK", "4 สี", "6 สี". "CMYK" alone does NOT mean 4 — it is just the color mode; only count colors when a number is explicitly stated.
+- DIMENSIONS from product names: NEVER extract box dimensions from product names, brand names, or codes. If a name like "9x255" or "140X12" appears in the product/job name, do NOT treat it as box dimensions. Only extract dimensions from lines explicitly labeled as W/L/H, width/length/height, ขนาด, dimension, size — and only when the numbers are clearly dimensional measurements, not codes.
+- BOX TEMPLATE from product name: "Tuck Box" in the Style/Type field (not in product name) → box_template_id=1. A product name containing numbers like "140X12" does NOT imply template 12. Template is determined ONLY from the style description field.
+- DELIVERY PROVINCE: Only create a delivery entry when the spec names a specific Thai province. "DESTINATION: Thailand" or "ส่งไทย" without a province name → omit deliveries (cannot determine province). "DESTINATION: USA" or any non-Thai country → put destination='ต่างประเทศ'.
+- CORRUGATED: NEVER guess/invent flute type or layer count. Only fill flute and layer fields when explicitly stated in the spec. If only the grade is given (e.g. "CA125") without a flute label, omit flute and layer.
 - For paper: cost is THB per kg unless the doc says per sheet.
 - "color_outside / color_inside" = TOTAL number of printing colors per side. COUNT GENEROUSLY — include CMYK + every additional ink/varnish layer applied via the press:
     * CMYK base = 4 colors
@@ -258,7 +279,20 @@ Rules:
 
 7. flap_mm (ปีกกล่อง / dust flap): measure the dust flap height from the dieline (the small wing tabs flanking the top closure). Do NOT confuse with the side-glue-tab width (which goes into glue_mm). If the dust flap is clearly visible as ~50-55mm wings on either side of the top tuck, use that value, NOT a small 8-12mm formula estimate.
 
-8. Any other field you cannot back up with an explicit quote from the text/dieline → REMOVE rather than guess. Empty form-template field labels (Customer:, Board:, Flute:, Disk:, M/C:, Plate No.:, Pcs:, Wt:, with nothing filled in) are NOT data — treat them as if they don't exist.`
+8. Any other field you cannot back up with an explicit quote from the text/dieline → REMOVE rather than guess. Empty form-template field labels (Customer:, Board:, Flute:, Disk:, M/C:, Plate No.:, Pcs:, Wt:, with nothing filled in) are NOT data — treat them as if they don't exist.
+
+- PRINT MACHINE keywords: 'Ryo'/'Ryobi' → Offset. 'Roland' → Offset. 'Komori' → Offset. 'Flexo' → Flexo. 'HP Indigo'/'Jet Press'/'Jet press' → Jet Press. 'Konica'/'Konica Minolta' → Konica.
+- _uncertain: when you cannot determine a field value with confidence (spec is ambiguous, info is missing, or you had to guess), add the field name to _uncertain[] and OMIT the field from output. Common uncertain fields: paper_type (only "กระดาษ" mentioned), paper_gram (not stated), box_template_id (no style word), color_outside/color_inside (not explicitly stated), corrugated flute (grade given but no flute label).
+
+EXAMPLES — input spec → expected JSON (follow this pattern exactly):
+
+--- Example 1: Simple Offset inner box with coating + delivery ---
+INPUT: "กล่อง Inner box ลูกค้า ABC Corp จำนวน 5,000 / 10,000 ขนาด W80×L120×H40 mm กระดาษ Art Card 350 gsm พิมพ์ 4/0 สี เคลือบ Gloss OPP 1 ด้าน ส่งงานกรุงเทพ 1 จุด"
+OUTPUT: {"job_name":"กล่อง Inner box","customer_name":"ABC Corp","print_type":"Offset","quantities":[5000,10000],"components":[{"type":1,"box_template_id":1,"dimensions_mm":{"width":80,"length":120,"height":40},"paper_type":"A/C","paper_gram":350,"color_outside":4,"color_inside":0,"coatings":[{"option":"Gloss","type":"OPP 1 s"}]}],"deliveries":[{"destination":"กรุงเทพ"}]}
+
+--- Example 2: Multi-F job with uncertain paper_gram ---
+INPUT: "Brochure ลูกค้า XYZ งานมี 3 แบบ Design A01: 5,000 ชิ้น Design A02: 10,000 ชิ้น Design A03: 8,000 ชิ้น กระดาษ Art Card C1S พิมพ์ 4/4 เคลือบ Matt OPP 1 ด้าน"
+OUTPUT: {"job_name":"Brochure","customer_name":"XYZ","print_type":"Offset","is_multiple_f":true,"f_codes":[{"code":"A01","qty":5000},{"code":"A02","qty":10000},{"code":"A03","qty":8000}],"quantities":[],"components":[{"type":1,"paper_type":"A/C C1s","color_outside":4,"color_inside":4,"coatings":[{"option":"Matt","type":"OPP 1 s"}]}],"_uncertain":["paper_gram"]}`
 
 async function buildContentFromUpload(textInput, files) {
 	const content = []
@@ -347,6 +381,106 @@ async function buildContentFromUpload(textInput, files) {
 		text: 'Now extract the packaging spec and return the JSON object as described in the system prompt.'
 	})
 	return content
+}
+
+// ===== Post-processing: deterministic fix-up after AI extraction =====
+const VALID_PRINT_TYPES = ['Offset', 'Flexo', 'Jet Press', 'Konica', 'Digital']
+const OPTION_PREFIXES   = ['Gloss ', 'Matt ', 'Other ']
+// Alias map: regex matches product-name part → canonical name (sides suffix preserved)
+const COATING_ALIASES   = [
+	[/^Hi[\s-]+Rub\b/i,               'Waterbase'],
+	[/^WB\s+Hi[\s-]+Rub\b/i,          'Waterbase'],
+	[/^Waterbase\s+Hi[\s-]+Rub\b/i,   'Waterbase'],
+	[/^WB\s+Coating\b/i,              'Waterbase'],
+	[/^WB\b/i,                        'Waterbase'],
+	[/^Hi[\s-]+Gloss\s+Waterbase\b/i, 'Hi-gloss waterbase'],
+]
+
+function fixCoating(c) {
+	if (!c || typeof c !== 'object') return null
+	let type = (c.type || '').trim()
+
+	// Remove invalid entries that are ONLY a side-count (e.g. "1 s", "2 s")
+	if (/^\d+\s*s$/i.test(type)) return null
+
+	// Strip option name that was incorrectly prepended (e.g. "Gloss Waterbase 1 s" → "Waterbase 1 s")
+	for (const p of OPTION_PREFIXES) {
+		if (type.startsWith(p)) { type = type.slice(p.length); break }
+	}
+
+	// Normalize known aliases (preserve trailing "N s" side-count)
+	for (const [rx, canonical] of COATING_ALIASES) {
+		if (rx.test(type)) {
+			const sides = (type.match(/\d+\s+s$/i) || [])[0]
+			type = canonical + (sides ? ' ' + sides : '')
+			break
+		}
+	}
+
+	return type ? { ...c, type } : null
+}
+
+function validateAndFix(data) {
+	if (!data || typeof data !== 'object') return data
+
+	// 1. print_type — must be a known value
+	if (!VALID_PRINT_TYPES.includes(data.print_type)) data.print_type = 'Offset'
+
+	// 2. quantities — remove zero / non-numeric values
+	if (Array.isArray(data.quantities)) {
+		data.quantities = data.quantities.filter(q => typeof q === 'number' && q > 0)
+	}
+
+	// 3. components
+	if (Array.isArray(data.components)) {
+		data.components.forEach(comp => {
+			// box_template_id must be integer 1-12. When the AI couldn't determine
+			// the box style (omitted or out of range), default to 12 (Custom) AND
+			// flag it for review — so the user always gets a populated style field
+			// plus a yellow highlight telling them to verify it.
+			{
+				const raw = comp.box_template_id
+				const t = parseInt(raw, 10)
+				if (raw === undefined || raw === null || isNaN(t) || t < 1 || t > 12) {
+					comp.box_template_id = 12
+					if (!Array.isArray(data._uncertain)) data._uncertain = []
+					if (!data._uncertain.includes('box_template_id')) data._uncertain.push('box_template_id')
+				} else {
+					comp.box_template_id = t
+				}
+			}
+
+			// paper_type too generic → remove (let user fill)
+			if (/^กระดาษ$/i.test(comp.paper_type || '') || /^paper$/i.test(comp.paper_type || '')) {
+				delete comp.paper_type
+			}
+
+			// paper_gram must be a positive number
+			if (comp.paper_gram !== undefined && !(Number(comp.paper_gram) > 0)) {
+				delete comp.paper_gram
+			}
+
+			// Konica: max 4 colors per side
+			if (data.print_type === 'Konica') {
+				if (comp.color_outside > 4) comp.color_outside = 4
+				if (comp.color_inside  > 4) comp.color_inside  = 4
+			}
+
+			// Flexo: component type must be 3 (corrugated only)
+			if (data.print_type === 'Flexo' && comp.type && comp.type !== 3) comp.type = 3
+
+			// Corrugated data on type=1 (plain board) doesn't make sense
+			if (comp.type === 1 && comp.corrugated) delete comp.corrugated
+
+			// Fix coating entries
+			if (Array.isArray(comp.coatings)) {
+				comp.coatings = comp.coatings.map(fixCoating).filter(Boolean)
+				if (comp.coatings.length === 0) delete comp.coatings
+			}
+		})
+	}
+
+	return data
 }
 
 function extractJson(text) {
@@ -475,20 +609,27 @@ router.post('/parse-spec', upload.array('files', 10), async (req, res) => {
 			})
 		}
 		const text = req.body && req.body.text ? String(req.body.text) : ''
+		const temperature = typeof req.body?._temperature === 'number' ? Math.min(1, Math.max(0, req.body._temperature)) : 0
 		const files = req.files || []
 		if (!text.trim() && files.length === 0) {
 			return res.status(400).json({ success: false, error: 'ต้องมีข้อความหรือไฟล์อย่างน้อย 1 อย่าง' })
 		}
 
-		const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+		// timeout 90s + extra retries: the request ships a ~2.4MB reference
+		// payload (PDF + 12 template images) which re-uploads on every cache
+		// miss (5-min TTL), so a slow network can stall it. Fail at 90s and let
+		// the SDK retry rather than hanging on the default 10-minute timeout.
+		const client = new Anthropic({
+			apiKey: process.env.ANTHROPIC_API_KEY,
+			timeout: 90000,
+			maxRetries: 3
+		})
 		const userContent = await buildContentFromUpload(text, files)
 
 		const msg = await createWithRetry(client, {
 			model: MODEL,
 			max_tokens: 4000,
-			// temperature=0 → most deterministic. For a spec-extraction task we
-			// want the same input → same output as much as possible.
-			temperature: 0,
+			temperature,
 			// system as a structured array so we can attach cache_control —
 			// caches the (mostly stable) prompt across requests.
 			system: [
@@ -532,6 +673,7 @@ router.post('/parse-spec', upload.array('files', 10), async (req, res) => {
 		} catch (e) {
 			console.warn('[AI strip] error (non-fatal): ' + e.message)
 		}
+		parsed = validateAndFix(parsed)
 
 		res.json({ success: true, data: parsed, model: MODEL })
 	} catch (err) {
