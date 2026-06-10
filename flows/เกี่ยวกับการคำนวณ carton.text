@@ -1,0 +1,62 @@
+เกี่ยวกับการคำนวณ carton
+1. storeCarton
+    carton_obj.unit = ถ้าติ๊ก kraftwrap = "kraftwrap" ถ้าไม่ "piece" //* หา unit
+    carton_obj.inner_size: carton(inner_size) 3 ช่องในหน้าเว็บ //* เก็บ inner_size จาก3ช่องจาก ui ถ้าไม่มีจะเป็น ค่าว่าง
+    carton_obj.layer_carton: จำนวนชิ้นบน ui ถ้าไม่มี = 1 //* เก็บจำนวนชิ้นจาก ui ถ้าไม่มี default = 1
+    est.setCarton(index,carton_obj)
+        info = {
+            inner_size: carton_obj.inner_size,
+            layer_carton: carton_obj.layer_carton,
+            corrugated,
+            bulk : { unit : carton_obj.unit }
+        },
+        line=[],
+        detail=[]
+
+2. this.setCalculateCartonCost(item,false)
+    ราคา = default 1 บาท
+    bulk.unit ถ้ามี kraftwrap ด้วยจะเป็น kraftwrap ถ้าไม่มีจะเป็น piece
+    ถ้าเป็น 'piece' 
+    ? bulk_size = [
+            packing_size[0],
+            packing_size[1],
+            item.thickness.inch.packing_thickness,
+            packing_size[2],
+            packing_size[3],
+            item.thickness.mm.packing_thickness
+        ]
+        unit_info = ""
+        
+    : 'kraftwrap'
+        unit_info = packing kraftwrap
+        bulk_size = packing kraftwrap .info.outer_size
+
+    info.bulk = this.getBulkCartonObj(item, bulk.unit, unit_info, bulk_size)
+        case bulk.unit = 'piece':
+            var bulk = {
+                unit : unit,
+                bulk_size : bulk_size,
+                qty_per_bulk : 1,
+                weight_per_bulk : comp_obj.weight.weight
+            }
+            break
+        case  bulk.unit= 'paperband': 
+            var bulk = {
+                unit : unit,
+                bulk_size : bulk_size,
+                qty_per_bulk : unit_info.info.qty_per_paperband,
+                weight_per_bulk : unit_info.info.stack_weight,
+            }
+            break
+        case bulk.unit = 'kraftwrap': 
+            var bulk = {
+                unit : unit,
+                bulk_size : bulk_size,
+                qty_per_bulk : unit_info.info.qty_per_pack,
+                weight_per_bulk : unit_info.info.gross_weight
+            }
+            break
+        
+
+    
+

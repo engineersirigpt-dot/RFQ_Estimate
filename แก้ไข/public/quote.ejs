@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Quotation</title>
+<%- include('header') -%>
+<link rel="stylesheet"  href="./css/style_quote.css">
+<script src="./js/function_quote.js" ></script>
+<body>
+	<h1 style="margin-left: 40px;">ข้อมูลใบเสนอราคา (Quotation)</h1>
+    <table id="quote-info" cellpadding="5px" style="margin-left: 10%;margin-bottom: 20px;">
+        <tr>
+            <td class="info-label">RFQ ID: </td>
+            <td><input id="rfq_id" readonly></td>
+        </tr>
+        <tr>
+            <td class="info-label">Job Name: </td>
+            <td><input id="job_name" readonly></td>
+        </tr>
+        <tr>
+            <td class="info-label">AE: </td>
+            <td><input id="ae_name" readonly></td>
+        </tr>
+        <tr>
+            <td class="info-label">Customer: </td>
+            <td><input id="customer_name" readonly></td>
+        </tr>
+        <tr>
+            <td class="info-label">Quantity: </td>
+            <td><input id="qty" readonly></td>
+        </tr>
+    </table>
+    <div id="quote-tab">
+        <ul>
+            <li id="quotation-li"><a href="${}">Quotation</a></li>
+        </ul>
+        <div id="quotation-tab">
+            <div style="min-height: 120px;">
+                <table cellpadding="5px" width="100%">
+                    <thead>
+                        <tr height="20px">
+                            <th style="width: 10%;">Quotation ID</th>
+                            <th style="width: 20%;">ชื่อลูกค้า</th>
+                            <th style="width: 10%;">วันที่เสนอราคา</th>
+                            <th style="width: 10%;">ยืนราคาถึงวันที่</th>
+                            <th style="width: 10%;">การชำระเงิน</th>
+                            <th style="width: 15%;">ผู้อนุมัติ</th>
+                            <th style="width: 15%;">ผู้ติดต่อ</th>
+                            <th style="width: 10%;">สถานะ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                       
+                    </tbody>
+                </table>
+            </div>
+            <div id='bttn-menu-table' style="margin-top:20px;">
+                <button id='add'>New</button>
+                <button id='edit'>Edit</button>
+                <button id='delete'>Delete</button>
+                <button id='view'>View</button>
+                <button id='print'>Print</button>
+                <!-- <button id='mail'>Mail แจ้งหัวหน้างาน</button> -->
+                <!-- <button id='approve'>อนุมัติใบเสนอราคา</button> -->
+                <button id='close'>Close</button>
+                <button id='reject' style="display:none;">Reject</button>
+                <button id='approve' style="display:none;">Approve</button>
+            </div>
+        </div>
+    </div>
+    <div id="modal_history">
+        <h2>ประวัติการแก้ไข : <span id="history_id">-</span></h2>
+        <table id="tb_quotation_history" class="w-100 display responsive table hover stripe row-border compact">
+            <thead>
+                <th>No.</th>
+                <th>สถานะ</th>
+                <th>หมายเหตุ</th>
+                <th>ผู้แก้ไข</th>
+                <th>วันที่แก้ไข</th>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <div class="w-100 text-center">
+            <button id="close_modal_history" class="btn-default">Close</button>
+        </div>
+    </div>
+
+    <div id="quotation_reject_modal">
+        <div>
+            <h3>Reject : <span id="reject_quotation_id">-</span></h3>
+            <span>หมายเหตุ <span style="color:red;font-weight:bold;">*</span> :</span>
+            <textarea id="remark" style="margin-top:5px;padding:5px;" rows="3"></textarea>
+            <div class="w-100 text-center" style="margin-top:10px;">
+                <button id="save_reject" class="btn-default">Confirm</button>
+                <button id="cancel_reject" class="btn-default">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>

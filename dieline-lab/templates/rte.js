@@ -1,0 +1,99 @@
+/* templates/rte.js — โหลดผ่าน <script> ได้ (ใช้ได้แม้เปิดด้วย double-click / file://)
+ * เนื้อหาเหมือน rte.json ทุกประการ — rte.json ใช้เป็นไฟล์ export มาตรฐาน
+ */
+window.DIELINE_TEMPLATES = window.DIELINE_TEMPLATES || {};
+window.DIELINE_TEMPLATES.RTE = {
+	"template": "RTE",
+	"name": "Reverse Tuck End",
+	"params": ["L", "W", "D", "T", "G", "dust"],
+	"defaults": { "L": 120, "W": 60, "D": 170, "T": 28, "G": 16, "dust": 22 },
+
+	"controls": [
+		{ "name": "tuckRound", "label": "มนฝาเสียบ", "min": 0.05, "max": 0.5, "step": 0.01, "default": 0.32 },
+		{ "name": "shoulderW", "label": "ไหล่ฝา (กว้าง)", "min": 0, "max": 0.3, "step": 0.01, "default": 0.10 },
+		{ "name": "shoulderH", "label": "ไหล่ฝา (สูง)", "min": 0.1, "max": 1.0, "step": 0.05, "default": 0.6 },
+		{ "name": "glueCham", "label": "กาวตัดเฉียง", "min": 0, "max": 0.8, "step": 0.02, "default": 0.6 },
+		{ "name": "lockH", "label": "บากล็อก (สูง)", "min": 0, "max": 0.4, "step": 0.02, "default": 0.22 },
+		{ "name": "lockW", "label": "บากล็อก (กว้าง)", "min": 0, "max": 0.15, "step": 0.01, "default": 0.05 },
+		{ "name": "dustTaper", "label": "องศาปีก", "min": 0.1, "max": 0.8, "step": 0.02, "default": 0.45 },
+		{ "name": "tuckBotRound", "label": "มนฝาล่าง", "min": 0.05, "max": 0.5, "step": 0.01, "default": 0.18 }
+	],
+
+	"vars": [
+		{ "name": "xL1", "expr": "G" },
+		{ "name": "xW1", "expr": "G+L" },
+		{ "name": "xL2", "expr": "G+L+W" },
+		{ "name": "xW2", "expr": "G+2*L+W" },
+		{ "name": "xEnd", "expr": "G+2*L+2*W" },
+		{ "name": "taper", "expr": "W*dustTaper" },
+		{ "name": "shw", "expr": "L*shoulderW" },
+		{ "name": "shh", "expr": "min(dust, T*shoulderH)" },
+		{ "name": "rt", "expr": "min((L-2*shw)*tuckRound, (T-shh)*0.9)" },
+		{ "name": "ch", "expr": "min(G*glueCham, D*0.08)" },
+		{ "name": "nh", "expr": "min(T*lockH, dust*0.5)" },
+		{ "name": "nw", "expr": "L*lockW" },
+		{ "name": "rb", "expr": "min((L-2*nw)*tuckBotRound, (T-nh)*0.85)" }
+	],
+
+	"panels": [
+		{ "id": "glue", "role": "glue", "comment": "ติดกาว — มุมนอก(ซ้าย)ตัดเฉียง", "outline": [
+			{ "t": "M", "x": "G", "y": "0" }, { "t": "L", "x": "G", "y": "D" },
+			{ "t": "L", "x": "ch", "y": "D" }, { "t": "L", "x": "0", "y": "D-ch" },
+			{ "t": "L", "x": "0", "y": "ch" }, { "t": "L", "x": "ch", "y": "0" }, { "t": "Z" }
+		]},
+		{ "id": "L1", "role": "wall", "outline": [
+			{ "t": "M", "x": "xL1", "y": "0" }, { "t": "L", "x": "xW1", "y": "0" },
+			{ "t": "L", "x": "xW1", "y": "D" }, { "t": "L", "x": "xL1", "y": "D" }, { "t": "Z" }
+		]},
+		{ "id": "W1", "role": "wall", "outline": [
+			{ "t": "M", "x": "xW1", "y": "0" }, { "t": "L", "x": "xL2", "y": "0" },
+			{ "t": "L", "x": "xL2", "y": "D" }, { "t": "L", "x": "xW1", "y": "D" }, { "t": "Z" }
+		]},
+		{ "id": "L2", "role": "wall", "outline": [
+			{ "t": "M", "x": "xL2", "y": "0" }, { "t": "L", "x": "xW2", "y": "0" },
+			{ "t": "L", "x": "xW2", "y": "D" }, { "t": "L", "x": "xL2", "y": "D" }, { "t": "Z" }
+		]},
+		{ "id": "W2", "role": "wall", "outline": [
+			{ "t": "M", "x": "xW2", "y": "0" }, { "t": "L", "x": "xEnd", "y": "0" },
+			{ "t": "L", "x": "xEnd", "y": "D" }, { "t": "L", "x": "xW2", "y": "D" }, { "t": "Z" }
+		]},
+		{ "id": "tuckTop", "role": "tuck", "comment": "ฝาเสียบบน บน L2 — ไหล่สอบเข้า + มุมบนมน", "outline": [
+			{ "t": "M", "x": "xL2", "y": "D" },
+			{ "t": "L", "x": "xL2+shw", "y": "D+shh" },
+			{ "t": "L", "x": "xL2+shw", "y": "D+T-rt" },
+			{ "t": "Q", "cx": "xL2+shw", "cy": "D+T", "x": "xL2+shw+rt", "y": "D+T" },
+			{ "t": "L", "x": "xL2+L-shw-rt", "y": "D+T" },
+			{ "t": "Q", "cx": "xL2+L-shw", "cy": "D+T", "x": "xL2+L-shw", "y": "D+T-rt" },
+			{ "t": "L", "x": "xL2+L-shw", "y": "D+shh" },
+			{ "t": "L", "x": "xL2+L", "y": "D" }, { "t": "Z" }
+		]},
+		{ "id": "dustTopW1", "role": "dust", "comment": "ปีกบนซ้าย คางหมู", "outline": [
+			{ "t": "M", "x": "xW1", "y": "D" }, { "t": "L", "x": "xL2", "y": "D" },
+			{ "t": "L", "x": "xL2", "y": "D+dust" }, { "t": "L", "x": "xW1+taper", "y": "D+dust" }, { "t": "Z" }
+		]},
+		{ "id": "dustTopW2", "role": "dust", "comment": "ปีกบนขวา คางหมู", "outline": [
+			{ "t": "M", "x": "xW2", "y": "D" }, { "t": "L", "x": "xW2", "y": "D+dust" },
+			{ "t": "L", "x": "xEnd-taper", "y": "D+dust" }, { "t": "L", "x": "xEnd", "y": "D" }, { "t": "Z" }
+		]},
+		{ "id": "tuckBot", "role": "tuck", "comment": "ฝาเสียบล่าง บน L1 — รอยบากล็อก + มุมล่างมน", "outline": [
+			{ "t": "M", "x": "xL1", "y": "0" },
+			{ "t": "L", "x": "xL1", "y": "-nh" },
+			{ "t": "L", "x": "xL1+nw", "y": "-nh" },
+			{ "t": "L", "x": "xL1+nw", "y": "-(T-rb)" },
+			{ "t": "Q", "cx": "xL1+nw", "cy": "-T", "x": "xL1+nw+rb", "y": "-T" },
+			{ "t": "L", "x": "xW1-nw-rb", "y": "-T" },
+			{ "t": "Q", "cx": "xW1-nw", "cy": "-T", "x": "xW1-nw", "y": "-(T-rb)" },
+			{ "t": "L", "x": "xW1-nw", "y": "-nh" },
+			{ "t": "L", "x": "xW1", "y": "-nh" },
+			{ "t": "L", "x": "xW1", "y": "0" }, { "t": "Z" }
+		]},
+		{ "id": "dustBotW1", "role": "dust", "comment": "ปีกล่างซ้าย", "outline": [
+			{ "t": "M", "x": "xW1", "y": "0" }, { "t": "L", "x": "xL2", "y": "0" },
+			{ "t": "L", "x": "xL2", "y": "-dust" }, { "t": "L", "x": "xW1+taper", "y": "-dust" }, { "t": "Z" }
+		]},
+		{ "id": "dustBotW2", "role": "dust", "comment": "ปีกล่างขวา", "outline": [
+			{ "t": "M", "x": "xW2", "y": "0" }, { "t": "L", "x": "xW2", "y": "-dust" },
+			{ "t": "L", "x": "xEnd-taper", "y": "-dust" }, { "t": "L", "x": "xEnd", "y": "0" }, { "t": "Z" }
+		]}
+	]
+};

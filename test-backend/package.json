@@ -1,0 +1,26 @@
+{
+  "name": "estimate-test-backend",
+  "version": "0.1.0",
+  "description": "Mock node_api backend (Postgres + Prisma) for local/test environment — isolated from production DB",
+  "type": "commonjs",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "db:push": "prisma db push",
+    "db:seed": "node src/seed.js",
+    "db:studio": "prisma studio",
+    "import:master": "node scripts/import-master.js",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "nanoid": "^3.3.7"
+  },
+  "devDependencies": {
+    "prisma": "^5.22.0"
+  }
+}

@@ -1,0 +1,496 @@
+body {
+    background-color: #aac5e6ce;
+
+}
+
+body,
+body input,
+body textarea {
+    font-family: 'Prompt';
+    font-size: 14px;
+}
+
+#quote-datail {
+    font-size: 16px !important;
+}
+
+body select {
+    font-family: 'Prompt';
+    font-size: 14px;
+}
+
+body,
+#quote-datail input:not([type="radio"]),
+body textarea {
+    width: 100%;
+    height: 100%;
+    margin: 0px;
+    padding: 0px;
+}
+
+
+body input[readonly] {
+    border: 2px solid #E6E6FA !important;
+    background-color: #E6E3EA !important;
+    outline-style: none;
+}
+
+body.prevent-scroll {
+    overflow: hidden;
+}
+
+#quote-datail textarea {
+    resize: none;
+    height: 75px !important;
+    padding: 5px;
+}
+
+#quote-info input {
+    width: 400px;
+}
+
+.info-label {
+    font-weight: bold;
+    text-align: right;
+}
+
+#quote-tab {
+    width: 80%;
+    margin: auto;
+}
+
+#quotation-tab td {
+    text-align: center;
+    border-top: 1px solid #b7b1b1;
+    border-bottom: 1px solid #b7b1b1;
+}
+
+#quotation-tab table {
+    border-collapse: collapse;
+}
+
+#quotation-tab tbody tr:hover {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+
+.ui-widget-content {
+    border: 3px solid #3b597e;
+    border-radius: 10px;
+    font-family: 'Prompt';
+}
+
+.ui-widget-content table {
+    font-size: 14px;
+}
+
+
+
+.ui-state-active {
+    border: 1px solid #5480ca !important;
+    background: #3e5f80 !important;
+    font-weight: normal !important;
+    color: #fff !important;
+}
+
+button,
+.ui-widget-content button {
+    background-color: #95b8e3;
+    border: none;
+    border-radius: 7px;
+    color: black;
+    padding: 8px 10px;
+    text-align: center;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: bold;
+    margin: 4px 2px;
+    cursor: pointer;
+    font-family: 'Prompt';
+}
+
+.ui-widget-content button {
+    width: 100px;
+}
+
+button:hover {
+    background-color: #dfe3ee;
+}
+
+button[disabled]{
+    background-color: #e7e7e7;
+    color: #a0a0a0;
+    cursor: not-allowed;
+}
+
+#quote-datail,
+#quote-table {
+    margin: auto;
+    width: 80%;
+}
+
+#quote-table table {
+    width: 100%;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    background-color: rgb(233, 230, 220);
+    font-size: 14px;
+}
+
+#quote-table table,
+#quote-table th,
+#quote-table td {
+    box-sizing: border-box;
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+#quote-table textarea {
+    resize: vertical;
+    padding: 5px;
+    box-sizing: border-box;
+}
+
+#job_info {
+    height: 300px;
+}
+
+
+.td-input {
+    text-align: center;
+    vertical-align: top;
+}
+
+#qty-div {
+    box-sizing: border-box;
+    background-color: white;
+    overflow-y: scroll;
+    padding: 5px;
+    height: 100px;
+    border-radius: 5px;
+}
+
+
+#bttn-menu-div {
+    width: 80%;
+    margin: auto;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+#bttn-menu-div button {
+    width: 120px;
+    font-size: 16px;
+}
+
+#control {
+    position: fixed;
+    margin: 30px;
+    width: 200px;
+    top: 10%
+}
+
+#control fieldset {
+    border-radius: 10px;
+    line-height: 150%;
+}
+
+.page {
+    position: relative;
+    margin: auto;
+    width: 8.37in;
+    height: 12.17in;
+    background-color: #FFFFFF;
+    border: 1px solid black;
+    box-sizing: content-box;
+}
+
+.page form {
+    margin: 4%;
+    width: 92%;
+    height: 92%;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 12px;
+}
+
+.page table {
+    border-collapse: collapse;
+    width: 100%;
+    box-sizing: border-box;
+
+}
+
+.page .table-quote {
+    table-layout: fixed;
+}
+
+.page table td {
+    border-collapse: collapse;
+    /* border: 1px solid black; */
+}
+
+.td-small-size {
+    font-size: 10px;
+    white-space: pre
+        /* font-weight:bold; */
+}
+
+.td-header {
+    font-weight: bold;
+    text-align: center;
+    line-height: 150%;
+    font-size: 16px;
+}
+
+.td-bd-t {
+    border-top: 1px solid black;
+}
+
+.td-bd-l {
+    border-left: 1px solid black;
+}
+
+.td-bd-b {
+    border-bottom: 1px solid black;
+}
+
+.td-bd-r {
+    border-right: 1px solid black;
+}
+
+.td-bold {
+    font-weight: bold;
+    word-wrap: normal;
+}
+
+.td-line-height {
+    line-height: 150%;
+}
+
+.td-left-top {
+    border-top: 1px solid black;
+    border-left: 1px solid black;
+    border-bottom: 1px solid black;
+}
+
+.td-middle {
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+}
+
+.td-right {
+    border-top: 1px solid black;
+    border-right: 1px solid black;
+    border-bottom: 1px solid black;
+}
+
+.td-new-line {
+    white-space: pre
+}
+
+.td-qty,
+.td-unitprice {
+    text-align: center;
+    vertical-align: top;
+}
+
+.td-price,
+.align-right {
+    text-align: right !important;
+    vertical-align: top;
+}
+
+.display_vat {
+    text-align: center;
+    display: none;
+}
+
+.d-none {
+    display: none !important;
+}
+
+.align-top {
+    vertical-align: top;
+}
+
+.validate_THB_unitprice {
+    color:red;
+    font-weight: bold;
+}
+
+@media print {
+    @page {
+        size: A4;
+    }
+
+    @-moz-document url-prefix() {
+        .page form {
+            margin-left: 20px !important;
+        }
+    }
+
+    html {
+        zoom: 1.45;
+        -moz-transform: scale(1, 1.05);
+        -moz-transform-origin: left top;
+        /* -moz-transform-origin: left top; */
+    }
+
+    body {
+        background-color: white;
+    }
+
+    #control,
+    .br {
+        display: none;
+    }
+
+    .page {
+        height: 10.7in;
+        break-inside: avoid;
+        border: none;
+        display: block !important;
+        zoom: initial;
+    }
+
+    .page form {
+        margin-left: 0px;
+        margin-right: 0px;
+        margin-top: 0px;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .page {
+        margin: 0;
+        padding: 0;
+    }
+}
+
+.view_history{
+    cursor:pointer;
+    text-decoration: underline;
+}
+
+.bold{
+    font-weight: bold;
+}
+
+.doc_status_1{
+    color:#005afe;
+}
+
+.doc_status_2{
+    color:red;
+}
+
+.doc_status_3{
+    color:green;
+}
+
+.text-left{
+    text-align:left;
+}
+.text-center{
+    text-align:center;
+}
+.text-right{
+    text-align:right;
+}
+
+#tb_quotation_history tr {
+    border-bottom:1px solid gray;
+}
+
+#modal_history button {
+    background-color: none;
+}
+
+#remark {
+    font-weight: normal;
+}
+
+.ui-widget input, .ui-widget textarea {
+    font-family: 'Prompt';
+}
+
+button#approve,
+button#history,
+button#reject {
+    width: 100px;
+    float: right;
+}
+
+button#approve,
+button#save_reject{
+    background-color:#95b8e3;
+}
+button#reject,
+button#cancel_reject{
+    background-color:#ff8787;
+}
+
+button#approve:hover,
+button#reject:hover{
+    opacity: 0.7;
+}
+
+.text-editor-delete-row {
+    color: white;
+    font-weight: bold;
+    background: red;
+    padding: 2px 8px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+#text-editor-wrapper {
+    padding:20px;
+}
+
+#close-modal {
+    padding: 2.5px 4px;
+    border-radius: 50px;
+    font-size: 18px;
+    color: #ff0000;
+    position:absolute;
+    right:6px;
+    top: 6px;
+    cursor: pointer;
+}
+
+#tb-text-editor td {
+    vertical-align: top;
+}
+
+#text-editor-title {
+    display:flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+#text-editor-add-row{
+    margin-left: 20px;
+    padding: 5px 5px;
+}
+
+#text-editor-save {
+    background-color: #6bb3ff;
+    margin-right:20px;
+}
+
+#text-editor-close {
+    background-color: #ff6b6b;
+}
+
+#text-editor-save:hover,
+#text-editor-close:hover {
+    opacity: 0.8;
+}
+
+.pointer {
+    cursor: pointer;
+}
+

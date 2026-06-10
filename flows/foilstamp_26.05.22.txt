@@ -1,0 +1,28 @@
+#calc_layout
+checkValidateAll()
+    checkValidateEachComponent(index)
+        แก้ validate input ใหม่
+        checkValidateAddon(index,'foilstampInput')
+getComponentDetail(index)
+    getAddon(index)
+        ซ้ำข้างบน
+        checkValidateAddon(index,'foilstampInput')
+        แก้ตรงนี้ วนลูปเก็บค่า foil size
+        getFoilStampInfo(index)
+            info = { //* foil = value from db
+                    code: foil.code,
+                    color: foil.color,
+                    color_th: foil.color_th,
+                    width: size[0],
+                    length: size[1],
+                    //unit_price:parseFloat(price),
+                    foil_width: foil.width,
+                    foil_length: foil.length,
+                    foil_roll_price: foil.roll_price,
+                    foil_roll_min_price: foil.roll_min_price,
+                    is_customFoil: is_customFoil
+                }
+            return arr[info ตามจำนวนกรอบ foilstamp ที่มี] > [info ตามจำนวนบรรทัด และกรอบ]
+    
+const total_price = foil_roll.qty * foil_roll.unit_price
+summary.foilRoll[qtyIndex].price += total_price < foil_roll_min_price ? foil_roll_min_price : total_price

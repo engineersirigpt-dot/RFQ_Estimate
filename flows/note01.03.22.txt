@@ -1,0 +1,35 @@
+readyFunction.js:1498
+$('body').on('click',('.changeLayout_bttn'),function(){ 
+    var index=$(this).attr('index')
+    var num_layout=[parseInt($('.componentLayout[index='+index+'] .edit_w_layout input').val()),parseInt($('.componentLayout[index='+index+'] .edit_l_layout input').val())]
+    $('.componentLayout[index='+index+'] .edit_w_layout input').val(num_layout[1])
+    $('.componentLayout[index='+index+'] .edit_l_layout input').val(num_layout[0])
+    var new_num_layout=[num_layout[1],num_layout[0]]
+    //console.log(new_num_layout)
+    getPaperSize(index,new_num_layout)
+    checkComponentPaperSize(index)
+    console.log(est.mainData)
+})
+
+var check = est.setCollectLaying(item,num_lay,false,index)
+
+
+setCalculateLayoutSize
+
+ปัญหา
+setCalculateLayoutSize(index)
+สูตรคำนวณผิด / ใช้สูตรคำนวณไม่เหมือนกัน X
+ตอนคำนวณอิงจาก W + gripper +color_bar
+แต่ตอนคำนวณ layout ใช้ ด้านสั้น + gripper + color_bar
+
+
+Note 28.02.22
+
+estimate.js
+:1638 / checkIsSwitchDisplay / ใช้สำหรับพลิกกระดาษ
+// function ที่คาดว่าต้องแก้ถ้าเปลี่ยนแปลง grain
+:1822 / getLayoutSize / มีการสลับ W ,L 
+> getLayoutSize // return paperSize & laySize
+> checkComponentPaperSize // check paperSize & laySize match and alert
+> checkPaperSize
+> getLayout4Display

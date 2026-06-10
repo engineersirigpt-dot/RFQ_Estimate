@@ -4,3 +4,14 @@
 .env.local
 .DS_Store
 **/.DS_Store
+
+# ===== ไฟล์ลับ (JWT/OpenAI token) — ห้าม commit เด็ดขาด =====
+/Pornchai AI RFQ/
+**/cookies.txt
+**/auth-profiles.json
+.env.example
+
+# ===== artifact/ทดสอบ (ไม่จำเป็นต้อง commit) =====
+*~
+README.md~
+notes.txt

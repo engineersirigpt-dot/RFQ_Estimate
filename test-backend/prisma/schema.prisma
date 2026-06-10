@@ -1,0 +1,164 @@
+// Prisma schema — test backend (PostgreSQL)
+// คอลัมน์ใน DB เป็น snake_case (@map) แต่ใช้ camelCase ใน JS → กันปัญหา Postgres บีบตัวพิมพ์
+// สลับ test/prod ผ่าน DATABASE_URL ใน .env
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// ตาราง RFQ หลัก — เก็บแบบ hybrid: คอลัมน์ค้นหา + jsonb เต็มก้อน
+model Rfq {
+  jobId           Int      @id @default(autoincrement()) @map("job_id")
+  jobName         String   @map("job_name")
+  docType         String   @default("est") @map("doc_type")
+  customerId      String?  @map("customer_id")
+  customerName    String?  @map("customer_name")
+  saleId          String?  @map("sale_id")
+  aeName          String?  @map("ae_name")
+  estimatorId     String?  @map("estimator_id")
+  printType       String?  @map("print_type")
+  inkType         String?  @map("ink_type")
+  isReprinted     String?  @map("is_reprinted")
+  isMultipleF     Int      @default(0) @map("is_multiple_f")
+  isProfitSharing Int      @default(0) @map("is_profit_sharing")
+  statusId        Int?     @map("status_id")
+  taxPercent      Float?   @map("tax")
+  remark          String?
+  refCopyRfq      String?  @map("ref_copy_rfq")
+
+  jobData         Json     @map("job_data") // mainData ทั้งก้อน (ใช้ตอน reload — แหล่งความจริง)
+  payload         Json?    @map("payload")  // payload save ทั้งหมด (ทุก tb_* array) ไว้ทำรายงาน
+
+  createdBy       String?  @map("created_by")
+  updatedBy       String?  @map("updated_by")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  qty             RfqQty[]
+
+  @@map("tb_rfq")
+}
+
+/// ราคาแยกตามยอดจำนวน (ไว้ query / หน้า list / รายงาน)
+model RfqQty {
+  id              Int    @id @default(autoincrement())
+  rfqId           Int    @map("job_id")
+  qtyIndex        Int    @default(0) @map("qty_index")
+  qtyMain         Float? @map("qty_main")
+  qtyRunon        Float? @map("qty_runon")
+  qtyTotal        Float? @map("qty_total")
+  materialPrice   Float? @map("material_price")
+  platePrice      Float? @map("plate_price")
+  printPrice      Float? @map("print_price")
+  afterpressPrice Float? @map("afterpress_price")
+  packingPrice    Float? @map("packing_price")
+  subtotalPrice   Float? @map("subtotal_price")
+  totalPrice      Float? @map("total_price")
+  unitPrice       Float? @map("unit_price")
+  tax             Float?
+
+  rfq             Rfq    @relation(fields: [rfqId], references: [jobId], onDelete: Cascade)
+
+  @@map("tb_rfq_qty")
+}
+
+/// user เทส (ใช้ login)
+model User {
+  empId    String @id @map("emp_id")
+  empName  String @map("emp_name")
+  username String @unique
+  password String // plaintext — สำหรับเทสเท่านั้น
+  roles    Json   // [{ user_group_id, sale_group_id, enable_price_check, is_super_admin, authorized }]
+
+  @@map("tb_user")
+}
+
+/// สถานะเอกสาร (dropdown Document Status)
+model Status {
+  statusId   Int    @id @map("status_id")
+  statusName String @map("status_name")
+
+  @@map("tb_status")
+}
+
+/// ใบเสนอราคา (header)
+model Quotation {
+  id                    Int      @id @default(autoincrement())
+  quotationId           String   @unique @map("quotation_id")
+  rfqId                 String?  @map("rfq_id")
+  description           String?
+  docStatus             Int      @default(0) @map("doc_status")
+  customerId            String?  @map("customer_id")
+  customerName          String?  @map("customer_name")
+  customerAddress       String?  @map("customer_address")
+  customerContactPerson String?  @map("customer_contact_person")
+  customerTel           String?  @map("customer_tel")
+  customerFax           String?  @map("customer_fax")
+  customerMobile        String?  @map("customer_mobile")
+  customerEmail         String?  @map("customer_email")
+  creditTerm            String?  @map("credit_term")
+  aeName                String?  @map("ae_name")
+  currencyUnit          String?  @map("currency_unit")
+  exchangeUnit          Float?   @map("exchange_unit")
+  priceFormat           Int?     @map("price_format")
+  priceIncludedVat      Float?   @map("price_included_vat")
+  vat                   Float?
+  priceExcludedVat      Float?   @map("price_excluded_vat")
+  createdBy             String?  @map("created_by")
+  editedBy              String?  @map("edited_by")
+  requestApproveTo1     String?  @map("request_approve_to_1")
+  requestApproveTo2     String?  @map("request_approve_to_2")
+  approvedByName        String?  @map("approved_by_name")
+  issueDate             String?  @map("issue_date")
+  validDate             String?  @map("valid_date")
+  validDateDay          String?  @map("valid_date_day")
+  deliveryDate          String?  @map("delivery_date")
+  jobInfoTypeId         Int?     @map("job_info_type_id")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  items QuotationList[]
+  logs  QuotationLog[]
+
+  @@map("tb_rfq_quotation")
+}
+
+/// รายการสินค้าในใบเสนอราคา
+model QuotationList {
+  id              Int     @id @default(autoincrement())
+  quotationId     String  @map("quotation_id")
+  listInfo        String? @map("list_info")
+  isMainInfo      Int     @default(0) @map("is_maininfo")
+  isQtyList       Int     @default(0) @map("is_qtylist")
+  unit            String?
+  qty             Float?
+  minThbUnitprice Float?  @map("min_thb_unitprice")
+  thbUnitprice    Float?  @map("thb_unitprice")
+  thbPrice        Float?  @map("thb_price")
+  curUnitprice    Float?  @map("cur_unitprice")
+  curPrice        Float?  @map("cur_price")
+
+  quotation Quotation @relation(fields: [quotationId], references: [quotationId], onDelete: Cascade)
+
+  @@map("tb_rfq_quotation_list")
+}
+
+/// ประวัติสถานะใบเสนอราคา
+model QuotationLog {
+  id          Int      @id @default(autoincrement())
+  quotationId String   @map("quotation_id")
+  statusId    Int      @map("status_id")
+  statusName  String?  @map("status_name")
+  remark      String?
+  empName     String?  @map("emp_name")
+  edited      DateTime @default(now())
+
+  quotation Quotation @relation(fields: [quotationId], references: [quotationId], onDelete: Cascade)
+
+  @@map("tb_rfq_quotation_log")
+}

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIRIVATANA ESTIMATE</title>
+    <%- include('header') -%>
+    <link rel="stylesheet" href="./css/online_estimate.css">
+    <script src="./js/function_online_estimate.js"></script>
+    <script src="./js/estimate_online_process.js"></script>
+</head>
+
+<body>
+    <div id="sidebar" is_show="0">
+        <!-- <a class="close-sidebar">×</a> -->
+        <!-- Add sidebar content here -->
+        <div class="border-1 m-2 pd-1 bg-white">
+            <div class="button-icon">
+                <span class="button button-icon">
+                    <img src="./images/home.png" alt="" width="25" height="25">
+                </span>
+            </div>
+        </div>
+
+        <div class="text-center border-1 m-2 pd-1 bg-white">
+            <div class="item-section justify-start no-border mb-2">
+                <div class="w-100 text-center mb-1">
+                    <span class="bold">
+                        จำนวนหน้า
+                    </span>
+                </div>
+                <div class="w-md2 text-left">
+                    <span>จำนวนหน้าทั้งหมด : </span>
+                </div>
+                <div>
+                    <input type="number" min="0" max="2000" class="number w-sm mr-1">
+                    <span>หน้า</span>
+                </div>
+            </div>
+
+            <div class="w-100 border-bottom-1 mt-1 mb-1"></div>
+
+            <div class="item-section no-border justify-start">
+                <div class="w-100 text-center mb-1">
+                    <span class="bold">
+                        ประเภทพิมพ์
+                    </span>
+                </div>
+                <div class="w-md2 text-left">
+                    <span>พิมพ์ขาว-ดำ : </span>
+                </div>
+                <div>
+                    <input type="number" min="0" max="2000" class="number w-sm mr-1">
+                    <span>หน้า</span>
+                </div>
+            </div>
+            <div class="item-section no-border justify-start">
+                <div class="w-md2 text-left">
+                    <span>พิมพ์ 4 สี : </span>
+                </div>
+                <div>
+                    <input type="number" min="0" max="2000" class="number w-sm mr-1">
+                    <span>หน้า</span>
+                </div>
+            </div>
+            <div class="item-section no-border justify-start">
+                <div class="w-md2 text-left">
+                    <span>ชนิดกระดาษ : </span>
+                </div>
+                <div>
+                    <select class="select_paper_type text-center w-md2 bg-sky" index="0">
+                        <option value="">--select--</option>
+                    </select>
+                </div>
+            </div>
+            <div class="item-section justify-start no-border">
+                <div class="w-md2 text-left">
+                </div>
+                <div>
+                    <select class="paper_gram w-sm mr-1" index="0">
+                    </select>
+                    <span>แกรม</span>
+                </div>
+            </div>
+
+            <div class="w-100 border-bottom-1 mt-1 mb-1"></div>
+
+            <div class="item-section no-border justify-start">
+                <div class="w-md2 text-left">
+                    <span>พิมพ์ ปก : </span>
+                </div>
+                <div>
+                    <input type="text" class="number w-sm mr-1">
+                    <span>สี</span>
+                </div>
+            </div>
+            <div class="item-section no-border justify-start">
+                <div class="w-md2 text-left">
+                    <span>ชนิดกระดาษ : </span>
+                </div>
+                <div>
+                    <select class="select_paper_type text-center w-md2 bg-sky" index="1">
+                        <option value="">--select--</option>
+                    </select>
+                </div>
+            </div>
+            <div class="item-section justify-start no-border mb-2">
+                <div class="w-md2 text-left">
+                </div>
+                <div>
+                    <select class="paper_gram w-sm mr-1" index="1">
+                    </select>
+                    <span>แกรม</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="select-size-section d-flex flex-row flex-wrap justify-between border-1 m-2 pd-1 bg-white">
+            <div class="w-100 mb-2 text-center">
+                <span class="bold">เลือกขนาด</span>
+            </div>
+            <div class="w-100 text-center">
+                <span class="bold">A</span>
+            </div>
+            <div class="size-item-1 item-section justify-center w-md2">
+                <span class="bold w-100 text-center">A6</span>
+                <span class="w-100 text-center">10.5 x 14.8 cm.</span>
+            </div>
+            <div class="size-item-1 item-section justify-center w-md2">
+                <span class="bold w-100 text-center">A5</span>
+                <span class="w-100 text-center">14.8 x 21 cm.</span>
+            </div>
+            <div class="size-item-1 item-section justify-center w-md2">
+                <span class="bold w-100 text-center">A4</span>
+                <span class="w-100 text-center">21 x 29.7 cm.</span>
+            </div>
+            <div class="size-item-1 item-section justify-center w-md2">
+                <span class="bold w-100 text-center">A3</span>
+                <span class="w-100 text-center">29.25 x 43 cm.</span>
+            </div>
+
+            <div class="w-100 border-bottom-1 mt-1 mb-1"></div>
+            <div class="w-100 text-center">
+                <span class="bold">B</span>
+            </div>
+            <div class="size-item-2 item-section justify-center w-md2">
+                <span class="bold w-100 text-center">B6</span>
+                <span class="w-100 text-center">13 x 19.5 cm.</span>
+            </div>
+            <div class="size-item-2 item-section justify-center w-md2">
+                <span class="bold w-100 text-center">B5</span>
+                <span class="w-100 text-center">18.2 x 25.7 cm.</span>
+            </div>
+            <div class="size-item-2 item-section justify-center w-md2">
+                <span class="bold w-100 text-center">B4</span>
+                <span class="w-100 text-center">26 x 39 cm.</span>
+            </div>
+
+            <div class="w-100 border-bottom-1 mt-1 mb-1"></div>
+            <div class="w-100 text-center">
+                <span class="bold">C</span>
+            </div>
+            <div class="size-item-3 item-section justify-center w-md2">
+                <span class="bold w-100 text-center">C6</span>
+                <span class="w-100 text-center">11 x 16 cm.</span>
+            </div>
+            <div class="size-item-3 item-section justify-center w-md2">
+                <span class="bold w-100 text-center">C5</span>
+                <span class="w-100 text-center">16 x 23 cm.</span>
+            </div>
+            <div class="size-item-3 item-section justify-center w-md2">
+                <span class="bold w-100 text-center">C4</span>
+                <span class="w-100 text-center">23 x 32 cm.</span>
+            </div>
+        </div>
+    </div>
+    <div id="content">
+        <div id="editButton"><img class="icon-btn" src="./images/menu.png" alt="ปรับแต่ง"></div>
+        <div id="topBar" class="w-100 d-flex flex-center">
+            <div id="topBarContent">
+                <div class="top-left d-flex flex-col flex-center">
+                    <span class="bold">ประเภท</span>
+                </div>
+                <div class="top-center d-flex flex-col flex-center">
+                    <span class="bold">Leaflet</span>
+                </div>
+            </div>
+        </div>
+        <div id="displayTemplateImg">
+            <!-- Display 3 images here -->
+            <img class="template_img1 image shadow" src="./images/online/leaflet_example.png" alt="" width="150"
+                height="150">
+                <img class="template_img3 image" src="./images/online/leaflet_content.jpg" alt="" width="300"
+                    height="auto">
+            <img class="template_img2 image" src="./images/online/template.png" alt="" width="300"
+                height="auto">
+            <!-- <div id="templateImgContainer w-100"> -->
+            <!-- </div> -->
+        </div>
+
+        <div class="contentContainer pd-3 w-100 d-flex flex-row flex-wrap flex-top">
+            <div id="leftContent">
+                <!-- Text content with 3 lines here -->
+                <div class="displaySpec">
+                    <div class="item-detail mb-1">
+                        <div class="item-detail-header text-center">
+                            <span class="header">แผ่นพับ</span>
+                        </div>
+                    </div>
+                    <div class="item-detail">
+                        <div class="item-detail-header text-left">
+                            <span>ขนาด :</span>
+                        </div>
+                        <div class="item-detail-detail">
+                            <span>A4 8.27" x 11.69" (21 x 29.7 cm)</span>
+                        </div>
+                    </div>
+                    <div class="item-detail">
+                        <div class="item-detail-header text-left">
+                            <span>จำนวนหน้าพับ :</span>
+                        </div>
+                        <div class="item-detail-detail">
+                            <span>พับด้านยาว 3 ทบ</span>
+                        </div>
+                    </div>
+                    <div class="item-detail">
+                        <div class="item-detail-header text-left">
+                            <span>ชนิดกระดาษ :</span>
+                        </div>
+                        <div class="item-detail-detail">
+                            <span>A/C Art Card - 290 gsm.</span>
+                        </div>
+                    </div>
+                    <div class="item-detail">
+                        <div class="item-detail-header text-left">
+                            <span>พิมพ์สี (หน้า-หลัง) :</span>
+                        </div>
+                        <div class="item-detail-detail">
+                            <span>4/4 สี</span>
+                        </div>
+                    </div>
+                    <div class="item-detail">
+                        <div class="item-detail-header text-left">
+                            <span>รายละเอียดอื่นๆ :</span>
+                        </div>
+                        <div class="item-detail-detail">
+                            <ul>
+                                <li>เคลือบ Spot Waterbase</li>
+                                <li>เคลือบฟอยสื</li>
+                                <li>ปั้มนูน</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="rightContent">
+                <!-- Input fields with 3 lines here -->
+                <div class="displaySpec">
+                    <div class="item-detail mb-1">
+                        <div class="item-detail-header text-center">
+                            <span class="header">ตารางราคา</span>
+                        </div>
+                    </div>
+                    <div class="w-100">
+                        <table id="pricing_table" cellspacing="5" cellpadding="0">
+                            <thead>
+                                <tr>
+                                    <th class="w-lg text-left" rowspan="2"></th>
+                                    <!-- <th colspan="4">
+                                        <div class="text-center"><span>จำนวน</span></div>
+                                    </th> -->
+                                    <th>
+                                        <div class="text-center"><span>จำนวน</span></div>
+                                    </th>
+                                    <th>
+                                        <div class="text-center"><span>จำนวน</span></div>
+                                    </th>
+                                    <th>
+                                        <div class="text-center"><span>จำนวน</span></div>
+                                    </th>
+                                    <th>
+                                        <div class="text-center"><span>จำนวน</span></div>
+                                    </th>
+                                    <th rowspan="2">
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th><input type="text" class="text-center w-md" value="100"></th>
+                                    <th><input type="text" class="text-center w-md" value="1,000"></th>
+                                    <th><input type="text" class="text-center w-md" value="10,000"></th>
+                                    <th><input type="text" class="text-center w-md" value="100,000"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="w-lg text-left"><b>ราคา / หน่วย</b></td>
+                                    <td class="text-center font-14">3.00</td>
+                                    <td class="text-center font-14">2.85</td>
+                                    <td class="text-center font-14">2.70</td>
+                                    <td class="text-center font-14">2.45</td>
+                                    <td class="text-center bold font-12"><b>บาท</b></td>
+                                </tr>
+                                <tr>
+                                    <td class="w-lg text-left"><b>ราคารวม</b></td>
+                                    <td class="text-center font-14">300</td>
+                                    <td class="text-center font-14">2,850</td>
+                                    <td class="text-center font-14">27,000</td>
+                                    <td class="text-center font-14">245,000</td>
+                                    <td class="text-center bold font-12"><b>บาท</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div> <!-- / contentContainer -->
+        <div id="bottomContent" class="">
+            <!-- <div class="pd"> -->
+                <span>Department of Programmer Sirivatana Interprint Co., Ltd</span>
+            <!-- </div> -->
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Dieline Lab — RTE (ทาบรูป)</title>
+	<style>
+		* { box-sizing: border-box; }
+		body { margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif; background: #f1f5f9; color: #1e293b; }
+		header { background: linear-gradient(90deg, #6d28d9, #8b5cf6); color: #fff; padding: 12px 20px; font-weight: bold; }
+		.wrap { display: flex; height: calc(100vh - 48px); }
+		.controls { width: 300px; flex-shrink: 0; background: #fff; border-right: 1px solid #e2e8f0; padding: 16px; overflow-y: auto; }
+		.stage { flex: 1; position: relative; overflow: hidden; background: #e2e8f0; }
+		.stage-inner { position: absolute; inset: 0; }
+		#bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+		#svgWrap { position: absolute; inset: 0; transform-origin: center; pointer-events: none; }
+		.grp { margin-bottom: 14px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 10px; }
+		.grp h4 { margin: 0 0 8px; font-size: 12px; color: #6d28d9; text-transform: uppercase; letter-spacing: .5px; }
+		.row { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+		.row label { width: 54px; font-size: 13px; font-weight: 600; }
+		.row input[type=range] { flex: 1; accent-color: #7c3aed; }
+		.row .val { width: 46px; text-align: right; font-size: 13px; font-variant-numeric: tabular-nums; }
+		.hint { font-size: 11px; color: #94a3b8; line-height: 1.5; }
+		.legend { font-size: 12px; display: flex; gap: 14px; margin-top: 4px; }
+		.legend span::before { content: ''; display: inline-block; width: 16px; height: 3px; margin-right: 5px; vertical-align: middle; }
+		.legend .cut::before { background: #e11d48; }
+		.legend .fold::before { background: #1769ff; }
+		.legend .fold::before { background: repeating-linear-gradient(90deg, #1769ff 0 4px, transparent 4px 7px); }
+		.tabs { position: absolute; top: 0; left: 0; right: 0; height: 38px; display: flex; gap: 2px; background: #cbd5e1; z-index: 5; }
+		.tab { flex: 1; border: none; background: #e2e8f0; cursor: pointer; font-size: 13px; font-weight: 600; color: #475569; }
+		.tab.active { background: #fff; color: #6d28d9; }
+		#cv3d { background: radial-gradient(circle at 50% 40%, #eef2ff, #dbe2f5); }
+		.foldbar { position: absolute; left: 16px; right: 16px; bottom: 14px; display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,.9); padding: 8px 14px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,.15); }
+		.foldbar input { flex: 1; accent-color: #7c3aed; }
+		.foldbar span { font-size: 12px; font-weight: 600; color: #6d28d9; }
+		.foldbar button { border: none; background: #7c3aed; color: #fff; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 12px; }
+		.edittools { position: absolute; top: 8px; left: 8px; z-index: 6; display: flex; gap: 6px; align-items: center; }
+		.edittools button { border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+		.edittools button.on { background: #16a34a; color: #fff; border-color: #16a34a; }
+		.edittools #editHint { font-size: 11px; color: #475569; background: rgba(255,255,255,.85); padding: 3px 8px; border-radius: 5px; }
+		.handle-pt { fill: #16a34a; stroke: #fff; stroke-width: 1.2; cursor: grab; }
+		.handle-pt.ov { fill: #f59e0b; }
+		.handle-ctrl { fill: #fff; stroke: #1769ff; stroke-width: 1.4; cursor: grab; }
+		.handle-ctrl.ov { fill: #1769ff; }
+	</style>
+</head>
+<body>
+	<header><i></i>🧪 Dieline Lab — RTE · ทาบ SVG บนรูปจริง (1.jpg)</header>
+	<div class="wrap">
+		<div class="controls">
+			<div class="grp">
+				<h4>ขนาดกล่อง (mm)</h4>
+				<div id="dims"></div>
+			</div>
+			<div class="grp">
+				<h4>🔧 เกลารูปทรง</h4>
+				<div id="shape"></div>
+				<button id="resetShape" style="margin-top:4px;border:none;background:#e2e8f0;border-radius:5px;padding:4px 10px;cursor:pointer;font-size:11px">รีเซ็ตรูปทรง</button>
+			</div>
+			<div class="grp">
+				<h4>จัดวางทาบรูป</h4>
+				<div id="align"></div>
+				<div class="legend"><span class="cut">เส้นตัด</span><span class="fold">เส้นพับ</span></div>
+			</div>
+			<div class="grp">
+				<h4>วิธีใช้</h4>
+				<p class="hint">
+					ปรับ <b>ขนาด</b> → dieline เปลี่ยนสด<br>
+					ปรับ <b>จัดวาง</b> (scale/เลื่อน/หมุน) ให้ SVG ทาบพอดีเส้นในรูป<br>
+					ตรงไหนไม่ตรง บอกผมได้เลย เดี๋ยวแก้สูตรใน <code>rte.json</code>
+				</p>
+			</div>
+		</div>
+		<div class="stage">
+			<div class="tabs">
+				<button id="tab2d" class="tab active">📐 2D ทาบรูป</button>
+				<button id="tab3d" class="tab">📦 3D พับ</button>
+			</div>
+			<div id="view2d" class="stage-inner" style="top:38px">
+				<img id="bg" src="../public/img/1.jpg" alt="reference dieline" />
+				<div id="svgWrap"></div>
+				<div class="edittools">
+					<button id="srcTemplate" class="on">📐 Template</button>
+					<button id="srcApi">📥 API SVG</button>
+					<button id="editToggle">✏️ แก้มือ</button>
+					<button id="clearOv" title="ลบการลากทั้งหมด">↺ ล้างที่ลาก</button>
+					<button id="exportBtn">💾 Export JSON</button>
+					<span id="editHint"></span>
+				</div>
+			</div>
+			<div id="view3d" class="stage-inner" style="top:38px;display:none">
+				<canvas id="cv3d" style="width:100%;height:100%;display:block;touch-action:none"></canvas>
+				<div class="foldbar">
+					<span>กาง</span>
+					<input id="foldSlider" type="range" min="0" max="100" value="0">
+					<span>พับ</span>
+					<button id="flipSign" title="สลับทิศพับ">⇄ ทิศ</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="../public/js/library/three.min.js"></script>
+	<script src="engine.js"></script>
+	<script src="fold3d.js"></script>
+	<script src="svgimport.js"></script>
+	<script src="api-samples/rte-svg.js"></script>
+	<script src="templates/rte.js"></script>
+	<script>
+		var TEMPLATE = null, foldSign = 1, _geo = null, _base = null
+		var overrides = {}, editMode = false, dragKey = null, mode = 'template'
+		var SVGNS = 'http://www.w3.org/2000/svg'
+
+		var dimDefs = [
+			{ k: 'L', label: 'ยาว L', min: 40, max: 300 },
+			{ k: 'W', label: 'กว้าง W', min: 20, max: 200 },
+			{ k: 'D', label: 'สูง D', min: 30, max: 300 },
+			{ k: 'T', label: 'ฝา T', min: 5, max: 70 },
+			{ k: 'G', label: 'กาว G', min: 5, max: 50 },
+			{ k: 'dust', label: 'ปีก dust', min: 5, max: 70 }
+		]
+		var alignDefs = [
+			{ k: 'opacity', label: 'รูปจาง', min: 0, max: 100, val: 55, suffix: '%' },
+			{ k: 'scale', label: 'ขยาย', min: 20, max: 200, val: 100, suffix: '%' },
+			{ k: 'offX', label: 'เลื่อน X', min: -400, max: 400, val: 0 },
+			{ k: 'offY', label: 'เลื่อน Y', min: -400, max: 400, val: 0 },
+			{ k: 'rot', label: 'หมุน', min: -15, max: 15, val: 0, suffix: '°' }
+		]
+		var params = {}, align = {}
+
+		function makeRow(host, def, store, onChange) {
+			store[def.k] = def.val != null ? def.val : (TEMPLATE && TEMPLATE.defaults[def.k]) || def.min
+			var row = document.createElement('div'); row.className = 'row'
+			row.innerHTML = '<label>' + def.label + '</label>'
+			var inp = document.createElement('input')
+			inp.type = 'range'; inp.min = def.min; inp.max = def.max; inp.step = def.step || 1; inp.value = store[def.k]
+			var val = document.createElement('span'); val.className = 'val'; val.textContent = store[def.k] + (def.suffix || '')
+			inp.addEventListener('input', function () {
+				store[def.k] = parseFloat(inp.value); val.textContent = inp.value + (def.suffix || ''); onChange()
+			})
+			inp.dataset.key = def.k
+			row.appendChild(inp); row.appendChild(val); host.appendChild(row)
+			return inp
+		}
+
+		function applyAlign() {
+			document.getElementById('bg').style.opacity = align.opacity / 100
+			document.getElementById('svgWrap').style.transform =
+				'translate(' + align.offX + 'px,' + align.offY + 'px) scale(' + (align.scale / 100) + ') rotate(' + align.rot + 'deg)'
+		}
+
+		function render() {
+			if (mode === 'api') {
+				// 2D = SVG จริงจาก API (แม่นเป๊ะ), 3D = พับจากที่ parse
+				_geo = SVGImport.fromSVG(window.API_SVG.RTE, {})
+				document.getElementById('svgWrap').innerHTML = window.API_SVG.RTE
+				rebuild3D()
+				return
+			}
+			if (!TEMPLATE) return
+			_geo = DielineEngine.compute(TEMPLATE, params, overrides)
+			_base = DielineEngine.compute(TEMPLATE, params, null)   // สูตรล้วน (ไว้คำนวณ delta การลาก)
+			document.getElementById('svgWrap').innerHTML = DielineEngine.toSVG(_geo, {})
+			if (editMode) drawHandles()
+			rebuild3D()
+		}
+
+		// ===== โหมดแก้มือ: ลากจุดมุม/จุดคุมโค้ง =====
+		function basePoint(key) {
+			var parts = key.split(':'), pid = parts[0], ci = +parts[1], isC = parts[2] === 'c'
+			var pan = null
+			_base.panels.forEach(function (p) { if (p.id === pid) pan = p })
+			if (!pan) return [0, 0]
+			var c = pan.cmds[ci]
+			return isC ? [c.cx, c.cy] : [c.x, c.y]
+		}
+		function drawHandles() {
+			var svg = document.querySelector('#svgWrap svg'); if (!svg) return
+			var tr = DielineEngine.viewTransform(_geo, 12)
+			var rad = tr.W * 0.011
+			var g = document.createElementNS(SVGNS, 'g')
+			function add(key, vx, vy, kind, ov) {
+				var el
+				if (kind === 'ctrl') {
+					el = document.createElementNS(SVGNS, 'rect')
+					el.setAttribute('x', vx - rad); el.setAttribute('y', vy - rad)
+					el.setAttribute('width', rad * 2); el.setAttribute('height', rad * 2)
+					el.setAttribute('class', 'handle-ctrl' + (ov ? ' ov' : ''))
+				} else {
+					el = document.createElementNS(SVGNS, 'circle')
+					el.setAttribute('cx', vx); el.setAttribute('cy', vy); el.setAttribute('r', rad)
+					el.setAttribute('class', 'handle-pt' + (ov ? ' ov' : ''))
+				}
+				el.setAttribute('data-key', key)
+				el.addEventListener('pointerdown', function (e) { e.preventDefault(); e.stopPropagation(); dragKey = key })
+				g.appendChild(el)
+			}
+			_geo.panels.forEach(function (p) {
+				p.cmds.forEach(function (c) {
+					if (c.x != null) add(p.id + ':' + c.i, tr.X(c.x), tr.Y(c.y), 'pt', c.ov)
+					if (c.cx != null) add(p.id + ':' + c.i + ':c', tr.X(c.cx), tr.Y(c.cy), 'ctrl', c.ovc)
+				})
+			})
+			svg.appendChild(g)
+		}
+		window.addEventListener('pointermove', function (e) {
+			if (!dragKey) return
+			var svg = document.querySelector('#svgWrap svg'); if (!svg) return
+			var tr = DielineEngine.viewTransform(_geo, 12)
+			var ctm = svg.getScreenCTM(); if (!ctm) return
+			var pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY
+			var u = pt.matrixTransform(ctm.inverse())
+			var wx = tr.invX(u.x), wy = tr.invY(u.y)
+			var b = basePoint(dragKey)
+			overrides[dragKey] = [+(wx - b[0]).toFixed(2), +(wy - b[1]).toFixed(2)]
+			render()
+		})
+		window.addEventListener('pointerup', function () { dragKey = null })
+
+		function setEditMode(on) {
+			editMode = on
+			document.getElementById('editToggle').classList.toggle('on', on)
+			document.getElementById('svgWrap').style.pointerEvents = on ? 'auto' : 'none'
+			document.getElementById('editHint').textContent = on ? 'ลากจุด🟢=มุม ◻️=โค้ง · ส้ม/น้ำเงิน=ถูกลากแล้ว' : ''
+			render()
+		}
+		function exportJSON() {
+			var out = {}
+			Object.keys(TEMPLATE).forEach(function (k) { out[k] = TEMPLATE[k] })
+			out.overrides = Object.assign({}, TEMPLATE.overrides || {}, overrides)
+			var blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' })
+			var a = document.createElement('a'); a.href = URL.createObjectURL(blob)
+			a.download = (TEMPLATE.template || 'template').toLowerCase() + '.json'; a.click()
+		}
+
+		// ===== 3D viewer (มินิมอล: orbit ลาก + ล้อซูม) =====
+		var V = null
+		function Viewer(canvas) {
+			this.canvas = canvas
+			this.renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true })
+			this.scene = new THREE.Scene()
+			this.scene.add(new THREE.HemisphereLight(0xffffff, 0xdedede, 0.9))
+			var d = new THREE.DirectionalLight(0xffffff, 0.7); d.position.set(2, 3, 2); this.scene.add(d)
+			this.camera = new THREE.PerspectiveCamera(45, 1, 0.01, 100)
+			this.az = 0.9; this.pol = 1.1; this.rad = 3; this.target = new THREE.Vector3(0, 0, 0)
+			this._bind(); this._loop = this._loop.bind(this); this._loop()
+		}
+		Viewer.prototype.setGroup = function (g) {
+			if (this.group) this.scene.remove(this.group)
+			this.group = g; this.scene.add(g)
+		}
+		Viewer.prototype._bind = function () {
+			var self = this, drag = false, px = 0, py = 0
+			this.canvas.addEventListener('mousedown', function (e) { drag = true; px = e.clientX; py = e.clientY })
+			window.addEventListener('mouseup', function () { drag = false })
+			window.addEventListener('mousemove', function (e) {
+				if (!drag) return
+				self.az -= (e.clientX - px) * 0.01; self.pol -= (e.clientY - py) * 0.01
+				self.pol = Math.max(0.15, Math.min(3.0, self.pol)); px = e.clientX; py = e.clientY
+			})
+			this.canvas.addEventListener('wheel', function (e) { e.preventDefault(); self.rad *= (1 + (e.deltaY > 0 ? 0.1 : -0.1)) }, { passive: false })
+		}
+		Viewer.prototype.resize = function () {
+			var w = this.canvas.clientWidth || 600, h = this.canvas.clientHeight || 400
+			this.renderer.setSize(w, h, false); this.camera.aspect = w / h; this.camera.updateProjectionMatrix()
+		}
+		Viewer.prototype._loop = function () {
+			requestAnimationFrame(this._loop)
+			this.resize()
+			var r = this.rad, p = this.pol, a = this.az
+			this.camera.position.set(r * Math.sin(p) * Math.cos(a), r * Math.cos(p), r * Math.sin(p) * Math.sin(a))
+			this.camera.lookAt(this.target)
+			this.renderer.render(this.scene, this.camera)
+		}
+		function rebuild3D() {
+			if (!_geo || !window.Fold3D || !window.THREE) return
+			if (!V) V = new Viewer(document.getElementById('cv3d'))
+			var built = Fold3D.build3D(_geo, { sign: foldSign, root: _geo.rootId || 'L1' })
+			V.setGroup(built.group)
+			V._built = built
+			var t = (document.getElementById('foldSlider').value || 0) / 100
+			built.setFold(t)
+		}
+
+		function init(tpl) {
+			TEMPLATE = tpl
+			var dh = document.getElementById('dims'), ah = document.getElementById('align'), sh = document.getElementById('shape')
+			dimDefs.forEach(function (d) { d.val = tpl.defaults[d.k]; makeRow(dh, d, params, render) })
+			// สไลเดอร์เกลารูปทรง (จาก template.controls)
+			var shapeInputs = []
+				; (tpl.controls || []).forEach(function (c) {
+					shapeInputs.push(makeRow(sh, { k: c.name, label: c.label, min: c.min, max: c.max, step: c.step, val: c.default }, params, render))
+				})
+			document.getElementById('resetShape').onclick = function () {
+				(tpl.controls || []).forEach(function (c, i) {
+					params[c.name] = c.default; shapeInputs[i].value = c.default
+					shapeInputs[i].parentNode.querySelector('.val').textContent = c.default
+				})
+				render()
+			}
+			alignDefs.forEach(function (a) { makeRow(ah, a, align, applyAlign) })
+			applyAlign(); render()
+
+			// tabs
+			function showTab(is3d) {
+				document.getElementById('view2d').style.display = is3d ? 'none' : 'block'
+				document.getElementById('view3d').style.display = is3d ? 'block' : 'none'
+				document.getElementById('tab2d').classList.toggle('active', !is3d)
+				document.getElementById('tab3d').classList.toggle('active', is3d)
+				if (is3d && V) V.resize()
+			}
+			document.getElementById('tab2d').onclick = function () { showTab(false) }
+			document.getElementById('tab3d').onclick = function () { showTab(true) }
+			// fold slider
+			document.getElementById('foldSlider').addEventListener('input', function () {
+				if (V && V._built) V._built.setFold(this.value / 100)
+			})
+			// flip fold direction
+			document.getElementById('flipSign').onclick = function () { foldSign = -foldSign; rebuild3D() }
+			// แหล่งข้อมูล: template (parametric) vs API SVG (import)
+			function setMode(m) {
+				mode = m
+				document.getElementById('srcTemplate').classList.toggle('on', m === 'template')
+				document.getElementById('srcApi').classList.toggle('on', m === 'api')
+				if (m === 'api' && editMode) setEditMode(false)
+				render()
+			}
+			document.getElementById('srcTemplate').onclick = function () { setMode('template') }
+			document.getElementById('srcApi').onclick = function () { setMode('api') }
+			// edit mode
+			document.getElementById('editToggle').onclick = function () { setEditMode(!editMode) }
+			document.getElementById('clearOv').onclick = function () { overrides = {}; render() }
+			document.getElementById('exportBtn').onclick = exportJSON
+		}
+
+		// โหลด template (จาก templates/rte.js ผ่าน <script> — ใช้ได้แม้ double-click)
+		if (window.DIELINE_TEMPLATES && window.DIELINE_TEMPLATES.RTE) {
+			init(window.DIELINE_TEMPLATES.RTE)
+		} else {
+			document.getElementById('dims').innerHTML =
+				'<p class="hint" style="color:#e11d48">โหลด template ไม่ได้ — เช็คว่ามีไฟล์ templates/rte.js</p>'
+		}
+	</script>
+</body>
+</html>

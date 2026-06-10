@@ -10,6 +10,7 @@ const PORT = config.get('data').port
 const data = config.get('data')
 const productRouter = require('./router/product')
 const aiRouter = require('./router/ai')
+const dielineRouter = require('./router/dieline')
 const { checkAuth } = require('./public/js/includes/auth')
 
 app.locals = { data }
@@ -21,6 +22,7 @@ app.use(cookieParser())
 
 app.use('/product', productRouter)
 app.use('/ai', checkAuth, aiRouter)
+app.use('/dieline', checkAuth, dielineRouter)
 
 app.get('/login', (req, res) => {
 	res.render('login')

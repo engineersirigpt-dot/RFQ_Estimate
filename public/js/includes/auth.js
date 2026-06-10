@@ -3,6 +3,15 @@ const config = require('config')
 const data = config.get('data')
 
 async function checkAuth(req, res, next) {
+    // --- DEV BYPASS ---
+    // ข้ามการตรวจ auth ทั้งหมดเมื่อรันแบบ local (ไม่มี node_api/DB จริง)
+    // เปิดใช้โดยตั้ง BYPASS_AUTH=true ใน .env  —  production ห้ามตั้งค่านี้
+    if (process.env.BYPASS_AUTH === 'true') {
+        // ใส่ emp_id หลอกให้ downstream ที่อ่าน cookie ไม่พัง
+        if (!req.cookies?.emp_id) req.cookies = { ...req.cookies, emp_id: 'local-dev' };
+        return next();
+    }
+
     const publicPaths = ['/logout', '/login', '/set-cookie', '/user/check-auth', '/favicon.ico'];
     if (publicPaths.some(p => req.path.startsWith(p))) return next();
 

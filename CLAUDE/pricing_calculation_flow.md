@@ -989,41 +989,13 @@ Pallet :
 
 #### [C16] ต้นทุนจัดส่ง (Delivery Cost)
 
-> Source: `setCalculateDeliveryPrice()` — บรรทัด 8536+
-
-**Logic การคำนวณ (ต่อรอบส่ง) :**
+> Source: `setCalculateDelivery()` — บรรทัด 7303-7358
 
 ```
-// 1. ดึง rate list ตาม destination
-delivery_rate_list = getDeliveryRate(destinationId)             [database: delivery_rate]
-
-// 2. คำนวณ net_weight ต่อรอบ (รวมทุก component ในรอบนั้น)
-net_weight = sum(total_weight ทุก comp ในรอบส่งนั้น)           ← จาก [C15] packing
-
-// 3. หา vehicle type ตาม net_weight
-rate_info = getDeliveryRateInfo(destinationId, net_weight)
-    → { price, additional_price, max_weight_kg, vehicle_type }  [database: delivery_rate]
-    ตัวอย่าง: รถ 4 ล้อ = 0–1,500 kg | รถ 6 ล้อ = 1,500–5,500 kg
-
-// 4. คำนวณจำนวนรถ
-qty = floor(net_weight / rate_info.max_weight_kg)
-ถ้า qty <= 0 → qty = 1, balance_weight = 0
-ถ้า qty > 0  → balance_weight = net_weight % rate_info.max_weight_kg
-// วนซ้ำสำหรับ balance_weight ที่เหลือ (อาจต้องใช้รถเพิ่ม)
-
-// 5. คำนวณค่าส่ง
-unit_price = rate_info.price + rate_info.additional_price
-price = unit_price × qty × (1 + delivery_marking/100)
+unit_price = delivery_rate × gross_weight / 1,000              [config: delivery_rate = 1,500 THB/ton]
 ```
 
-**Parameter :**
-
-- destinationId : ปลายทาง `[input]`
-- net_weight : น้ำหนักสินค้ารวมต่อรอบส่ง (kg) ← จาก [C15]
-- delivery_rate : ตาราง rate ตาม destination + ช่วงน้ำหนัก `[database: delivery_rate]`
-  - ฟิลด์: price, additional_price, min_weight_kg, max_weight_kg, vehicle_type
-- delivery_marking : % markup ค่าส่ง `[config: default_marking > delivery_marking]`
-  - Standard: 0%, Profit Sharing: 20%
+gross_weight มาจากน้ำหนัก packing ที่คำนวณได้ (carton, kraftwrap, หรือ pallet) ← จาก [C15]
 
 ---
 
@@ -1255,6 +1227,7 @@ grand_total = grand_total × exchange_rate                      [input: exchange
 **อื่นๆ :**
 
 - coating_opp_cold_film_cost_sqin : 0.0103 THB/sqin → ใช้ใน [C5]
+- delivery_rate : 1,500 THB/ton → ใช้ใน [C16]
 - tax : 3% → ใช้ใน [D3]
 - addon_labor_price_marking : 20% → ใช้ใน [C6], [C7] labor
 - reprinted_block : 500 THB/block → ใช้ใน [C10]
@@ -1307,10 +1280,6 @@ grand_total = grand_total × exchange_rate                      [input: exchange
 
 - tb_master_jetpress_info : ข้อมูลเครื่อง Jet Press → ใช้ใน [C4]
   - JSON : `CLAUDE/json/tb_master_jetpress_info.json`
-
-- delivery_rate : ตาราง rate ส่งสินค้า ตาม destination + ช่วงน้ำหนัก → ใช้ใน [C16]
-  - JSON : `CLAUDE/master data/delivery_rate.json`
-  - ฟิลด์: destination_id, min_weight_kg, max_weight_kg, price, additional_price, vehicle_type
 
 ---
 

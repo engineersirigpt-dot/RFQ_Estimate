@@ -37,8 +37,16 @@
 
 ## Need more detail?
 
-อ่าน CLAUDE/README.md (สูตรคำนวณ, box type, markup rates, pipeline ครบ)
-อ่าน CLAUDE/pricing_calculation_flow.md (สูตรราคาละเอียด)
+**Context recovery docs (อ่านชุดนี้ก่อนเมื่อ context เต็ม) — `CLAUDE/context/`:**
+
+- `CLAUDE/context/00-ARCHITECTURE.md` — ภาพรวมระบบ, services, config, env (เริ่มที่นี่)
+- `CLAUDE/context/01-BACKEND.md` — index.js, router/\*, auth, AI endpoint, node_api endpoints
+- `CLAUDE/context/02-CALCULATION-ENGINE.md` — Estimate class, 16 cost items (file:line), box types, UPS/layout, special logic
+- `CLAUDE/context/03-FRONTEND.md` — est.mainData, page lifecycle, db class, save flow, default.js constants
+- `CLAUDE/context/04-AI-RFQ.md` — AI RFQ (/ai/parse-spec) + Pornchai Agent subproject
+- `CLAUDE/context/05-DIELINE-3D.md` — มุมมอง 3D + กางแบน (พับจาก SVG DiecutTemplates ทรง 1-7 / procedural 8-12), pipeline, การเพิ่มทรง, deploy
+
+**สูตรละเอียด:** CLAUDE/pricing_calculation_flow.md (สูตรราคาละเอียดสุด)
 
 ## Pages (EJS)
 

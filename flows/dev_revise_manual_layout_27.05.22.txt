@@ -1,0 +1,37 @@
+readyFunction.js:1465
+    .manualLayout change >
+        est.setManualLayout(index,true)
+            layout_manual = true to comp.
+        setDivComponentLayout(index,true)
+            true > 
+                prepareDivManualLayout(index)
+                est.setLayout4Manual(index)
+                est.setCalculateUps(index)
+                edittbPaperUsage(index)
+        checkRequiredInput()
+
+
+
+--- display
+.parallelRollWidth
+.optionWSize
+.optionLSize
+
+corrugated
+.parallelFluteSide
+.optionWSize
+.optionLSize
+
+--- input
+Layout Size
+.layoutSize
+    .wLaySize x .lLaySize
+
+Paper Size / Corrugated Size
+.paperSize
+    .wSize x .lSize
+
+Machine Size
+.cut_size
+
+*** setDataforManualLayout(index) น่าจะเป็นตัวคำนวณ manual lay
