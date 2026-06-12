@@ -749,14 +749,16 @@
 		var g = nestGrid(PW, PL, pw, ph), pieces = [], i, j, count, pitchY = g.ph;
 		var _useProd = !forceCross && prodMatches(_prodLayout, PW, PL);   // ทรง 10 ไม่ใช้ prod grid (รูปทับ) → ใช้ interlock แทน
 		if (_useProd) {
-			// cap pitch ให้ "ทั้งแถวรวมความกว้างชิ้นสุดท้าย" พอดีพื้นที่ใช้ได้ — ไม่ล้ำกรอบ
-			// extent = (cols-1)*pitch + bw ต้อง <= uW  →  pitch <= (uW - bw)/(cols-1)
-			// คงจำนวนตามสูตร (cols×rows) เป๊ะ — ชิ้นที่แชร์ขอบจะวางชิด/ซ้อนเล็กน้อยตามจริง
-			var _capX = _prodLayout.cols > 1 ? (uW - bw) / (_prodLayout.cols - 1) : (_prodLayout.pitchX + bl)
-			var _capY = _prodLayout.rows > 1 ? (uL - bh) / (_prodLayout.rows - 1) : (_prodLayout.pitchY + bl)
+			// "จาก estimate" → คง cols ตามสูตร (logic วางแนวขวาง/แชร์ขอบ) แต่ปูแถวเต็มความสูงแผ่น
+			// (สูตร costing มักให้ไม่กี่แถว → เห็นแถวเดียวกลางแผ่น) → เติมแถวให้ดูเหมือน nesting จริง
+			var _cols = _prodLayout.cols
+			var _rows = Math.max(_prodLayout.rows || 1, Math.floor(uL / (bh + bl)))
+			// cap pitch ให้ทั้งแถวรวมชิ้นสุดท้ายพอดีกรอบ (extent = (n-1)*pitch + ขนาดชิ้น ≤ usable)
+			var _capX = _cols > 1 ? (uW - bw) / (_cols - 1) : (_prodLayout.pitchX + bl)
+			var _capY = _rows > 1 ? (uL - bh) / (_rows - 1) : (bh + bl)
 			var _ppx = Math.max(2, Math.min(_prodLayout.pitchX + bl, _capX))
-			var _ppy = Math.max(2, Math.min(_prodLayout.pitchY + bl, _capY))
-			g = { cols: _prodLayout.cols, rows: _prodLayout.rows, pw: _ppx, ph: _ppy, count: _prodLayout.num }; pitchY = g.ph
+			var _ppy = Math.max(2, Math.min(bh + bl, _capY))
+			g = { cols: _cols, rows: _rows, pw: _ppx, ph: _ppy, count: _cols * _rows }; pitchY = g.ph
 		}
 		var gridRot = !_useProd && Math.abs(g.pw - pw) > 0.1, baseAng = gridRot ? 90 : 0;
 		if ((cross || forceCross) && !_useProd) {
@@ -1017,7 +1019,14 @@
 		return Math.max(1, Math.floor((uL - bh) / pitch) + 1);
 	}
 	function nestCount(PW, PL, pw, ph, cross) {
-		if (_nestType !== 10 && prodPaperMatches(_prodLayout, PW, PL)) return _prodLayout.num;   // กระดาษตรงกับสูตรระบบ → ใช้ Ups (ยกเว้นทรง 10 ที่ Ups ทับ)
+		if (_nestType !== 10 && prodPaperMatches(_prodLayout, PW, PL)) {   // กระดาษตรงสูตร → ใช้ cols ของสูตร ปูแถวเต็มแผ่น (ยกเว้นทรง 10)
+			if (prodHasGrid(_prodLayout)) {
+				var _uL2 = usableWL(PW, PL).uL
+				var _rows2 = Math.max(_prodLayout.rows || 1, Math.floor(_uL2 / ph))   // ph = ความสูงชิ้น + bleed
+				return _prodLayout.cols * _rows2
+			}
+			return _prodLayout.num
+		}
 		var u = usableWL(PW, PL), g = nestGrid(PW, PL, pw, ph);
 		if (!cross) return g.cols * g.rows;
 		var gridRot = Math.abs(g.pw - pw) > 0.1, nrows = g.rows;   // ไขว้ยึด grid วางตรง + วางสอดเพิ่มแถว
