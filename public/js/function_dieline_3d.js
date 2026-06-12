@@ -719,7 +719,7 @@
 			var outline = [], nu2 = 56, k
 			for (k = 0; k <= nu2; k++) outline.push(pillowPt(k / nu2, 1, 1, Wc, Lc, Dc))    // ขอบข้าง v=1 (y=0)
 			for (k = nu2; k >= 0; k--) outline.push(pillowPt(k / nu2, 0, 1, Wc, Lc, Dc))    // ขอบข้าง v=0 กลับ (ปิดวง)
-			pholder.add(lineFrom(outline, true))
+			pholder.add(lineFrom(outline, false))   // เส้นขอบนอก = ไม่ใช่รอยพับ → โชว์ในโหมดเส้นนอก
 			var ps = 1 / (spec.boxMax || 100); pholder.scale.set(ps, ps, ps)
 			pholder.userData.lineMats = { cut: seamMat, fold: seamMat }
 			return { group: pholder, folds: [], material: material, edgeMat: edgeMat }
@@ -1175,16 +1175,26 @@
 	// OFF = ไม่โชว์เส้นเลย (กล่องเรียบ), ON = โชว์ทุกเส้น (สีจริง)
 	Viewer.prototype._applyLineVisibility = function () {
 		if (!this._allLines) return
-		var show = !!this._showFolds
-		for (var i = 0; i < this._allLines.length; i++) this._allLines[i].visible = show
-		if (show) this._updateCreases(this._t || 0)
+		var show = !!this._showFolds, outer = this._outerOnly !== false   // ค่าเริ่มต้น = โชว์เฉพาะเส้นนอก (เส้นตัด) ซ่อนรอยพับ
+		for (var i = 0; i < this._allLines.length; i++) {
+			var ln = this._allLines[i]
+			var isCrease = ln.userData && (ln.userData.creaseDash || ln.userData.creaseSolid)
+			ln.visible = show && !(outer && isCrease)
+		}
+		if (show && !outer) this._updateCreases(this._t || 0)
 		this._dirty = true
 	}
 	Viewer.prototype.setShowFolds = function (on) { this._showFolds = on; this._applyFoldLineColors(); this._applyLineVisibility() }
-	// กาง(t เล็ก)=เส้นประ, พับ(t ใกล้ 1)=เส้นทึบ
+	// กาง(t เล็ก)=เส้นประ, พับ(t ใกล้ 1)=เส้นทึบ — โหมดเส้นนอก: ซ่อนรอยพับเสมอ
 	Viewer.prototype._updateCreases = function (t) {
 		if (!this._showFolds) return
-		var solid = t >= 0.96, i
+		var i
+		if (this._outerOnly !== false) {   // เส้นนอกอย่างเดียว → ซ่อนรอยพับ
+			if (this._creaseDash) for (i = 0; i < this._creaseDash.length; i++) this._creaseDash[i].visible = false
+			if (this._creaseSolid) for (i = 0; i < this._creaseSolid.length; i++) this._creaseSolid[i].visible = false
+			return
+		}
+		var solid = t >= 0.96
 		if (this._creaseDash) for (i = 0; i < this._creaseDash.length; i++) this._creaseDash[i].visible = !solid
 		if (this._creaseSolid) for (i = 0; i < this._creaseSolid.length; i++) this._creaseSolid[i].visible = solid
 	}
