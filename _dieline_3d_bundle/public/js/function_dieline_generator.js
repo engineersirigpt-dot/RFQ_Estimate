@@ -749,10 +749,13 @@
 		var g = nestGrid(PW, PL, pw, ph), pieces = [], i, j, count, pitchY = g.ph;
 		var _useProd = !forceCross && prodMatches(_prodLayout, PW, PL);   // ทรง 10 ไม่ใช้ prod grid (รูปทับ) → ใช้ interlock แทน
 		if (_useProd) {
-			// cap pitch ไม่ให้ cols×pitch เกินพื้นที่ใช้ได้ — กัน bleed สะสม (cols เยอะ) ทำให้ล้ำกรอบ
-			// คงจำนวนตามสูตร (cols×rows) เป๊ะ แค่เกลี่ยระยะให้พอดีแผ่น (มี gap เท่าที่กระดาษเหลือ)
-			var _ppx = Math.min(_prodLayout.pitchX + bl, uW / _prodLayout.cols)
-			var _ppy = Math.min(_prodLayout.pitchY + bl, uL / _prodLayout.rows)
+			// cap pitch ให้ "ทั้งแถวรวมความกว้างชิ้นสุดท้าย" พอดีพื้นที่ใช้ได้ — ไม่ล้ำกรอบ
+			// extent = (cols-1)*pitch + bw ต้อง <= uW  →  pitch <= (uW - bw)/(cols-1)
+			// คงจำนวนตามสูตร (cols×rows) เป๊ะ — ชิ้นที่แชร์ขอบจะวางชิด/ซ้อนเล็กน้อยตามจริง
+			var _capX = _prodLayout.cols > 1 ? (uW - bw) / (_prodLayout.cols - 1) : (_prodLayout.pitchX + bl)
+			var _capY = _prodLayout.rows > 1 ? (uL - bh) / (_prodLayout.rows - 1) : (_prodLayout.pitchY + bl)
+			var _ppx = Math.max(2, Math.min(_prodLayout.pitchX + bl, _capX))
+			var _ppy = Math.max(2, Math.min(_prodLayout.pitchY + bl, _capY))
 			g = { cols: _prodLayout.cols, rows: _prodLayout.rows, pw: _ppx, ph: _ppy, count: _prodLayout.num }; pitchY = g.ph
 		}
 		var gridRot = !_useProd && Math.abs(g.pw - pw) > 0.1, baseAng = gridRot ? 90 : 0;
