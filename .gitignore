@@ -14,4 +14,11 @@
 # ===== artifact/ทดสอบ (ไม่จำเป็นต้อง commit) =====
 *~
 README.md~
+
+# ===== จาก sirisol =====
+_*
+# คง _dieline_3d_bundle ไว้ (อย่าให้ _* ไป ignore งาน dieline)
+!_dieline_3d_bundle/
+!_dieline_3d_bundle/**
+/LogAI
 notes.txt
