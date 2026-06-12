@@ -737,6 +737,11 @@
 			if (!ps || !tpl) return null;
 			var key = tpl + '|' + r(PW) + '|' + r(PL);
 			if (_estLayCache[key] !== undefined) return _estLayCache[key];
+			// กระดาษที่ระบบเลือก → ใช้ Ups จริงของระบบ (selected_layout) แม่นสุด ตรง 100%
+			if (_nestType !== 10 && _prodLayout && _prodLayout.num > 0 && prodPaperMatches(_prodLayout, PW, PL)) {
+				var _sysv = { count: _prodLayout.num, cols: _prodLayout.cols || 0, rows: _prodLayout.rows || 0, laying: "system" };
+				_estLayCache[key] = _sysv; return _sysv;
+			}
 			var m = getMargins();
 			var tol = { gripper: m.gripper, color_bar: m.colorbar, paper_edge: m.edge, bleed: 6 };
 			var best = null;
