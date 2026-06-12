@@ -1355,7 +1355,7 @@
 		var approx = APPROX_TYPES[d.type]
 			? '<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:10px;font-size:11px;margin-left:8px">⚠️ ภาพจำลองโดยประมาณ</span>' : ''
 		var $ov = $('<div id="dieline-3d-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:10000;display:flex;align-items:center;justify-content:center">' +
-			'<div style="background:#fff;width:min(960px,96vw);height:min(90vh,720px);border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,0.35);display:flex;flex-direction:column;overflow:hidden">' +
+			'<div style="background:#fff;width:min(1180px,96vw);height:min(94vh,880px);border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,0.35);display:flex;flex-direction:column;overflow:hidden">' +
 			'<div style="flex-shrink:0;background:linear-gradient(90deg,#8b5cf6,#6d28d9);color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;font-weight:bold">' +
 			'<span id="d3-title"><i class="fa fa-cube"></i> มุมมอง 3D — ' + (BOX_NAMES[d.type] || ('Type ' + d.type)) + approx + '</span>' +
 			'<span class="d3-close" style="cursor:pointer;font-size:24px;padding:0 6px">&times;</span></div>' +

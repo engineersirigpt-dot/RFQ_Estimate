@@ -30,7 +30,7 @@
 		s += '<line x1="' + r(gr) + '" y1="' + r(y) + '" x2="' + r(x2 - ah * 0.9) + '" y2="' + r(y) + '" stroke="' + col + '" stroke-width="' + r(lw) + '" stroke-linecap="round"/>';
 		s += '<path d="M ' + r(x1) + ' ' + r(y) + ' L ' + r(x1 + ah) + ' ' + r(y - ah * 0.58) + ' L ' + r(x1 + ah) + ' ' + r(y + ah * 0.58) + ' Z"' + ahS;
 		s += '<path d="M ' + r(x2) + ' ' + r(y) + ' L ' + r(x2 - ah) + ' ' + r(y - ah * 0.58) + ' L ' + r(x2 - ah) + ' ' + r(y + ah * 0.58) + ' Z"' + ahS;
-		s += '<text x="' + r(cx) + '" y="' + r(y) + '" font-size="' + r(fs) + '" fill="' + col + '" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-weight="bold" letter-spacing="3">GRAIN</text>';
+		s += '<text x="' + r(cx) + '" y="' + r(y) + '" font-size="' + r(fs) + '" fill="' + col + '" text-anchor="middle" dominant-baseline="central" font-family="Prompt, sans-serif" font-weight="bold" letter-spacing="3">GRAIN</text>';
 		return s;
 	}
 
@@ -63,7 +63,7 @@
 	}
 	function label(x, y, txt, size) {
 		return '<text x="' + r(x) + '" y="' + r(y) + '" font-size="' + (size || 9) +
-			'" fill="#475569" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif">' + txt + '</text>';
+			'" fill="#475569" text-anchor="middle" dominant-baseline="middle" font-family="Prompt, sans-serif">' + txt + '</text>';
 	}
 	// เส้นบอกขนาด (dimension) แนวนอน — มีหัวลูกศร + ค่า mm
 	function dimH(x1, x2, y, value, fs, hi) {
@@ -71,7 +71,7 @@
 		return '<line x1="' + r(x1) + '" y1="' + r(y) + '" x2="' + r(x2) + '" y2="' + r(y) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
 			'<line x1="' + r(x1) + '" y1="' + r(y - aw) + '" x2="' + r(x1) + '" y2="' + r(y + aw) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
 			'<line x1="' + r(x2) + '" y1="' + r(y - aw) + '" x2="' + r(x2) + '" y2="' + r(y + aw) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
-			'<text x="' + r((x1 + x2) / 2) + '" y="' + r(y - aw * 1.8) + '" font-size="' + r(hi ? fs * 1.18 : fs) + '" fill="' + (hi ? '#2563eb' : '#dc2626') + '" text-anchor="middle" font-family="sans-serif" font-weight="' + (hi ? 'bold' : 'normal') + '">' + value.toFixed(2) + ' mm</text>';
+			'<text x="' + r((x1 + x2) / 2) + '" y="' + r(y - aw * 1.8) + '" font-size="' + r(hi ? fs * 1.18 : fs) + '" fill="' + (hi ? '#2563eb' : '#dc2626') + '" text-anchor="middle" font-family="Prompt, sans-serif" font-weight="' + (hi ? 'bold' : 'normal') + '">' + value.toFixed(2) + ' mm</text>';
 	}
 	// เส้นบอกขนาด แนวตั้ง
 	function dimV(y1, y2, x, value, fs, hi) {
@@ -79,7 +79,7 @@
 		return '<line x1="' + r(x) + '" y1="' + r(y1) + '" x2="' + r(x) + '" y2="' + r(y2) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
 			'<line x1="' + r(x - aw) + '" y1="' + r(y1) + '" x2="' + r(x + aw) + '" y2="' + r(y1) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
 			'<line x1="' + r(x - aw) + '" y1="' + r(y2) + '" x2="' + r(x + aw) + '" y2="' + r(y2) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
-			'<text x="' + r(tx) + '" y="' + r(ty) + '" font-size="' + r(hi ? fs * 1.18 : fs) + '" fill="' + (hi ? '#2563eb' : '#dc2626') + '" text-anchor="middle" font-family="sans-serif" font-weight="' + (hi ? 'bold' : 'normal') + '" transform="rotate(-90 ' + r(tx) + ' ' + r(ty) + ')">' + value.toFixed(2) + ' mm</text>';
+			'<text x="' + r(tx) + '" y="' + r(ty) + '" font-size="' + r(hi ? fs * 1.18 : fs) + '" fill="' + (hi ? '#2563eb' : '#dc2626') + '" text-anchor="middle" font-family="Prompt, sans-serif" font-weight="' + (hi ? 'bold' : 'normal') + '" transform="rotate(-90 ' + r(tx) + ' ' + r(ty) + ')">' + value.toFixed(2) + ' mm</text>';
 	}
 	// เส้นบอกขนาดแนวนอน (ข้อความอยู่ใต้เส้น) — ใช้กับ per-panel
 	function dimHb(x1, x2, y, value, fs, hi) {
@@ -87,7 +87,7 @@
 		return '<line x1="' + r(x1) + '" y1="' + r(y) + '" x2="' + r(x2) + '" y2="' + r(y) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
 			'<line x1="' + r(x1) + '" y1="' + r(y - aw) + '" x2="' + r(x1) + '" y2="' + r(y + aw) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
 			'<line x1="' + r(x2) + '" y1="' + r(y - aw) + '" x2="' + r(x2) + '" y2="' + r(y + aw) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
-			'<text x="' + r((x1 + x2) / 2) + '" y="' + r(y + aw + fs) + '" font-size="' + r(hi ? fs * 1.18 : fs) + '" fill="' + (hi ? '#2563eb' : '#dc2626') + '" text-anchor="middle" font-family="sans-serif" font-weight="' + (hi ? 'bold' : 'normal') + '">' + value.toFixed(1) + ' mm</text>';
+			'<text x="' + r((x1 + x2) / 2) + '" y="' + r(y + aw + fs) + '" font-size="' + r(hi ? fs * 1.18 : fs) + '" fill="' + (hi ? '#2563eb' : '#dc2626') + '" text-anchor="middle" font-family="Prompt, sans-serif" font-weight="' + (hi ? 'bold' : 'normal') + '">' + value.toFixed(1) + ' mm</text>';
 	}
 	// เลขบอกขนาดต่อ panel สำหรับทรงที่มีผนัง W|L|W|L (ใต้กล่อง = ความกว้าง panel, ขวา = ความสูง D)
 	function wallRowDims(W, L, D, xP1, yWall, yWallBot, totalW, totalH) {
@@ -625,7 +625,7 @@
 		var hh = fs * (rows.length * 1.35 + 0.9);
 		var vy = c.vy - hh;
 		var s = '<rect x="' + r(c.vx) + '" y="' + r(vy) + '" width="' + r(c.vw) + '" height="' + r(hh - fs * 0.5) + '" fill="#f8fafc" stroke="#cbd5e1" stroke-width="' + r(fs * 0.05) + '"/>';
-		rows.forEach(function (t, i) { s += '<text x="' + r(c.vx + fs * 0.4) + '" y="' + r(vy + fs * (1.15 + i * 1.35)) + '" font-size="' + r(i === 0 ? fs * 1.05 : fs * 0.8) + '" font-weight="' + (i === 0 ? 'bold' : 'normal') + '" fill="#1e293b" font-family="sans-serif">' + t + '</text>'; });
+		rows.forEach(function (t, i) { s += '<text x="' + r(c.vx + fs * 0.4) + '" y="' + r(vy + fs * (1.15 + i * 1.35)) + '" font-size="' + r(i === 0 ? fs * 1.05 : fs * 0.8) + '" font-weight="' + (i === 0 ? 'bold' : 'normal') + '" fill="#1e293b" font-family="Prompt, sans-serif">' + t + '</text>'; });
 		var w = pxW || 1600, h = w * (c.vh + hh) / c.vw;
 		return '<svg xmlns="http://www.w3.org/2000/svg" width="' + r(w) + '" height="' + r(h) + '" viewBox="' + r(c.vx) + ' ' + r(vy) + ' ' + r(c.vw) + ' ' + r(c.vh + hh) + '">' + s + c.inner + '</svg>';
 	}
@@ -889,11 +889,11 @@
 			if (cross) {
 				if (debugMode && rotated180) {
 					var bfs2 = Math.min(cw, ch) * 0.14, bcx = px + bl/2 + cw / 2, bcy = py + bl/2 + ch / 2;
-					s += '<text x="' + r(bcx) + '" y="' + r(bcy + bfs2 * 0.35) + '" font-size="' + r(bfs2) + '" fill="#d97706" text-anchor="middle" font-family="sans-serif" font-weight="bold" fill-opacity="0.7">↺</text>';
+					s += '<text x="' + r(bcx) + '" y="' + r(bcy + bfs2 * 0.35) + '" font-size="' + r(bfs2) + '" fill="#d97706" text-anchor="middle" font-family="Prompt, sans-serif" font-weight="bold" fill-opacity="0.7">↺</text>';
 				} else if (!debugMode) {
 					var lblSz = Math.min(cw, ch) * 0.09, lblX = px + bl/2 + cw * 0.05, lblY = py + bl/2 + lblSz * 1.4;
 					var lblCol = rotated180 ? '#d97706' : '#3b82f6';
-					s += '<text x="' + r(lblX) + '" y="' + r(lblY) + '" font-size="' + r(lblSz) + '" fill="' + lblCol + '" font-family="sans-serif" font-weight="bold" fill-opacity="0.85">' + (rotated180 ? '180\xb0' : '0\xb0') + '</text>';
+					s += '<text x="' + r(lblX) + '" y="' + r(lblY) + '" font-size="' + r(lblSz) + '" fill="' + lblCol + '" font-family="Prompt, sans-serif" font-weight="bold" fill-opacity="0.85">' + (rotated180 ? '180\xb0' : '0\xb0') + '</text>';
 				}
 			}
 		});
@@ -903,14 +903,14 @@
 		// ===== ลูกศร + ป้ายระยะ แบบ reference (วางนอกแผ่น ไม่ทับชิ้นงาน) =====
 		var ann = '<defs><marker id="nah" markerWidth="9" markerHeight="9" refX="4.5" refY="4.5" orient="auto"><path d="M1,1.5 L7.5,4.5 L1,7.5" fill="none" stroke="' + AC + '" stroke-width="1.4"/></marker></defs>';
 		// gripper (บน)
-		ann += '<text x="' + r(PW * 0.5) + '" y="' + r(-pd * 0.45) + '" font-size="' + r(afs) + '" fill="' + AC + '" text-anchor="middle" font-family="sans-serif">' + r(myT) + ' mm : gripper</text>';
+		ann += '<text x="' + r(PW * 0.5) + '" y="' + r(-pd * 0.45) + '" font-size="' + r(afs) + '" fill="' + AC + '" text-anchor="middle" font-family="Prompt, sans-serif">' + r(myT) + ' mm : gripper</text>';
 		ann += '<line x1="' + r(PW * 0.5) + '" y1="' + r(-pd * 0.3) + '" x2="' + r(PW * 0.5) + '" y2="' + r(myT) + '" stroke="' + AC + '" stroke-width="' + r(asw) + '" marker-end="url(#nah)"/>';
 		// color bar (ล่าง)
-		ann += '<text x="' + r(PW * 0.5) + '" y="' + r(PL + pd * 0.58) + '" font-size="' + r(afs) + '" fill="' + AC + '" text-anchor="middle" font-family="sans-serif">' + r(myB) + ' mm : color bar</text>';
+		ann += '<text x="' + r(PW * 0.5) + '" y="' + r(PL + pd * 0.58) + '" font-size="' + r(afs) + '" fill="' + AC + '" text-anchor="middle" font-family="Prompt, sans-serif">' + r(myB) + ' mm : color bar</text>';
 		ann += '<line x1="' + r(PW * 0.5) + '" y1="' + r(PL + pd * 0.42) + '" x2="' + r(PW * 0.5) + '" y2="' + r(PL - myB) + '" stroke="' + AC + '" stroke-width="' + r(asw) + '" marker-end="url(#nah)"/>';
 		// paper edge (ซ้าย/ขวา) — หมุน 90°
-		ann += '<text x="' + r(-pd * 0.55) + '" y="' + r(PL * 0.5) + '" font-size="' + r(afs) + '" fill="' + AC + '" text-anchor="middle" font-family="sans-serif" transform="rotate(-90 ' + r(-pd * 0.55) + ' ' + r(PL * 0.5) + ')">' + r(mx) + ' mm : paper edge</text>';
-		ann += '<text x="' + r(PW + pd * 0.55) + '" y="' + r(PL * 0.5) + '" font-size="' + r(afs) + '" fill="' + AC + '" text-anchor="middle" font-family="sans-serif" transform="rotate(-90 ' + r(PW + pd * 0.55) + ' ' + r(PL * 0.5) + ')">' + r(mx) + ' mm : paper edge</text>';
+		ann += '<text x="' + r(-pd * 0.55) + '" y="' + r(PL * 0.5) + '" font-size="' + r(afs) + '" fill="' + AC + '" text-anchor="middle" font-family="Prompt, sans-serif" transform="rotate(-90 ' + r(-pd * 0.55) + ' ' + r(PL * 0.5) + ')">' + r(mx) + ' mm : paper edge</text>';
+		ann += '<text x="' + r(PW + pd * 0.55) + '" y="' + r(PL * 0.5) + '" font-size="' + r(afs) + '" fill="' + AC + '" text-anchor="middle" font-family="Prompt, sans-serif" transform="rotate(-90 ' + r(PW + pd * 0.55) + ' ' + r(PL * 0.5) + ')">' + r(mx) + ' mm : paper edge</text>';
 		// bleed — แสดงรอบชิ้นแรกแบบ reference (กล่องเขียว=ชิ้นงาน + ลูกศร bleed 4 ด้าน)
 		if (pieces.length) {
 			var p0 = pieces[0], p0r = (p0[2] === 90 || p0[2] === 270), cw0 = p0r ? (bh + bl) : (bw + bl), ch0 = p0r ? (bw + bl) : (bh + bl);
@@ -925,15 +925,15 @@
 				ann += '<line x1="' + r(p0[0]) + '" y1="' + r(myp) + '" x2="' + r(gx) + '" y2="' + r(myp) + '" stroke="' + BC + '" stroke-width="' + r(asw * 0.7) + '" marker-end="url(#nahR)"/>';
 				ann += '<line x1="' + r(p0[0] + cw0) + '" y1="' + r(myp) + '" x2="' + r(gx + dw0) + '" y2="' + r(myp) + '" stroke="' + BC + '" stroke-width="' + r(asw * 0.7) + '" marker-end="url(#nahR)"/>';
 				var halo = ' paint-order="stroke" stroke="#fff" stroke-width="' + r(bfs * 0.5) + '" stroke-linejoin="round"';
-				ann += '<text x="' + r(mxp) + '" y="' + r((p0[1] + gy) / 2 + bfs * 0.35) + '" font-size="' + r(bfs) + '" fill="' + BC + '" text-anchor="middle" font-family="sans-serif"' + halo + '>bleed ' + r(bl / 2) + 'mm</text>';
-				ann += '<text x="' + r((p0[0] + gx) / 2) + '" y="' + r(myp) + '" font-size="' + r(bfs) + '" fill="' + BC + '" text-anchor="middle" font-family="sans-serif"' + halo + ' transform="rotate(-90 ' + r((p0[0] + gx) / 2) + ' ' + r(myp) + ')">bleed ' + r(bl / 2) + 'mm</text>';
+				ann += '<text x="' + r(mxp) + '" y="' + r((p0[1] + gy) / 2 + bfs * 0.35) + '" font-size="' + r(bfs) + '" fill="' + BC + '" text-anchor="middle" font-family="Prompt, sans-serif"' + halo + '>bleed ' + r(bl / 2) + 'mm</text>';
+				ann += '<text x="' + r((p0[0] + gx) / 2) + '" y="' + r(myp) + '" font-size="' + r(bfs) + '" fill="' + BC + '" text-anchor="middle" font-family="Prompt, sans-serif"' + halo + ' transform="rotate(-90 ' + r((p0[0] + gx) / 2) + ' ' + r(myp) + ')">bleed ' + r(bl / 2) + 'mm</text>';
 			} else {
-				ann += '<text x="' + r(p0[0] + cw0 / 2) + '" y="' + r(p0[1] + ch0 * 0.08) + '" font-size="' + r(bfs) + '" fill="' + BC + '" text-anchor="middle" font-family="sans-serif">' + r(bl / 2) + 'mm bleed</text>';
+				ann += '<text x="' + r(p0[0] + cw0 / 2) + '" y="' + r(p0[1] + ch0 * 0.08) + '" font-size="' + r(bfs) + '" fill="' + BC + '" text-anchor="middle" font-family="Prompt, sans-serif">' + r(bl / 2) + 'mm bleed</text>';
 			}
 		}
 		s += ann;
 		var svg = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="' + r(-pd) + ' ' + r(-pd) + ' ' + r(PW + pd * 2) + ' ' + r(PL + pd * 2) +
-			'" style="width:100%;height:auto;max-height:50vh;display:block;background:#f8fafc">' + s + '</svg>';
+			'" style="width:100%;height:auto;max-height:72vh;display:block;background:#f8fafc">' + s + '</svg>';
 		return { svg: svg, count: count, eff: eff, overlap: cross ? Math.max(0, g.ph - pitchY) : 0 };
 	}
 	// ขนาดกระดาษเครื่องพิมพ์ (จาก Excel: all spec machine) — w×l mm + ช่วงแกรม
@@ -1070,7 +1070,7 @@
 		var svg = nestSvg.replace(/max-height:[^;"]*;?/g, '');
 		w2.document.open();
 		w2.document.write('<!doctype html><html><head><meta charset="utf-8"><title>nesting</title>' +
-			'<style>@page{margin:8mm}html,body{margin:0;padding:0;font-family:sans-serif;background:#fff}.h{padding:6px 12px;font-size:12px;border-bottom:1px solid #cbd5e1;font-weight:bold;word-break:break-word}.wrap{padding:4px;text-align:center}svg{width:auto;max-width:100%;max-height:90vh;height:auto}</style></head>' +
+			'<style>@page{margin:8mm}html,body{margin:0;padding:0;font-family:Prompt,sans-serif;background:#fff}.h{padding:6px 12px;font-size:12px;border-bottom:1px solid #cbd5e1;font-weight:bold;word-break:break-word}.wrap{padding:4px;text-align:center}svg{width:auto;max-width:100%;max-height:90vh;height:auto}</style></head>' +
 			'<body><div class="h">' + titleText + '</div><div class="wrap">' + svg + '</div>' +
 			'<scr' + 'ipt>window.onload=function(){setTimeout(function(){window.focus();window.print();},500)}</scr' + 'ipt></body></html>');
 		w2.document.close();
@@ -1142,16 +1142,16 @@
 		}).join('');
 
 		var html = '<div id="dieline-nest-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:100000;display:flex;align-items:center;justify-content:center">' +
-			'<div style="background:#fff;width:min(1020px,97vw);max-height:95vh;overflow:auto;border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,.35)">' +
-			'<div style="background:linear-gradient(90deg,#0ea5e9,#2563eb);color:#fff;padding:13px 18px;display:flex;justify-content:space-between;align-items:center;font-weight:bold"><span>📐 วางไดไลน์ลงกระดาษ — Type ' + d.type + '</span><span class="nest-close" style="cursor:pointer;font-size:24px">&times;</span></div>' +
+			'<div style="background:#fff;width:min(1180px,96vw);height:min(94vh,880px);overflow:auto;border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,.35)">' +
+			'<div style="background:linear-gradient(90deg,#0ea5e9,#2563eb);color:#fff;padding:13px 18px;display:flex;justify-content:space-between;align-items:center;font-weight:bold"><span>วางไดไลน์ลงกระดาษ — Type ' + d.type + '</span><span class="nest-close" style="cursor:pointer;font-size:24px">&times;</span></div>' +
 			'<div style="padding:10px 16px;background:#eff6ff;font-size:13px;color:#1e40af;display:flex;gap:10px;align-items:center;flex-wrap:wrap">' +
 			'เลือกเครื่อง/กระดาษ <select class="nest-sel" style="padding:4px 6px;border:1px solid #93c5fd;border-radius:5px">' + optHtml + '</select>' +
 			'<span id="nest-gram"></span></div>' +
 			'<div id="nest-sheets" style="display:flex;gap:14px;flex-wrap:wrap;padding:16px"></div>' +
-			'<div style="padding:0 16px 16px"><div style="font-weight:bold;color:#334155;margin-bottom:6px">📊 เทียบทุกขนาด (ไดไลน์ ≈ ' + r(pw) + '×' + r(ph) + ' mm รวม bleed · เว้น gripper ' + _margins.gripper + ' / color bar ' + _margins.colorbar + ' / edge ' + _margins.edge + ' mm)</div>' +
+			'<div style="padding:0 16px 16px"><div style="font-weight:bold;color:#334155;margin-bottom:6px">เทียบทุกขนาด (ไดไลน์ ≈ ' + r(pw) + '×' + r(ph) + ' mm รวม bleed · เว้น gripper ' + _margins.gripper + ' / color bar ' + _margins.colorbar + ' / edge ' + _margins.edge + ' mm)</div>' +
 			'<table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="background:#f1f5f9"><th style="padding:5px 8px;text-align:left">กระดาษ</th><th style="padding:5px 8px">ขนาด mm</th><th style="padding:5px 8px;text-align:left">เครื่อง (รุ่น)</th><th style="padding:5px 8px">วางตรง</th><th style="padding:5px 8px">วางไขว้</th><th style="padding:5px 8px">เสียน้อยสุด</th><th style="padding:5px 8px">กระดาษที่ใช้</th><th style="padding:5px 8px">แกรม</th></tr>' + tblRows + '</table>' +
 			'<div style="font-size:11px;color:#64748b;margin-top:6px">✅/⚠️ = แกรมงาน' + (gram ? ' ' + gram + 'g' : '') + ' รับได้ไหม' + (qty ? ' · ยอด ' + qty.toLocaleString() : ' · (ใส่ยอดสั่ง)') + (priceKg ? ' · ราคา ' + priceKg + ' ฿/kg' : ' · (ใส่ Cost B/Kg เพื่อคิดเป็นบาท)') + '</div>' +
-			(_prodLayout && _prodLayout.cols > 0 ? '<div style="font-size:11px;color:#16a34a;margin-top:4px">📐 กระดาษ ' + r(_prodLayout.paperW) + '×' + r(_prodLayout.paperL) + ' = ตรงกับ <b>Ups สูตรระบบ ' + _prodLayout.num + ' ตัว</b> (' + _prodLayout.cols + '×' + _prodLayout.rows + ' แชร์ขอบตามทรง) · กระดาษอื่นเป็นค่าประมาณจาก nesting</div>' : '') + '</div>' +
+			(_prodLayout && _prodLayout.cols > 0 ? '<div style="font-size:11px;color:#16a34a;margin-top:4px">กระดาษ ' + r(_prodLayout.paperW) + '×' + r(_prodLayout.paperL) + ' = ตรงกับ <b>Ups สูตรระบบ ' + _prodLayout.num + ' ตัว</b> (' + _prodLayout.cols + '×' + _prodLayout.rows + ' แชร์ขอบตามทรง) · กระดาษอื่นเป็นค่าประมาณจาก nesting</div>' : '') + '</div>' +
 			'</div></div>';
 		document.body.insertAdjacentHTML('beforeend', html);
 		var ov = document.getElementById('dieline-nest-overlay');
@@ -1160,8 +1160,8 @@
 			var st = drawNest(m.w, m.l, unit, false), cr = drawNest(m.w, m.l, unit, true);
 			var b = cr.count > st.count ? 'สอด' : 'ตรง';
 			var ebtn = 'border:0;padding:4px 10px;border-radius:5px;font-size:11px;font-weight:bold;cursor:pointer;color:#fff;margin-right:5px';
-			var bar = function (k) { return '<div style="margin:6px 0 8px"><button class="np-pdf-' + k + '" style="background:#dc2626;' + ebtn + '">🔍 PDF (ซูมได้)</button><button class="np-svg-' + k + '" style="background:#059669;' + ebtn + '">📥 SVG</button><span style="font-size:11px;color:#94a3b8;margin-left:6px">(ลูกกลิ้ง = ซูม)</span></div>'; };
-			var zwrap = function (svg) { return '<div class="nz-holder" style="overflow:auto;max-height:52vh;border:1px solid #eef2f7;border-radius:4px"><div class="nz-inner" style="transform-origin:0 0;width:100%">' + svg + '</div></div>'; };
+			var bar = function (k) { return '<div style="margin:6px 0 8px"><button class="np-pdf-' + k + '" style="background:#dc2626;' + ebtn + '">PDF (ซูมได้)</button><button class="np-svg-' + k + '" style="background:#059669;' + ebtn + '">SVG</button><span style="font-size:11px;color:#94a3b8;margin-left:6px">(ลูกกลิ้ง = ซูม)</span></div>'; };
+			var zwrap = function (svg) { return '<div class="nz-holder" style="overflow:auto;max-height:74vh;border:1px solid #eef2f7;border-radius:4px"><div class="nz-inner" style="transform-origin:0 0;width:100%">' + svg + '</div></div>'; };
 			document.getElementById('nest-sheets').innerHTML =
 				'<div style="flex:1;min-width:280px;border:2px solid ' + (b === 'ตรง' ? '#16a34a' : '#e2e8f0') + ';border-radius:8px;padding:10px"><div style="font-weight:bold;color:#334155">วางตรง — <span style="color:#2563eb;font-size:18px">' + st.count + '</span> ตัว/แผ่น · ' + st.eff.toFixed(0) + '%</div>' + sheetInfo(st.count, st.eff) + bar('st') + zwrap(st.svg) + '</div>' +
 				'<div style="flex:1;min-width:280px;border:2px solid ' + (b === 'สอด' ? '#16a34a' : '#e2e8f0') + ';border-radius:8px;padding:10px"><div style="font-weight:bold;color:#334155">วางไขว้ — <span style="color:#2563eb;font-size:18px">' + cr.count + '</span> ตัว/แผ่น · ' + cr.eff.toFixed(0) + '%</div>' + sheetInfo(cr.count, cr.eff) + bar('cr') + zwrap(cr.svg) + '</div>';
@@ -1208,13 +1208,13 @@
 			'#v2-svg-holder.bg-black rect,#v2-svg-holder.bg-black path,#v2-svg-holder.bg-black ellipse{fill:none !important}' +
 			'#v2-svg-holder.bg-black line[stroke="#334155"]{stroke:#cbd5e1 !important}' +
 			'#v2-svg-holder.bg-black text{fill:#e5e7eb !important}</style>' +
-			'<div style="background:#fff;width:min(980px,97vw);max-height:95vh;border-radius:8px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.35)">' +
+			'<div style="background:#fff;width:min(1180px,96vw);height:min(94vh,880px);border-radius:8px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.35)">' +
 			'<div style="background:linear-gradient(90deg,#8b5cf6,#6d28d9);color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;font-weight:bold">' +
 			'<span><i class="fa fa-vector-square"></i> Dieline v2 — สร้างเอง (ฟรี)</span>' +
 			'<span class="v2-close" style="cursor:pointer;font-size:24px">&times;</span></div>' +
 			'<div id="v2-tabs" style="display:flex;border-bottom:2px solid #e2e8f0;background:#f8fafc">' +
-			'<button class="v2-tab" data-tab="dieline" style="' + tabActS + '">📐 Dieline</button>' +
-			'<button class="v2-tab" data-tab="nesting" style="' + tabS + '">📋 Nesting</button>' +
+			'<button class="v2-tab" data-tab="dieline" style="' + tabActS + '">Dieline</button>' +
+			'<button class="v2-tab" data-tab="nesting" style="' + tabS + '">Nesting</button>' +
 			'</div>' +
 			'<div style="flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0">' +
 			'<div id="v2-svg-holder" class="bg-white" style="flex:1;overflow:auto;padding:16px;display:flex;align-items:center;justify-content:center"><div id="v2-svg-inner" style="transform-origin:center center;display:flex;align-items:center;justify-content:center;margin:auto"></div></div>' +
@@ -1228,9 +1228,9 @@
 			'<span style="font-size:11px;color:#94a3b8">(ลูกกลิ้งเมาส์ = ซูมที่จุดนั้น)</span>' +
 			'<label style="font-size:12px;color:#475569">พื้นหลัง <select class="v2-bg" style="padding:3px 5px;border:1px solid #cbd5e1;border-radius:5px"><option value="white">ขาว</option><option value="gray">เทา</option><option value="black">ดำ</option></select></label>' +
 			'<span style="flex:1"></span>' +
-			'<button class="v2-3d" style="background:#7c3aed;' + btn + '">🧊 3D</button>' +
-			'<button class="v2-pdf" style="background:#dc2626;' + btn + '">📄 PDF</button>' +
-			'<button class="v2-dl" style="background:#6d28d9;' + btn + '">📥 SVG</button>' +
+			'<button class="v2-3d" style="background:#7c3aed;' + btn + '">3D</button>' +
+			'<button class="v2-pdf" style="background:#dc2626;' + btn + '">PDF</button>' +
+			'<button class="v2-dl" style="background:#6d28d9;' + btn + '">SVG</button>' +
 			'<button class="v2-close" style="background:#eee;border:0;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer">ปิด</button>' +
 			'</div></div></div>';
 		document.body.insertAdjacentHTML('beforeend', html);
@@ -1379,17 +1379,17 @@
 				'เลือกเครื่อง/กระดาษ <select class="vn-sel" style="padding:4px 6px;border:1px solid #93c5fd;border-radius:5px">' + optHtml + '</select>' +
 				'<span class="vn-gram"></span></div>' +
 				'<div class="vn-sheets" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px"></div>' +
-				'<div><div style="font-weight:bold;color:#334155;margin-bottom:6px">📊 เทียบทุกขนาด (ไดไลน์ ≈ ' + r(pw) + '×' + r(ph) + ' mm · gripper ' + _margins.gripper + ' / color bar ' + _margins.colorbar + ' / edge ' + _margins.edge + ' mm)</div>' +
+				'<div><div style="font-weight:bold;color:#334155;margin-bottom:6px">เทียบทุกขนาด (ไดไลน์ ≈ ' + r(pw) + '×' + r(ph) + ' mm · gripper ' + _margins.gripper + ' / color bar ' + _margins.colorbar + ' / edge ' + _margins.edge + ' mm)</div>' +
 				'<table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="background:#f1f5f9"><th style="padding:5px 8px;text-align:left">กระดาษ</th><th style="padding:5px 8px">ขนาด mm</th><th style="padding:5px 8px;text-align:left">เครื่อง</th><th style="padding:5px 8px">วางตรง</th><th style="padding:5px 8px">วางไขว้</th><th style="padding:5px 8px">เสีย%</th><th style="padding:5px 8px">กระดาษที่ใช้</th><th style="padding:5px 8px">แกรม</th></tr>' + tblRows + '</table>' +
 				'<div style="font-size:11px;color:#64748b;margin-top:6px">✅/⚠️=แกรมงาน' + (gram ? ' ' + gram + 'g' : '') + (qty ? ' · ยอด ' + qty.toLocaleString() : '') + (priceKg ? ' · ราคา ' + priceKg + ' ฿/kg' : '') + '</div>' +
-				(_prodLayout && _prodLayout.cols > 0 ? '<div style="font-size:11px;color:#16a34a;margin-top:4px">📐 กระดาษ ' + r(_prodLayout.paperW) + '×' + r(_prodLayout.paperL) + ' = <b>Ups สูตรระบบ ' + _prodLayout.num + ' ตัว</b> (' + _prodLayout.cols + '×' + _prodLayout.rows + ')</div>' : '') + '</div>';
+				(_prodLayout && _prodLayout.cols > 0 ? '<div style="font-size:11px;color:#16a34a;margin-top:4px">กระดาษ ' + r(_prodLayout.paperW) + '×' + r(_prodLayout.paperL) + ' = <b>Ups สูตรระบบ ' + _prodLayout.num + ' ตัว</b> (' + _prodLayout.cols + '×' + _prodLayout.rows + ')</div>' : '') + '</div>';
 			function renderSel(i) {
 				var m = rows[i].m;
 				var st = drawNest(m.w, m.l, unit, false), cr = drawNest(m.w, m.l, unit, true);
 				var b = cr.count > st.count ? 'สอด' : 'ตรง';
 				var ebtn = 'border:0;padding:4px 10px;border-radius:5px;font-size:11px;font-weight:bold;cursor:pointer;color:#fff;margin-right:5px';
-				var bar = function (k) { return '<div style="margin:6px 0 8px"><button class="np-pdf-' + k + '" style="background:#dc2626;' + ebtn + '">🔍 PDF</button><button class="np-svg-' + k + '" style="background:#059669;' + ebtn + '">📥 SVG</button><span style="font-size:11px;color:#94a3b8;margin-left:6px">(ลูกกลิ้ง = ซูม)</span></div>'; };
-				var zwrap = function (svg) { return '<div class="nz-holder" style="overflow:auto;max-height:42vh;border:1px solid #eef2f7;border-radius:4px"><div class="nz-inner" style="transform-origin:0 0;width:100%">' + svg + '</div></div>'; };
+				var bar = function (k) { return '<div style="margin:6px 0 8px"><button class="np-pdf-' + k + '" style="background:#dc2626;' + ebtn + '">PDF</button><button class="np-svg-' + k + '" style="background:#059669;' + ebtn + '">SVG</button><span style="font-size:11px;color:#94a3b8;margin-left:6px">(ลูกกลิ้ง = ซูม)</span></div>'; };
+				var zwrap = function (svg) { return '<div class="nz-holder" style="overflow:auto;max-height:74vh;border:1px solid #eef2f7;border-radius:4px"><div class="nz-inner" style="transform-origin:0 0;width:100%">' + svg + '</div></div>'; };
 				el.querySelector('.vn-sheets').innerHTML =
 					'<div style="flex:1;min-width:280px;border:2px solid ' + (b === 'ตรง' ? '#16a34a' : '#e2e8f0') + ';border-radius:8px;padding:10px"><div style="font-weight:bold;color:#334155">วางตรง — <span style="color:#2563eb;font-size:18px">' + st.count + '</span> ตัว/แผ่น · ' + st.eff.toFixed(0) + '%</div>' + sheetInfo(st.count, st.eff) + bar('st') + zwrap(st.svg) + '</div>' +
 					'<div style="flex:1;min-width:280px;border:2px solid ' + (b === 'สอด' ? '#16a34a' : '#e2e8f0') + ';border-radius:8px;padding:10px"><div style="font-weight:bold;color:#334155">วางไขว้ — <span style="color:#2563eb;font-size:18px">' + cr.count + '</span> ตัว/แผ่น · ' + cr.eff.toFixed(0) + '%</div>' + sheetInfo(cr.count, cr.eff) + bar('cr') + zwrap(cr.svg) + '</div>';
