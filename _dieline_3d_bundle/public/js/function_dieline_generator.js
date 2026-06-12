@@ -748,7 +748,13 @@
 		var forceCross = (unit.type === 10);   // ทรง 10 (Pillow) บังคับวางสอด 180° — ปลายนูนลงร่อง ไม่ทับ จำนวนใกล้ของจริง
 		var g = nestGrid(PW, PL, pw, ph), pieces = [], i, j, count, pitchY = g.ph;
 		var _useProd = !forceCross && prodMatches(_prodLayout, PW, PL);   // ทรง 10 ไม่ใช้ prod grid (รูปทับ) → ใช้ interlock แทน
-		if (_useProd) { g = { cols: _prodLayout.cols, rows: _prodLayout.rows, pw: _prodLayout.pitchX + bl, ph: _prodLayout.pitchY + bl, count: _prodLayout.num }; pitchY = g.ph; }
+		if (_useProd) {
+			// cap pitch ไม่ให้ cols×pitch เกินพื้นที่ใช้ได้ — กัน bleed สะสม (cols เยอะ) ทำให้ล้ำกรอบ
+			// คงจำนวนตามสูตร (cols×rows) เป๊ะ แค่เกลี่ยระยะให้พอดีแผ่น (มี gap เท่าที่กระดาษเหลือ)
+			var _ppx = Math.min(_prodLayout.pitchX + bl, uW / _prodLayout.cols)
+			var _ppy = Math.min(_prodLayout.pitchY + bl, uL / _prodLayout.rows)
+			g = { cols: _prodLayout.cols, rows: _prodLayout.rows, pw: _ppx, ph: _ppy, count: _prodLayout.num }; pitchY = g.ph
+		}
 		var gridRot = !_useProd && Math.abs(g.pw - pw) > 0.1, baseAng = gridRot ? 90 : 0;
 		if ((cross || forceCross) && !_useProd) {
 			// ใช้ grid เดียวกับวางตรง (เต็มเฟรม) + วางสอดเพิ่มแถว (เฉพาะแนวไม่หมุน · profile แนวตั้ง)
