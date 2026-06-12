@@ -807,7 +807,8 @@
 			count = _placed;
 		}
 		// จัดกึ่งกลาง: เลื่อนกลุ่มชิ้นงานให้อยู่กลางพื้นที่ใช้งาน (เว้นขอบเท่ากันทุกด้าน)
-		if (pieces.length) {
+		// ยกเว้น _useProd (จาก estimate) → ชิดซ้ายบน ไล่ขวา-ลง (ชิ้นวางที่ mx,myT อยู่แล้ว ไม่ต้องเลื่อน)
+		if (pieces.length && !_useProd) {
 			var mnX = Infinity, mxX = -Infinity, mnY = Infinity, mxY = -Infinity;
 			pieces.forEach(function (p) {
 				var rotp = (p[2] === 90 || p[2] === 270);
