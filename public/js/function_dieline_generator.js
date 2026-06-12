@@ -752,7 +752,13 @@
 			try {
 				item.paperSize = _machinePaperArr(saved, _prodLayout.paperW, _prodLayout.paperL, PW, PL);
 				var laying = est.setCalculateLayoutSize(0);
-				var best = 0;
+				// กรองด้วยขั้นเดียวกับระบบ (grain/machine/paper size) → เลือก best ให้ตรง Ups จริง
+				if (typeof est.checkSelectedLayout === 'function') {
+					var sel = est.checkSelectedLayout(0, laying && laying.laying);
+					var sn = sel && sel.selected_layout && +sel.selected_layout.num_laying;
+					if (sn > 0) return sn;
+				}
+				var best = 0;   // fallback: max ดิบ (ถ้า checkSelectedLayout ใช้ไม่ได้)
 				((laying && laying.laying) || []).forEach(function (L) { var n = L && +L.num_laying; if (n > best) best = n; });
 				return best > 0 ? best : null;
 			} finally { item.paperSize = saved; }
