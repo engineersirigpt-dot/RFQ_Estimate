@@ -776,7 +776,7 @@
 		var pw = unit.pw, ph = unit.ph, bw = unit.bw, bh = unit.bh, bl = unit.bleed;
 		var mx = _margins.edge, myT = _margins.gripper, myB = _margins.colorbar;
 		var u = usableWL(PW, PL), uW = u.uW, uL = u.uL;
-		var forceCross = (unit.type === 10);   // ทรง 10 (Pillow) บังคับวางสอด 180° — ปลายนูนลงร่อง ไม่ทับ จำนวนใกล้ของจริง
+		var forceCross = (unit.type === 10);   // ทรง 10 (Pillow) บังคับวางไขว้ — ปลายนูนลงร่อง ไม่ทับ จำนวนใกล้ของจริง
 		var g = nestGrid(PW, PL, pw, ph), pieces = [], i, j, count, pitchY = g.ph;
 		var _el = forceCross ? null : estLayout(PW, PL);   // สูตรระบบจริง ต่อเครื่องนี้
 		var _useProd = !forceCross && (_el || prodMatches(_prodLayout, PW, PL));   // ทรง 10 ไม่ใช้ (ใช้ interlock แทน)
@@ -930,14 +930,6 @@
 			} else {
 				ann += '<text x="' + r(p0[0] + cw0 / 2) + '" y="' + r(p0[1] + ch0 * 0.08) + '" font-size="' + r(bfs) + '" fill="' + BC + '" text-anchor="middle" font-family="sans-serif">' + r(bl / 2) + 'mm bleed</text>';
 			}
-		}
-		if (cross && !debugMode) {
-			var legY = PL + pd * 0.75, legSz = afs * 0.72, legGap = PW * 0.24;
-			var legX1 = PW * 0.14, legX2 = legX1 + legGap;
-			ann += '<rect x="' + r(legX1) + '" y="' + r(legY - legSz * 0.75) + '" width="' + r(legSz) + '" height="' + r(legSz * 0.85) + '" fill="none" stroke="#3b82f6" stroke-width="' + r(asw) + '"/>';
-			ann += '<text x="' + r(legX1 + legSz * 1.3) + '" y="' + r(legY) + '" font-size="' + r(legSz) + '" fill="#1d4ed8" font-family="sans-serif">0\xb0 ชิ้นงานปกติ</text>';
-			ann += '<rect x="' + r(legX2) + '" y="' + r(legY - legSz * 0.75) + '" width="' + r(legSz) + '" height="' + r(legSz * 0.85) + '" fill="none" stroke="#d97706" stroke-width="' + r(asw) + '"/>';
-			ann += '<text x="' + r(legX2 + legSz * 1.3) + '" y="' + r(legY) + '" font-size="' + r(legSz) + '" fill="#92400e" font-family="sans-serif">180\xb0 หมุนสอดหัวท้าย</text>';
 		}
 		s += ann;
 		var svg = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="' + r(-pd) + ' ' + r(-pd) + ' ' + r(PW + pd * 2) + ' ' + r(PL + pd * 2) +
@@ -1157,7 +1149,7 @@
 			'<span id="nest-gram"></span></div>' +
 			'<div id="nest-sheets" style="display:flex;gap:14px;flex-wrap:wrap;padding:16px"></div>' +
 			'<div style="padding:0 16px 16px"><div style="font-weight:bold;color:#334155;margin-bottom:6px">📊 เทียบทุกขนาด (ไดไลน์ ≈ ' + r(pw) + '×' + r(ph) + ' mm รวม bleed · เว้น gripper ' + _margins.gripper + ' / color bar ' + _margins.colorbar + ' / edge ' + _margins.edge + ' mm)</div>' +
-			'<table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="background:#f1f5f9"><th style="padding:5px 8px;text-align:left">กระดาษ</th><th style="padding:5px 8px">ขนาด mm</th><th style="padding:5px 8px;text-align:left">เครื่อง (รุ่น)</th><th style="padding:5px 8px">วางตรง</th><th style="padding:5px 8px">วางสอด 180°</th><th style="padding:5px 8px">เสียน้อยสุด</th><th style="padding:5px 8px">กระดาษที่ใช้</th><th style="padding:5px 8px">แกรม</th></tr>' + tblRows + '</table>' +
+			'<table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="background:#f1f5f9"><th style="padding:5px 8px;text-align:left">กระดาษ</th><th style="padding:5px 8px">ขนาด mm</th><th style="padding:5px 8px;text-align:left">เครื่อง (รุ่น)</th><th style="padding:5px 8px">วางตรง</th><th style="padding:5px 8px">วางไขว้</th><th style="padding:5px 8px">เสียน้อยสุด</th><th style="padding:5px 8px">กระดาษที่ใช้</th><th style="padding:5px 8px">แกรม</th></tr>' + tblRows + '</table>' +
 			'<div style="font-size:11px;color:#64748b;margin-top:6px">✅/⚠️ = แกรมงาน' + (gram ? ' ' + gram + 'g' : '') + ' รับได้ไหม' + (qty ? ' · ยอด ' + qty.toLocaleString() : ' · (ใส่ยอดสั่ง)') + (priceKg ? ' · ราคา ' + priceKg + ' ฿/kg' : ' · (ใส่ Cost B/Kg เพื่อคิดเป็นบาท)') + '</div>' +
 			(_prodLayout && _prodLayout.cols > 0 ? '<div style="font-size:11px;color:#16a34a;margin-top:4px">📐 กระดาษ ' + r(_prodLayout.paperW) + '×' + r(_prodLayout.paperL) + ' = ตรงกับ <b>Ups สูตรระบบ ' + _prodLayout.num + ' ตัว</b> (' + _prodLayout.cols + '×' + _prodLayout.rows + ' แชร์ขอบตามทรง) · กระดาษอื่นเป็นค่าประมาณจาก nesting</div>' : '') + '</div>' +
 			'</div></div>';
@@ -1172,12 +1164,12 @@
 			var zwrap = function (svg) { return '<div class="nz-holder" style="overflow:auto;max-height:52vh;border:1px solid #eef2f7;border-radius:4px"><div class="nz-inner" style="transform-origin:0 0;width:100%">' + svg + '</div></div>'; };
 			document.getElementById('nest-sheets').innerHTML =
 				'<div style="flex:1;min-width:280px;border:2px solid ' + (b === 'ตรง' ? '#16a34a' : '#e2e8f0') + ';border-radius:8px;padding:10px"><div style="font-weight:bold;color:#334155">วางตรง — <span style="color:#2563eb;font-size:18px">' + st.count + '</span> ตัว/แผ่น · ' + st.eff.toFixed(0) + '%</div>' + sheetInfo(st.count, st.eff) + bar('st') + zwrap(st.svg) + '</div>' +
-				'<div style="flex:1;min-width:280px;border:2px solid ' + (b === 'สอด' ? '#16a34a' : '#e2e8f0') + ';border-radius:8px;padding:10px"><div style="font-weight:bold;color:#334155">วางสอด 180° — <span style="color:#2563eb;font-size:18px">' + cr.count + '</span> ตัว/แผ่น · ' + cr.eff.toFixed(0) + '%</div>' + sheetInfo(cr.count, cr.eff) + bar('cr') + zwrap(cr.svg) + '</div>';
+				'<div style="flex:1;min-width:280px;border:2px solid ' + (b === 'สอด' ? '#16a34a' : '#e2e8f0') + ';border-radius:8px;padding:10px"><div style="font-weight:bold;color:#334155">วางไขว้ — <span style="color:#2563eb;font-size:18px">' + cr.count + '</span> ตัว/แผ่น · ' + cr.eff.toFixed(0) + '%</div>' + sheetInfo(cr.count, cr.eff) + bar('cr') + zwrap(cr.svg) + '</div>';
 			var ns = document.getElementById('nest-sheets');
 			var ttl = function (kind, cnt, eff) { return 'Nesting — Type ' + d.type + ' · ' + kind + ' · เครื่อง ' + m.name + ' (' + r(m.w) + '×' + r(m.l) + 'mm) · ' + cnt + ' ตัว/แผ่น · เสีย ' + Math.max(0, 100 - eff).toFixed(0) + '% · ไดไลน์ ' + r(unit.bw) + '×' + r(unit.bh) + 'mm'; };
 			ns.querySelector('.np-pdf-st').onclick = function () { exportNestPDF(st.svg, ttl('วางตรง', st.count, st.eff)); };
 			ns.querySelector('.np-svg-st').onclick = function () { downloadNestSVG(st.svg, 'nest_type' + d.type + '_straight_' + r(m.w) + 'x' + r(m.l)); };
-			ns.querySelector('.np-pdf-cr').onclick = function () { exportNestPDF(cr.svg, ttl('วางสอด 180°', cr.count, cr.eff)); };
+			ns.querySelector('.np-pdf-cr').onclick = function () { exportNestPDF(cr.svg, ttl('วางไขว้', cr.count, cr.eff)); };
 			ns.querySelector('.np-svg-cr').onclick = function () { downloadNestSVG(cr.svg, 'nest_type' + d.type + '_cross_' + r(m.w) + 'x' + r(m.l)); };
 			// ซูมด้วยลูกกลิ้งเมาส์ (ที่ตำแหน่งเคอร์เซอร์) ในแต่ละแผ่น
 			ns.querySelectorAll('.nz-holder').forEach(function (h) {
@@ -1388,7 +1380,7 @@
 				'<span class="vn-gram"></span></div>' +
 				'<div class="vn-sheets" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px"></div>' +
 				'<div><div style="font-weight:bold;color:#334155;margin-bottom:6px">📊 เทียบทุกขนาด (ไดไลน์ ≈ ' + r(pw) + '×' + r(ph) + ' mm · gripper ' + _margins.gripper + ' / color bar ' + _margins.colorbar + ' / edge ' + _margins.edge + ' mm)</div>' +
-				'<table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="background:#f1f5f9"><th style="padding:5px 8px;text-align:left">กระดาษ</th><th style="padding:5px 8px">ขนาด mm</th><th style="padding:5px 8px;text-align:left">เครื่อง</th><th style="padding:5px 8px">วางตรง</th><th style="padding:5px 8px">วางสอด 180°</th><th style="padding:5px 8px">เสีย%</th><th style="padding:5px 8px">กระดาษที่ใช้</th><th style="padding:5px 8px">แกรม</th></tr>' + tblRows + '</table>' +
+				'<table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="background:#f1f5f9"><th style="padding:5px 8px;text-align:left">กระดาษ</th><th style="padding:5px 8px">ขนาด mm</th><th style="padding:5px 8px;text-align:left">เครื่อง</th><th style="padding:5px 8px">วางตรง</th><th style="padding:5px 8px">วางไขว้</th><th style="padding:5px 8px">เสีย%</th><th style="padding:5px 8px">กระดาษที่ใช้</th><th style="padding:5px 8px">แกรม</th></tr>' + tblRows + '</table>' +
 				'<div style="font-size:11px;color:#64748b;margin-top:6px">✅/⚠️=แกรมงาน' + (gram ? ' ' + gram + 'g' : '') + (qty ? ' · ยอด ' + qty.toLocaleString() : '') + (priceKg ? ' · ราคา ' + priceKg + ' ฿/kg' : '') + '</div>' +
 				(_prodLayout && _prodLayout.cols > 0 ? '<div style="font-size:11px;color:#16a34a;margin-top:4px">📐 กระดาษ ' + r(_prodLayout.paperW) + '×' + r(_prodLayout.paperL) + ' = <b>Ups สูตรระบบ ' + _prodLayout.num + ' ตัว</b> (' + _prodLayout.cols + '×' + _prodLayout.rows + ')</div>' : '') + '</div>';
 			function renderSel(i) {
@@ -1400,12 +1392,12 @@
 				var zwrap = function (svg) { return '<div class="nz-holder" style="overflow:auto;max-height:42vh;border:1px solid #eef2f7;border-radius:4px"><div class="nz-inner" style="transform-origin:0 0;width:100%">' + svg + '</div></div>'; };
 				el.querySelector('.vn-sheets').innerHTML =
 					'<div style="flex:1;min-width:280px;border:2px solid ' + (b === 'ตรง' ? '#16a34a' : '#e2e8f0') + ';border-radius:8px;padding:10px"><div style="font-weight:bold;color:#334155">วางตรง — <span style="color:#2563eb;font-size:18px">' + st.count + '</span> ตัว/แผ่น · ' + st.eff.toFixed(0) + '%</div>' + sheetInfo(st.count, st.eff) + bar('st') + zwrap(st.svg) + '</div>' +
-					'<div style="flex:1;min-width:280px;border:2px solid ' + (b === 'สอด' ? '#16a34a' : '#e2e8f0') + ';border-radius:8px;padding:10px"><div style="font-weight:bold;color:#334155">วางสอด 180° — <span style="color:#2563eb;font-size:18px">' + cr.count + '</span> ตัว/แผ่น · ' + cr.eff.toFixed(0) + '%</div>' + sheetInfo(cr.count, cr.eff) + bar('cr') + zwrap(cr.svg) + '</div>';
+					'<div style="flex:1;min-width:280px;border:2px solid ' + (b === 'สอด' ? '#16a34a' : '#e2e8f0') + ';border-radius:8px;padding:10px"><div style="font-weight:bold;color:#334155">วางไขว้ — <span style="color:#2563eb;font-size:18px">' + cr.count + '</span> ตัว/แผ่น · ' + cr.eff.toFixed(0) + '%</div>' + sheetInfo(cr.count, cr.eff) + bar('cr') + zwrap(cr.svg) + '</div>';
 				var ns = el.querySelector('.vn-sheets');
 				var ttl = function (kind, cnt, eff) { return 'Nesting — Type ' + d.type + ' · ' + kind + ' · เครื่อง ' + m.name + ' (' + r(m.w) + '×' + r(m.l) + 'mm) · ' + cnt + ' ตัว/แผ่น · เสีย ' + Math.max(0, 100 - eff).toFixed(0) + '%'; };
 				ns.querySelector('.np-pdf-st').onclick = function () { exportNestPDF(st.svg, ttl('วางตรง', st.count, st.eff)); };
 				ns.querySelector('.np-svg-st').onclick = function () { downloadNestSVG(st.svg, 'nest_type' + d.type + '_straight_' + r(m.w) + 'x' + r(m.l)); };
-				ns.querySelector('.np-pdf-cr').onclick = function () { exportNestPDF(cr.svg, ttl('วางสอด 180°', cr.count, cr.eff)); };
+				ns.querySelector('.np-pdf-cr').onclick = function () { exportNestPDF(cr.svg, ttl('วางไขว้', cr.count, cr.eff)); };
 				ns.querySelector('.np-svg-cr').onclick = function () { downloadNestSVG(cr.svg, 'nest_type' + d.type + '_cross_' + r(m.w) + 'x' + r(m.l)); };
 				ns.querySelectorAll('.nz-holder').forEach(function (h) {
 					var nzInner = h.querySelector('.nz-inner'), z = 1;
