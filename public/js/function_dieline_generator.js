@@ -593,7 +593,7 @@
 	// หาเครื่อง/กระดาษที่วางได้เยอะสุด (แกรมรับได้) สำหรับ title block
 	function bestMachine(d) {
 		try {
-			_prodLayout = getProdLayout(); _nestType = d.type; _estLayCache = {};
+			_prodLayout = getProdLayout(); _nestType = d.type; _estLayCache = {}; _realLayoutOK = undefined;
 			var c = dielineCore(d), pw = c.bw, ph = c.bh, gram = getJobGram(), best = null;
 			MACHINE_PAPERS.forEach(function (m) {
 				if (gram != null && (gram < m.gmin || gram > m.gmax)) return;
@@ -726,22 +726,65 @@
 	}
 	// คำนวณการวางต่อแผ่นด้วย "สูตรระบบจริง" (เหมือน Estimate) — ต่อขนาดแผ่นใดก็ได้
 	// เรียก est.calculateLayoutDetail (pure calc, คืน grid+จำนวน) ทั้งแนวตั้ง/นอน เอาที่ได้เยอะกว่า
-	var _estLayCache = {};   // cache ต่อ (type|PW|PL) — กันเรียกซ้ำ
-	function estLayout(PW, PL) {
+	var _estLayCache = {}; _realLayoutOK = undefined;      // cache ต่อ (type|PW|PL)
+	var _realLayoutOK;          // undefined=ยังไม่ตรวจ · true/false=สูตรเต็มเชื่อถือได้ไหม (validate กับ Ups)
+	// map paperSize ปัจจุบัน (กระดาษที่ระบบเลือก) → ของเครื่อง (auto-detect mm/inch จากค่าจริง)
+	function _machinePaperArr(arr, cw, cl, PW, PL) {
+		if (!Array.isArray(arr)) return [PW, PL, PW / 25.4, PL / 25.4];
+		return arr.map(function (v) {
+			v = +v;
+			if (Math.abs(v - cw) < 1.5) return PW;
+			if (Math.abs(v - cl) < 1.5) return PL;
+			if (Math.abs(v - cw / 25.4) < 0.6) return PW / 25.4;
+			if (Math.abs(v - cl / 25.4) < 0.6) return PL / 25.4;
+			return v;
+		});
+	}
+	// เรียกสูตร layout จริงของระบบ (setCalculateLayoutSize) กับขนาดแผ่นใดก็ได้
+	// สลับ item.paperSize ชั่วคราว (method นี้ pure ไม่ mutate) แล้วคืนค่าเดิมใน finally
+	function realLayout(PW, PL) {
 		try {
 			var est = window.est || window.estimate;
-			if (!est || typeof est.calculateLayoutDetail !== 'function') return null;
+			if (!est || typeof est.setCalculateLayoutSize !== 'function') return null;
+			var item = est.mainData && est.mainData.component1 && est.mainData.component1[0];
+			if (!item || !item.paperSize || !_prodLayout || !(_prodLayout.paperW > 0)) return null;
+			var saved = item.paperSize;
+			try {
+				item.paperSize = _machinePaperArr(saved, _prodLayout.paperW, _prodLayout.paperL, PW, PL);
+				var laying = est.setCalculateLayoutSize(0);
+				var best = 0;
+				((laying && laying.laying) || []).forEach(function (L) { var n = L && +L.num_laying; if (n > best) best = n; });
+				return best > 0 ? best : null;
+			} finally { item.paperSize = saved; }
+		} catch (e) { return null; }
+	}
+	function estLayout(PW, PL) {
+		try {
+			var key = (_nestType || 0) + '|' + r(PW) + '|' + r(PL);
+			if (_estLayCache[key] !== undefined) return _estLayCache[key];
+			// กระดาษที่ระบบเลือก → Ups จริง (selected_layout) เป๊ะ 100%
+			if (_nestType !== 10 && _prodLayout && _prodLayout.num > 0 && prodPaperMatches(_prodLayout, PW, PL)) {
+				var _sysv = { count: _prodLayout.num, cols: _prodLayout.cols || 0, rows: _prodLayout.rows || 0, laying: 'system' };
+				_estLayCache[key] = _sysv; return _sysv;
+			}
+			if (_nestType === 10) { _estLayCache[key] = null; return null; }
+			// ตรวจครั้งเดียว: สูตรเต็มกับกระดาษที่เลือก ต้องได้ Ups เป๊ะ → ถ้าตรงใช้กับทุกเครื่อง
+			if (_realLayoutOK === undefined && _prodLayout && _prodLayout.num > 0 && _prodLayout.paperW > 0) {
+				var chk = realLayout(_prodLayout.paperW, _prodLayout.paperL);
+				_realLayoutOK = (chk != null && chk === _prodLayout.num);
+				console.log('[nest] realLayout validate: สูตรเต็ม=' + chk + ' vs Ups=' + _prodLayout.num + ' -> ' + (_realLayoutOK ? 'ใช้สูตรจริงทุกเครื่อง OK' : 'fallback ค่าประมาณ'));
+			}
+			// เครื่องอื่น → สูตรจริง (ถ้า validate ผ่าน) ไม่งั้น calculateLayoutDetail (ค่าประมาณ)
+			if (_realLayoutOK) {
+				var rn = realLayout(PW, PL);
+				if (rn != null && rn > 0) { var rv = { count: rn, cols: 0, rows: 0, laying: 'system' }; _estLayCache[key] = rv; return rv; }
+			}
+			var est = window.est || window.estimate;
+			if (!est || typeof est.calculateLayoutDetail !== 'function') { _estLayCache[key] = null; return null; }
 			var comp = est.mainData && est.mainData.component1 && est.mainData.component1[0];
 			var ps = comp && comp.packaging_size;
 			var tpl = _nestType || (comp && comp.box_type && comp.box_type.type_id);
-			if (!ps || !tpl) return null;
-			var key = tpl + '|' + r(PW) + '|' + r(PL);
-			if (_estLayCache[key] !== undefined) return _estLayCache[key];
-			// กระดาษที่ระบบเลือก → ใช้ Ups จริงของระบบ (selected_layout) แม่นสุด ตรง 100%
-			if (_nestType !== 10 && _prodLayout && _prodLayout.num > 0 && prodPaperMatches(_prodLayout, PW, PL)) {
-				var _sysv = { count: _prodLayout.num, cols: _prodLayout.cols || 0, rows: _prodLayout.rows || 0, laying: "system" };
-				_estLayCache[key] = _sysv; return _sysv;
-			}
+			if (!ps || !tpl) { _estLayCache[key] = null; return null; }
 			var m = getMargins();
 			var tol = { gripper: m.gripper, color_bar: m.colorbar, paper_edge: m.edge, bleed: 6 };
 			var best = null;
@@ -752,10 +795,6 @@
 					if (n > 0 && (!best || n > best.count)) best = { count: n, cols: rdt.wSideAmount, rows: rdt.lSideAmount, laying: lay };
 				} catch (e) { }
 			});
-			// validate: กระดาษที่ระบบเลือก → สูตรนี้ต้องได้เลขตรง Ups เดิม (เช็คว่าเรียกถูก)
-			if (best && _prodLayout && _prodLayout.num > 0 && prodPaperMatches(_prodLayout, PW, PL)) {
-				console.log('[nest] estLayout เช็ค: สูตรระบบ=' + best.count + ' vs Ups เดิม=' + _prodLayout.num + (best.count === _prodLayout.num ? ' ✓ ตรง' : ' ⚠️ ไม่ตรง') + ' (paper ' + r(PW) + 'x' + r(PL) + ')');
-			}
 			_estLayCache[key] = best;
 			return best;
 		} catch (e) { return null; }
@@ -1098,7 +1137,7 @@
 	function openNestModal(d) {
 		var p0 = document.getElementById('dieline-nest-overlay'); if (p0) p0.remove();
 		_margins = getMargins();
-		_prodLayout = getProdLayout(); _nestType = d.type; _estLayCache = {};   // Ups จากสูตรระบบ (ใช้ให้ตรงกันสำหรับกระดาษที่แมท)
+		_prodLayout = getProdLayout(); _nestType = d.type; _estLayCache = {}; _realLayoutOK = undefined;   // Ups จากสูตรระบบ (ใช้ให้ตรงกันสำหรับกระดาษที่แมท)
 		var core = dielineCore(d);
 		var bleed = 6, pw = core.bw + bleed, ph = core.bh + bleed;
 		// ตัด label + เส้นบอกขนาดออก → เหลือแต่เส้นกล่อง (สะอาด ดูออกง่ายเวลาวางหลายตัว)
@@ -1339,7 +1378,7 @@
 		function renderNestPanel(d, el) {
 			el.__loaded = true;
 			_margins = getMargins();
-			_prodLayout = getProdLayout(); _nestType = d.type; _estLayCache = {};
+			_prodLayout = getProdLayout(); _nestType = d.type; _estLayCache = {}; _realLayoutOK = undefined;
 			var core = dielineCore(d);
 			var bleed = 6, pw = core.bw + bleed, ph = core.bh + bleed;
 			var cleanSvg = (core.bodySvg || '').replace(/<text[\s\S]*?<\/text>/g, '').replace(/<line[^>]*#dc2626[^>]*\/>/g, '');
