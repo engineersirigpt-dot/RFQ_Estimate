@@ -839,8 +839,7 @@
 			count = _placed;
 		}
 		// จัดกึ่งกลาง: เลื่อนกลุ่มชิ้นงานให้อยู่กลางพื้นที่ใช้งาน (เว้นขอบเท่ากันทุกด้าน)
-		// ยกเว้น _useProd (จาก estimate) → ชิดซ้ายบน ไล่ขวา-ลง (ชิ้นวางที่ mx,myT อยู่แล้ว ไม่ต้องเลื่อน)
-		if (pieces.length && !_useProd) {
+		if (pieces.length) {
 			var mnX = Infinity, mxX = -Infinity, mnY = Infinity, mxY = -Infinity;
 			pieces.forEach(function (p) {
 				var rotp = (p[2] === 90 || p[2] === 270);
@@ -1140,13 +1139,13 @@
 		var optHtml = rows.map(function (x, i) { return '<option value="' + i + '"' + (i === selIdx ? ' selected' : '') + '>' + x.m.name + (x.ok ? '' : ' ⚠️แกรมไม่รับ') + '</option>'; }).join('');
 		var tblRows = rows.slice().map(function (x, i) { return { x: x, i: i }; }).sort(function (a, b) { return b.x.best - a.x.best; }).map(function (o) {
 			var x = o.x, hl = (o.i === selIdx), waste = x.waste, wc = waste < 25 ? '#16a34a' : (waste > 40 ? '#dc2626' : '#92400e');
-			return '<tr style="' + (hl ? 'background:#dcfce7;font-weight:bold' : '') + '"><td style="padding:4px 8px">' + (o.i === rows.indexOf(bestRow) ? '🏆 ' : '') + x.m.name + '</td>' +
+			return '<tr style="' + (hl ? 'background:#dcfce7;font-weight:bold' : '') + '"><td style="padding:4px 8px">' + '' + x.m.name + '</td>' +
 				'<td style="padding:4px 8px;text-align:center">' + r(x.m.w) + '×' + r(x.m.l) + '</td>' +
 				'<td style="padding:4px 8px;font-size:11px;color:#64748b">' + (x.m.mc || '-') + '</td>' +
 				'<td style="padding:4px 8px;text-align:center">' + x.st + '</td>' +
 				'<td style="padding:4px 8px;text-align:center;color:#2563eb">' + x.cr + '</td>' +
 				'<td style="padding:4px 8px;text-align:center;font-weight:bold;color:' + wc + '">' + (x.ok && x.best > 0 ? waste.toFixed(0) + '%' : '-') + '</td>' +
-					'<td style="padding:4px 8px;text-align:center' + (x === cheapest ? ';color:#16a34a;font-weight:bold' : '') + '">' + (x.totalKg != null ? ((x === cheapest ? '💰 ' : '') + x.sheets + ' แผ่น · ' + x.totalKg.toFixed(0) + ' kg' + (x.cost != null ? ' · ฿' + Math.round(x.cost).toLocaleString() : '')) : '-') + '</td>' +
+					'<td style="padding:4px 8px;text-align:center' + (x === cheapest ? ';color:#16a34a;font-weight:bold' : '') + '">' + (x.totalKg != null ? ('' + x.sheets + ' แผ่น · ' + x.totalKg.toFixed(0) + ' kg' + (x.cost != null ? ' · ฿' + Math.round(x.cost).toLocaleString() : '')) : '-') + '</td>' +
 					'<td style="padding:4px 8px;text-align:center">' + (x.ok ? '✅' : '⚠️') + '</td></tr>';
 		}).join('');
 
@@ -1159,7 +1158,7 @@
 			'<div id="nest-sheets" style="display:flex;gap:14px;flex-wrap:wrap;padding:16px"></div>' +
 			'<div style="padding:0 16px 16px"><div style="font-weight:bold;color:#334155;margin-bottom:6px">📊 เทียบทุกขนาด (ไดไลน์ ≈ ' + r(pw) + '×' + r(ph) + ' mm รวม bleed · เว้น gripper ' + _margins.gripper + ' / color bar ' + _margins.colorbar + ' / edge ' + _margins.edge + ' mm)</div>' +
 			'<table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="background:#f1f5f9"><th style="padding:5px 8px;text-align:left">กระดาษ</th><th style="padding:5px 8px">ขนาด mm</th><th style="padding:5px 8px;text-align:left">เครื่อง (รุ่น)</th><th style="padding:5px 8px">วางตรง</th><th style="padding:5px 8px">วางสอด 180°</th><th style="padding:5px 8px">เสียน้อยสุด</th><th style="padding:5px 8px">กระดาษที่ใช้</th><th style="padding:5px 8px">แกรม</th></tr>' + tblRows + '</table>' +
-			'<div style="font-size:11px;color:#64748b;margin-top:6px">🏆 = ได้เยอะสุด · 💰 = กระดาษน้อยสุด/ถูกสุด · ✅/⚠️ = แกรมงาน' + (gram ? ' ' + gram + 'g' : '') + ' รับได้ไหม' + (qty ? ' · ยอด ' + qty.toLocaleString() : ' · (ใส่ยอดสั่ง)') + (priceKg ? ' · ราคา ' + priceKg + ' ฿/kg' : ' · (ใส่ Cost B/Kg เพื่อคิดเป็นบาท)') + '</div>' +
+			'<div style="font-size:11px;color:#64748b;margin-top:6px">✅/⚠️ = แกรมงาน' + (gram ? ' ' + gram + 'g' : '') + ' รับได้ไหม' + (qty ? ' · ยอด ' + qty.toLocaleString() : ' · (ใส่ยอดสั่ง)') + (priceKg ? ' · ราคา ' + priceKg + ' ฿/kg' : ' · (ใส่ Cost B/Kg เพื่อคิดเป็นบาท)') + '</div>' +
 			(_prodLayout && _prodLayout.cols > 0 ? '<div style="font-size:11px;color:#16a34a;margin-top:4px">📐 กระดาษ ' + r(_prodLayout.paperW) + '×' + r(_prodLayout.paperL) + ' = ตรงกับ <b>Ups สูตรระบบ ' + _prodLayout.num + ' ตัว</b> (' + _prodLayout.cols + '×' + _prodLayout.rows + ' แชร์ขอบตามทรง) · กระดาษอื่นเป็นค่าประมาณจาก nesting</div>' : '') + '</div>' +
 			'</div></div>';
 		document.body.insertAdjacentHTML('beforeend', html);
@@ -1374,13 +1373,13 @@
 			var optHtml = rows.map(function (x, i) { return '<option value="' + i + '"' + (i === selIdx ? ' selected' : '') + '>' + x.m.name + (x.ok ? '' : ' ⚠️แกรมไม่รับ') + '</option>'; }).join('');
 			var tblRows = rows.slice().map(function (x, i) { return { x: x, i: i }; }).sort(function (a, b) { return b.x.best - a.x.best; }).map(function (o) {
 				var x = o.x, hl = (o.i === selIdx), waste = x.waste, wc = waste < 25 ? '#16a34a' : (waste > 40 ? '#dc2626' : '#92400e');
-				return '<tr style="' + (hl ? 'background:#dcfce7;font-weight:bold' : '') + '"><td style="padding:4px 8px">' + (o.i === rows.indexOf(bestRow) ? '🏆 ' : '') + x.m.name + '</td>' +
+				return '<tr style="' + (hl ? 'background:#dcfce7;font-weight:bold' : '') + '"><td style="padding:4px 8px">' + '' + x.m.name + '</td>' +
 					'<td style="padding:4px 8px;text-align:center">' + r(x.m.w) + '×' + r(x.m.l) + '</td>' +
 					'<td style="padding:4px 8px;font-size:11px;color:#64748b">' + (x.m.mc || '-') + '</td>' +
 					'<td style="padding:4px 8px;text-align:center">' + x.st + '</td>' +
 					'<td style="padding:4px 8px;text-align:center;color:#2563eb">' + x.cr + '</td>' +
 					'<td style="padding:4px 8px;text-align:center;font-weight:bold;color:' + wc + '">' + (x.ok && x.best > 0 ? waste.toFixed(0) + '%' : '-') + '</td>' +
-					'<td style="padding:4px 8px;text-align:center' + (x === cheapest ? ';color:#16a34a;font-weight:bold' : '') + '">' + (x.totalKg != null ? ((x === cheapest ? '💰 ' : '') + x.sheets + ' แผ่น · ' + x.totalKg.toFixed(0) + ' kg' + (x.cost != null ? ' · ฿' + Math.round(x.cost).toLocaleString() : '')) : '-') + '</td>' +
+					'<td style="padding:4px 8px;text-align:center' + (x === cheapest ? ';color:#16a34a;font-weight:bold' : '') + '">' + (x.totalKg != null ? ('' + x.sheets + ' แผ่น · ' + x.totalKg.toFixed(0) + ' kg' + (x.cost != null ? ' · ฿' + Math.round(x.cost).toLocaleString() : '')) : '-') + '</td>' +
 					'<td style="padding:4px 8px;text-align:center">' + (x.ok ? '✅' : '⚠️') + '</td></tr>';
 			}).join('');
 			el.innerHTML =
@@ -1390,7 +1389,7 @@
 				'<div class="vn-sheets" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px"></div>' +
 				'<div><div style="font-weight:bold;color:#334155;margin-bottom:6px">📊 เทียบทุกขนาด (ไดไลน์ ≈ ' + r(pw) + '×' + r(ph) + ' mm · gripper ' + _margins.gripper + ' / color bar ' + _margins.colorbar + ' / edge ' + _margins.edge + ' mm)</div>' +
 				'<table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="background:#f1f5f9"><th style="padding:5px 8px;text-align:left">กระดาษ</th><th style="padding:5px 8px">ขนาด mm</th><th style="padding:5px 8px;text-align:left">เครื่อง</th><th style="padding:5px 8px">วางตรง</th><th style="padding:5px 8px">วางสอด 180°</th><th style="padding:5px 8px">เสีย%</th><th style="padding:5px 8px">กระดาษที่ใช้</th><th style="padding:5px 8px">แกรม</th></tr>' + tblRows + '</table>' +
-				'<div style="font-size:11px;color:#64748b;margin-top:6px">🏆=ได้เยอะสุด · 💰=ถูกสุด · ✅/⚠️=แกรมงาน' + (gram ? ' ' + gram + 'g' : '') + (qty ? ' · ยอด ' + qty.toLocaleString() : '') + (priceKg ? ' · ราคา ' + priceKg + ' ฿/kg' : '') + '</div>' +
+				'<div style="font-size:11px;color:#64748b;margin-top:6px">✅/⚠️=แกรมงาน' + (gram ? ' ' + gram + 'g' : '') + (qty ? ' · ยอด ' + qty.toLocaleString() : '') + (priceKg ? ' · ราคา ' + priceKg + ' ฿/kg' : '') + '</div>' +
 				(_prodLayout && _prodLayout.cols > 0 ? '<div style="font-size:11px;color:#16a34a;margin-top:4px">📐 กระดาษ ' + r(_prodLayout.paperW) + '×' + r(_prodLayout.paperL) + ' = <b>Ups สูตรระบบ ' + _prodLayout.num + ' ตัว</b> (' + _prodLayout.cols + '×' + _prodLayout.rows + ')</div>' : '') + '</div>';
 			function renderSel(i) {
 				var m = rows[i].m;
