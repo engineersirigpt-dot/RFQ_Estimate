@@ -13,14 +13,14 @@ const BASE_URL = process.env.DIECUTTEMPLATES_BASE_URL || 'https://sandbox.api.di
 const API_KEY = process.env.DIECUTTEMPLATES_API_KEY
 
 // ===== Local SVG (ทรงที่เซฟไว้แล้ว — เสิร์ฟไฟล์ตรงๆ ไม่ยิง API/ไม่เสีย quota) =====
-// box_template_id → ชื่อไฟล์ใน 2D_Dieline/
-const LOCAL_SVG_DIR = process.env.LOCAL_DIELINE_DIR || path.join(__dirname, '..', '2D_Dieline')
+// box_template_id → ชื่อไฟล์ใน _dieline_3d_bundle/3D_Dieline/ (3D fold engine)
+const LOCAL_SVG_DIR = process.env.LOCAL_DIELINE_DIR || path.join(__dirname, '..', '_dieline_3d_bundle', '3D_Dieline')
 const LOCAL_SVG = {
-	'1': '01-Reverse Tuck End.svg',
+	'1': '01-Reverse Tuck End2.svg',
 	'2': '02-Straight Tuck End.svg',
 	'3': '03-Tuck Top Snap Lock.svg',
 	'4': '04-Tuck Top Auto Bottom.svg',
-	'5': '05-Shirt Box Tray.svg',
+	'5': '05-Shirt Box Tray01.svg',
 	'6': '06-Frame Vue Tray.svg',
 	'7': '07-Tray Lid.svg',
 	'8': '08-Gable Top with Auto Bottom.svg',
@@ -125,6 +125,17 @@ router.get('/map-info', (req, res) => {
 	res.json({ success: true, map: TEMPLATE_MAP })
 })
 
+// GET /dieline/debug-path — แสดง path ที่ router ใช้จริง (debug only)
+router.get('/debug-path', (req, res) => {
+	const p6 = path.join(LOCAL_SVG_DIR, '06-Frame Vue Tray.svg')
+	res.json({
+		LOCAL_SVG_DIR,
+		file6_exists: fs.existsSync(p6),
+		file6_path: p6,
+		files: (() => { try { return fs.readdirSync(LOCAL_SVG_DIR) } catch(e) { return 'ERROR: ' + e.message } })()
+	})
+})
+
 // GET /dieline/local/:type — เสิร์ฟ SVG ที่เซฟไว้ในเครื่อง (3D ใช้ตัวนี้ → โฟลเดอร์ 2D_Dieline)
 router.get('/local/:type', (req, res) => {
 	const p = localSvgPath(req.params.type)
@@ -134,12 +145,25 @@ router.get('/local/:type', (req, res) => {
 	res.sendFile(p)
 })
 
-// GET /dieline/v2svg/:type — เสิร์ฟ SVG สำหรับ 2D dieline (v2) แยกจาก 3D → โฟลเดอร์ Diline_svg
-const V2_SVG_DIR = process.env.V2_DIELINE_DIR || path.join(__dirname, '..', 'Diline_svg')
+// GET /dieline/v2svg/:type — เสิร์ฟ SVG สำหรับ 2D dieline (v2) แยกจาก 3D → โฟลเดอร์ _dieline_3d_bundle/2D-Diline_svg
+const V2_SVG_DIR = process.env.V2_DIELINE_DIR || path.join(__dirname, '..', '_dieline_3d_bundle', '2D-Diline_svg')
+const V2_SVG = {
+	'1': '01-Reverse Tuck End.svg',
+	'2': '02-Straight Tuck End.svg',
+	'3': '03-Tuck Top Snap Lock.svg',
+	'4': '04-Tuck Top Auto Bottom.svg',
+	'5': '05-Shirt Box Tray.svg',
+	'6': '06-Frame Vue Tray.svg',
+	'7': '07-Tray Lid.svg',
+	'8': '08-Gable Top with Auto Bottom.svg',
+	'9': '09-Sleeve.svg',
+	'10': '10-Pillow Box.svg',
+	'11': '11-Standard Box.svg'
+}
 router.get('/v2svg/:type', (req, res) => {
-	const f = LOCAL_SVG[String(req.params.type)]
+	const f = V2_SVG[String(req.params.type)]
 	let p = f ? path.join(V2_SVG_DIR, f) : null
-	if (!p || !fs.existsSync(p)) p = localSvgPath(req.params.type)   // fallback → 2D_Dieline ถ้าไม่มีใน Diline_svg
+	if (!p || !fs.existsSync(p)) p = localSvgPath(req.params.type)   // fallback → 3D_Dieline ถ้าไม่มีใน 2D-Diline_svg
 	if (!p) return res.status(404).json({ success: false, error: 'ไม่มี v2 SVG สำหรับทรงนี้' })
 	res.set('Content-Type', 'image/svg+xml')
 	res.set('Cache-Control', 'no-cache')

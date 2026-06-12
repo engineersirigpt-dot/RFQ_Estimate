@@ -67,27 +67,27 @@
 	}
 	// เส้นบอกขนาด (dimension) แนวนอน — มีหัวลูกศร + ค่า mm
 	function dimH(x1, x2, y, value, fs, hi) {
-		var aw = Math.max((x2 - x1) * 0.015, 2.5), col = hi ? '#2563eb' : '#334155', sw = hi ? 1.8 : 0.8;
+		var aw = Math.max((x2 - x1) * 0.015, 2.5), col = hi ? '#2563eb' : '#dc2626', sw = hi ? 1.8 : 0.8;
 		return '<line x1="' + r(x1) + '" y1="' + r(y) + '" x2="' + r(x2) + '" y2="' + r(y) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
 			'<line x1="' + r(x1) + '" y1="' + r(y - aw) + '" x2="' + r(x1) + '" y2="' + r(y + aw) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
 			'<line x1="' + r(x2) + '" y1="' + r(y - aw) + '" x2="' + r(x2) + '" y2="' + r(y + aw) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
-			'<text x="' + r((x1 + x2) / 2) + '" y="' + r(y - aw * 1.8) + '" font-size="' + r(hi ? fs * 1.18 : fs) + '" fill="' + (hi ? '#2563eb' : '#1e293b') + '" text-anchor="middle" font-family="sans-serif" font-weight="' + (hi ? 'bold' : 'normal') + '">' + value.toFixed(2) + ' mm</text>';
+			'<text x="' + r((x1 + x2) / 2) + '" y="' + r(y - aw * 1.8) + '" font-size="' + r(hi ? fs * 1.18 : fs) + '" fill="' + (hi ? '#2563eb' : '#dc2626') + '" text-anchor="middle" font-family="sans-serif" font-weight="' + (hi ? 'bold' : 'normal') + '">' + value.toFixed(2) + ' mm</text>';
 	}
 	// เส้นบอกขนาด แนวตั้ง
 	function dimV(y1, y2, x, value, fs, hi) {
-		var aw = Math.max((y2 - y1) * 0.015, 2.5), tx = x - aw * 1.8, ty = (y1 + y2) / 2, col = hi ? '#2563eb' : '#334155', sw = hi ? 1.8 : 0.8;
+		var aw = Math.max((y2 - y1) * 0.015, 2.5), tx = x - aw * 1.8, ty = (y1 + y2) / 2, col = hi ? '#2563eb' : '#dc2626', sw = hi ? 1.8 : 0.8;
 		return '<line x1="' + r(x) + '" y1="' + r(y1) + '" x2="' + r(x) + '" y2="' + r(y2) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
 			'<line x1="' + r(x - aw) + '" y1="' + r(y1) + '" x2="' + r(x + aw) + '" y2="' + r(y1) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
 			'<line x1="' + r(x - aw) + '" y1="' + r(y2) + '" x2="' + r(x + aw) + '" y2="' + r(y2) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
-			'<text x="' + r(tx) + '" y="' + r(ty) + '" font-size="' + r(hi ? fs * 1.18 : fs) + '" fill="' + (hi ? '#2563eb' : '#1e293b') + '" text-anchor="middle" font-family="sans-serif" font-weight="' + (hi ? 'bold' : 'normal') + '" transform="rotate(-90 ' + r(tx) + ' ' + r(ty) + ')">' + value.toFixed(2) + ' mm</text>';
+			'<text x="' + r(tx) + '" y="' + r(ty) + '" font-size="' + r(hi ? fs * 1.18 : fs) + '" fill="' + (hi ? '#2563eb' : '#dc2626') + '" text-anchor="middle" font-family="sans-serif" font-weight="' + (hi ? 'bold' : 'normal') + '" transform="rotate(-90 ' + r(tx) + ' ' + r(ty) + ')">' + value.toFixed(2) + ' mm</text>';
 	}
 	// เส้นบอกขนาดแนวนอน (ข้อความอยู่ใต้เส้น) — ใช้กับ per-panel
 	function dimHb(x1, x2, y, value, fs, hi) {
-		var aw = Math.max((x2 - x1) * 0.04, 2.5), col = hi ? '#2563eb' : '#334155', sw = hi ? 1.7 : 0.7;
+		var aw = Math.max((x2 - x1) * 0.04, 2.5), col = hi ? '#2563eb' : '#dc2626', sw = hi ? 1.7 : 0.7;
 		return '<line x1="' + r(x1) + '" y1="' + r(y) + '" x2="' + r(x2) + '" y2="' + r(y) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
 			'<line x1="' + r(x1) + '" y1="' + r(y - aw) + '" x2="' + r(x1) + '" y2="' + r(y + aw) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
 			'<line x1="' + r(x2) + '" y1="' + r(y - aw) + '" x2="' + r(x2) + '" y2="' + r(y + aw) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
-			'<text x="' + r((x1 + x2) / 2) + '" y="' + r(y + aw + fs) + '" font-size="' + r(hi ? fs * 1.18 : fs) + '" fill="' + (hi ? '#2563eb' : '#1e293b') + '" text-anchor="middle" font-family="sans-serif" font-weight="' + (hi ? 'bold' : 'normal') + '">' + value.toFixed(1) + ' mm</text>';
+			'<text x="' + r((x1 + x2) / 2) + '" y="' + r(y + aw + fs) + '" font-size="' + r(hi ? fs * 1.18 : fs) + '" fill="' + (hi ? '#2563eb' : '#dc2626') + '" text-anchor="middle" font-family="sans-serif" font-weight="' + (hi ? 'bold' : 'normal') + '">' + value.toFixed(1) + ' mm</text>';
 	}
 	// เลขบอกขนาดต่อ panel สำหรับทรงที่มีผนัง W|L|W|L (ใต้กล่อง = ความกว้าง panel, ขวา = ความสูง D)
 	function wallRowDims(W, L, D, xP1, yWall, yWallBot, totalW, totalH) {
@@ -330,35 +330,45 @@
 	}
 
 	// ===== Pillow Box (type 10) — ทรงหมอน ปลายโค้ง =====
-	//   open: W=L+D, L=2W+G
-	function pillowPanel(x, w, yTop, L, arch, fill) {
-		var yBot = yTop + L;
+	//   open: กว้าง G+2W , ยาว L + 2*(D/2)  (ปลายโค้งบน/ล่างนูนออก D/2)
+	//   อ้างอิงแบบ 10-Pillow Box.svg: ขอบนอกตัด = อาร์คนูนออก , เส้นพับปลาย = อาร์คเว้าเข้า (ประ)
+	function pillowPanel(x, w, yTop, yBot, bulge, fill) {
+		// ขอบตัดรอบ panel: ด้านข้างตรง + ปลายบน/ล่างอาร์คนูนออก (apex = bulge)
 		var dd = 'M' + r(x) + ',' + r(yTop) +
-			' Q' + r(x + w / 2) + ',' + r(yTop - arch) + ' ' + r(x + w) + ',' + r(yTop) +
+			' Q' + r(x + w / 2) + ',' + r(yTop - 2 * bulge) + ' ' + r(x + w) + ',' + r(yTop) +
 			' L' + r(x + w) + ',' + r(yBot) +
-			' Q' + r(x + w / 2) + ',' + r(yBot + arch) + ' ' + r(x) + ',' + r(yBot) + ' Z';
+			' Q' + r(x + w / 2) + ',' + r(yBot + 2 * bulge) + ' ' + r(x) + ',' + r(yBot) + ' Z';
 		return pathCut(dd, fill);
+	}
+	function pillowCrease(x, w, y, dipSign, bulge) {
+		// เส้นพับปลายโค้ง = อาร์คเว้าเข้าหาลำตัว (ประเขียว) apex = bulge เข้าไปในเนื้อกล่อง
+		var dd = 'M' + r(x) + ',' + r(y) + ' Q' + r(x + w / 2) + ',' + r(y + dipSign * 2 * bulge) + ' ' + r(x + w) + ',' + r(y);
+		return '<path d="' + dd + '" fill="none" stroke="' + FOLD + '" stroke-width="1" stroke-dasharray="7,4" />';
 	}
 	function buildPillow(d) {
 		var W = d.W, L = d.L, D = d.D, G = d.G;
-		var totalW = G + 2 * W, totalH = L + D, arch = D / 2;
-		var yTop = arch, yBot = arch + L;
+		var bulge = D / 2;
+		var totalW = G + 2 * W, totalH = L + 2 * bulge;
+		var yTop = bulge, yBot = bulge + L;
 		var s = '';
-		s += rectCut(0, yTop, G, L, '#eef2ff');                 // ลิ้นกาว (ตรง)
-		s += pillowPanel(G, W, yTop, L, arch, '#f8fafc');       // panel 1 (โค้งบน/ล่าง)
-		s += pillowPanel(G + W, W, yTop, L, arch, '#eff6ff');   // panel 2
-		// เส้นพับแนวตั้ง + ขอบโค้ง
+		s += rectCut(0, yTop, G, L, '#eef2ff');                       // ลิ้นกาว (ตรง สูง = L)
+		s += pillowPanel(G, W, yTop, yBot, bulge, '#f8fafc');         // panel 1
+		s += pillowPanel(G + W, W, yTop, yBot, bulge, '#eff6ff');     // panel 2
+		// เส้นพับแนวตั้ง (กาว|p1 , p1|p2)
 		s += foldLine(G, yTop, G, yBot);
 		s += foldLine(G + W, yTop, G + W, yBot);
-		s += foldLine(G, yTop, G + 2 * W, yTop);
-		s += foldLine(G, yBot, G + 2 * W, yBot);
-		s += label(G / 2, yTop + L / 2, 'กาว', 7);
-		s += label(G + W, yTop - arch * 0.55, 'ปลายโค้ง (ลึก ' + D + ')', 7);
-		// เส้นบอกขนาด W (panel) + L (ความยาวตรง)
+		// เส้นพับปลายโค้ง (อาร์คเว้า) บน/ล่าง ของแต่ละ panel
+		s += pillowCrease(G, W, yTop, 1, bulge);
+		s += pillowCrease(G + W, W, yTop, 1, bulge);
+		s += pillowCrease(G, W, yBot, -1, bulge);
+		s += pillowCrease(G + W, W, yBot, -1, bulge);
+		s += label(G / 2, yTop + L / 2, 'ติดกาว', 7);
+		// เส้นบอกขนาด W (panel) + L (ความยาวตรง) + D/2 (ปลายโค้ง)
 		if (_showDims) {
 			var fsd = Math.max(Math.min(W, L, D) * 0.13, 7);
-			s += dimH(G, G + W, yTop + fsd * 1.6, W, fsd, _hiDim === 'B');   // W = B (กว้าง)
+			s += dimH(G, G + W, -fsd * 0.8, W, fsd, _hiDim === 'B');         // W = B (กว้าง)
 			s += dimV(yTop, yBot, G + fsd * 1.4, L, fsd, _hiDim === 'A');    // L = A (ยาว)
+			s += dimV(0, yTop, totalW + fsd * 1.6, bulge, fsd, false);       // D/2 (ปลายโค้ง)
 		}
 		return { svg: s, w: totalW, h: totalH };
 	}
@@ -583,7 +593,7 @@
 	// หาเครื่อง/กระดาษที่วางได้เยอะสุด (แกรมรับได้) สำหรับ title block
 	function bestMachine(d) {
 		try {
-			_prodLayout = getProdLayout();
+			_prodLayout = getProdLayout(); _nestType = d.type;
 			var c = dielineCore(d), pw = c.bw, ph = c.bh, gram = getJobGram(), best = null;
 			MACHINE_PAPERS.forEach(function (m) {
 				if (gram != null && (gram < m.gmin || gram > m.gmax)) return;
@@ -735,11 +745,12 @@
 		var pw = unit.pw, ph = unit.ph, bw = unit.bw, bh = unit.bh, bl = unit.bleed;
 		var mx = _margins.edge, myT = _margins.gripper, myB = _margins.colorbar;
 		var u = usableWL(PW, PL), uW = u.uW, uL = u.uL;
+		var forceCross = (unit.type === 10);   // ทรง 10 (Pillow) บังคับวางสอด 180° — ปลายนูนลงร่อง ไม่ทับ จำนวนใกล้ของจริง
 		var g = nestGrid(PW, PL, pw, ph), pieces = [], i, j, count, pitchY = g.ph;
-		var _useProd = prodMatches(_prodLayout, PW, PL);
+		var _useProd = !forceCross && prodMatches(_prodLayout, PW, PL);   // ทรง 10 ไม่ใช้ prod grid (รูปทับ) → ใช้ interlock แทน
 		if (_useProd) { g = { cols: _prodLayout.cols, rows: _prodLayout.rows, pw: _prodLayout.pitchX + bl, ph: _prodLayout.pitchY + bl, count: _prodLayout.num }; pitchY = g.ph; }
 		var gridRot = !_useProd && Math.abs(g.pw - pw) > 0.1, baseAng = gridRot ? 90 : 0;
-		if (cross && !_useProd) {
+		if ((cross || forceCross) && !_useProd) {
 			// ใช้ grid เดียวกับวางตรง (เต็มเฟรม) + วางสอดเพิ่มแถว (เฉพาะแนวไม่หมุน · profile แนวตั้ง)
 			var nrows = g.rows;
 			if (!gridRot && _crossPitchY > 0 && _crossPitchY < g.ph) {
@@ -798,7 +809,7 @@
 			'<rect x="0" y="0" width="' + r(mx) + '" height="' + r(PL) + '" fill="#e2e8f0" fill-opacity="0.8"/>' +
 			'<rect x="' + r(PW - mx) + '" y="0" width="' + r(mx) + '" height="' + r(PL) + '" fill="#e2e8f0" fill-opacity="0.8"/>';
 		var debugMode = false;
-		var useReal = pieces.length <= 80 && unit.svg;
+		var useReal = (unit.type === 10 || pieces.length <= 80) && unit.svg;   // ทรง 10 (Pillow) วาดรูปจริงเสมอ — ทรงอื่นคงเพดาน 80 เพื่อความลื่น
 		if (useReal) s += '<defs><g id="du">' + unit.svg + '</g></defs>';
 		pieces.forEach(function (p, pi) {
 			var px = p[0], py = p[1], ang = p[2], rotd = (ang === 90 || ang === 270), rotated180 = (ang === 180 || ang === 270);
@@ -839,7 +850,7 @@
 		});
 		var eff = count * (_unitArea || pw * ph) / (PW * PL) * 100;
 		var pd = Math.max(PW, PL) * 0.085;
-		var afs = Math.max(PW, PL) * 0.021, asw = afs * 0.07, AC = '#1d4ed8';
+		var afs = Math.max(PW, PL) * 0.021, asw = afs * 0.07, AC = '#dc2626';
 		// ===== ลูกศร + ป้ายระยะ แบบ reference (วางนอกแผ่น ไม่ทับชิ้นงาน) =====
 		var ann = '<defs><marker id="nah" markerWidth="9" markerHeight="9" refX="4.5" refY="4.5" orient="auto"><path d="M1,1.5 L7.5,4.5 L1,7.5" fill="none" stroke="' + AC + '" stroke-width="1.4"/></marker></defs>';
 		// gripper (บน)
@@ -932,6 +943,7 @@
 	// ===== Shape-nesting: วัด profile รูปจริง → ระยะวางสอด (เส้นตัดไม่ทับ เว้น 3mm) =====
 	var _crossPitchY = 0, _unitArea = 0;   // ระยะวางสอด + เนื้อที่จริงของไดไลน์ (สำหรับ %เสีย)
 	var _prodLayout = null;   // layout ที่ระบบคำนวณ (Ups) — set ตอน openNestModal
+	var _nestType = 0;        // box type ที่กำลังวาง (ทรง 10 = ไม่ใช้ prod Ups ที่ทับ → interlock)
 	function parseShapes(svg) {
 		var shapes = [], m;
 		var re = /<rect\s+x="(-?[\d.]+)"\s+y="(-?[\d.]+)"\s+width="(-?[\d.]+)"\s+height="(-?[\d.]+)"/g;
@@ -996,7 +1008,7 @@
 		return Math.max(1, Math.floor((uL - bh) / pitch) + 1);
 	}
 	function nestCount(PW, PL, pw, ph, cross) {
-		if (prodPaperMatches(_prodLayout, PW, PL)) return _prodLayout.num;   // กระดาษตรงกับสูตรระบบ → ใช้ Ups
+		if (_nestType !== 10 && prodPaperMatches(_prodLayout, PW, PL)) return _prodLayout.num;   // กระดาษตรงกับสูตรระบบ → ใช้ Ups (ยกเว้นทรง 10 ที่ Ups ทับ)
 		var u = usableWL(PW, PL), g = nestGrid(PW, PL, pw, ph);
 		if (!cross) return g.cols * g.rows;
 		var gridRot = Math.abs(g.pw - pw) > 0.1, nrows = g.rows;   // ไขว้ยึด grid วางตรง + วางสอดเพิ่มแถว
@@ -1027,12 +1039,12 @@
 	function openNestModal(d) {
 		var p0 = document.getElementById('dieline-nest-overlay'); if (p0) p0.remove();
 		_margins = getMargins();
-		_prodLayout = getProdLayout();   // Ups จากสูตรระบบ (ใช้ให้ตรงกันสำหรับกระดาษที่แมท)
+		_prodLayout = getProdLayout(); _nestType = d.type;   // Ups จากสูตรระบบ (ใช้ให้ตรงกันสำหรับกระดาษที่แมท)
 		var core = dielineCore(d);
 		var bleed = 6, pw = core.bw + bleed, ph = core.bh + bleed;
 		// ตัด label + เส้นบอกขนาดออก → เหลือแต่เส้นกล่อง (สะอาด ดูออกง่ายเวลาวางหลายตัว)
-		var cleanSvg = (core.bodySvg || '').replace(/<text[\s\S]*?<\/text>/g, '').replace(/<line[^>]*#334155[^>]*\/>/g, '');
-		var unit = { svg: cleanSvg, bw: core.bw, bh: core.bh, bleed: bleed, pw: pw, ph: ph };
+		var cleanSvg = (core.bodySvg || '').replace(/<text[\s\S]*?<\/text>/g, '').replace(/<line[^>]*#dc2626[^>]*\/>/g, '');
+		var unit = { svg: cleanSvg, bw: core.bw, bh: core.bh, bleed: bleed, pw: pw, ph: ph, type: d.type };
 		_crossPitchY = computeCrossPitchY(unit);   // ระยะวางสอดจาก profile รูปจริง
 		var gram = getJobGram(), qty = getJobQty(), priceKg = getPaperPriceKg();
 		function sheetInfo(count, eff) {
@@ -1160,7 +1172,7 @@
 			'<button class="v2-tab" data-tab="nesting" style="' + tabS + '">📋 Nesting</button>' +
 			'</div>' +
 			'<div style="flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0">' +
-			'<div id="v2-svg-holder" class="bg-white" style="flex:1;overflow:auto;padding:16px"><div id="v2-svg-inner" style="transform-origin:0 0;width:100%"></div></div>' +
+			'<div id="v2-svg-holder" class="bg-white" style="flex:1;overflow:auto;padding:16px;display:flex;align-items:center;justify-content:center"><div id="v2-svg-inner" style="transform-origin:center center;display:flex;align-items:center;justify-content:center;margin:auto"></div></div>' +
 			'<div id="v2-nest-panel" style="flex:1;overflow:auto;padding:16px;display:none"></div>' +
 			'</div>' +
 			'<div id="v2-zoombar" style="padding:12px 18px;border-top:1px solid #eee;background:#fafafa;display:flex;gap:8px;align-items:center;flex-wrap:wrap">' +
@@ -1177,7 +1189,10 @@
 			'<button class="v2-close" style="background:#eee;border:0;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer">ปิด</button>' +
 			'</div></div></div>';
 		document.body.insertAdjacentHTML('beforeend', html);
+		var _prevBodyOverflow = document.body.style.overflow;
+		document.body.style.overflow = 'hidden';   // ล็อกหน้าจอหลังไม่ให้เลื่อนตอนเปิด modal
 		var ov = document.getElementById('dieline-v2-overlay');
+		function closeV2() { _hiDim = null; _lineOnly = false; document.body.style.overflow = _prevBodyOverflow; ov.remove(); }
 		var holder = document.getElementById('v2-svg-holder');
 		var nestPanel = document.getElementById('v2-nest-panel');
 		var zoomBar = document.getElementById('v2-zoombar');
@@ -1188,6 +1203,14 @@
 			try { svg = buildDielineSVG(cur); }
 			catch (e) { console.error('[dieline-v2] build error:', e); svg = '<div style="color:#dc2626;padding:20px">' + (e && e.message) + '</div>'; }
 			inner.innerHTML = svg;
+			// fit เต็มกรอบ + จัดกึ่งกลาง: ใส่ขนาด intrinsic จาก viewBox แล้วจำกัดด้วย max 100% (contain)
+			var _sv = inner.querySelector('svg');
+			if (_sv) {
+				var vb = (_sv.getAttribute('viewBox') || '').split(/\s+/);
+				if (vb.length === 4) { _sv.setAttribute('width', vb[2]); _sv.setAttribute('height', vb[3]); }
+				_sv.style.width = 'auto'; _sv.style.height = 'auto';
+				_sv.style.maxWidth = '100%'; _sv.style.maxHeight = '100%'; _sv.style.display = 'block';
+			}
 		}
 		redraw();
 		selBg.addEventListener('change', function () {
@@ -1208,7 +1231,7 @@
 				this.style.color = '#6d28d9';
 				this.style.fontWeight = 'bold';
 				var isNest = t === 'nesting';
-				holder.style.display = isNest ? 'none' : '';
+				holder.style.display = isNest ? 'none' : 'flex';   // คงเป็น flex เพื่อจัดกึ่งกลาง dieline
 				nestPanel.style.display = isNest ? '' : 'none';
 				zoomBar.style.display = isNest ? 'none' : '';
 				if (isNest && !nestPanel.__loaded) {
@@ -1238,7 +1261,7 @@
 			holder.scrollTop = cy * zoom - oy;
 		}, { passive: false });
 		ov.addEventListener('click', function (e) {
-			if (e.target === ov || (e.target.classList && e.target.classList.contains('v2-close'))) { _hiDim = null; _lineOnly = false; ov.remove(); }
+			if (e.target === ov || (e.target.classList && e.target.classList.contains('v2-close'))) { closeV2(); }
 		});
 		ov.querySelector('.v2-dl').addEventListener('click', function () {
 			var exSvg = buildExportSVG(cur, 1600, getMeta(cur));
@@ -1249,7 +1272,7 @@
 		});
 		ov.querySelector('.v2-pdf').addEventListener('click', function () { exportV2PDF(cur); });
 		ov.querySelector('.v2-3d').addEventListener('click', function () {
-			ov.remove();
+			document.body.style.overflow = _prevBodyOverflow; ov.remove();
 			var btn3d = document.getElementById('dieline-3d-btn');
 			if (btn3d) btn3d.click();
 			else alert('ไม่พบปุ่ม 3D — กรุณากดปุ่ม 3D ที่หน้าหลักแทน');
@@ -1257,11 +1280,11 @@
 		function renderNestPanel(d, el) {
 			el.__loaded = true;
 			_margins = getMargins();
-			_prodLayout = getProdLayout();
+			_prodLayout = getProdLayout(); _nestType = d.type;
 			var core = dielineCore(d);
 			var bleed = 6, pw = core.bw + bleed, ph = core.bh + bleed;
-			var cleanSvg = (core.bodySvg || '').replace(/<text[\s\S]*?<\/text>/g, '').replace(/<line[^>]*#334155[^>]*\/>/g, '');
-			var unit = { svg: cleanSvg, bw: core.bw, bh: core.bh, bleed: bleed, pw: pw, ph: ph };
+			var cleanSvg = (core.bodySvg || '').replace(/<text[\s\S]*?<\/text>/g, '').replace(/<line[^>]*#dc2626[^>]*\/>/g, '');
+			var unit = { svg: cleanSvg, bw: core.bw, bh: core.bh, bleed: bleed, pw: pw, ph: ph, type: d.type };
 			_crossPitchY = computeCrossPitchY(unit);
 			var gram = getJobGram(), qty = getJobQty(), priceKg = getPaperPriceKg();
 			function sheetInfo(count, eff) {

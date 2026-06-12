@@ -310,23 +310,36 @@
 		var W = d.W, L = d.L, D = Math.max(d.D, 6)
 		return { boxMax: Math.max(W, L, D, 1), customGeo: 'pillow', cw: W, cl: L, cd: D, noFold: true }
 	}
+	// พารามิเตอร์ผิวหมอน (ใช้ร่วมกันระหว่าง mesh กับเส้น crease) — z=ยาว(L), x=กว้าง(W), y=หนา(D)
+	var PILLOW_KE = 0.18        // สัดส่วนช่วงปลายที่จีบ (หัว/ท้าย ข้างละ 18%)
+	function pillowTu(u) {      // ความอวบตามยาว: เต็มกลางลำตัว จีบนุ่มที่ปลาย
+		if (u < PILLOW_KE) return Math.sin((u / PILLOW_KE) * Math.PI / 2)
+		if (u > 1 - PILLOW_KE) return Math.sin(((1 - u) / PILLOW_KE) * Math.PI / 2)
+		return 1
+	}
+	function pillowWf(u) {      // มนมุมปลาย: ลดความกว้างเล็กน้อยที่ปลายสุด → ขอบไม่เป็นเหลี่ยม
+		var e = 0.10
+		if (u < e) return 0.4 + 0.6 * Math.sin((u / e) * Math.PI / 2)
+		if (u > 1 - e) return 0.4 + 0.6 * Math.sin(((1 - u) / e) * Math.PI / 2)
+		return 1
+	}
+	function pillowProf(v) { return Math.sqrt(Math.max(0, 1 - Math.pow(2 * v - 1, 2))) }   // หน้าตัดครึ่งวงรี
+	function pillowPt(u, v, sgn, W, L, D) {
+		return new THREE.Vector3((v - 0.5) * W * pillowWf(u), sgn * (D / 2) * pillowTu(u) * pillowProf(v), (u - 0.5) * L)
+	}
 	function makePillowGeometry(W, L, D) {
-		var nu = 30, nv = 16, pos = [], idx = []
+		var nu = 48, nv = 28, pos = [], idx = []
 		function surf(sgn) {
 			var base = pos.length / 3, i, j
-			for (i = 0; i <= nu; i++) {
-				var u = i / nu, tu = Math.pow(Math.sin(Math.PI * u), 0.45), z = (u - 0.5) * L   // อวบ พับเฉพาะปลาย
-				for (j = 0; j <= nv; j++) {
-					var v = j / nv
-					pos.push((v - 0.5) * W, sgn * (D / 2) * tu * Math.pow(Math.sin(Math.PI * v), 0.6), z)   // ผิวบน/ล่างอวบ
-				}
+			for (i = 0; i <= nu; i++) for (j = 0; j <= nv; j++) {
+				var p = pillowPt(i / nu, j / nv, sgn, W, L, D); pos.push(p.x, p.y, p.z)
 			}
 			for (i = 0; i < nu; i++) for (j = 0; j < nv; j++) {
-				var a = base + i * (nv + 1) + j, b = a + 1, c = a + (nv + 1), e = c + 1
-				if (sgn > 0) idx.push(a, c, b, b, c, e); else idx.push(a, b, c, b, e, c)
+				var a = base + i * (nv + 1) + j, b = a + 1, c = a + (nv + 1), e2 = c + 1
+				if (sgn > 0) idx.push(a, c, b, b, c, e2); else idx.push(a, b, c, b, e2, c)
 			}
 		}
-		surf(1); surf(-1)   // ผิวบน + ผิวล่าง
+		surf(1); surf(-1)   // ผิวบน + ผิวล่าง (บรรจบกันที่ตะเข็บข้าง/ปลาย)
 		var g = new THREE.BufferGeometry()
 		g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3))
 		g.setIndex(idx); g.computeVertexNormals()
@@ -685,9 +698,30 @@
 		var edgeMat = new THREE.LineBasicMaterial({ color: 0xffffff })
 		// ทรงพิเศษที่เป็น surface โค้ง (pillow) — ไม่ใช้ fold tree
 		if (spec.customGeo === 'pillow') {
-			var pgeo = makePillowGeometry(spec.cw, spec.cl, spec.cd)
+			var Wc = spec.cw, Lc = spec.cl, Dc = spec.cd
+			var pgeo = makePillowGeometry(Wc, Lc, Dc)
 			var pholder = new THREE.Group(); pholder.add(new THREE.Mesh(pgeo, material))
+			var seamMat = new THREE.LineBasicMaterial({ color: 0x222222, depthTest: false })
+			function lineFrom(pts, isCrease) {
+				var ln = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), seamMat)
+				if (isCrease) ln.userData.creaseSolid = true
+				return ln
+			}
+			// 1) เส้นรอยพับโอบรอบลำตัว (crease ring) ที่ผิวเริ่มจีบปลาย — โค้งตามผิววงรีจริง
+			function creaseRing(u) {
+				var pts = [], nv2 = 30, j
+				for (j = 0; j <= nv2; j++) pts.push(pillowPt(u, j / nv2, 1, Wc, Lc, Dc))    // ครึ่งบน
+				for (j = nv2; j >= 0; j--) pts.push(pillowPt(u, j / nv2, -1, Wc, Lc, Dc))   // ครึ่งล่าง (ปิดวง)
+				return lineFrom(pts, true)
+			}
+			pholder.add(creaseRing(PILLOW_KE)); pholder.add(creaseRing(1 - PILLOW_KE))
+			// 2) เส้นขอบรอบนอก (silhouette) ที่ y=0 — ตะเข็บข้าง+ปลาย เป็นวงเดียวต่อเนื่อง มุมมนตามผิว
+			var outline = [], nu2 = 56, k
+			for (k = 0; k <= nu2; k++) outline.push(pillowPt(k / nu2, 1, 1, Wc, Lc, Dc))    // ขอบข้าง v=1 (y=0)
+			for (k = nu2; k >= 0; k--) outline.push(pillowPt(k / nu2, 0, 1, Wc, Lc, Dc))    // ขอบข้าง v=0 กลับ (ปิดวง)
+			pholder.add(lineFrom(outline, true))
 			var ps = 1 / (spec.boxMax || 100); pholder.scale.set(ps, ps, ps)
+			pholder.userData.lineMats = { cut: seamMat, fold: seamMat }
 			return { group: pholder, folds: [], material: material, edgeMat: edgeMat }
 		}
 		var dashMat = new THREE.LineDashedMaterial({ color: 0x2b2b2b, dashSize: 9, gapSize: 5 })   // เส้นพับ (เส้นประ) ขีดยาว เห็นชัด
@@ -1184,7 +1218,7 @@
 		this._addDimLine(new THREE.Vector3(mx.x + off, mn.y - off, mn.z), new THREE.Vector3(mx.x + off, mn.y - off, mx.z), 'ยาว ' + this._dims.L, off, ctr)       // L ล่าง
 	}
 	Viewer.prototype._addDimLine = function (p1, p2, label, off, center) {
-		var mat = new THREE.LineBasicMaterial({ color: 0xffffff, depthTest: false })
+		var mat = new THREE.LineBasicMaterial({ color: 0xdc2626, depthTest: false })   // เส้นวัดขนาด = แดง (ให้ตรงกับ 2D)
 		this._dimGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([p1, p2]), mat))
 		var dir = new THREE.Vector3().subVectors(p2, p1).normalize()
 		var ah = Math.min(p1.distanceTo(p2) * 0.14, off * 1.1)
@@ -1194,7 +1228,7 @@
 		this._arrow(p2, dir, perp, ah, mat)
 		var mid = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5)
 		var outward = center ? new THREE.Vector3().subVectors(mid, center).normalize() : perp   // ดันออกนอกกล่อง
-		var sp = makeTextSprite(label, '#111')
+		var sp = makeTextSprite(label, '#dc2626')
 		var tsc = off * 2.8
 		sp.scale.set(tsc, tsc * 0.25, 1)
 		sp.position.copy(mid).addScaledVector(outward, off * 1.2)   // ตัวหนังสืออยู่นอก (พ้นกล่อง)
