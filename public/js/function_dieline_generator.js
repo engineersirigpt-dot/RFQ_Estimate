@@ -780,23 +780,32 @@
 		var g = nestGrid(PW, PL, pw, ph), pieces = [], i, j, count, pitchY = g.ph;
 		var _el = forceCross ? null : estLayout(PW, PL);   // สูตรระบบจริง ต่อเครื่องนี้
 		var _useProd = !forceCross && (_el || prodMatches(_prodLayout, PW, PL));   // ทรง 10 ไม่ใช้ (ใช้ interlock แทน)
+		var _prodAng = 0;   // มุมวางของ _useProd (0 หรือ 90 ถ้าต้องหมุนให้ฟิตแผ่น)
 		if (_useProd) {
-			// วาง "จำนวน = สูตรระบบ" (จากเครื่องนี้ ถ้ามี / ไม่งั้น Ups กระดาษที่เลือก) จัดกริดสวยเต็มแผ่น ขนาดจริง
+			// วาง "จำนวน = สูตรระบบ" จัดกริดสวยเต็มแผ่น — เลือกทิศ (ไม่หมุน vs หมุน 90°) ให้ฟิตแผ่น
 			var _num = _el ? _el.count : _prodLayout.num
-			var _maxCols = Math.max(1, Math.floor(uW / (bw + bl)))   // วางขนาดจริงได้กี่คอลัมน์
-			var _maxRows = Math.max(1, Math.floor(uL / (bh + bl)))   // กี่แถว
-			var _cols, _ppx = bw + bl, _ppy = bh + bl
+			function _fit(pwid, phei) { return Math.max(0, Math.floor(uW / (pwid + bl))) * Math.max(0, Math.floor(uL / (phei + bl))); }
+			var _capA = _fit(bw, bh), _capB = _fit(bh, bw);   // A=ไม่หมุน, B=หมุน 90°
+			var _rot;   // เลือกทิศที่วาง _num ได้พอดี (ชิ้นกว้างเกินแผ่น → ต้องหมุน)
+			if (_num <= _capA && Math.floor(uW / (bw + bl)) > 0) _rot = false;
+			else if (_num <= _capB && Math.floor(uW / (bh + bl)) > 0) _rot = true;
+			else _rot = (_capB > _capA);
+			var _pW = _rot ? bh : bw, _pH = _rot ? bw : bh;   // ขนาดชิ้นตามทิศที่เลือก
+			_prodAng = _rot ? 90 : 0;
+			var _maxCols = Math.max(1, Math.floor(uW / (_pW + bl)))
+			var _maxRows = Math.max(1, Math.floor(uL / (_pH + bl)))
+			var _cols, _ppx = _pW + bl, _ppy = _pH + bl
 			if (_num <= _maxCols * _maxRows) {
 				_cols = Math.min(_maxCols, _num)                     // พอดีแผ่น → ขนาดจริง ไม่ซ้อน
 			} else {
-				_cols = Math.ceil(_num / _maxRows)                   // เกินความจุปกติ (แชร์ขอบ) → อัดคอลัมน์ ลด pitch
-				_ppx = _cols > 1 ? Math.max(2, (uW - bw) / (_cols - 1)) : (bw + bl)
+				_cols = Math.ceil(_num / _maxRows)                   // เกินความจุปกติ → อัดคอลัมน์ ลด pitch
+				_ppx = _cols > 1 ? Math.max(2, (uW - _pW) / (_cols - 1)) : (_pW + bl)
 			}
 			var _rows = Math.ceil(_num / _cols)
-			if (_rows > 1) _ppy = Math.min(_ppy, (uL - bh) / (_rows - 1))
+			if (_rows > 1) _ppy = Math.min(_ppy, (uL - _pH) / (_rows - 1))
 			g = { cols: _cols, rows: _rows, pw: _ppx, ph: _ppy, count: _num }; pitchY = g.ph
 		}
-		var gridRot = !_useProd && Math.abs(g.pw - pw) > 0.1, baseAng = gridRot ? 90 : 0;
+		var gridRot = !_useProd && Math.abs(g.pw - pw) > 0.1, baseAng = _useProd ? _prodAng : (gridRot ? 90 : 0);
 		if ((cross || forceCross) && !_useProd) {
 			// ใช้ grid เดียวกับวางตรง (เต็มเฟรม) + วางสอดเพิ่มแถว (เฉพาะแนวไม่หมุน · profile แนวตั้ง)
 			var nrows = g.rows;
@@ -1388,20 +1397,28 @@
 				var st = drawNest(m.w, m.l, unit, false), cr = drawNest(m.w, m.l, unit, true);
 				var b = cr.count > st.count ? 'สอด' : 'ตรง';
 				var ebtn = 'border:0;padding:4px 10px;border-radius:5px;font-size:11px;font-weight:bold;cursor:pointer;color:#fff;margin-right:5px';
-				var bar = function (k) { return '<div style="margin:6px 0 8px"><button class="np-pdf-' + k + '" style="background:#dc2626;' + ebtn + '">PDF</button><button class="np-svg-' + k + '" style="background:#059669;' + ebtn + '">SVG</button><span style="font-size:11px;color:#94a3b8;margin-left:6px">(ลูกกลิ้ง = ซูม)</span></div>'; };
+				var bar = function (k) { return '<div style="margin:6px 0 8px"><button class="np-pdf-' + k + '" style="background:#dc2626;' + ebtn + '">PDF</button><button class="np-svg-' + k + '" style="background:#059669;' + ebtn + '">SVG</button><span style="font-size:11px;color:#94a3b8;margin-left:6px">(คลิกเลือกกรอบ → ลูกกลิ้งซูม)</span></div>'; };
 				var zwrap = function (svg) { return '<div class="nz-holder" style="overflow:auto;max-height:74vh;border:1px solid #eef2f7;border-radius:4px"><div class="nz-inner" style="transform-origin:0 0;width:100%">' + svg + '</div></div>'; };
 				el.querySelector('.vn-sheets').innerHTML =
-					'<div style="flex:1;min-width:280px;border:2px solid ' + (b === 'ตรง' ? '#16a34a' : '#e2e8f0') + ';border-radius:8px;padding:10px"><div style="font-weight:bold;color:#334155">วางตรง — <span style="color:#2563eb;font-size:18px">' + st.count + '</span> ตัว/แผ่น · ' + st.eff.toFixed(0) + '%</div>' + sheetInfo(st.count, st.eff) + bar('st') + zwrap(st.svg) + '</div>' +
-					'<div style="flex:1;min-width:280px;border:2px solid ' + (b === 'สอด' ? '#16a34a' : '#e2e8f0') + ';border-radius:8px;padding:10px"><div style="font-weight:bold;color:#334155">วางไขว้ — <span style="color:#2563eb;font-size:18px">' + cr.count + '</span> ตัว/แผ่น · ' + cr.eff.toFixed(0) + '%</div>' + sheetInfo(cr.count, cr.eff) + bar('cr') + zwrap(cr.svg) + '</div>';
+					'<div class="vn-panel" data-idx="0" style="flex:1;min-width:280px;border:2px solid #e2e8f0;border-radius:8px;padding:10px;cursor:pointer"><div style="font-weight:bold;color:#334155">วางตรง — <span style="color:#2563eb;font-size:18px">' + st.count + '</span> ตัว/แผ่น · ' + st.eff.toFixed(0) + '%</div>' + sheetInfo(st.count, st.eff) + bar('st') + zwrap(st.svg) + '</div>' +
+					'<div class="vn-panel" data-idx="1" style="flex:1;min-width:280px;border:2px solid #e2e8f0;border-radius:8px;padding:10px;cursor:pointer"><div style="font-weight:bold;color:#334155">วางไขว้ — <span style="color:#2563eb;font-size:18px">' + cr.count + '</span> ตัว/แผ่น · ' + cr.eff.toFixed(0) + '%</div>' + sheetInfo(cr.count, cr.eff) + bar('cr') + zwrap(cr.svg) + '</div>';
 				var ns = el.querySelector('.vn-sheets');
 				var ttl = function (kind, cnt, eff) { return 'Nesting — Type ' + d.type + ' · ' + kind + ' · เครื่อง ' + m.name + ' (' + r(m.w) + '×' + r(m.l) + 'mm) · ' + cnt + ' ตัว/แผ่น · เสีย ' + Math.max(0, 100 - eff).toFixed(0) + '%'; };
 				ns.querySelector('.np-pdf-st').onclick = function () { exportNestPDF(st.svg, ttl('วางตรง', st.count, st.eff)); };
 				ns.querySelector('.np-svg-st').onclick = function () { downloadNestSVG(st.svg, 'nest_type' + d.type + '_straight_' + r(m.w) + 'x' + r(m.l)); };
 				ns.querySelector('.np-pdf-cr').onclick = function () { exportNestPDF(cr.svg, ttl('วางไขว้', cr.count, cr.eff)); };
 				ns.querySelector('.np-svg-cr').onclick = function () { downloadNestSVG(cr.svg, 'nest_type' + d.type + '_cross_' + r(m.w) + 'x' + r(m.l)); };
-				ns.querySelectorAll('.nz-holder').forEach(function (h) {
+				// คลิกเลือกกรอบ → เขียว(เลือก)/เทา(ไม่เลือก) · ลูกกลิ้งซูมเฉพาะกรอบที่เลือก (ไม่งั้นหน้าเลื่อนปกติ)
+				var _panels = ns.querySelectorAll('.vn-panel'), _sel = -1;
+				function _setSel(k) {
+					_sel = (_sel === k) ? -1 : k;
+					_panels.forEach(function (p, j) { p.style.borderColor = (_sel === j) ? '#16a34a' : (_sel === -1 ? '#e2e8f0' : '#9ca3af'); });
+				}
+				_panels.forEach(function (p, k) { p.addEventListener('click', function (e) { if (e.target.closest('button')) return; _setSel(k); }); });
+				ns.querySelectorAll('.nz-holder').forEach(function (h, k) {
 					var nzInner = h.querySelector('.nz-inner'), z = 1;
 					h.addEventListener('wheel', function (e) {
+						if (_sel !== k) return;   // ยังไม่เลือกกรอบนี้ → ปล่อยให้หน้าเลื่อนปกติ
 						e.preventDefault();
 						var rect = h.getBoundingClientRect(), ox = e.clientX - rect.left, oy = e.clientY - rect.top;
 						var cx = (h.scrollLeft + ox) / z, cy = (h.scrollTop + oy) / z;
