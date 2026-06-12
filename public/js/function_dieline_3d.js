@@ -13,7 +13,7 @@
  * ใช้ three.js global (window.THREE) + orbit controller ขนาดเล็กที่เขียนเอง
  */
 (function () {
-	try { console.log('%c[dieline3d] build v9 — gable SVG peak (roof slope)', 'color:#16a34a;font-weight:bold') } catch (e) { }; if (!/\/estimate|\/view/.test(location.pathname)) return
+	try { console.log('%c[dieline3d] build v11 — fold-on-open + field-vis + corrugated edge thickness + flute texture', 'color:#16a34a;font-weight:bold') } catch (e) { }; if (!/\/estimate|\/view/.test(location.pathname)) return
 
 	var BOX_NAMES = {
 		1: 'Reverse Tuck End (RTE)', 2: 'Straight Tuck End (STE)',
@@ -24,6 +24,11 @@
 	}
 	var APPROX_TYPES = {}
 	var HALF = Math.PI / 2
+	// T (tuck flap) and dust (ปีก/wing flap) visibility per box type — based on calculation formula
+	var BOX_FIELD_VIS = {
+		T:    {1:1, 2:1, 3:1, 4:1, 5:0, 6:0, 7:0, 8:1, 9:0, 10:0, 11:0, 12:0},
+		dust: {1:1, 2:1, 3:1, 4:1, 5:1, 6:1, 7:1, 8:0, 9:0, 10:0, 11:1, 12:0},
+	}
 
 	// ===== slider แบบ gradient + ลูกศรวงกลม (ธีมม่วง) =====
 	var SLIDER_ARROW = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='9 6 15 12 9 18'/%3E%3C/svg%3E"
@@ -266,14 +271,15 @@
 	}
 
 	function buildGable(d) {
-		var W = d.W, L = d.L, D = d.D
+		var W = d.W, L = d.L, D = d.D, T = d.T || Math.max(10, Math.round(W * 0.07))
 		var w = buildWalls(d)
 		w.front.children.push({ id: 'floor', pw: W, ph: L, anchor: 'tl', hinge: 'bottom', axis: 'x', sign: 1, angle: HALF, phase: [0.5, 0.66], children: [] })
-		var peakH = Math.max(W * 0.45, D * 0.85)
+		// peakH = D ตามสูตร dieline 2D: apex อยู่สูงกว่าผนังเท่ากับ D (yApex=T, yWall=T+D)
+		var peakH = D
 		var roofH = Math.sqrt((W / 2) * (W / 2) + peakH * peakH)
 		var slope = Math.atan2(W / 2, peakH)
 		var slotW = Math.min(L * 0.34, W * 0.58)
-		var slotH = Math.max(4, Math.min(roofH * 0.14, peakH * 0.22))
+		var slotH = Math.max(4, Math.min(T * 0.8, peakH * 0.5))  // ความสูง slot ใช้ T (หูหิ้ว)
 		var slotR = Math.max(2, slotH * 0.35)
 		var slotY = Math.max(slotH, roofH * 0.62)
 		w.right.children.push({ id: 'roofR', pw: L, ph: roofH, anchor: 'bl', hinge: 'top', axis: 'x', sign: -1, angle: slope, phase: [0.7, 1], slot: { cx: L / 2, cy: slotY, w: slotW, h: slotH, r: slotR } })
@@ -545,8 +551,63 @@
 		}
 	}
 
+	// ===== Corrugated board — ขอบหนา + ลายลูกฟูก =====
+	var _fluteTexture = null
+	function getFluteTexture() {
+		if (_fluteTexture) return _fluteTexture
+		var c = document.createElement('canvas'), ctx = c.getContext('2d')
+		c.width = 64; c.height = 20
+		ctx.fillStyle = '#c8895a'; ctx.fillRect(0, 0, 64, 20)         // แกนกลาง (fluting)
+		ctx.fillStyle = '#7a4810'; ctx.fillRect(0, 0, 64, 3)          // liner บน
+		ctx.fillStyle = '#7a4810'; ctx.fillRect(0, 17, 64, 3)         // liner ล่าง
+		ctx.strokeStyle = '#6a3808'; ctx.lineWidth = 1.5               // เส้น flute
+		ctx.beginPath()
+		for (var xi = 0; xi <= 64; xi++) { var yi = 10 + 5.5 * Math.sin(xi / 5 * Math.PI); xi === 0 ? ctx.moveTo(xi, yi) : ctx.lineTo(xi, yi) }
+		ctx.stroke()
+		_fluteTexture = new THREE.CanvasTexture(c)
+		_fluteTexture.wrapS = THREE.RepeatWrapping; _fluteTexture.wrapT = THREE.ClampToEdgeWrapping
+		return _fluteTexture
+	}
+	function addCorrEdges(pivot, node, T) {
+		if (node.outline || node.trap || node.round || node.glue || node.tri) return
+		var pw = node.pw, ph = node.ph, a = node.anchor || 'bl'
+		var x0 = (a === 'br') ? -pw : 0, x1 = (a === 'br') ? 0 : pw
+		var y0 = (a === 'tl') ? -ph : 0, y1 = (a === 'tl') ? 0 : ph
+		var cx = (x0 + x1) / 2, cy = (y0 + y1) / 2
+		var tex = getFluteTexture()
+		function strip(w, h, px, py, rx, ry) {
+			var t2 = tex.clone(); t2.needsUpdate = true; t2.repeat.set(Math.max(1, Math.round(Math.max(w, h) / 8)), 1)
+			var m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({ color: 0xb07c3a, roughness: 0.95, side: THREE.DoubleSide, map: t2 }))
+			m.position.set(px, py, -T / 2)
+			if (rx) m.rotation.x = rx; if (ry) m.rotation.y = ry
+			m.userData.corrEdge = true; pivot.add(m)
+		}
+		strip(T, ph, x1, cy, 0, Math.PI / 2)        // ขอบขวา
+		strip(T, ph, x0, cy, 0, -Math.PI / 2)       // ขอบซ้าย
+		strip(pw, T, cx, y1, -Math.PI / 2, 0)       // ขอบบน
+		strip(pw, T, cx, y0, Math.PI / 2, 0)        // ขอบล่าง
+	}
+	function applyCorrugated(boxGroup, on, T) {
+		var toRemove = []
+		boxGroup.traverse(function (o) { if (o.userData && o.userData.corrEdge) toRemove.push(o) })
+		toRemove.forEach(function (o) { if (o.parent) o.parent.remove(o); if (o.geometry) o.geometry.dispose() })
+		if (!on) return
+		boxGroup.traverse(function (o) {
+			if (o.type !== 'Group' || !o.userData || !o.userData.nodeInfo) return
+			addCorrEdges(o, o.userData.nodeInfo, T)
+		})
+	}
+	function readBoardThickness() {
+		try {
+			var _e = window.est || window.estimate
+			var _cl = _e && _e.mainData && _e.mainData.component1 && _e.mainData.component1[0] && _e.mainData.component1[0].corrugated_layer
+			return (_cl && _cl.info && +_cl.info.thickness) || 3.5
+		} catch (e) { return 3.5 }
+	}
+
 	function buildNode(node, material, edgeMat, folds, dashMat) {
 		var pivot = new THREE.Group()
+		pivot.userData.nodeInfo = node
 		pivot.add(makeMesh(node, material, edgeMat))
 		// รอยบากล็อก (ฝาเสียบล่าง): ข้างละเส้น "โค้งสั้นๆ" ชี้ขึ้นบน (โค้งเข้าหากลาง) — ทั้งซ้ายและขวา
 		if (node.lock && dashMat) {
@@ -621,7 +682,7 @@
 			roughness: (finish.roughness != null ? finish.roughness : 0.92),
 			metalness: (finish.metalness != null ? finish.metalness : 0)
 		})
-		var edgeMat = new THREE.LineBasicMaterial({ color: 0x8a7a55 })
+		var edgeMat = new THREE.LineBasicMaterial({ color: 0xffffff })
 		// ทรงพิเศษที่เป็น surface โค้ง (pillow) — ไม่ใช้ fold tree
 		if (spec.customGeo === 'pillow') {
 			var pgeo = makePillowGeometry(spec.cw, spec.cl, spec.cd)
@@ -644,9 +705,10 @@
 	// SVG dieline (diecuttemplates) → 3D — ทรงที่เซฟ SVG ไว้ (1=RTE, 2=STE)
 	// parse SVG → panels (face-finding) → พับ (general edge-fold) → folds รูปแบบเดียวกับ buildBoxGroup
 	// ===========================================================================
-	// ทรงที่พับ 3D จาก SVG (1-7, 9) — ทรง 10 Pillow ใช้ procedural (ผิวโค้ง) เพราะ flat-fold ทำเส้นโค้งไม่ได้
+	// ทรงที่พับ 3D จาก SVG (1-9, 11) — ทรง 10 Pillow ใช้ procedural (ผิวโค้ง)
 	var LOCAL_SVG_TYPES = { 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1, 11: 1 }
 	function hasLocalSVG(t) { return !!LOCAL_SVG_TYPES[t] }
+	var _svgTextCache = {}   // cache SVG text by type (fetch once per session)
 
 	var SVGImp = (function () {
 		function parsePath(d) {
@@ -723,8 +785,8 @@
 				if (!cuts.length) { out.push(s); return }
 				cuts.sort(function (a, b) { return a.t - b.t })
 				var prev = s.a
-				cuts.forEach(function (c) { out.push({ type: 'line', a: prev, b: c.p }); prev = c.p })
-				out.push({ type: 'line', a: prev, b: s.b })
+				cuts.forEach(function (c) { out.push({ type: 'line', a: prev, b: c.p, isCrease: s.isCrease }); prev = c.p })
+				out.push({ type: 'line', a: prev, b: s.b, isCrease: s.isCrease })
 			})
 			return out
 		}
@@ -764,17 +826,22 @@
 		function fromSVG(svgText, opt) {
 			opt = opt || {}
 			var cr = extractGroup(svgText, 'crease'), ct = extractGroup(svgText, 'cut')
+			// แท็ก crease ก่อน concat เพื่อแยก fold-edge จาก cut-edge ในขั้นตอน buildTreeImp
+			cr.forEach(function (s) { s.isCrease = true })
 			var all = cr.concat(ct)
 			all.forEach(function (s) { s.a = [s.a[0], -s.a[1]]; s.b = [s.b[0], -s.b[1]] })   // flip y
 			all = snapVerts(all, opt.tol || 2.0)
-			all = nodeSegments(all)            // ตัด T-junction ก่อนหา face
+			all = nodeSegments(all)            // ตัด T-junction ก่อนหา face (isCrease propagates)
+			// สร้าง creaseSet จาก edges ที่เป็น fold จริง (ป้องกัน cut-edge สร้าง parent ผิดใน tree)
+			var creaseSet = {}
+			all.forEach(function (s) { if (s.isCrease) { var k = ekey(s.a, s.b); creaseSet[k] = 1 } })
 			var res = findFaces(all)
 			var panels = res.faces.map(function (f, i) {
 				var segs = []
 				for (var k = 0; k < f.length; k++) { var a = res.verts[f[k]], b = res.verts[f[(k + 1) % f.length]]; segs.push({ type: 'line', a: [a[0], a[1]], b: [b[0], b[1]] }) }
 				return { id: 'p' + i, segs: segs }
 			})
-			return { panels: panels, rootId: pickRoot(panels) }
+			return { panels: panels, rootId: pickRoot(panels), creaseSet: creaseSet }
 		}
 		// root = "ผนัง" (สูงเท่ากล่อง) ที่มีผนังเพื่อนบ้านมากสุด + ฝาเพื่อนบ้านเตี้ย (ไม่ใช่ tuck)
 		// → กล่องตั้ง ฝา tuck พับปิดได้ (ถ้า root มี tuck ฝาจะตั้งชี้ขึ้นไม่ปิด)
@@ -808,7 +875,9 @@
 		function ek(a, b) { var r = function (n) { return Math.round(n * 2) / 2 }; var pa = r(a[0]) + ',' + r(a[1]), pb = r(b[0]) + ',' + r(b[1]); return pa < pb ? pa + '|' + pb : pb + '|' + pa }
 		geo.panels.forEach(function (p, pi) { p.segs.forEach(function (s) { var k = ek(s.a, s.b); (edgeMap[k] = edgeMap[k] || []).push({ pi: pi, a: s.a, b: s.b }) }) })
 		var adj = geo.panels.map(function () { return [] })
-		Object.keys(edgeMap).forEach(function (k) { var e = edgeMap[k]; if (e.length === 2) { var L = Math.hypot(e[0].a[0] - e[0].b[0], e[0].a[1] - e[0].b[1]); adj[e[0].pi].push({ nb: e[1].pi, A: e[0].a, B: e[0].b, len: L }); adj[e[1].pi].push({ nb: e[0].pi, A: e[0].a, B: e[0].b, len: L }) } })
+		// ใช้เฉพาะ crease edges (fold) เป็น adjacency — cut edges อาจสร้าง false parent เช่น tuck→dust flap
+		var _cs = geo.creaseSet || null
+		Object.keys(edgeMap).forEach(function (k) { var e = edgeMap[k]; if (e.length === 2 && (!_cs || _cs[k])) { var L = Math.hypot(e[0].a[0] - e[0].b[0], e[0].a[1] - e[0].b[1]); adj[e[0].pi].push({ nb: e[1].pi, A: e[0].a, B: e[0].b, len: L }); adj[e[1].pi].push({ nb: e[0].pi, A: e[0].a, B: e[0].b, len: L }) } })
 		var cent = geo.panels.map(function (p) { var sx = 0, sy = 0, n = 0; p.segs.forEach(function (s) { sx += s.a[0]; sy += s.a[1]; n++ }); return [sx / n, sy / n] })
 		var rootIdx = 0; geo.panels.forEach(function (p, i) { if (p.id === rootId) rootIdx = i })
 		var nodes = geo.panels.map(function (p, i) { return { idx: i, id: p.id, children: [], hinge: null } })
@@ -835,11 +904,11 @@
 	function buildSVGGroup(svgText, fin, boxType) {
 		fin = fin || {}
 		var material = new THREE.MeshStandardMaterial({ color: (fin.paperColor != null ? fin.paperColor : 0xf4ecd8), side: THREE.DoubleSide, roughness: (fin.roughness != null ? fin.roughness : 0.92), metalness: (fin.metalness != null ? fin.metalness : 0), polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 })
-		var edgeMat = new THREE.LineBasicMaterial({ color: 0x8a7a55 })
+		var edgeMat = new THREE.LineBasicMaterial({ color: 0xffffff })
 		var geo = SVGImp.fromSVG(svgText, {})
 		function ekeyG(a, b) { var r = function (n) { return Math.round(n * 2) / 2 }; var pa = r(a[0]) + ',' + r(a[1]), pb = r(b[0]) + ',' + r(b[1]); return pa < pb ? pa + '|' + pb : pb + '|' + pa }
-			var cutMat = new THREE.LineBasicMaterial({ color: 0x333333 })   // 3D = เส้นดำ (backend ยังแยก cut/fold ด้วย ecount)
-			var foldMat = new THREE.LineBasicMaterial({ color: 0x333333 }); function pAreaG(p) { var s = 0; p.segs.forEach(function (e) { s += e.a[0] * e.b[1] - e.b[0] * e.a[1] }); return Math.abs(s / 2) }
+			var cutMat = new THREE.LineBasicMaterial({ color: 0x222222, depthTest: false })
+			var foldMat = new THREE.LineBasicMaterial({ color: 0x222222, depthTest: false }); function pAreaG(p) { var s = 0; p.segs.forEach(function (e) { s += e.a[0] * e.b[1] - e.b[0] * e.a[1] }); return Math.abs(s / 2) }
 			var ecount = {}
 			geo.panels.forEach(function (p) { p.segs.forEach(function (s) { var k = ekeyG(s.a, s.b); ecount[k] = (ecount[k] || 0) + 1 }) })
 			var root = buildTreeImp(geo, geo.rootId)
@@ -895,15 +964,12 @@
 		var _up = _axU[_ui], _upLen = [_bsz.x, _bsz.y, _bsz.z][_ui]
 		folds.forEach(function (f) {
 			if (!f.leaf || !f.mesh || f.angle > HALF * 1.2 || f._d < 2) return
-			var b = f.mesh.geometry.boundingBox, cen = b.getCenter(new THREE.Vector3()); f.mesh.localToWorld(cen)
-			_nrm.getNormalMatrix(f.mesh.matrixWorld)
-			var n = new THREE.Vector3(0, 0, 1).applyMatrix3(_nrm).normalize()
-			var perp = Math.abs(n.dot(_up)) < 0.35
-			var cUp = cen.dot(_up), nearEnd = Math.min(Math.abs(cUp - _bb.min.dot(_up)), Math.abs(cUp - _bb.max.dot(_up))) < _upLen * 0.25
 			var small = f.mesh._area < 0.4 * _maxA
-			if (perp && nearEnd && small) { f.angle = Math.PI * 0.98; return }
 			// ลิ้นเล็กที่ตั้งฉากกับ parent ซึ่งเป็น "ปีก" (เล็ก ไม่ใช่ผนัง) เช่น lock tab บนปีกก้น auto-bottom → พับราบ
+			// (เอา perp+nearEnd+small ออกแล้ว — เงื่อนไขเดิมพับ dust flap ทุกทรงเป็น 180° ทำให้ปีกหาย)
 			if (small && f.parentMesh && f.parentMesh._area != null && f.parentMesh._area < 0.4 * _maxA) {
+				_nrm.getNormalMatrix(f.mesh.matrixWorld)
+				var n = new THREE.Vector3(0, 0, 1).applyMatrix3(_nrm).normalize()
 				_nrm.getNormalMatrix(f.parentMesh.matrixWorld)
 				var pn = new THREE.Vector3(0, 0, 1).applyMatrix3(_nrm).normalize()
 				if (Math.abs(n.dot(pn)) < 0.4) f.angle = Math.PI * 0.98
@@ -916,13 +982,60 @@
 		return { group: holder, folds: folds, material: material, edgeMat: edgeMat }
 	}
 
-	// เลือก builder: ทรงมี local SVG → พับจาก SVG (async fetch), ไม่มี → procedural เดิม
+	// Scale SVG group ให้ตรงกับ d.W/L/D — fold ไปที่ 1 ก่อนวัด bbox แล้วค่อย unfold กลับ
+	function scaleSVGToBox(group, folds, d) {
+		if (!d || !d.W || !d.L || !d.D) return
+		// fold ไปที่ 1 เพื่อวัดขนาดกล่องจริง (flat=0 จะได้ sz.z≈0 → scale พัง)
+		if (folds && folds.length) applyFold(folds, 1)
+		group.traverse(function (o) { if (o.matrixAutoUpdate) o.updateMatrix() })
+		group.updateMatrixWorld(true)
+		var bb = new THREE.Box3().setFromObject(group)
+		// reset กลับ 0 (setScene จะ fold ใหม่อีกรอบ)
+		if (folds && folds.length) applyFold(folds, 0)
+		var sz = new THREE.Vector3()
+		if (!bb.isEmpty()) sz = bb.getSize(new THREE.Vector3())
+		console.log('[d3] scaleSVG isEmpty=' + bb.isEmpty() + ' sz=' + sz.x.toFixed(3) + ',' + sz.y.toFixed(3) + ',' + sz.z.toFixed(3))
+		if (bb.isEmpty() || isNaN(sz.x) || isNaN(sz.y) || isNaN(sz.z)) {
+			console.warn('[d3] scaleSVG: bad bbox — keeping default scale'); return
+		}
+		var userMax = Math.max(d.W, d.L, d.D, 1)
+		var nativeMax = Math.max(sz.x, sz.y, sz.z, 0.001)
+		// scale แต่ละแกน: X=W, Y=D, Z=L (ตาม orientation ของ fold engine)
+		var sx = sz.x > 0.01 ? (d.W / sz.x) / userMax : 1 / nativeMax
+		var sy = sz.y > 0.01 ? (d.D / sz.y) / userMax : 1 / nativeMax
+		var sz2 = sz.z > 0.01 ? (d.L / sz.z) / userMax : 1 / nativeMax
+		console.log('[d3] scaleSVG scale=' + sx.toFixed(3) + ',' + sy.toFixed(3) + ',' + sz2.toFixed(3))
+		var ok = isFinite(sx) && isFinite(sy) && isFinite(sz2) && !isNaN(sx) && !isNaN(sy) && !isNaN(sz2)
+		if (!ok || sx > 500 || sy > 500 || sz2 > 500) {
+			var s = 1 / nativeMax; group.scale.set(s, s, s)
+			console.warn('[d3] scaleSVG: extreme/bad scale → uniform ' + s.toFixed(4))
+		} else {
+			group.scale.set(sx, sy, sz2)
+		}
+	}
+
+	// เลือก builder: ทรงมี local SVG → พับจาก SVG (async fetch + cache), ไม่มี → procedural เดิม
 	function buildModelAsync(d, fin, cb) {
 		if (hasLocalSVG(d.type)) {
+			function doBuild(txt) {
+				try {
+					var built = buildSVGGroup(txt, fin, d.type)
+					scaleSVGToBox(built.group, built.folds, d)
+					cb(built, true)
+				} catch (e) {
+					console.warn('[dieline3d] buildSVGGroup failed', e)
+					cb(buildBoxGroup(buildSpec(d), fin), false)
+				}
+			}
+			if (_svgTextCache[d.type]) { doBuild(_svgTextCache[d.type]); return }
 			fetch('/dieline/local/' + d.type, { credentials: 'same-origin' })
 				.then(function (r) { if (!r.ok) throw new Error('no svg'); return r.text() })
-				.then(function (txt) { cb(buildSVGGroup(txt, fin, d.type), true) })
-				.catch(function () { cb(buildBoxGroup(buildSpec(d), fin), false) })
+				.then(function (txt) {
+					_svgTextCache[d.type] = txt
+					console.log('[dieline3d] SVG type=' + d.type + ' len=' + txt.length + ' hasCut=' + txt.indexOf('<g id="cut"') + ' hasCrease=' + txt.indexOf('<g id="crease"'))
+					doBuild(txt)
+				})
+				.catch(function (err) { console.warn('[dieline3d] SVG fetch failed', err); cb(buildBoxGroup(buildSpec(d), fin), false) })
 		} else {
 			cb(buildBoxGroup(buildSpec(d), fin), false)
 		}
@@ -981,7 +1094,9 @@
 		el.addEventListener('wheel', function (e) {
 			e.preventDefault()
 			self.autoFit = false // ผู้ใช้คุมซูมเอง
-			self.rad = Math.max(0.2, Math.min(50, self.rad * (1 + (e.deltaY > 0 ? 0.12 : -0.12))))
+			var minR = (self._sph && self._sph.radius > 0) ? self._sph.radius * 0.6 : 0.1
+			var maxR = (self._sph && self._sph.radius > 0) ? self._sph.radius * 25 : 5000
+			self.rad = Math.max(minR, Math.min(maxR, self.rad * (1 + (e.deltaY > 0 ? 0.12 : -0.12))))
 		}, { passive: false })
 	}
 	Viewer.prototype.setScene = function (boxGroup, folds) {
@@ -1018,11 +1133,9 @@
 	// toggle: โชว์เส้นพับสีจริง (เขียว=fold, แดง=cut) / ปิด=สีเดิม
 	Viewer.prototype._applyFoldLineColors = function () {
 		if (!this._lineMats) return
-		var on = this._showFolds
-		this._lineMats.cut.color.setHex(on ? 0xdd1111 : this._lineMats.cut.userData.defHex)
-		this._lineMats.fold.color.setHex(on ? 0x16a34a : this._lineMats.fold.userData.defHex)
-		// ON = เส้นทะลุผิว (depthTest off) → เห็นเส้น dieline ครบทุกเส้น 2 ฝั่ง สมมาตร
-		this._lineMats.cut.depthTest = !on; this._lineMats.fold.depthTest = !on
+		this._lineMats.cut.color.setHex(0x222222)
+		this._lineMats.fold.color.setHex(0x222222)
+		this._lineMats.cut.depthTest = false; this._lineMats.fold.depthTest = false
 		this._dirty = true
 	}
 	// OFF = ไม่โชว์เส้นเลย (กล่องเรียบ), ON = โชว์ทุกเส้น (สีจริง)
@@ -1071,7 +1184,7 @@
 		this._addDimLine(new THREE.Vector3(mx.x + off, mn.y - off, mn.z), new THREE.Vector3(mx.x + off, mn.y - off, mx.z), 'ยาว ' + this._dims.L, off, ctr)       // L ล่าง
 	}
 	Viewer.prototype._addDimLine = function (p1, p2, label, off, center) {
-		var mat = new THREE.LineBasicMaterial({ color: 0x222222, depthTest: false })
+		var mat = new THREE.LineBasicMaterial({ color: 0xffffff, depthTest: false })
 		this._dimGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([p1, p2]), mat))
 		var dir = new THREE.Vector3().subVectors(p2, p1).normalize()
 		var ah = Math.min(p1.distanceTo(p2) * 0.14, off * 1.1)
@@ -1102,11 +1215,18 @@
 	Viewer.prototype._fit = function () {
 		if (!this.boxGroup) return
 		this._box3.setFromObject(this.boxGroup)
-		if (this._box3.isEmpty()) return
+		if (this._box3.isEmpty()) { console.warn('[d3] _fit: bbox empty'); return }
+		var fsz = this._box3.getSize(new THREE.Vector3())
+		if (isNaN(fsz.x) || isNaN(fsz.y) || isNaN(fsz.z)) { console.warn('[d3] _fit: NaN bbox'); return }
+		console.log('[d3] _fit sz=' + fsz.x.toFixed(3) + ',' + fsz.y.toFixed(3) + ',' + fsz.z.toFixed(3))
 		this._box3.getBoundingSphere(this._sph)
 		this.target.copy(this._sph.center)
 		// ระยะกล้องให้ทรงกลมขอบเขตพอดีเฟรม + เผื่อขอบ
 		this.rad = (this._sph.radius / this.fovHalfSin) * 1.25
+		// อัปเดต near/far ตามขนาด model จริง (กัน model ขนาด mm โดน clipped)
+		this.camera.near = this.rad * 0.001
+		this.camera.far = this.rad * 50
+		this.camera.updateProjectionMatrix()
 	}
 	Viewer.prototype._loop = function () {
 		this._raf = requestAnimationFrame(this._loop)
@@ -1200,54 +1320,22 @@
 		injectSliderStyle()
 		var approx = APPROX_TYPES[d.type]
 			? '<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:10px;font-size:11px;margin-left:8px">⚠️ ภาพจำลองโดยประมาณ</span>' : ''
-		var specInfo = buildSpecInfo(fin)
-		// dropdown กระดาษ — clone option จากฟอร์ม component แรก
-		var paperOptionsHtml = $('.paperType').eq(0).html() || ('<option value="">' + (fin.paperLabel || '-') + '</option>')
-		var paperCurVal = $('.paperType').eq(0).val()
-		var paperSelect = '<span style="display:inline-flex;align-items:center;gap:4px"><b>กระดาษ</b>' +
-			'<select id="d3-paper" style="max-width:215px;padding:3px 5px;border:1px solid #cbd5e1;border-radius:4px;font-size:12px;cursor:pointer">' + paperOptionsHtml + '</select></span>'
-		// dropdown ชนิดกล่อง (Box Template) — clone จากฟอร์ม
-		var boxOptionsHtml = $('.boxType').eq(0).html() || ''
-		var boxCurVal = $('.boxType').eq(0).val()
-		var boxSelect = boxOptionsHtml ? ('<span style="display:inline-flex;align-items:center;gap:4px"><b>ทรง</b>' +
-			'<select id="d3-box" style="max-width:185px;padding:3px 5px;border:1px solid #cbd5e1;border-radius:4px;font-size:12px;cursor:pointer">' + boxOptionsHtml + '</select></span>') : ''
-		// dropdown เคลือบ
-		var coatSelect = '<span style="display:inline-flex;align-items:center;gap:4px"><b>เคลือบ</b>' +
-			'<select id="d3-coat" style="padding:3px 5px;border:1px solid #cbd5e1;border-radius:4px;font-size:12px;cursor:pointer">' +
-			'<option value="">ไม่เคลือบ</option><option value="Gloss">Gloss (เงา)</option><option value="Matt">Matt (ด้าน)</option></select></span>'
-		function dimInput(label, key, val) {
-			return '<span style="display:inline-flex;align-items:center;gap:3px"><b>' + label + '</b>' +
-				'<input class="d3-dim" data-key="' + key + '" type="number" min="1" value="' + (val || 0) + '" style="width:50px;padding:2px 4px;border:1px solid #cbd5e1;border-radius:4px;text-align:center;font-size:12px"></span>'
-		}
-		var dimRow = dimInput('กว้าง', 'W', d.W) + dimInput('ยาว', 'L', d.L) + dimInput('สูง', 'D', d.D) + dimInput('ฝา', 'T', d.T) + dimInput('ปีก', 'dust', d.dust)
 		var $ov = $('<div id="dieline-3d-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:10000;display:flex;align-items:center;justify-content:center">' +
 			'<div style="background:#fff;width:min(960px,96vw);height:min(90vh,720px);border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,0.35);display:flex;flex-direction:column;overflow:hidden">' +
 			'<div style="flex-shrink:0;background:linear-gradient(90deg,#8b5cf6,#6d28d9);color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;font-weight:bold">' +
 			'<span id="d3-title"><i class="fa fa-cube"></i> มุมมอง 3D — ' + (BOX_NAMES[d.type] || ('Type ' + d.type)) + approx + '</span>' +
 			'<span class="d3-close" style="cursor:pointer;font-size:24px;padding:0 6px">&times;</span></div>' +
-			'<div style="flex-shrink:0;display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:#f9fafb;padding:8px 16px;font-size:12px;color:#444">' +
-			dimRow + boxSelect + paperSelect + coatSelect + '<span id="d3-specinfo" style="display:inline-flex;gap:10px;align-items:center">' + specInfo + '</span>' + '<span style="color:#888;font-size:11px">(mm)</span></div>' +
 			'<div style="flex:1;display:flex;min-height:0">' +
 			'<div id="d3-canvas-wrap" style="flex:1;min-height:0;position:relative;background:radial-gradient(circle at 50% 38%,#eef2ff,#dbe2f5)">' +
 			'<canvas id="d3-canvas" style="width:100%;height:100%;display:block;touch-action:none"></canvas>' +
-			'<div id="d3-status" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#4338ca;font-weight:bold;pointer-events:none;text-align:center">' +
+			'<div id="d3-status" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#6d28d9;font-weight:bold;pointer-events:none;text-align:center">' +
 			'<span><i class="fa fa-spinner fa-pulse" style="font-size:28px"></i><br>กำลังสร้างโมเดล...</span></div></div>' +
-			'' +
 			'</div>' +
-			'<div style="flex-shrink:0;padding:12px 18px;border-top:1px solid #eee;background:#fafafa;display:flex;align-items:center;gap:12px">' +
-			'<span style="font-size:13px;color:#6d28d9;font-weight:bold;white-space:nowrap"><i class="fa fa-cube"></i> พับ/กาง</span>' +
-			'<input id="d3-slider" type="range" min="0" max="100" value="0" style="flex:1">' +
-			'<span id="d3-pct" style="font-size:13px;color:#444;min-width:64px;text-align:right">พับ 0%</span>' +
-			'<button id="d3-foldlines" data-on="0" style="background:#fff;color:#6d28d9;border:2px solid #6d28d9;border-radius:6px;padding:6px 12px;font-weight:bold;cursor:pointer;white-space:nowrap"><i class="fa fa-bezier-curve"></i> เส้นพับ</button>' +
+			'<div style="flex-shrink:0;padding:12px 18px;border-top:1px solid #eee;background:#fafafa;display:flex;align-items:center;justify-content:flex-end;gap:12px">' +
 			'<button id="d3-showdim" style="background:#9ca3af;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-weight:bold;cursor:pointer;white-space:nowrap"><i class="fa fa-arrows-alt"></i> ขนาด</button>' +
-			'<button id="d3-confirm" style="background:#16a34a;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-weight:bold;cursor:pointer"><i class="fa fa-check"></i> ยืนยัน</button>' +
-			'<button class="d3-close" style="padding:8px 16px;background:#eee;border:none;border-radius:6px;cursor:pointer">ปิด</button>' +
+			'<button id="d3-show2d" style="background:#0ea5e9;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-weight:bold;cursor:pointer;white-space:nowrap"><i class="fa fa-vector-square"></i> 2D Dieline</button>' +
 			'</div></div></div>')
 		$('body').append($ov)
-		if (paperCurVal != null) $('#d3-paper').val(paperCurVal)
-		if (boxCurVal != null) $('#d3-box').val(boxCurVal)
-		var ci = (fin.coatingLabel || '').toLowerCase()
-		$('#d3-coat').val(/gloss|เงา|uv/.test(ci) ? 'Gloss' : (/matt|ด้าน/.test(ci) ? 'Matt' : ''))
 		$ov.on('click', function (e) { if (e.target === this || $(e.target).hasClass('d3-close')) closeModal() })
 		startViewer(d, fin)
 	}
@@ -1308,10 +1396,17 @@
 					else { out.paperColor = 0xf2ebd9 }
 				}
 				var copt = ($('#d3-coat').length ? ($('#d3-coat').val() || '') : ($('.coatingOption').eq(index).val() || '')).trim()   // dropdown ในป๊อปอัปก่อน
-				if (copt && copt.toLowerCase() !== 'other') {
-					out.coatingLabel = copt
-					if (/gloss|เงา|uv/i.test(copt)) { out.roughness = 0.32; out.metalness = 0.07 }
-					else if (/matt|ด้าน/i.test(copt)) { out.roughness = 0.97 }
+				// DOM เป็น source of truth เสมอ — ถ้า element มีอยู่ในหน้า ให้ override mainData ทุกกรณี
+				var $coatEl = $('#d3-coat').length ? $('#d3-coat') : $('.coatingOption').eq(index)
+				if ($coatEl.length) {
+					if (copt && copt.toLowerCase() !== 'other') {
+						out.coatingLabel = copt
+						if (/gloss|เงา|uv/i.test(copt)) { out.roughness = 0.32; out.metalness = 0.07 }
+						else if (/matt|ด้าน/i.test(copt)) { out.roughness = 0.97 }
+					} else {
+						// DOM เป็น "" หรือ "-select-" → ไม่มีเคลือบ → reset เป็น matte (override mainData gloss)
+						out.roughness = 0.92; out.metalness = 0; out.coatingLabel = ''
+					}
 				}
 				var cv = parseInt($('.colorOutside').eq(index).val())
 				if (!isNaN(cv)) out.colorOut = cv
@@ -1329,10 +1424,15 @@
 	function renderSideDieline(d) {
 		var $side = $('#d3-dieline-side'); if (!$side.length) return
 		var ttl = '<div style="position:absolute;top:6px;left:8px;font-size:11px;color:#6d28d9;font-weight:bold;z-index:2"><i class="fa fa-vector-square"></i> แบบกาง (dieline)</div>'
+		// parametric generator ก่อนเสมอ (ใช้ W/L/D จริง) — static template เป็น fallback เท่านั้น
+		if (window.__dielineV2 && window.__dielineV2.buildDielineSVG) {
+			try {
+				var svgHtml = window.__dielineV2.buildDielineSVG(d)
+				if (svgHtml) { $side.html(ttl + svgHtml); return }
+			} catch (e) { }
+		}
 		if (hasLocalSVG(d.type)) {
-			$side.html(ttl + '<object data="/dieline/local/' + d.type + '" type="image/svg+xml" style="max-width:100%;max-height:100%"></object>')
-		} else if (window.__dielineV2 && window.__dielineV2.buildDielineSVG) {
-			try { $side.html(ttl + window.__dielineV2.buildDielineSVG(d)) } catch (e) { $side.html(ttl + '<span style="color:#dc2626">สร้าง dieline ไม่ได้</span>') }
+			$side.html(ttl + '<object data="/dieline/v2svg/' + d.type + '" type="image/svg+xml" style="max-width:100%;max-height:100%"></object>')
 		} else {
 			$side.html(ttl + '<span style="color:#94a3b8;text-align:center">ทรงนี้ใช้ Dieline v2<br>(กดปุ่ม Dieline v2 ฟรี)</span>')
 		}
@@ -1357,36 +1457,23 @@
 		_viewer = new Viewer(canvas)
 		_viewer.resize()
 		_viewer.start()
-		_viewer.onFold = function (t) {
-			var pct = Math.round(t * 100)
-			$('#d3-slider').val(pct); setSliderFill(pct)
-			$('#d3-pct').text('พับ ' + pct + '%')
-		}
-		setSliderFill(0)
-		$('#d3-slider').off('input').on('input', function () {
-			var t = (+this.value) / 100
-			_viewer.pause(); _viewer.setFold(t); setSliderFill(+this.value)
-			$('#d3-pct').text('พับ ' + Math.round(t * 100) + '%')
-		})
-		// toggle เส้นพับสีจริง (เขียว=fold, แดง=cut)
-		$('#d3-foldlines').off('click').on('click', function () {
-			var on = $(this).attr('data-on') !== '1'
-			$(this).attr('data-on', on ? '1' : '0')
-			_viewer.setShowFolds(on)
-			if (on) $(this).css({ background: '#6d28d9', color: '#fff' })
-			else $(this).css({ background: '#fff', color: '#6d28d9' })
-		})
+		// resize หลัง browser layout เสร็จ (ตอน new Viewer canvas อาจยังเป็น 0×0)
+		setTimeout(function () { if (_viewer) { _viewer.resize(); _viewer._dirty = true } }, 50)
+
 
 		// ใส่ built เข้า viewer (ใช้ร่วมกันทั้งตอนเปิดและ rebuild)
 		function applyBuilt(built, isSvg) {
 			_viewer.setScene(built.group, built.folds)
 			_viewer._svgType = isSvg ? d.type : null
+			_viewer._svgFin = isSvg ? fin : null
 			_viewer.setDims(d.W, d.L, d.D)
 			var stops = built.folds.map(function (f) { return f.phase[1] })
 				.filter(function (v, i, a) { return a.indexOf(v) === i }).sort(function (a, b) { return a - b })
 			if (!stops.length || stops[stops.length - 1] !== 1) stops.push(1)
 			_viewer.stops = stops
-			_viewer.setFold(_viewer._t || 0)
+			_viewer.setFold(1)
+			_viewer.setShowFolds(true)
+			recolorFromForm()
 			setStatus(false)
 		}
 		setStatus('กำลังสร้างโมเดล...')
@@ -1397,8 +1484,6 @@
 		// ===== แก้ขนาดในหน้าต่าง 3D → กล่องอัปเดต =====
 		function rebuild3D() {
 			renderSideDieline(d)
-			// ทรง SVG = ขนาดคงที่ → ไม่ rebuild ตอนแก้ขนาด (rebuild เฉพาะตอนเปลี่ยนทรง)
-			if (hasLocalSVG(d.type) && _viewer._svgType === d.type) return
 			buildModelAsync(d, readFinish(0), function (built, isSvg) {
 				_viewer.setScene(built.group, built.folds)
 				_viewer._svgType = isSvg ? d.type : null
@@ -1407,39 +1492,24 @@
 					.filter(function (v, i, a) { return a.indexOf(v) === i }).sort(function (a, b) { return a - b })
 				if (!stops2.length || stops2[stops2.length - 1] !== 1) stops2.push(1)
 				_viewer.stops = stops2
-				_viewer.setFold(_viewer._t)   // คงตำแหน่งพับเดิม
+				_viewer.setFold(1)
+				_viewer.setShowFolds(true)
 			})
 		}
-		function readEdits() {
-			$('#dieline-3d-overlay .d3-dim').each(function () {
-				var k = $(this).data('key'), v = parseFloat(this.value)
-				if (!isNaN(v) && v > 0) d[k] = v
-			})
-		}
-		function commitToForm() {
-			var $i = $('.inputType[index="0"]')
-			if (!$i.length) return
-			$i.find('.specmm.width').val(d.W).trigger('change')
-			$i.find('.specmm.length').val(d.L).trigger('change')
-			$i.find('.specmm.depth').val(d.D).trigger('change')
-			$i.find('.specmm.tuck').val(d.T).trigger('change')
-			$i.find('.specmm.dust').val(d.dust).trigger('change')
-		}
-		$('#dieline-3d-overlay').off('input.d3 change.d3', '.d3-dim')
-			.on('input.d3', '.d3-dim', function () { readEdits(); rebuild3D() })                       // พิมพ์ → กล่องเปลี่ยนสด
-			.on('change.d3', '.d3-dim', function () { readEdits(); rebuild3D(); commitToForm() })       // ออกจากช่อง → อัปเดตฟอร์ม
 
 		// ===== เปลี่ยนกระดาษ/เคลือบ/สี ในฟอร์ม → กล่อง 3D เปลี่ยนสีเองทันที =====
 		function recolorFromForm() {
 			var fin2 = readFinish(0)
 			if (_viewer && _viewer.boxGroup) {
 				_viewer.boxGroup.traverse(function (o) {
-					if (o.material && o.material.isMeshStandardMaterial) {
+					if (o.material && o.material.isMeshStandardMaterial && !o.userData.corrEdge) {
 						o.material.color.setHex(fin2.paperColor)
 						o.material.roughness = fin2.roughness
 						o.material.metalness = fin2.metalness
 					}
 				})
+				var isCorr = $('#d3-corrugated').is(':checked')
+				applyCorrugated(_viewer.boxGroup, isCorr, readBoardThickness())
 			}
 			$('#d3-specinfo').html(buildSpecInfo(fin2))
 		}
@@ -1447,11 +1517,30 @@
 			.on('change.d3color', '.paperType, .paperGram, .coatingOption, .coatingType, .colorOutside, .has_speInk', function () {
 				setTimeout(recolorFromForm, 120)   // รอฟอร์มอัปเดต mainData ก่อนแล้วค่อยอ่านใหม่
 			})
+		// เปลี่ยนขนาดในฟอร์มหลัก → อัปเดต d แล้ว rebuild 3D อัตโนมัติ (debounce 350ms รอ form คำนวนเสร็จ)
+		var _d3DimTimer = null
+		$(document).off('change.d3dims').off('input.d3dims')
+			.on('change.d3dims input.d3dims', '.specmm.width, .specmm.length, .specmm.depth, .specmm.tuck, .specmm.dust', function () {
+				clearTimeout(_d3DimTimer)
+				_d3DimTimer = setTimeout(function () {
+					var nd = readDims(0)
+					if (!nd.W || !nd.L || !nd.D) return
+					if (nd.W === d.W && nd.L === d.L && nd.D === d.D && nd.T === d.T) return
+					d.W = nd.W; d.L = nd.L; d.D = nd.D; d.T = nd.T; d.dust = nd.dust
+					rebuild3D()
+				}, 400)
+			})
 
-		// เปลี่ยน dropdown กระดาษในป๊อปอัป → 3D เปลี่ยนสีทันที (preview ยังไม่แตะฟอร์ม)
-		$('#dieline-3d-overlay').off('change.d3p', '#d3-paper').on('change.d3p', '#d3-paper', function () { recolorFromForm() })
-		// เปลี่ยน dropdown เคลือบ → ความเงาเปลี่ยนสด
-		$('#dieline-3d-overlay').off('change.d3coat', '#d3-coat').on('change.d3coat', '#d3-coat', function () { recolorFromForm() })
+		// เปลี่ยนทรงกล่องในฟอร์มหลัก → rebuild 3D ทันที
+		$(document).off('change.d3type')
+			.on('change.d3type', '.boxType', function () {
+				var nt = readType(0)
+				if (!nt || nt === d.type) return
+				d.type = nt
+				var nd = readDims(0); d.W = nd.W || d.W; d.L = nd.L || d.L; d.D = nd.D || d.D; d.T = nd.T || d.T; d.dust = nd.dust || d.dust
+				rebuild3D()
+			})
+
 		// toggle แสดงป้ายขนาด
 		$('#dieline-3d-overlay').off('click.d3dim', '#d3-showdim').on('click.d3dim', '#d3-showdim', function () {
 			if (!_viewer) return
@@ -1462,35 +1551,11 @@
 			_viewer._dirty = true
 			$(this).css('background', _viewer.showDims ? '#7c3aed' : '#9ca3af')   // active=ม่วง / off=เทา
 		})
-		// เปลี่ยน dropdown ทรงกล่อง → 3D เปลี่ยนรูปทรงทันที (preview)
-		$('#dieline-3d-overlay').off('change.d3b', '#d3-box').on('change.d3b', '#d3-box', function () {
-			var nt = parseInt($('#d3-box').val())
-			if (isNaN(nt)) return
-			d.type = nt
-			rebuild3D()
-			updateReferenceDieline(nt)
-			var apx = APPROX_TYPES[nt] ? ' <span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:10px;font-size:11px;margin-left:8px">⚠️ ภาพจำลองโดยประมาณ</span>' : ''
-			$('#d3-title').html('<i class="fa fa-cube"></i> มุมมอง 3D — ' + (BOX_NAMES[nt] || ('Type ' + nt)) + apx)
-		})
-		// ปุ่มยืนยัน → ดันค่า ขนาด + กระดาษ + ทรงกล่อง เข้าฟอร์ม RFQ
-		$('#dieline-3d-overlay').off('click.d3c', '#d3-confirm').on('click.d3c', '#d3-confirm', function () {
-			readEdits()
-			var bv = $('#d3-box').val(), pv = $('#d3-paper').val(), cv = $('#d3-coat').val()
-			var bt = parseInt(bv); if (!isNaN(bt)) d.type = bt
-			rebuild3D()
-			// 1) เปลี่ยน "ทรง" ก่อน (ถ้าต่างจากฟอร์ม) — เพราะมันจะ reconfigure ฟอร์ม (ล้างช่องขนาด)
-			var boxChanged = (bv != null && bv !== '' && String(bv) !== String($('.boxType').eq(0).val()))
-			if (boxChanged) $('.boxType').eq(0).val(bv).trigger('change')
-			// 2) รอ form reconfigure เสร็จ แล้วค่อยกรอก ขนาด/กระดาษ/เคลือบ
-			var applyRest = function () {
-				commitToForm()                                                                  // ขนาด → ฟอร์ม
-				if (pv != null && pv !== '') $('.paperType').eq(0).val(pv).trigger('change')     // กระดาษ
-				if (cv && $('.coatingOption').length) $('.coatingOption').eq(0).val(cv).trigger('change')  // เคลือบ
-			}
-			if (boxChanged) setTimeout(applyRest, 450); else applyRest()
-			var $b = $(this), html = $b.html()
-			$b.html('<i class="fa fa-check"></i> อัปเดตแล้ว')
-			setTimeout(function () { $b.html(html) }, 1500)
+		// ปุ่ม 2D → trigger ปุ่ม Dieline v2 ที่มีอยู่ในหน้า
+		$('#dieline-3d-overlay').off('click.d3_2d', '#d3-show2d').on('click.d3_2d', '#d3-show2d', function () {
+			var $v2 = $('#dieline-v2-btn')
+			if ($v2.length) { $v2.trigger('click') }
+			else { alert('ไม่พบปุ่ม Dieline v2 ในหน้า') }
 		})
 		try {
 			_viewer._ro = new ResizeObserver(function () { if (_viewer) _viewer.resize() })
@@ -1523,7 +1588,7 @@
 			if (_viewer._onWinResize) window.removeEventListener('resize', _viewer._onWinResize)
 			_viewer.dispose(); _viewer = null
 		}
-		$(document).off('change.d3color')   // เลิกฟังการเปลี่ยนกระดาษในฟอร์ม
+		$(document).off('change.d3color').off('change.d3dims').off('input.d3dims').off('change.d3type')
 		$('#dieline-3d-overlay').remove()
 	}
 

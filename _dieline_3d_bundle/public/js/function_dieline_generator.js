@@ -10,10 +10,29 @@
 	var _hiDim = null;       // ไฮไลต์เส้นบอกขนาด: 'A'(ยาว/L) | 'B'(กว้าง/W) | 'C'(สูง/D) | null
 	var _lineOnly = false;   // โหมดเส้นล้วน (ไม่ใส่สีพื้น) แบบ v1
 	var _showDims = true;    // โชว์เส้นบอกขนาด (เปิด/ปิดได้)
+	var _showGrain = true;   // โชว์ทิศเส้นใยกระดาษ (GRAIN) — วิ่งแนวนอน (ด้าน L)
+	var _bg = 'white';       // พื้นหลังปัจจุบัน — ใช้เลือกสี GRAIN ให้อ่านชัด
 	var _margins = { gripper: 12, colorbar: 8, edge: 4 };   // ระยะเว้นเลย์ (mm) — gripper/color bar/paper edge
-	var _interlock = 0;   // ระยะซ้อนไขว้ (mm) — แถวพลิกขยับชิดเข้าหากัน (ลิ้นสอดในช่องว่าง) วางได้เพิ่ม
 
 	function r(v) { return Math.round(v * 100) / 100 }
+	function grainArrow(bw, y, fsIn) {
+		var fs = fsIn || Math.max(bw * 0.022, 9), ls = 3;
+		var textHalf = (5 * fs * 0.65 + 5 * ls) / 2;
+		var gap = textHalf + fs * 1.5;
+		var cx = bw / 2, half = Math.max(bw * 0.17, gap + fs * 2.2);
+		var x1 = cx - half, x2 = cx + half;
+		var ah = Math.max(bw * 0.014, 5), lw = Math.max(ah * 0.24, 0.9);
+		var col = _bg === 'black' ? '#c4b5fd' : (_bg === 'gray' ? '#2e1065' : '#7c3aed');
+		var gl = cx - gap, gr = cx + gap;
+		var ahS = ' fill="' + col + '" stroke="' + col + '" stroke-width="' + r(lw * 0.9) + '" stroke-linejoin="round"/>';
+		var s = '';
+		s += '<line x1="' + r(x1 + ah * 0.9) + '" y1="' + r(y) + '" x2="' + r(gl) + '" y2="' + r(y) + '" stroke="' + col + '" stroke-width="' + r(lw) + '" stroke-linecap="round"/>';
+		s += '<line x1="' + r(gr) + '" y1="' + r(y) + '" x2="' + r(x2 - ah * 0.9) + '" y2="' + r(y) + '" stroke="' + col + '" stroke-width="' + r(lw) + '" stroke-linecap="round"/>';
+		s += '<path d="M ' + r(x1) + ' ' + r(y) + ' L ' + r(x1 + ah) + ' ' + r(y - ah * 0.58) + ' L ' + r(x1 + ah) + ' ' + r(y + ah * 0.58) + ' Z"' + ahS;
+		s += '<path d="M ' + r(x2) + ' ' + r(y) + ' L ' + r(x2 - ah) + ' ' + r(y - ah * 0.58) + ' L ' + r(x2 - ah) + ' ' + r(y + ah * 0.58) + ' Z"' + ahS;
+		s += '<text x="' + r(cx) + '" y="' + r(y) + '" font-size="' + r(fs) + '" fill="' + col + '" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-weight="bold" letter-spacing="3">GRAIN</text>';
+		return s;
+	}
 
 	// อ่านขนาดสด (ใช้ตัวเดียวกับ 3D ถ้ามี ไม่งั้น fallback อ่านฟอร์มตรง)
 	function readDimsSafe() {
@@ -541,9 +560,17 @@
 		var gap = pad * 0.5;
 		// เส้นบอกขนาดรวม (open size) หน่วย mm — บนสุด + ซ้ายสุด
 		var dims = _showDims ? (dimH(0, body.w, -gap, body.w, fs) + dimV(0, body.h, -gap, body.h, fs)) : '';
+		// GRAIN arrow — วางเหนือเส้นบอกขนาด
+		var vyTop = -pad, grain = '';
+		if (_showGrain) {
+			var dimTop = _showDims ? (gap + fs * 1.9) : gap;
+			var gY = -(dimTop + fs * 1.5);
+			grain = grainArrow(body.w, gY, fs);
+			vyTop = Math.min(-pad, gY - fs * 1.3);
+		}
 		// โหมดเส้นล้วน (แบบ v1): เอาสีพื้นออก เหลือแต่เส้น
 		var styleB = _lineOnly ? '<style>rect,path,ellipse{fill:none !important}</style>' : '';
-		return { inner: styleB + body.svg + dims, bodySvg: body.svg, vx: -pad, vy: -pad, vw: body.w + pad * 2, vh: body.h + pad * 2, bw: body.w, bh: body.h };
+		return { inner: styleB + body.svg + dims + grain, bodySvg: body.svg, vx: -pad, vy: vyTop, vw: body.w + pad * 2, vh: (body.h + pad) - vyTop, bw: body.w, bh: body.h };
 	}
 	// SVG สำหรับแสดงบนจอ (width 100%)
 	function buildDielineSVG(d) {
@@ -556,7 +583,8 @@
 	// หาเครื่อง/กระดาษที่วางได้เยอะสุด (แกรมรับได้) สำหรับ title block
 	function bestMachine(d) {
 		try {
-			var c = dielineCore(d), pw = c.bw + 6, ph = c.bh + 6, gram = getJobGram(), best = null;
+			_prodLayout = getProdLayout();
+			var c = dielineCore(d), pw = c.bw, ph = c.bh, gram = getJobGram(), best = null;
 			MACHINE_PAPERS.forEach(function (m) {
 				if (gram != null && (gram < m.gmin || gram > m.gmax)) return;
 				var cnt = Math.max(nestCount(m.w, m.l, pw, ph, false), nestCount(m.w, m.l, pw, ph, true));
@@ -601,7 +629,7 @@
 			console.log('[dieline-v2] click! dims:', d);
 			if (!d.W || !d.L || !d.D) { alert('กรุณากรอกขนาด กว้าง × ยาว × สูง (mm) ก่อน'); return }
 			if (LOCAL_TPL_TYPES[d.type] && !_localBodyCache[d.type]) {
-				fetch('/dieline/v2svg/' + d.type, { credentials: 'same-origin' })   // 2D dieline → Diline_svg (แยกจาก 3D)
+				fetch('/dieline/local/' + d.type, { credentials: 'same-origin' })   // ใช้ 3D_Dieline SVG (มี <g id="cut">/<g id="crease">) แทน 2D-Diline_svg ที่ parse ไม่ได้
 					.then(function (rr) { if (!rr.ok) throw 0; return rr.text(); })
 					.then(function (txt) { var b = ourSvgToBody(txt); if (b) _localBodyCache[d.type] = b; openV2Modal(d); })
 					.catch(function () { openV2Modal(d); });
@@ -619,7 +647,7 @@
 		var btn = document.createElement('button');
 		btn.id = 'dieline-v2-btn';
 		btn.type = 'button';
-		btn.style.cssText = 'margin-left:10px;background:linear-gradient(90deg,#10b981 0%,#059669 100%);color:#fff;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer';
+		btn.style.cssText = 'margin-left:10px;background:linear-gradient(90deg,#8b5cf6 0%,#6d28d9 100%);color:#fff;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer';
 		btn.innerHTML = '<i class="fa fa-vector-square"></i> Dieline v2 (ฟรี)';
 		btn.addEventListener('click', onV2Click);   // bind ตรงกับปุ่ม
 		target.appendChild(btn);
@@ -664,16 +692,27 @@
 			var comp = (window.est || window.estimate).mainData.component1[0];
 			var sl = comp.layout && comp.layout.selected_layout;
 			if (!sl || !(+sl.num_laying > 0)) return null;
-			var grid = sl.layout || [], ps = sl.printSize || (sl.laySize ? [sl.laySize[2], sl.laySize[3]] : null), paper = sl.paper_size;
+			var grid = sl.layout || [],
+				ps = sl.printSize || sl.printing || (sl.laySize ? [sl.laySize[2], sl.laySize[3]] : null),
+				paper = sl.paper_size;
 			var pw = paper ? asMm(+paper[0]) : 0, pl = paper ? asMm(+paper[1]) : 0;
-			if (!(grid.length >= 2) || !ps || !(pw > 0)) return { num: +sl.num_laying, paperW: pw, paperL: pl };
-			return { num: +sl.num_laying, cols: +grid[0], rows: +grid[1], pitchX: ps[0] / grid[0], pitchY: ps[1] / grid[1], paperW: pw, paperL: pl };
+			var cols = +grid[0], rows = +grid[1];
+			if (!(cols > 0) || !(rows > 0) || !ps || !(ps.length >= 2) || !(pw > 0) || !(pl > 0)) return { num: +sl.num_laying, paperW: pw, paperL: pl };
+			var pitchX = (+ps[0]) / cols, pitchY = (+ps[1]) / rows;
+			if (!(pitchX > 0) || !(pitchY > 0)) return { num: +sl.num_laying, paperW: pw, paperL: pl };
+			return { num: +sl.num_laying, cols: cols, rows: rows, pitchX: pitchX, pitchY: pitchY, paperW: pw, paperL: pl };
 		} catch (e) { return null; }
 	}
-	function prodMatches(prod, PW, PL) {
-		if (!prod || !(prod.num > 0) || !(prod.paperW > 0) || !(prod.cols > 0)) return false;
+	function prodPaperMatches(prod, PW, PL) {
+		if (!prod || !(prod.num > 0) || !(prod.paperW > 0) || !(prod.paperL > 0)) return false;
 		var a = prod.paperW, b = prod.paperL;
 		return (Math.abs(a - PW) < 6 && Math.abs(b - PL) < 6) || (Math.abs(a - PL) < 6 && Math.abs(b - PW) < 6);
+	}
+	function prodHasGrid(prod) {
+		return !!(prod && prod.cols > 0 && prod.rows > 0 && prod.pitchX > 0 && prod.pitchY > 0);
+	}
+	function prodMatches(prod, PW, PL) {
+		return prodPaperMatches(prod, PW, PL) && prodHasGrid(prod);
 	}
 	function getMargins() {
 		var pt = '';
@@ -704,11 +743,37 @@
 			// ใช้ grid เดียวกับวางตรง (เต็มเฟรม) + วางสอดเพิ่มแถว (เฉพาะแนวไม่หมุน · profile แนวตั้ง)
 			var nrows = g.rows;
 			if (!gridRot && _crossPitchY > 0 && _crossPitchY < g.ph) {
-				pitchY = (_interlock > 0) ? Math.max(bh * 0.3, g.ph - _interlock) : _crossPitchY;
+				pitchY = _crossPitchY;
 				nrows = Math.max(g.rows, Math.floor((uL - bh) / pitchY) + 1);
+			}
+			// Safety guard: ตรวจ pitchY/nrows ก่อนวางจริง ป้องกัน overlap และล้ำขอบ
+			if (pitchY < g.ph) {
+				// Guard 1: pitchY ต้องไม่ต่ำกว่า _crossPitchY → ป้องกัน cut-line overlap ระหว่างแถว (profile + 3mm)
+				if (_crossPitchY > 0 && pitchY < _crossPitchY - 0.1) {
+					pitchY = _crossPitchY;
+					nrows = Math.max(g.rows, Math.floor((uL - bh) / pitchY) + 1);
+				}
+				// Guard 2: (nrows-1)*pitchY + (bh+bl) <= uL → ป้องกัน cut-line ล้ำ color bar/gripper หลัง centering
+				var nrowsCap = Math.max(1, Math.floor((uL - bh - bl) / pitchY) + 1);
+				if (nrows > nrowsCap) nrows = nrowsCap;
 			}
 			for (i = 0; i < g.cols; i++) for (j = 0; j < nrows; j++) pieces.push([mx + i * g.pw, myT + j * pitchY, baseAng + (j % 2 === 1 ? 180 : 0)]);
 			count = g.cols * nrows;
+			// A posteriori: ตรวจ shape overlap จาก dieline จริง → เพิ่ม pitchY 1mm/รอบจนไม่ซ้อน
+			if (pitchY < g.ph && unit.svg) {
+				var _ovShapes = parseShapes(unit.svg);
+				if (_ovShapes.length > 0) {
+					while (pitchY < g.ph && _hasCrossShapeOverlap(pieces, _ovShapes, bw, bh, bl)) {
+						pitchY = Math.min(pitchY + 1, g.ph);
+						var _ncap = Math.max(1, Math.floor((uL - bh - bl) / pitchY) + 1);
+						if (nrows > _ncap) nrows = _ncap;
+						pieces = [];
+						for (i = 0; i < g.cols; i++) for (j = 0; j < nrows; j++)
+							pieces.push([mx + i * g.pw, myT + j * pitchY, baseAng + (j % 2 === 1 ? 180 : 0)]);
+						count = g.cols * nrows;
+					}
+				}
+			}
 		} else {
 			for (i = 0; i < g.cols; i++) for (j = 0; j < g.rows; j++) pieces.push([mx + i * g.pw, myT + j * g.ph, baseAng]);
 			count = g.count;
@@ -718,7 +783,7 @@
 			var mnX = Infinity, mxX = -Infinity, mnY = Infinity, mxY = -Infinity;
 			pieces.forEach(function (p) {
 				var rotp = (p[2] === 90 || p[2] === 270);
-				var cwp = rotp ? (bh + bl) : (bw + bl), chp = rotp ? (bw + bl) : (bh + bl);
+				var cwp = rotp ? bh : bw, chp = rotp ? bw : bh;
 				if (p[0] < mnX) mnX = p[0]; if (p[0] + cwp > mxX) mxX = p[0] + cwp;
 				if (p[1] < mnY) mnY = p[1]; if (p[1] + chp > mxY) mxY = p[1] + chp;
 			});
@@ -732,27 +797,44 @@
 			'<rect x="0" y="' + r(PL - myB) + '" width="' + r(PW) + '" height="' + r(myB) + '" fill="#fde68a" fill-opacity="0.7"/>' +
 			'<rect x="0" y="0" width="' + r(mx) + '" height="' + r(PL) + '" fill="#e2e8f0" fill-opacity="0.8"/>' +
 			'<rect x="' + r(PW - mx) + '" y="0" width="' + r(mx) + '" height="' + r(PL) + '" fill="#e2e8f0" fill-opacity="0.8"/>';
-		var useReal = pieces.length <= 80 && unit.svg;   // วาด dieline จริงถ้าไม่เยอะเกิน
+		var debugMode = false;
+		var useReal = pieces.length <= 80 && unit.svg;
 		if (useReal) s += '<defs><g id="du">' + unit.svg + '</g></defs>';
 		pieces.forEach(function (p, pi) {
-			var px = p[0], py = p[1], ang = p[2], rotd = (ang === 90 || ang === 270), flipped = (ang === 180 || ang === 270);
-			var cw = rotd ? (bh + bl) : (bw + bl), ch = rotd ? (bw + bl) : (bh + bl);
-			// ขอบเซลล์ = ขอบ bleed (เส้นแดงประ) · พื้นฟ้า=วางตรง เหลือง=หมุนไขว้
-			s += '<rect x="' + r(px) + '" y="' + r(py) + '" width="' + r(cw) + '" height="' + r(ch) + '" fill="' + (flipped ? '#fef9c3' : '#eff6ff') + '" fill-opacity="0.45"' + (cross ? '' : ' stroke="#ef4444" stroke-width="' + r(lw * 0.9) + '" stroke-dasharray="' + r(lw * 4) + ' ' + r(lw * 3) + '"') + '/>';
-			var sf = cross ? 1.0 : 0.84;   // วางตรง=โชว์ช่องว่าง(เดิม) · วางไขว้=ชิดสุด(เต็มขนาด เว้น 3mm ไม่ทับ)
+			var px = p[0], py = p[1], ang = p[2], rotd = (ang === 90 || ang === 270), rotated180 = (ang === 180 || ang === 270);
+			var cw = rotd ? bh : bw, ch = rotd ? bw : bh;
+			// straight: เส้นปะแดงที่ขอบ bleed นอกสุด — อยู่ห่าง bl/2 จาก dieline SVG จึงไม่ทับ
+			// cross debugMode=true: background+ขอบสี; debugMode=false: dieline SVG + label เท่านั้น
+			if (!cross) {
+				s += '<rect x="' + r(px) + '" y="' + r(py) + '" width="' + r(cw + bl) + '" height="' + r(ch + bl) + '" fill="none" stroke="#dc2626" stroke-width="' + r(lw * 0.6) + '" stroke-dasharray="' + r(lw * 4) + ' ' + r(lw * 2.5) + '"/>';
+			} else if (debugMode) {
+				var cellStroke = rotated180 ? ' stroke="#d97706" stroke-width="' + r(lw * 1.1) + '"' : ' stroke="#3b82f6" stroke-width="' + r(lw * 0.7) + '"';
+				s += '<rect x="' + r(px + bl/2) + '" y="' + r(py + bl/2) + '" width="' + r(cw) + '" height="' + r(ch) + '" fill="' + (rotated180 ? '#fef9c3' : '#eff6ff') + '" fill-opacity="0.45"' + cellStroke + '/>';
+			}
+			var sf = 1.0;
 			if (useReal) {
 				var tr;
 				if (rotd) {
-					var oxr = px + (cw - bh * sf) / 2, oyr = py + (ch - bw * sf) / 2;
+					var oxr = px + bl/2 + (cw - bh * sf) / 2, oyr = py + bl/2 + (ch - bw * sf) / 2;
 					tr = (ang === 90) ? 'translate(' + r(oxr + bh * sf) + ',' + r(oyr) + ') scale(' + sf + ') rotate(90)' : 'translate(' + r(oxr) + ',' + r(oyr + bw * sf) + ') scale(' + sf + ') rotate(270)';
 				} else {
-					var oxn = px + (cw - bw * sf) / 2, oyn = py + (ch - bh * sf) / 2;
+					var oxn = px + bl/2 + (cw - bw * sf) / 2, oyn = py + bl/2 + (ch - bh * sf) / 2;
 					tr = (ang === 0) ? 'translate(' + r(oxn) + ',' + r(oyn) + ') scale(' + sf + ')' : 'translate(' + r(oxn + bw * sf) + ',' + r(oyn + bh * sf) + ') scale(' + sf + ') rotate(180)';
 				}
 				s += '<use href="#du" xlink:href="#du" transform="' + tr + '"/>';
 			} else {
 				var iw = (rotd ? bh : bw) * sf, ih = (rotd ? bw : bh) * sf;
-				s += '<rect x="' + r(px + (cw - iw) / 2) + '" y="' + r(py + (ch - ih) / 2) + '" width="' + r(iw) + '" height="' + r(ih) + '" fill="none" stroke="#dc2626" stroke-width="' + r(lw) + '"/>';
+				s += '<rect x="' + r(px + bl/2 + (cw - iw) / 2) + '" y="' + r(py + bl/2 + (ch - ih) / 2) + '" width="' + r(iw) + '" height="' + r(ih) + '" fill="none" stroke="#dc2626" stroke-width="' + r(lw) + '"/>';
+			}
+			if (cross) {
+				if (debugMode && rotated180) {
+					var bfs2 = Math.min(cw, ch) * 0.14, bcx = px + bl/2 + cw / 2, bcy = py + bl/2 + ch / 2;
+					s += '<text x="' + r(bcx) + '" y="' + r(bcy + bfs2 * 0.35) + '" font-size="' + r(bfs2) + '" fill="#d97706" text-anchor="middle" font-family="sans-serif" font-weight="bold" fill-opacity="0.7">↺</text>';
+				} else if (!debugMode) {
+					var lblSz = Math.min(cw, ch) * 0.09, lblX = px + bl/2 + cw * 0.05, lblY = py + bl/2 + lblSz * 1.4;
+					var lblCol = rotated180 ? '#d97706' : '#3b82f6';
+					s += '<text x="' + r(lblX) + '" y="' + r(lblY) + '" font-size="' + r(lblSz) + '" fill="' + lblCol + '" font-family="sans-serif" font-weight="bold" fill-opacity="0.85">' + (rotated180 ? '180\xb0' : '0\xb0') + '</text>';
+				}
 			}
 		});
 		var eff = count * (_unitArea || pw * ph) / (PW * PL) * 100;
@@ -774,7 +856,7 @@
 			var p0 = pieces[0], p0r = (p0[2] === 90 || p0[2] === 270), cw0 = p0r ? (bh + bl) : (bw + bl), ch0 = p0r ? (bw + bl) : (bh + bl);
 			var BC = '#dc2626', bfs = afs * 0.58;
 			if (pieces.length <= 8) {
-				var sf2 = cross ? 1.0 : 0.84, dw0 = (p0r ? bh : bw) * sf2, dh0 = (p0r ? bw : bh) * sf2;
+				var sf2 = 1.0, dw0 = (p0r ? bh : bw) * sf2, dh0 = (p0r ? bw : bh) * sf2;
 				var gx = p0[0] + (cw0 - dw0) / 2, gy = p0[1] + (ch0 - dh0) / 2, mxp = gx + dw0 / 2, myp = gy + dh0 / 2;
 				ann += '<defs><marker id="nahR" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M1,1.5 L6.5,4 L1,6.5" fill="none" stroke="' + BC + '" stroke-width="1.3"/></marker></defs>';
 				ann += '<rect x="' + r(gx) + '" y="' + r(gy) + '" width="' + r(dw0) + '" height="' + r(dh0) + '" fill="none" stroke="#16a34a" stroke-width="' + r(asw * 0.6) + '" stroke-dasharray="' + r(asw * 3) + ' ' + r(asw * 2) + '"/>';
@@ -788,6 +870,14 @@
 			} else {
 				ann += '<text x="' + r(p0[0] + cw0 / 2) + '" y="' + r(p0[1] + ch0 * 0.08) + '" font-size="' + r(bfs) + '" fill="' + BC + '" text-anchor="middle" font-family="sans-serif">' + r(bl / 2) + 'mm bleed</text>';
 			}
+		}
+		if (cross && !debugMode) {
+			var legY = PL + pd * 0.75, legSz = afs * 0.72, legGap = PW * 0.24;
+			var legX1 = PW * 0.14, legX2 = legX1 + legGap;
+			ann += '<rect x="' + r(legX1) + '" y="' + r(legY - legSz * 0.75) + '" width="' + r(legSz) + '" height="' + r(legSz * 0.85) + '" fill="none" stroke="#3b82f6" stroke-width="' + r(asw) + '"/>';
+			ann += '<text x="' + r(legX1 + legSz * 1.3) + '" y="' + r(legY) + '" font-size="' + r(legSz) + '" fill="#1d4ed8" font-family="sans-serif">0\xb0 ชิ้นงานปกติ</text>';
+			ann += '<rect x="' + r(legX2) + '" y="' + r(legY - legSz * 0.75) + '" width="' + r(legSz) + '" height="' + r(legSz * 0.85) + '" fill="none" stroke="#d97706" stroke-width="' + r(asw) + '"/>';
+			ann += '<text x="' + r(legX2 + legSz * 1.3) + '" y="' + r(legY) + '" font-size="' + r(legSz) + '" fill="#92400e" font-family="sans-serif">180\xb0 หมุนสอดหัวท้าย</text>';
 		}
 		s += ann;
 		var svg = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="' + r(-pd) + ' ' + r(-pd) + ' ' + r(PW + pd * 2) + ' ' + r(PL + pd * 2) +
@@ -855,6 +945,35 @@
 		}
 		return shapes;
 	}
+	// แปลง shape (local coords) → พิกัดกระดาษ (รองรับ 0° และ 180°)
+	function _paperRect(s, ox, oy, bwp, bhp, rotated) {
+		return rotated
+			? { x: ox + bwp - s.x - s.w, y: oy + bhp - s.y - s.h, w: s.w, h: s.h }
+			: { x: ox + s.x, y: oy + s.y, w: s.w, h: s.h };
+	}
+	// ตรวจว่า shape จริงของ pieces ใดคู่หนึ่งในคอลัมน์เดียวกันซ้อนทับกัน (pixel-level rect intersection)
+	function _hasCrossShapeOverlap(pieces, shapes, bwp, bhp, blp) {
+		var n = pieces.length;
+		for (var pi = 0; pi < n; pi++) {
+			for (var pj = pi + 1; pj < n; pj++) {
+				if (Math.abs(pieces[pi][0] - pieces[pj][0]) > 1) continue;   // คนละคอลัมน์ → X ห่างพอ ข้าม
+				if (Math.abs(pieces[pi][1] - pieces[pj][1]) >= bhp) continue; // Y ห่างกว่า bh → ไม่มีทางซ้อน
+				var rot1 = (pieces[pi][2] === 180 || pieces[pi][2] === 270);
+				var rot2 = (pieces[pj][2] === 180 || pieces[pj][2] === 270);
+				var ox1 = pieces[pi][0] + blp / 2, oy1 = pieces[pi][1] + blp / 2;
+				var ox2 = pieces[pj][0] + blp / 2, oy2 = pieces[pj][1] + blp / 2;
+				for (var a = 0; a < shapes.length; a++) {
+					var r1 = _paperRect(shapes[a], ox1, oy1, bwp, bhp, rot1);
+					for (var b = 0; b < shapes.length; b++) {
+						var r2 = _paperRect(shapes[b], ox2, oy2, bwp, bhp, rot2);
+						if (r1.x + r1.w > r2.x && r2.x + r2.w > r1.x &&
+							r1.y + r1.h > r2.y && r2.y + r2.h > r1.y) return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
 	function computeCrossPitchY(unit) {
 		_unitArea = unit.bw * unit.bh * 0.62;   // fallback
 		try {
@@ -873,17 +992,16 @@
 	}
 	function crossRows(uL, ph) {
 		var bh = ph - 6, pitch = ph;
-		if (_interlock > 0) pitch = Math.max(bh * 0.3, ph - _interlock);          // ผู้ใช้กำหนดเอง
-		else if (_crossPitchY > 0 && _crossPitchY < ph) pitch = _crossPitchY;     // จาก profile รูปจริง
+		if (_crossPitchY > 0 && _crossPitchY < ph) pitch = _crossPitchY;
 		return Math.max(1, Math.floor((uL - bh) / pitch) + 1);
 	}
 	function nestCount(PW, PL, pw, ph, cross) {
-		if (prodMatches(_prodLayout, PW, PL)) return _prodLayout.num;   // กระดาษตรงกับสูตรระบบ → ใช้ Ups
+		if (prodPaperMatches(_prodLayout, PW, PL)) return _prodLayout.num;   // กระดาษตรงกับสูตรระบบ → ใช้ Ups
 		var u = usableWL(PW, PL), g = nestGrid(PW, PL, pw, ph);
 		if (!cross) return g.cols * g.rows;
 		var gridRot = Math.abs(g.pw - pw) > 0.1, nrows = g.rows;   // ไขว้ยึด grid วางตรง + วางสอดเพิ่มแถว
 		if (!gridRot && _crossPitchY > 0 && _crossPitchY < g.ph) {
-			var bh2 = ph - 6, pitch = _interlock > 0 ? Math.max(bh2 * 0.3, ph - _interlock) : _crossPitchY;
+			var bh2 = ph, pitch = _crossPitchY;
 			nrows = Math.max(g.rows, Math.floor((u.uL - bh2) / pitch) + 1);
 		}
 		return g.cols * nrows;
@@ -901,7 +1019,8 @@
 		w2.document.close();
 	}
 	function downloadNestSVG(nestSvg, name) {
-		var blob = new Blob([nestSvg.replace(/max-height:[^;"]*;?/g, '')], { type: 'image/svg+xml' });
+		var clean = '<?xml version="1.0" encoding="UTF-8"?>\n' + nestSvg.replace(/max-height:[^;"]*;?/g, '');
+		var blob = new Blob([clean], { type: 'image/svg+xml;charset=utf-8' });
 		var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name + '.svg';
 		document.body.appendChild(a); a.click(); a.remove();
 	}
@@ -941,7 +1060,13 @@
 			if (b.best !== a.best) return b.best > a.best ? b : a;
 			return b.waste < a.waste ? b : a;
 		}, pool[0]);
-		var selIdx = rows.indexOf(bestRow);
+		var matchIdx = (_prodLayout && _prodLayout.num > 0 && _prodLayout.paperW > 0)
+			? rows.findIndex(function (x) {
+				var a = _prodLayout.paperW, b = _prodLayout.paperL;
+				return (Math.abs(a - x.m.w) < 6 && Math.abs(b - x.m.l) < 6) ||
+					   (Math.abs(a - x.m.l) < 6 && Math.abs(b - x.m.w) < 6);
+			}) : -1;
+		var selIdx = matchIdx >= 0 ? matchIdx : rows.indexOf(bestRow);
 		// กระดาษที่ใช้เนื้อน้อยสุด (ถูกสุด) ในกลุ่มที่แกรมรับได้
 		var costPool = rows.filter(function (x) { return x.ok && x.best > 0 && x.totalKg != null; });
 		var cheapest = costPool.length ? costPool.reduce(function (a, b) { return b.totalKg < a.totalKg ? b : a; }, costPool[0]) : null;
@@ -964,33 +1089,30 @@
 			'<div style="background:linear-gradient(90deg,#0ea5e9,#2563eb);color:#fff;padding:13px 18px;display:flex;justify-content:space-between;align-items:center;font-weight:bold"><span>📐 วางไดไลน์ลงกระดาษ — Type ' + d.type + '</span><span class="nest-close" style="cursor:pointer;font-size:24px">&times;</span></div>' +
 			'<div style="padding:10px 16px;background:#eff6ff;font-size:13px;color:#1e40af;display:flex;gap:10px;align-items:center;flex-wrap:wrap">' +
 			'เลือกเครื่อง/กระดาษ <select class="nest-sel" style="padding:4px 6px;border:1px solid #93c5fd;border-radius:5px">' + optHtml + '</select>' +
-			' · ซ้อนไขว้ <input class="nest-il" type="number" value="' + _interlock + '" min="0" step="1" style="width:54px;padding:3px 5px;border:1px solid #93c5fd;border-radius:5px"> mm <span style="color:#64748b;font-size:11px">(0=ชิดไม่ทับ · ใส่เลข=ซ้อนสอดลิ้น)</span>' +
 			'<span id="nest-gram"></span></div>' +
 			'<div id="nest-sheets" style="display:flex;gap:14px;flex-wrap:wrap;padding:16px"></div>' +
 			'<div style="padding:0 16px 16px"><div style="font-weight:bold;color:#334155;margin-bottom:6px">📊 เทียบทุกขนาด (ไดไลน์ ≈ ' + r(pw) + '×' + r(ph) + ' mm รวม bleed · เว้น gripper ' + _margins.gripper + ' / color bar ' + _margins.colorbar + ' / edge ' + _margins.edge + ' mm)</div>' +
-			'<table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="background:#f1f5f9"><th style="padding:5px 8px;text-align:left">กระดาษ</th><th style="padding:5px 8px">ขนาด mm</th><th style="padding:5px 8px;text-align:left">เครื่อง (รุ่น)</th><th style="padding:5px 8px">วางตรง</th><th style="padding:5px 8px">วางไขว้</th><th style="padding:5px 8px">เสียน้อยสุด</th><th style="padding:5px 8px">กระดาษที่ใช้</th><th style="padding:5px 8px">แกรม</th></tr>' + tblRows + '</table>' +
+			'<table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="background:#f1f5f9"><th style="padding:5px 8px;text-align:left">กระดาษ</th><th style="padding:5px 8px">ขนาด mm</th><th style="padding:5px 8px;text-align:left">เครื่อง (รุ่น)</th><th style="padding:5px 8px">วางตรง</th><th style="padding:5px 8px">วางสอด 180°</th><th style="padding:5px 8px">เสียน้อยสุด</th><th style="padding:5px 8px">กระดาษที่ใช้</th><th style="padding:5px 8px">แกรม</th></tr>' + tblRows + '</table>' +
 			'<div style="font-size:11px;color:#64748b;margin-top:6px">🏆 = ได้เยอะสุด · 💰 = กระดาษน้อยสุด/ถูกสุด · ✅/⚠️ = แกรมงาน' + (gram ? ' ' + gram + 'g' : '') + ' รับได้ไหม' + (qty ? ' · ยอด ' + qty.toLocaleString() : ' · (ใส่ยอดสั่ง)') + (priceKg ? ' · ราคา ' + priceKg + ' ฿/kg' : ' · (ใส่ Cost B/Kg เพื่อคิดเป็นบาท)') + '</div>' +
 			(_prodLayout && _prodLayout.cols > 0 ? '<div style="font-size:11px;color:#16a34a;margin-top:4px">📐 กระดาษ ' + r(_prodLayout.paperW) + '×' + r(_prodLayout.paperL) + ' = ตรงกับ <b>Ups สูตรระบบ ' + _prodLayout.num + ' ตัว</b> (' + _prodLayout.cols + '×' + _prodLayout.rows + ' แชร์ขอบตามทรง) · กระดาษอื่นเป็นค่าประมาณจาก nesting</div>' : '') + '</div>' +
 			'</div></div>';
 		document.body.insertAdjacentHTML('beforeend', html);
 		var ov = document.getElementById('dieline-nest-overlay');
-		var ilInput = ov.querySelector('.nest-il');
-		if (ilInput) ilInput.addEventListener('change', function () { _interlock = Math.max(0, parseFloat(this.value) || 0); openNestModal(d); });
 		function renderSel(i) {
 			var m = rows[i].m;
 			var st = drawNest(m.w, m.l, unit, false), cr = drawNest(m.w, m.l, unit, true);
-			var b = cr.count > st.count ? 'ไขว้' : 'ตรง';
+			var b = cr.count > st.count ? 'สอด' : 'ตรง';
 			var ebtn = 'border:0;padding:4px 10px;border-radius:5px;font-size:11px;font-weight:bold;cursor:pointer;color:#fff;margin-right:5px';
 			var bar = function (k) { return '<div style="margin:6px 0 8px"><button class="np-pdf-' + k + '" style="background:#dc2626;' + ebtn + '">🔍 PDF (ซูมได้)</button><button class="np-svg-' + k + '" style="background:#059669;' + ebtn + '">📥 SVG</button><span style="font-size:11px;color:#94a3b8;margin-left:6px">(ลูกกลิ้ง = ซูม)</span></div>'; };
 			var zwrap = function (svg) { return '<div class="nz-holder" style="overflow:auto;max-height:52vh;border:1px solid #eef2f7;border-radius:4px"><div class="nz-inner" style="transform-origin:0 0;width:100%">' + svg + '</div></div>'; };
 			document.getElementById('nest-sheets').innerHTML =
 				'<div style="flex:1;min-width:280px;border:2px solid ' + (b === 'ตรง' ? '#16a34a' : '#e2e8f0') + ';border-radius:8px;padding:10px"><div style="font-weight:bold;color:#334155">วางตรง — <span style="color:#2563eb;font-size:18px">' + st.count + '</span> ตัว/แผ่น · ' + st.eff.toFixed(0) + '%</div>' + sheetInfo(st.count, st.eff) + bar('st') + zwrap(st.svg) + '</div>' +
-				'<div style="flex:1;min-width:280px;border:2px solid ' + (b === 'ไขว้' ? '#16a34a' : '#e2e8f0') + ';border-radius:8px;padding:10px"><div style="font-weight:bold;color:#334155">วางไขว้ — <span style="color:#2563eb;font-size:18px">' + cr.count + '</span> ตัว/แผ่น · ' + cr.eff.toFixed(0) + '%</div>' + sheetInfo(cr.count, cr.eff) + bar('cr') + zwrap(cr.svg) + '</div>';
+				'<div style="flex:1;min-width:280px;border:2px solid ' + (b === 'สอด' ? '#16a34a' : '#e2e8f0') + ';border-radius:8px;padding:10px"><div style="font-weight:bold;color:#334155">วางสอด 180° — <span style="color:#2563eb;font-size:18px">' + cr.count + '</span> ตัว/แผ่น · ' + cr.eff.toFixed(0) + '%</div>' + sheetInfo(cr.count, cr.eff) + bar('cr') + zwrap(cr.svg) + '</div>';
 			var ns = document.getElementById('nest-sheets');
 			var ttl = function (kind, cnt, eff) { return 'Nesting — Type ' + d.type + ' · ' + kind + ' · เครื่อง ' + m.name + ' (' + r(m.w) + '×' + r(m.l) + 'mm) · ' + cnt + ' ตัว/แผ่น · เสีย ' + Math.max(0, 100 - eff).toFixed(0) + '% · ไดไลน์ ' + r(unit.bw) + '×' + r(unit.bh) + 'mm'; };
 			ns.querySelector('.np-pdf-st').onclick = function () { exportNestPDF(st.svg, ttl('วางตรง', st.count, st.eff)); };
 			ns.querySelector('.np-svg-st').onclick = function () { downloadNestSVG(st.svg, 'nest_type' + d.type + '_straight_' + r(m.w) + 'x' + r(m.l)); };
-			ns.querySelector('.np-pdf-cr').onclick = function () { exportNestPDF(cr.svg, ttl('วางไขว้', cr.count, cr.eff)); };
+			ns.querySelector('.np-pdf-cr').onclick = function () { exportNestPDF(cr.svg, ttl('วางสอด 180°', cr.count, cr.eff)); };
 			ns.querySelector('.np-svg-cr').onclick = function () { downloadNestSVG(cr.svg, 'nest_type' + d.type + '_cross_' + r(m.w) + 'x' + r(m.l)); };
 			// ซูมด้วยลูกกลิ้งเมาส์ (ที่ตำแหน่งเคอร์เซอร์) ในแต่ละแผ่น
 			ns.querySelectorAll('.nz-holder').forEach(function (h) {
@@ -1020,7 +1142,8 @@
 		var cur = { type: d.type, W: d.W, L: d.L, D: d.D, T: d.T, G: d.G, dust: d.dust, OL: d.OL };
 		var svg = '';
 		var btn = 'border:0;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;color:#fff;';
-		var inS = 'width:62px;padding:3px 5px;border:1px solid #cbd5e1;border-radius:5px';
+		var tabActS = 'padding:9px 20px;border:0;border-bottom:3px solid #6d28d9;background:transparent;font-weight:bold;cursor:pointer;color:#6d28d9;font-size:13px;';
+		var tabS = 'padding:9px 20px;border:0;border-bottom:3px solid transparent;background:transparent;cursor:pointer;color:#64748b;font-size:13px;';
 		var html =
 			'<div id="dieline-v2-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:99999;display:flex;align-items:center;justify-content:center">' +
 			'<style>#v2-svg-holder.bg-white{background:#fff}#v2-svg-holder.bg-gray{background:#9ca3af}#v2-svg-holder.bg-black{background:#0b0b0b}' +
@@ -1028,61 +1151,71 @@
 			'#v2-svg-holder.bg-black rect,#v2-svg-holder.bg-black path,#v2-svg-holder.bg-black ellipse{fill:none !important}' +
 			'#v2-svg-holder.bg-black line[stroke="#334155"]{stroke:#cbd5e1 !important}' +
 			'#v2-svg-holder.bg-black text{fill:#e5e7eb !important}</style>' +
-			'<div style="background:#fff;width:min(980px,97vw);max-height:95vh;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.35)">' +
-			'<div style="background:linear-gradient(90deg,#10b981,#059669);color:#fff;padding:12px 18px;display:flex;justify-content:space-between;align-items:center;font-weight:bold">' +
+			'<div style="background:#fff;width:min(980px,97vw);max-height:95vh;border-radius:8px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.35)">' +
+			'<div style="background:linear-gradient(90deg,#8b5cf6,#6d28d9);color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;font-weight:bold">' +
 			'<span><i class="fa fa-vector-square"></i> Dieline v2 — สร้างเอง (ฟรี)</span>' +
 			'<span class="v2-close" style="cursor:pointer;font-size:24px">&times;</span></div>' +
-			'<div style="padding:8px 16px;background:#f0fdf4;border-bottom:1px solid #dcfce7;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:12px;color:#166534">' +
-			'<label>A ยาว <input class="v2-A" type="number" value="' + cur.L + '" style="' + inS + '"></label>' +
-			'<label>B กว้าง <input class="v2-B" type="number" value="' + cur.W + '" style="' + inS + '"></label>' +
-			'<label>C สูง <input class="v2-C" type="number" value="' + cur.D + '" style="' + inS + '"></label>' +
-			'<span style="color:#64748b">โฟกัสช่องไหน เส้นขนาดนั้นไฮไลต์</span>' +
-			'<span style="flex:1"></span>' +
-			'<label><input type="checkbox" class="v2-dims" checked> เส้นบอกขนาด</label>' +
-			'<label><input type="checkbox" class="v2-lineonly"> เส้นล้วน</label>' +
-			'<label>พื้นหลัง <select class="v2-bg" style="padding:3px 5px;border:1px solid #cbd5e1;border-radius:5px"><option value="white">ขาว</option><option value="gray">เทา</option><option value="black">ดำ</option></select></label>' +
+			'<div id="v2-tabs" style="display:flex;border-bottom:2px solid #e2e8f0;background:#f8fafc">' +
+			'<button class="v2-tab" data-tab="dieline" style="' + tabActS + '">📐 Dieline</button>' +
+			'<button class="v2-tab" data-tab="nesting" style="' + tabS + '">📋 Nesting</button>' +
 			'</div>' +
+			'<div style="flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0">' +
 			'<div id="v2-svg-holder" class="bg-white" style="flex:1;overflow:auto;padding:16px"><div id="v2-svg-inner" style="transform-origin:0 0;width:100%"></div></div>' +
-			'<div style="padding:10px 16px;border-top:1px solid #eee;display:flex;gap:8px;align-items:center;flex-wrap:wrap">' +
+			'<div id="v2-nest-panel" style="flex:1;overflow:auto;padding:16px;display:none"></div>' +
+			'</div>' +
+			'<div id="v2-zoombar" style="padding:12px 18px;border-top:1px solid #eee;background:#fafafa;display:flex;gap:8px;align-items:center;flex-wrap:wrap">' +
 			'<button class="v2-zoomout" style="width:34px;height:34px;background:#e2e8f0;border:0;border-radius:6px;font-size:18px;font-weight:bold;cursor:pointer">−</button>' +
 			'<span id="v2-zoomlbl" style="min-width:46px;text-align:center;font-size:13px;color:#475569">100%</span>' +
 			'<button class="v2-zoomin" style="width:34px;height:34px;background:#e2e8f0;border:0;border-radius:6px;font-size:18px;font-weight:bold;cursor:pointer">+</button>' +
 			'<button class="v2-zoomreset" style="background:#e2e8f0;border:0;padding:7px 12px;border-radius:6px;font-size:12px;cursor:pointer">รีเซ็ต</button>' +
 			'<span style="font-size:11px;color:#94a3b8">(ลูกกลิ้งเมาส์ = ซูมที่จุดนั้น)</span>' +
+			'<label style="font-size:12px;color:#475569">พื้นหลัง <select class="v2-bg" style="padding:3px 5px;border:1px solid #cbd5e1;border-radius:5px"><option value="white">ขาว</option><option value="gray">เทา</option><option value="black">ดำ</option></select></label>' +
 			'<span style="flex:1"></span>' +
-			'<button class="v2-nest" style="background:#2563eb;' + btn + '">📐 วางกระดาษ</button>' +
+			'<button class="v2-3d" style="background:#7c3aed;' + btn + '">🧊 3D</button>' +
 			'<button class="v2-pdf" style="background:#dc2626;' + btn + '">📄 PDF</button>' +
-			'<button class="v2-dl" style="background:#059669;' + btn + '">📥 SVG</button>' +
-			'<button class="v2-close" style="background:#eee;border:0;padding:8px 16px;border-radius:6px;cursor:pointer">ปิด</button>' +
+			'<button class="v2-dl" style="background:#6d28d9;' + btn + '">📥 SVG</button>' +
+			'<button class="v2-close" style="background:#eee;border:0;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer">ปิด</button>' +
 			'</div></div></div>';
 		document.body.insertAdjacentHTML('beforeend', html);
 		var ov = document.getElementById('dieline-v2-overlay');
 		var holder = document.getElementById('v2-svg-holder');
+		var nestPanel = document.getElementById('v2-nest-panel');
+		var zoomBar = document.getElementById('v2-zoombar');
 		var inner = document.getElementById('v2-svg-inner');
-		var inpA = ov.querySelector('.v2-A'), inpB = ov.querySelector('.v2-B'), inpC = ov.querySelector('.v2-C');
-		var chkLine = ov.querySelector('.v2-lineonly'), selBg = ov.querySelector('.v2-bg'), chkDims = ov.querySelector('.v2-dims');
+		var selBg = ov.querySelector('.v2-bg');
 		function redraw() {
-			cur.L = parseFloat(inpA.value) || cur.L;
-			cur.W = parseFloat(inpB.value) || cur.W;
-			cur.D = parseFloat(inpC.value) || cur.D;
-			_lineOnly = chkLine.checked;
-			_showDims = chkDims.checked;
+			_lineOnly = true; _showDims = true;
 			try { svg = buildDielineSVG(cur); }
 			catch (e) { console.error('[dieline-v2] build error:', e); svg = '<div style="color:#dc2626;padding:20px">' + (e && e.message) + '</div>'; }
 			inner.innerHTML = svg;
 		}
 		redraw();
-		// live edit + ไฮไลต์ตอนโฟกัส
-		[[inpA, 'A'], [inpB, 'B'], [inpC, 'C']].forEach(function (p) {
-			p[0].addEventListener('input', function () { _hiDim = p[1]; redraw(); });
-			p[0].addEventListener('focus', function () { _hiDim = p[1]; redraw(); });
-			p[0].addEventListener('blur', function () { _hiDim = null; redraw(); });
-		});
-		chkLine.addEventListener('change', redraw);
-		chkDims.addEventListener('change', redraw);
 		selBg.addEventListener('change', function () {
+			_bg = selBg.value;
 			holder.className = 'bg-' + selBg.value;
-			if (selBg.value === 'black' && !chkLine.checked) { chkLine.checked = true; redraw(); }
+			redraw();
+		});
+		// ----- tabs -----
+		ov.querySelectorAll('.v2-tab').forEach(function (tab) {
+			tab.addEventListener('click', function () {
+				var t = this.getAttribute('data-tab');
+				ov.querySelectorAll('.v2-tab').forEach(function (bt) {
+					bt.style.borderBottomColor = 'transparent';
+					bt.style.color = '#64748b';
+					bt.style.fontWeight = '';
+				});
+				this.style.borderBottomColor = '#6d28d9';
+				this.style.color = '#6d28d9';
+				this.style.fontWeight = 'bold';
+				var isNest = t === 'nesting';
+				holder.style.display = isNest ? 'none' : '';
+				nestPanel.style.display = isNest ? '' : 'none';
+				zoomBar.style.display = isNest ? 'none' : '';
+				if (isNest && !nestPanel.__loaded) {
+					nestPanel.__loaded = true;
+					renderNestPanel(cur, nestPanel);
+				}
+			});
 		});
 		// ----- ซูม -----
 		var zoom = 1;
@@ -1115,6 +1248,106 @@
 			document.body.appendChild(a); a.click(); a.remove();
 		});
 		ov.querySelector('.v2-pdf').addEventListener('click', function () { exportV2PDF(cur); });
-		ov.querySelector('.v2-nest').addEventListener('click', function () { openNestModal(cur); });
+		ov.querySelector('.v2-3d').addEventListener('click', function () {
+			ov.remove();
+			var btn3d = document.getElementById('dieline-3d-btn');
+			if (btn3d) btn3d.click();
+			else alert('ไม่พบปุ่ม 3D — กรุณากดปุ่ม 3D ที่หน้าหลักแทน');
+		});
+		function renderNestPanel(d, el) {
+			el.__loaded = true;
+			_margins = getMargins();
+			_prodLayout = getProdLayout();
+			var core = dielineCore(d);
+			var bleed = 6, pw = core.bw + bleed, ph = core.bh + bleed;
+			var cleanSvg = (core.bodySvg || '').replace(/<text[\s\S]*?<\/text>/g, '').replace(/<line[^>]*#334155[^>]*\/>/g, '');
+			var unit = { svg: cleanSvg, bw: core.bw, bh: core.bh, bleed: bleed, pw: pw, ph: ph };
+			_crossPitchY = computeCrossPitchY(unit);
+			var gram = getJobGram(), qty = getJobQty(), priceKg = getPaperPriceKg();
+			function sheetInfo(count, eff) {
+				var waste = Math.max(0, 100 - eff).toFixed(0);
+				var sh = (qty && count > 0) ? ('→ <b>' + Math.ceil(qty / count) + '</b> แผ่น') : 'ใส่ยอดสั่งเพื่อคำนวณแผ่น';
+				return '<div style="font-size:12px;color:#475569;margin-top:3px">' + sh + ' · เสียกระดาษ <b>' + waste + '%</b></div>';
+			}
+			var opts = MACHINE_PAPERS.slice();
+			var ep = getPaperSize();
+			if (ep.src.indexOf('estimate') === 0) opts.unshift({ name: 'จาก estimate (' + r(ep.w) + '×' + r(ep.l) + ')', w: ep.w, l: ep.l, gmin: 0, gmax: 9999 });
+			var rows = opts.map(function (m) {
+				var st = nestCount(m.w, m.l, pw, ph, false), cr = nestCount(m.w, m.l, pw, ph, true), best = Math.max(st, cr);
+				var waste = Math.max(0, 100 - best * (_unitArea || pw * ph) / (m.w * m.l) * 100);
+				var sheets = (qty && best > 0) ? Math.ceil(qty / best) : null;
+				var totalKg = (sheets != null && gram) ? (sheets * m.w * m.l * gram / 1e9) : null;
+				var cost = (totalKg != null && priceKg) ? (totalKg * priceKg) : null;
+				return { m: m, st: st, cr: cr, best: best, waste: waste, sheets: sheets, totalKg: totalKg, cost: cost, ok: gramOk(m, gram) };
+			});
+			var pool = rows.filter(function (x) { return x.ok && x.best > 0; }); if (!pool.length) pool = rows;
+			var bestRow = pool.reduce(function (a, b) {
+				if (b.best !== a.best) return b.best > a.best ? b : a;
+				return b.waste < a.waste ? b : a;
+			}, pool[0]);
+			var matchIdx = (_prodLayout && _prodLayout.num > 0 && _prodLayout.paperW > 0)
+				? rows.findIndex(function (x) {
+					var a = _prodLayout.paperW, b = _prodLayout.paperL;
+					return (Math.abs(a - x.m.w) < 6 && Math.abs(b - x.m.l) < 6) ||
+						   (Math.abs(a - x.m.l) < 6 && Math.abs(b - x.m.w) < 6);
+				}) : -1;
+			var selIdx = matchIdx >= 0 ? matchIdx : rows.indexOf(bestRow);
+			var costPool = rows.filter(function (x) { return x.ok && x.best > 0 && x.totalKg != null; });
+			var cheapest = costPool.length ? costPool.reduce(function (a, b) { return b.totalKg < a.totalKg ? b : a; }, costPool[0]) : null;
+			var optHtml = rows.map(function (x, i) { return '<option value="' + i + '"' + (i === selIdx ? ' selected' : '') + '>' + x.m.name + (x.ok ? '' : ' ⚠️แกรมไม่รับ') + '</option>'; }).join('');
+			var tblRows = rows.slice().map(function (x, i) { return { x: x, i: i }; }).sort(function (a, b) { return b.x.best - a.x.best; }).map(function (o) {
+				var x = o.x, hl = (o.i === selIdx), waste = x.waste, wc = waste < 25 ? '#16a34a' : (waste > 40 ? '#dc2626' : '#92400e');
+				return '<tr style="' + (hl ? 'background:#dcfce7;font-weight:bold' : '') + '"><td style="padding:4px 8px">' + (o.i === rows.indexOf(bestRow) ? '🏆 ' : '') + x.m.name + '</td>' +
+					'<td style="padding:4px 8px;text-align:center">' + r(x.m.w) + '×' + r(x.m.l) + '</td>' +
+					'<td style="padding:4px 8px;font-size:11px;color:#64748b">' + (x.m.mc || '-') + '</td>' +
+					'<td style="padding:4px 8px;text-align:center">' + x.st + '</td>' +
+					'<td style="padding:4px 8px;text-align:center;color:#2563eb">' + x.cr + '</td>' +
+					'<td style="padding:4px 8px;text-align:center;font-weight:bold;color:' + wc + '">' + (x.ok && x.best > 0 ? waste.toFixed(0) + '%' : '-') + '</td>' +
+					'<td style="padding:4px 8px;text-align:center' + (x === cheapest ? ';color:#16a34a;font-weight:bold' : '') + '">' + (x.totalKg != null ? ((x === cheapest ? '💰 ' : '') + x.sheets + ' แผ่น · ' + x.totalKg.toFixed(0) + ' kg' + (x.cost != null ? ' · ฿' + Math.round(x.cost).toLocaleString() : '')) : '-') + '</td>' +
+					'<td style="padding:4px 8px;text-align:center">' + (x.ok ? '✅' : '⚠️') + '</td></tr>';
+			}).join('');
+			el.innerHTML =
+				'<div style="background:#eff6ff;font-size:13px;color:#1e40af;display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;border-radius:6px;padding:8px 12px">' +
+				'เลือกเครื่อง/กระดาษ <select class="vn-sel" style="padding:4px 6px;border:1px solid #93c5fd;border-radius:5px">' + optHtml + '</select>' +
+				'<span class="vn-gram"></span></div>' +
+				'<div class="vn-sheets" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px"></div>' +
+				'<div><div style="font-weight:bold;color:#334155;margin-bottom:6px">📊 เทียบทุกขนาด (ไดไลน์ ≈ ' + r(pw) + '×' + r(ph) + ' mm · gripper ' + _margins.gripper + ' / color bar ' + _margins.colorbar + ' / edge ' + _margins.edge + ' mm)</div>' +
+				'<table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="background:#f1f5f9"><th style="padding:5px 8px;text-align:left">กระดาษ</th><th style="padding:5px 8px">ขนาด mm</th><th style="padding:5px 8px;text-align:left">เครื่อง</th><th style="padding:5px 8px">วางตรง</th><th style="padding:5px 8px">วางสอด 180°</th><th style="padding:5px 8px">เสีย%</th><th style="padding:5px 8px">กระดาษที่ใช้</th><th style="padding:5px 8px">แกรม</th></tr>' + tblRows + '</table>' +
+				'<div style="font-size:11px;color:#64748b;margin-top:6px">🏆=ได้เยอะสุด · 💰=ถูกสุด · ✅/⚠️=แกรมงาน' + (gram ? ' ' + gram + 'g' : '') + (qty ? ' · ยอด ' + qty.toLocaleString() : '') + (priceKg ? ' · ราคา ' + priceKg + ' ฿/kg' : '') + '</div>' +
+				(_prodLayout && _prodLayout.cols > 0 ? '<div style="font-size:11px;color:#16a34a;margin-top:4px">📐 กระดาษ ' + r(_prodLayout.paperW) + '×' + r(_prodLayout.paperL) + ' = <b>Ups สูตรระบบ ' + _prodLayout.num + ' ตัว</b> (' + _prodLayout.cols + '×' + _prodLayout.rows + ')</div>' : '') + '</div>';
+			function renderSel(i) {
+				var m = rows[i].m;
+				var st = drawNest(m.w, m.l, unit, false), cr = drawNest(m.w, m.l, unit, true);
+				var b = cr.count > st.count ? 'สอด' : 'ตรง';
+				var ebtn = 'border:0;padding:4px 10px;border-radius:5px;font-size:11px;font-weight:bold;cursor:pointer;color:#fff;margin-right:5px';
+				var bar = function (k) { return '<div style="margin:6px 0 8px"><button class="np-pdf-' + k + '" style="background:#dc2626;' + ebtn + '">🔍 PDF</button><button class="np-svg-' + k + '" style="background:#059669;' + ebtn + '">📥 SVG</button><span style="font-size:11px;color:#94a3b8;margin-left:6px">(ลูกกลิ้ง = ซูม)</span></div>'; };
+				var zwrap = function (svg) { return '<div class="nz-holder" style="overflow:auto;max-height:42vh;border:1px solid #eef2f7;border-radius:4px"><div class="nz-inner" style="transform-origin:0 0;width:100%">' + svg + '</div></div>'; };
+				el.querySelector('.vn-sheets').innerHTML =
+					'<div style="flex:1;min-width:280px;border:2px solid ' + (b === 'ตรง' ? '#16a34a' : '#e2e8f0') + ';border-radius:8px;padding:10px"><div style="font-weight:bold;color:#334155">วางตรง — <span style="color:#2563eb;font-size:18px">' + st.count + '</span> ตัว/แผ่น · ' + st.eff.toFixed(0) + '%</div>' + sheetInfo(st.count, st.eff) + bar('st') + zwrap(st.svg) + '</div>' +
+					'<div style="flex:1;min-width:280px;border:2px solid ' + (b === 'สอด' ? '#16a34a' : '#e2e8f0') + ';border-radius:8px;padding:10px"><div style="font-weight:bold;color:#334155">วางสอด 180° — <span style="color:#2563eb;font-size:18px">' + cr.count + '</span> ตัว/แผ่น · ' + cr.eff.toFixed(0) + '%</div>' + sheetInfo(cr.count, cr.eff) + bar('cr') + zwrap(cr.svg) + '</div>';
+				var ns = el.querySelector('.vn-sheets');
+				var ttl = function (kind, cnt, eff) { return 'Nesting — Type ' + d.type + ' · ' + kind + ' · เครื่อง ' + m.name + ' (' + r(m.w) + '×' + r(m.l) + 'mm) · ' + cnt + ' ตัว/แผ่น · เสีย ' + Math.max(0, 100 - eff).toFixed(0) + '%'; };
+				ns.querySelector('.np-pdf-st').onclick = function () { exportNestPDF(st.svg, ttl('วางตรง', st.count, st.eff)); };
+				ns.querySelector('.np-svg-st').onclick = function () { downloadNestSVG(st.svg, 'nest_type' + d.type + '_straight_' + r(m.w) + 'x' + r(m.l)); };
+				ns.querySelector('.np-pdf-cr').onclick = function () { exportNestPDF(cr.svg, ttl('วางสอด 180°', cr.count, cr.eff)); };
+				ns.querySelector('.np-svg-cr').onclick = function () { downloadNestSVG(cr.svg, 'nest_type' + d.type + '_cross_' + r(m.w) + 'x' + r(m.l)); };
+				ns.querySelectorAll('.nz-holder').forEach(function (h) {
+					var nzInner = h.querySelector('.nz-inner'), z = 1;
+					h.addEventListener('wheel', function (e) {
+						e.preventDefault();
+						var rect = h.getBoundingClientRect(), ox = e.clientX - rect.left, oy = e.clientY - rect.top;
+						var cx = (h.scrollLeft + ox) / z, cy = (h.scrollTop + oy) / z;
+						z = Math.min(Math.max(z * (e.deltaY < 0 ? 1.15 : 1 / 1.15), 1), 8);
+						nzInner.style.transform = 'scale(' + z + ')';
+						h.scrollLeft = cx * z - ox; h.scrollTop = cy * z - oy;
+					}, { passive: false });
+				});
+				var ok = rows[i].ok;
+				el.querySelector('.vn-gram').innerHTML = '· กระดาษ <b>' + r(m.w) + '×' + r(m.l) + ' mm</b>' + (m.mc ? ' · เครื่อง: <b>' + m.mc + '</b>' : '') + ' · ยอดสั่ง <b>' + (qty ? qty.toLocaleString() : '?') + '</b> ตัว · ' +
+					(gram ? ('แกรมงาน ' + gram + 'g ' + (ok ? '<span style="color:#16a34a">✅ รับได้</span>' : '<span style="color:#dc2626">⚠️ เกินช่วง ' + m.gmin + '-' + m.gmax + 'g</span>')) : 'ไม่ทราบแกรมงาน');
+			}
+			renderSel(selIdx);
+			el.querySelector('.vn-sel').addEventListener('change', function () { renderSel(+this.value); });
+		}
 	}
 })();
