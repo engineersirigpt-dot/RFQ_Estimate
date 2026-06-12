@@ -593,7 +593,7 @@
 	// หาเครื่อง/กระดาษที่วางได้เยอะสุด (แกรมรับได้) สำหรับ title block
 	function bestMachine(d) {
 		try {
-			_prodLayout = getProdLayout(); _nestType = d.type;
+			_prodLayout = getProdLayout(); _nestType = d.type; _estLayCache = {};
 			var c = dielineCore(d), pw = c.bw, ph = c.bh, gram = getJobGram(), best = null;
 			MACHINE_PAPERS.forEach(function (m) {
 				if (gram != null && (gram < m.gmin || gram > m.gmax)) return;
@@ -724,6 +724,37 @@
 	function prodMatches(prod, PW, PL) {
 		return prodPaperMatches(prod, PW, PL) && prodHasGrid(prod);
 	}
+	// คำนวณการวางต่อแผ่นด้วย "สูตรระบบจริง" (เหมือน Estimate) — ต่อขนาดแผ่นใดก็ได้
+	// เรียก est.calculateLayoutDetail (pure calc, คืน grid+จำนวน) ทั้งแนวตั้ง/นอน เอาที่ได้เยอะกว่า
+	var _estLayCache = {};   // cache ต่อ (type|PW|PL) — กันเรียกซ้ำ
+	function estLayout(PW, PL) {
+		try {
+			var est = window.est || window.estimate;
+			if (!est || typeof est.calculateLayoutDetail !== 'function') return null;
+			var comp = est.mainData && est.mainData.component1 && est.mainData.component1[0];
+			var ps = comp && comp.packaging_size;
+			var tpl = _nestType || (comp && comp.box_type && comp.box_type.type_id);
+			if (!ps || !tpl) return null;
+			var key = tpl + '|' + r(PW) + '|' + r(PL);
+			if (_estLayCache[key] !== undefined) return _estLayCache[key];
+			var m = getMargins();
+			var tol = { gripper: m.gripper, color_bar: m.colorbar, paper_edge: m.edge, bleed: 6 };
+			var best = null;
+			['vertical', 'horizontal'].forEach(function (lay) {
+				try {
+					var rdt = est.calculateLayoutDetail(tpl, ps, [PW, PL], tol, lay);
+					var n = rdt && (rdt.totalAmount || (rdt.wSideAmount * rdt.lSideAmount));
+					if (n > 0 && (!best || n > best.count)) best = { count: n, cols: rdt.wSideAmount, rows: rdt.lSideAmount, laying: lay };
+				} catch (e) { }
+			});
+			// validate: กระดาษที่ระบบเลือก → สูตรนี้ต้องได้เลขตรง Ups เดิม (เช็คว่าเรียกถูก)
+			if (best && _prodLayout && _prodLayout.num > 0 && prodPaperMatches(_prodLayout, PW, PL)) {
+				console.log('[nest] estLayout เช็ค: สูตรระบบ=' + best.count + ' vs Ups เดิม=' + _prodLayout.num + (best.count === _prodLayout.num ? ' ✓ ตรง' : ' ⚠️ ไม่ตรง') + ' (paper ' + r(PW) + 'x' + r(PL) + ')');
+			}
+			_estLayCache[key] = best;
+			return best;
+		} catch (e) { return null; }
+	}
 	function getMargins() {
 		var pt = '';
 		try { pt = ($('#print_type select').val() || '') + ''; } catch (e) { }
@@ -747,10 +778,11 @@
 		var u = usableWL(PW, PL), uW = u.uW, uL = u.uL;
 		var forceCross = (unit.type === 10);   // ทรง 10 (Pillow) บังคับวางสอด 180° — ปลายนูนลงร่อง ไม่ทับ จำนวนใกล้ของจริง
 		var g = nestGrid(PW, PL, pw, ph), pieces = [], i, j, count, pitchY = g.ph;
-		var _useProd = !forceCross && prodMatches(_prodLayout, PW, PL);   // ทรง 10 ไม่ใช้ prod grid (รูปทับ) → ใช้ interlock แทน
+		var _el = forceCross ? null : estLayout(PW, PL);   // สูตรระบบจริง ต่อเครื่องนี้
+		var _useProd = !forceCross && (_el || prodMatches(_prodLayout, PW, PL));   // ทรง 10 ไม่ใช้ (ใช้ interlock แทน)
 		if (_useProd) {
-			// "จาก estimate" → วาง "จำนวน = Ups เป๊ะ" (ไม่เกิน) แต่จัดกริดให้สวย/เต็มแผ่น ขนาดจริง
-			var _num = _prodLayout.num
+			// วาง "จำนวน = สูตรระบบ" (จากเครื่องนี้ ถ้ามี / ไม่งั้น Ups กระดาษที่เลือก) จัดกริดสวยเต็มแผ่น ขนาดจริง
+			var _num = _el ? _el.count : _prodLayout.num
 			var _maxCols = Math.max(1, Math.floor(uW / (bw + bl)))   // วางขนาดจริงได้กี่คอลัมน์
 			var _maxRows = Math.max(1, Math.floor(uL / (bh + bl)))   // กี่แถว
 			var _cols, _ppx = bw + bl, _ppy = bh + bl
@@ -1026,7 +1058,11 @@
 		return Math.max(1, Math.floor((uL - bh) / pitch) + 1);
 	}
 	function nestCount(PW, PL, pw, ph, cross) {
-		if (_nestType !== 10 && prodPaperMatches(_prodLayout, PW, PL)) return _prodLayout.num;   // กระดาษตรงสูตร → จำนวน = Ups เป๊ะ (ยกเว้นทรง 10)
+		if (_nestType !== 10) {
+			var el = estLayout(PW, PL);                         // สูตรระบบจริง ต่อเครื่อง (ทุกขนาดแผ่น)
+			if (el && el.count > 0) return el.count;
+			if (prodPaperMatches(_prodLayout, PW, PL)) return _prodLayout.num;   // fallback: Ups กระดาษที่ระบบเลือก
+		}
 		var u = usableWL(PW, PL), g = nestGrid(PW, PL, pw, ph);
 		if (!cross) return g.cols * g.rows;
 		var gridRot = Math.abs(g.pw - pw) > 0.1, nrows = g.rows;   // ไขว้ยึด grid วางตรง + วางสอดเพิ่มแถว
@@ -1057,7 +1093,7 @@
 	function openNestModal(d) {
 		var p0 = document.getElementById('dieline-nest-overlay'); if (p0) p0.remove();
 		_margins = getMargins();
-		_prodLayout = getProdLayout(); _nestType = d.type;   // Ups จากสูตรระบบ (ใช้ให้ตรงกันสำหรับกระดาษที่แมท)
+		_prodLayout = getProdLayout(); _nestType = d.type; _estLayCache = {};   // Ups จากสูตรระบบ (ใช้ให้ตรงกันสำหรับกระดาษที่แมท)
 		var core = dielineCore(d);
 		var bleed = 6, pw = core.bw + bleed, ph = core.bh + bleed;
 		// ตัด label + เส้นบอกขนาดออก → เหลือแต่เส้นกล่อง (สะอาด ดูออกง่ายเวลาวางหลายตัว)
@@ -1298,7 +1334,7 @@
 		function renderNestPanel(d, el) {
 			el.__loaded = true;
 			_margins = getMargins();
-			_prodLayout = getProdLayout(); _nestType = d.type;
+			_prodLayout = getProdLayout(); _nestType = d.type; _estLayCache = {};
 			var core = dielineCore(d);
 			var bleed = 6, pw = core.bw + bleed, ph = core.bh + bleed;
 			var cleanSvg = (core.bodySvg || '').replace(/<text[\s\S]*?<\/text>/g, '').replace(/<line[^>]*#dc2626[^>]*\/>/g, '');
