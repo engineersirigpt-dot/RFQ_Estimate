@@ -1163,38 +1163,28 @@
 		this._updateCreases(this._t || 0)
 		this._dirty = true
 	}
-	// toggle: โชว์เส้นพับสีจริง (เขียว=fold, แดง=cut) / ปิด=สีเดิม
+	// คุมสีเส้นตามโหมด: เส้นนอก = ดำทั้งหมด (กล่องครบ ไม่หาย) · เส้นทั้งหมด = แดง(ตัด)/เขียว(พับ)
 	Viewer.prototype._applyFoldLineColors = function () {
 		if (!this._lineMats) return
 		var outer = this._outerOnly !== false
-		this._lineMats.cut.color.setHex(outer ? 0x222222 : 0xdc2626)   // เส้นนอก: ดำ(โหมดเส้นนอก) / แดง(โหมดทั้งหมด)
-		this._lineMats.fold.color.setHex(0x16a34a)                     // เส้นพับ = เขียว
+		this._lineMats.cut.color.setHex(outer ? 0x222222 : 0xdc2626)    // ตัด: ดำ / แดง
+		this._lineMats.fold.color.setHex(outer ? 0x222222 : 0x16a34a)   // พับ: ดำ / เขียว
 		this._lineMats.cut.depthTest = false; this._lineMats.fold.depthTest = false
 		this._dirty = true
 	}
-	// OFF = ไม่โชว์เส้นเลย (กล่องเรียบ), ON = โชว์ทุกเส้น (สีจริง)
+	// โชว์ขอบทั้งหมดเสมอ (ไม่ซ่อน) — ต่างกันที่สีตามโหมด
 	Viewer.prototype._applyLineVisibility = function () {
 		if (!this._allLines) return
-		var show = !!this._showFolds, outer = this._outerOnly !== false   // ค่าเริ่มต้น = โชว์เฉพาะเส้นนอก (เส้นตัด) ซ่อนรอยพับ
-		for (var i = 0; i < this._allLines.length; i++) {
-			var ln = this._allLines[i]
-			var isCrease = ln.userData && (ln.userData.creaseDash || ln.userData.creaseSolid)
-			ln.visible = show && !(outer && isCrease)
-		}
-		if (show && !outer) this._updateCreases(this._t || 0)
+		var show = !!this._showFolds
+		for (var i = 0; i < this._allLines.length; i++) this._allLines[i].visible = show
+		if (show) this._updateCreases(this._t || 0)
 		this._dirty = true
 	}
 	Viewer.prototype.setShowFolds = function (on) { this._showFolds = on; this._applyFoldLineColors(); this._applyLineVisibility() }
-	// กาง(t เล็ก)=เส้นประ, พับ(t ใกล้ 1)=เส้นทึบ — โหมดเส้นนอก: ซ่อนรอยพับเสมอ
+	// กาง(t เล็ก)=เส้นประ, พับ(t ใกล้ 1)=เส้นทึบ
 	Viewer.prototype._updateCreases = function (t) {
 		if (!this._showFolds) return
-		var i
-		if (this._outerOnly !== false) {   // เส้นนอกอย่างเดียว → ซ่อนรอยพับ
-			if (this._creaseDash) for (i = 0; i < this._creaseDash.length; i++) this._creaseDash[i].visible = false
-			if (this._creaseSolid) for (i = 0; i < this._creaseSolid.length; i++) this._creaseSolid[i].visible = false
-			return
-		}
-		var solid = t >= 0.96
+		var solid = t >= 0.96, i
 		if (this._creaseDash) for (i = 0; i < this._creaseDash.length; i++) this._creaseDash[i].visible = !solid
 		if (this._creaseSolid) for (i = 0; i < this._creaseSolid.length; i++) this._creaseSolid[i].visible = solid
 	}
