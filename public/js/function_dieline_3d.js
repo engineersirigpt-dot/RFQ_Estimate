@@ -941,7 +941,7 @@
 		var geo = SVGImp.fromSVG(svgText, {})
 		function ekeyG(a, b) { var r = function (n) { return Math.round(n * 2) / 2 }; var pa = r(a[0]) + ',' + r(a[1]), pb = r(b[0]) + ',' + r(b[1]); return pa < pb ? pa + '|' + pb : pb + '|' + pa }
 			var cutMat = new THREE.LineBasicMaterial({ color: 0x222222, depthTest: false })
-			var foldMat = new THREE.LineBasicMaterial({ color: 0x222222, depthTest: false }); function pAreaG(p) { var s = 0; p.segs.forEach(function (e) { s += e.a[0] * e.b[1] - e.b[0] * e.a[1] }); return Math.abs(s / 2) }
+			var foldMat = new THREE.LineDashedMaterial({ color: 0x222222, dashSize: 5, gapSize: 3, depthTest: false }); function pAreaG(p) { var s = 0; p.segs.forEach(function (e) { s += e.a[0] * e.b[1] - e.b[0] * e.a[1] }); return Math.abs(s / 2) }   // เส้นพับ = เส้นประ
 			var ecount = {}
 			geo.panels.forEach(function (p) { p.segs.forEach(function (s) { var k = ekeyG(s.a, s.b); ecount[k] = (ecount[k] || 0) + 1 }) })
 			var root = buildTreeImp(geo, geo.rootId)
@@ -959,7 +959,7 @@
 			panel.segs.forEach(function (s, i) { var la = w2l(frame, s.a), lb = w2l(frame, s.b); if (_clipP) { la[1] = Math.max(-_clipP, Math.min(_clipP, la[1])); lb[1] = Math.max(-_clipP, Math.min(_clipP, lb[1])) } if (i === 0) shape.moveTo(la[0], la[1]); shape.lineTo(lb[0], lb[1]); var arr = (ecount[ekeyG(s.a, s.b)] >= 2) ? foldV : cutV; arr.push(new THREE.Vector3(la[0], la[1], 0), new THREE.Vector3(lb[0], lb[1], 0)) })
 			var mesh = new THREE.Mesh(new THREE.ShapeGeometry(shape), material)
 			if (cutV.length) { var _cl = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(cutV), cutMat); _cl.userData.cutLine = true; mesh.add(_cl) }   // เส้นตัด(แดง) = ซ่อนในโหมดเส้นนอก
-			if (foldV.length) mesh.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(foldV), foldMat))   // เส้นพับ/โครงกล่อง(เขียว) = โชว์เสมอ
+			if (foldV.length) { var _flf = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(foldV), foldMat); _flf.computeLineDistances(); mesh.add(_flf) }   // เส้นพับ/โครงกล่อง = เส้นประ โชว์เสมอ
 			var nc
 			if (node.hinge) {
 				var aP = w2l(pf, node.hinge.A), joint = new THREE.Group()
