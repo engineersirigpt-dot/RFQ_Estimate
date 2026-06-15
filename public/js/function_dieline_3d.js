@@ -956,9 +956,12 @@
 			var frame = node.hinge ? { ox: node.hinge.A[0], oy: node.hinge.A[1], ang: Math.atan2(node.hinge.B[1] - node.hinge.A[1], node.hinge.B[0] - node.hinge.A[0]) } : { ox: 0, oy: 0, ang: 0 }
 			var shape = new THREE.Shape(), cutV = [], foldV = []
 			var _clipP = (isLip && parentPerp > 0) ? parentPerp * 1.02 : 0
-			panel.segs.forEach(function (s, i) { var la = w2l(frame, s.a), lb = w2l(frame, s.b); if (_clipP) { la[1] = Math.max(-_clipP, Math.min(_clipP, la[1])); lb[1] = Math.max(-_clipP, Math.min(_clipP, lb[1])) } if (i === 0) shape.moveTo(la[0], la[1]); shape.lineTo(lb[0], lb[1]); var arr = (ecount[ekeyG(s.a, s.b)] >= 2) ? foldV : cutV; arr.push(new THREE.Vector3(la[0], la[1], 0), new THREE.Vector3(lb[0], lb[1], 0)) })
+			var _mnx = 1e9, _mxx = -1e9, _mny = 1e9, _mxy = -1e9
+			panel.segs.forEach(function (s, i) { var la = w2l(frame, s.a), lb = w2l(frame, s.b); if (_clipP) { la[1] = Math.max(-_clipP, Math.min(_clipP, la[1])); lb[1] = Math.max(-_clipP, Math.min(_clipP, lb[1])) } if (i === 0) shape.moveTo(la[0], la[1]); shape.lineTo(lb[0], lb[1]); var arr = (ecount[ekeyG(s.a, s.b)] >= 2) ? foldV : cutV; arr.push(new THREE.Vector3(la[0], la[1], 0), new THREE.Vector3(lb[0], lb[1], 0)); if (la[0] < _mnx) _mnx = la[0]; if (la[0] > _mxx) _mxx = la[0]; if (la[1] < _mny) _mny = la[1]; if (la[1] > _mxy) _mxy = la[1] })
+			// ลิ้นกาว/แถบแคบยาว (leaf + แคบ ratio<0.22) → ถือเป็น flatFlap ให้ซ่อนในโหมดเส้นนอก
+			var _sw = _mxx - _mnx, _sh = _mxy - _mny, _glueLike = node.children.length === 0 && !!node.hinge && Math.max(_sw, _sh) > 0 && (Math.min(_sw, _sh) / Math.max(_sw, _sh)) < 0.22
 			var mesh = new THREE.Mesh(new THREE.ShapeGeometry(shape), material)
-			if (cutV.length) { var _cl = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(cutV), cutMat); _cl.userData.cutLine = true; mesh.add(_cl) }   // เส้นตัด(แดง) = ซ่อนในโหมดเส้นนอก
+			if (cutV.length) { var _cl = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(cutV), cutMat); _cl.userData.cutLine = true; if (_glueLike) _cl.userData.flatFlap = true; mesh.add(_cl) }   // เส้นตัด(แดง)=ซ่อนในเส้นนอก · ลิ้นกาว tag flatFlap ด้วย
 			if (foldV.length) {   // เส้นพับ = เส้นประ — ตั้ง lineDistance ให้แต่ละเซกเมนต์เริ่มที่ 0 (เส้นที่วางทับกันจะประตรงกัน ไม่เต็มเป็นทึบ)
 				var _fg = new THREE.BufferGeometry().setFromPoints(foldV), _fp = _fg.attributes.position, _fn = _fp.count, _fd = new Float32Array(_fn)
 				for (var _fi = 0; _fi < _fn; _fi += 2) { _fd[_fi] = 0; _fd[_fi + 1] = Math.hypot(_fp.getX(_fi + 1) - _fp.getX(_fi), _fp.getY(_fi + 1) - _fp.getY(_fi), _fp.getZ(_fi + 1) - _fp.getZ(_fi)) }
