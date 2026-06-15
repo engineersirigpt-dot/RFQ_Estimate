@@ -1178,7 +1178,9 @@
 		var show = !!this._showFolds, outer = this._outerOnly !== false
 		for (var i = 0; i < this._allLines.length; i++) {
 			var ln = this._allLines[i]
-			ln.visible = show && !(outer && ln.userData && ln.userData.cutLine)
+			// โหมดเส้นนอก: ซ่อนเฉพาะเส้นตัดที่เป็นรายละเอียดลิ้นฝา (flatFlap) — เก็บขอบนอกจริง (ปากเปิด/ขอบ)
+			var hideCut = ln.userData && ln.userData.cutLine && ln.userData.flatFlap
+			ln.visible = show && !(outer && hideCut)
 		}
 		if (show) this._updateCreases(this._t || 0)
 		this._dirty = true
