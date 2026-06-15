@@ -959,7 +959,12 @@
 			panel.segs.forEach(function (s, i) { var la = w2l(frame, s.a), lb = w2l(frame, s.b); if (_clipP) { la[1] = Math.max(-_clipP, Math.min(_clipP, la[1])); lb[1] = Math.max(-_clipP, Math.min(_clipP, lb[1])) } if (i === 0) shape.moveTo(la[0], la[1]); shape.lineTo(lb[0], lb[1]); var arr = (ecount[ekeyG(s.a, s.b)] >= 2) ? foldV : cutV; arr.push(new THREE.Vector3(la[0], la[1], 0), new THREE.Vector3(lb[0], lb[1], 0)) })
 			var mesh = new THREE.Mesh(new THREE.ShapeGeometry(shape), material)
 			if (cutV.length) { var _cl = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(cutV), cutMat); _cl.userData.cutLine = true; mesh.add(_cl) }   // เส้นตัด(แดง) = ซ่อนในโหมดเส้นนอก
-			if (foldV.length) { var _flf = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(foldV), foldMat); _flf.computeLineDistances(); mesh.add(_flf) }   // เส้นพับ/โครงกล่อง = เส้นประ โชว์เสมอ
+			if (foldV.length) {   // เส้นพับ = เส้นประ — ตั้ง lineDistance ให้แต่ละเซกเมนต์เริ่มที่ 0 (เส้นที่วางทับกันจะประตรงกัน ไม่เต็มเป็นทึบ)
+				var _fg = new THREE.BufferGeometry().setFromPoints(foldV), _fp = _fg.attributes.position, _fn = _fp.count, _fd = new Float32Array(_fn)
+				for (var _fi = 0; _fi < _fn; _fi += 2) { _fd[_fi] = 0; _fd[_fi + 1] = Math.hypot(_fp.getX(_fi + 1) - _fp.getX(_fi), _fp.getY(_fi + 1) - _fp.getY(_fi), _fp.getZ(_fi + 1) - _fp.getZ(_fi)) }
+				_fg.setAttribute('lineDistance', new THREE.Float32BufferAttribute(_fd, 1))
+				mesh.add(new THREE.LineSegments(_fg, foldMat))
+			}
 			var nc
 			if (node.hinge) {
 				var aP = w2l(pf, node.hinge.A), joint = new THREE.Group()
