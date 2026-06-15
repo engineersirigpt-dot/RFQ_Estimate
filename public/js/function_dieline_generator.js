@@ -89,6 +89,45 @@
 			'<line x1="' + r(x2) + '" y1="' + r(y - aw) + '" x2="' + r(x2) + '" y2="' + r(y + aw) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
 			'<text x="' + r((x1 + x2) / 2) + '" y="' + r(y + aw + fs) + '" font-size="' + r(hi ? fs * 1.18 : fs) + '" fill="' + (hi ? '#2563eb' : '#dc2626') + '" text-anchor="middle" font-family="Prompt, sans-serif" font-weight="' + (hi ? 'bold' : 'normal') + '">' + value.toFixed(1) + ' mm</text>';
 	}
+	// เส้นบอกขนาดแนวตั้ง ข้อความอยู่ขวา — ถ้า segment แคบ (<fs*3) ใช้ text แนวนอนแทน
+	function dimVr(y1, y2, x, value, fs) {
+		var aw = Math.max((y2 - y1) * 0.015, 2.5), col = '#dc2626', sw = 0.8;
+		var ty = (y1 + y2) / 2;
+		var lines = '<line x1="' + r(x) + '" y1="' + r(y1) + '" x2="' + r(x) + '" y2="' + r(y2) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
+			'<line x1="' + r(x - aw) + '" y1="' + r(y1) + '" x2="' + r(x + aw) + '" y2="' + r(y1) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
+			'<line x1="' + r(x - aw) + '" y1="' + r(y2) + '" x2="' + r(x + aw) + '" y2="' + r(y2) + '" stroke="' + col + '" stroke-width="' + sw + '"/>';
+		if ((y2 - y1) < fs * 3.2) {
+			return lines + '<text x="' + r(x + aw * 3.5) + '" y="' + r(ty) + '" font-size="' + r(fs) + '" fill="' + col + '" text-anchor="start" dominant-baseline="central" font-family="Prompt, sans-serif">' + value.toFixed(1) + ' mm</text>';
+		}
+		var tx = x + aw * 2.2;
+		return lines + '<text x="' + r(tx) + '" y="' + r(ty) + '" font-size="' + r(fs) + '" fill="' + col + '" text-anchor="middle" font-family="Prompt, sans-serif" transform="rotate(-90 ' + r(tx) + ' ' + r(ty) + ')">' + value.toFixed(1) + ' mm</text>';
+	}
+	// เส้นบอกขนาดแนวตั้ง ข้อความอยู่ซ้าย — ถ้า segment แคบ (<fs*3) ใช้ text แนวนอนแทน
+	function dimVl(y1, y2, x, value, fs) {
+		var aw = Math.max((y2 - y1) * 0.015, 2.5), col = '#dc2626', sw = 0.8;
+		var ty = (y1 + y2) / 2;
+		var lines = '<line x1="' + r(x) + '" y1="' + r(y1) + '" x2="' + r(x) + '" y2="' + r(y2) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
+			'<line x1="' + r(x - aw) + '" y1="' + r(y1) + '" x2="' + r(x + aw) + '" y2="' + r(y1) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
+			'<line x1="' + r(x - aw) + '" y1="' + r(y2) + '" x2="' + r(x + aw) + '" y2="' + r(y2) + '" stroke="' + col + '" stroke-width="' + sw + '"/>';
+		if ((y2 - y1) < fs * 3.2) {
+			// แนวนอน (text-anchor end = ข้อความชิดซ้ายของเส้น)
+			return lines + '<text x="' + r(x - aw * 3.5) + '" y="' + r(ty) + '" font-size="' + r(fs) + '" fill="' + col + '" text-anchor="end" dominant-baseline="central" font-family="Prompt, sans-serif">' + value.toFixed(1) + ' mm</text>';
+		}
+		var tx = x - aw * 2.2;
+		return lines + '<text x="' + r(tx) + '" y="' + r(ty) + '" font-size="' + r(fs) + '" fill="' + col + '" text-anchor="middle" font-family="Prompt, sans-serif" transform="rotate(-90 ' + r(tx) + ' ' + r(ty) + ')">' + value.toFixed(1) + ' mm</text>';
+	}
+	// คืนค่า arrays ความกว้างคอลัมน์/แถวสำหรับแต่ละ box type — ใช้วาด segment dims
+	function getPanelSegs(d) {
+		var W=d.W||0, L=d.L||0, D=d.D||0, T=d.T||15, G=d.G||10, OL=d.OL||Math.max(8,W*0.18);
+		if (d.type===1||d.type===2) return { cols:[G,L,W,L,W], rows:[T,W,D,W,T] };
+		if (d.type===3||d.type===4) return { cols:[G,L,W,L,W], rows:[T,W,D,W/2,OL] };
+		if (d.type===5)  return { cols:[D,W,D], rows:[D,L,D] };
+		if (d.type===6)  return { cols:[D,W,D], rows:[D,L,D] };
+		if (d.type===8)  return { cols:[G,L,W,L,W], rows:[T,D,D,W/2,OL] };
+		if (d.type===9)  return { cols:[G,W,L,W,L], rows:[D] };
+		if (d.type===11) return { cols:[G,L,W,L,W], rows:[W,D,W] };
+		return null;
+	}
 	// เลขบอกขนาดต่อ panel สำหรับทรงที่มีผนัง W|L|W|L (ใต้กล่อง = ความกว้าง panel, ขวา = ความสูง D)
 	function wallRowDims(W, L, D, xP1, yWall, yWallBot, totalW, totalH) {
 		if (!_showDims) return '';
@@ -131,94 +170,104 @@
 		return pathCut(dd, '#eef2ff');
 	}
 
+	// รอยบากวงกลมเล็ก ที่จุดตัดของรอยพับ — ช่วยพับโดยไม่แตก (corner relief)
+	function cornerRelief(cx, cy, rad) {
+		return '<circle cx="' + r(cx) + '" cy="' + r(cy) + '" r="' + r(rad) + '" fill="white" stroke="' + CUT + '" stroke-width="0.8"/>';
+	}
+
 	// ===== RTE / STE (type 1,2) — open size = 2(W+L)+G × 2(W+T)+D =====
+	// Phase B: panel order G | L | W | L | W — fully parametric + corner reliefs
 	function buildRTE(d) {
 		var W = d.W, L = d.L, D = d.D, T = d.T, G = d.G, dust = d.dust;
 		var totalW = G + 2 * W + 2 * L, totalH = D + 2 * (W + T);
-		var xP1 = G, xP2 = G + W, xP3 = G + W + L, xP4 = G + 2 * W + L;
+		var xP1 = G, xP2 = G + L, xP3 = G + L + W, xP4 = G + 2 * L + W;
 		var yMainTop = T, yWall = T + W, yWallBot = T + W + D;
+		var cr = Math.max(2, Math.min(D * 0.06, W * 0.08, 6));
 		var s = '';
 		// ลิ้นกาว + ผนัง 4 ด้าน (สูง D)
 		s += glueTab(G, G, yWall, D);
-		s += rectCut(xP1, yWall, W, D);
-		s += rectCut(xP2, yWall, L, D, '#eff6ff');
-		s += rectCut(xP3, yWall, W, D);
-		s += rectCut(xP4, yWall, L, D, '#eff6ff');
-		// ฝาบน (บนผนัง L หลัง) + ลิ้นเสียบ
-		s += rectCut(xP2, yMainTop, L, W, '#ffffff');
-		s += tuckFlap(xP2, L, yMainTop, T, -1);
-		// ฝาล่าง (บนผนัง L หน้า) + ลิ้นเสียบ — RTE สลับด้าน
-		s += rectCut(xP4, yWallBot, L, W, '#ffffff');
-		s += tuckFlap(xP4, L, yWallBot + W, T, 1);
-		// ปีกกล่อง (dust) บนผนัง W บน/ล่าง — เฉียงสอบ
-		s += dustFlap(xP1, W, yWall, dust, -1); s += dustFlap(xP3, W, yWall, dust, -1);
-		s += dustFlap(xP1, W, yWallBot, dust, 1); s += dustFlap(xP3, W, yWallBot, dust, 1);
+		s += rectCut(xP1, yWall, L, D, '#eff6ff');
+		s += rectCut(xP2, yWall, W, D);
+		s += rectCut(xP3, yWall, L, D, '#eff6ff');
+		s += rectCut(xP4, yWall, W, D);
+		// ฝาบน (บนผนัง L แรก) + ลิ้นเสียบ
+		s += rectCut(xP1, yMainTop, L, W, '#ffffff');
+		s += tuckFlap(xP1, L, yMainTop, T, -1);
+		// ฝาล่าง (บนผนัง L ที่สอง) + ลิ้นเสียบ — RTE สลับด้าน
+		s += rectCut(xP3, yWallBot, L, W, '#ffffff');
+		s += tuckFlap(xP3, L, yWallBot + W, T, 1);
+		// ปีกกล่อง (dust) บนผนัง W บน/ล่าง
+		s += dustFlap(xP2, W, yWall, dust, -1); s += dustFlap(xP4, W, yWall, dust, -1);
+		s += dustFlap(xP2, W, yWallBot, dust, 1); s += dustFlap(xP4, W, yWallBot, dust, 1);
+		// corner relief ที่จุดตัดรอยพับ (W panels)
+		[xP2, xP3, xP4, xP4 + W].forEach(function(x) {
+			s += cornerRelief(x, yWall, cr);
+			s += cornerRelief(x, yWallBot, cr);
+		});
 		// เส้นพับ (เขียวประ)
-		[xP1, xP2, xP3, xP4].forEach(function (x) { s += foldLine(x, yWall, x, yWallBot) });
-		s += foldLine(xP2, yWall, xP2 + L, yWall);
-		s += foldLine(xP2, yMainTop, xP2 + L, yMainTop);
-		s += foldLine(xP4, yWallBot, xP4 + L, yWallBot);
-		s += foldLine(xP4, yWallBot + W, xP4 + L, yWallBot + W);
-		s += foldLine(xP1, yWall, xP1 + W, yWall); s += foldLine(xP3, yWall, xP3 + W, yWall);
-		s += foldLine(xP1, yWallBot, xP1 + W, yWallBot); s += foldLine(xP3, yWallBot, xP3 + W, yWallBot);
-		// ป้ายกำกับ
-		// (เลขขนาดแสดงด้วยเส้น dimension แทน — แบบ v1)
+		[xP1, xP2, xP3, xP4].forEach(function (x) { s += foldLine(x, yWall, x, yWallBot); });
+		s += foldLine(xP1, yWall, xP1 + L, yWall);
+		s += foldLine(xP1, yMainTop, xP1 + L, yMainTop);
+		s += foldLine(xP3, yWallBot, xP3 + L, yWallBot);
+		s += foldLine(xP3, yWallBot + W, xP3 + L, yWallBot + W);
+		s += foldLine(xP2, yWall, xP2 + W, yWall); s += foldLine(xP4, yWall, xP4 + W, yWall);
+		s += foldLine(xP2, yWallBot, xP2 + W, yWallBot); s += foldLine(xP4, yWallBot, xP4 + W, yWallBot);
 		s += label(G / 2, yWall + D / 2, 'กาว', 7);
-		s += label(xP2 + L / 2, yMainTop + W / 2, 'ฝาบน', 8);
-		s += label(xP4 + L / 2, yWallBot + W / 2, 'ฝาล่าง', 8);
-		s += wallRowDims(W, L, D, xP1, yWall, yWallBot, totalW, totalH);
+		s += label(xP1 + L / 2, yMainTop + W / 2, 'ฝาบน', 8);
+		s += label(xP3 + L / 2, yWallBot + W / 2, 'ฝาล่าง', 8);
 		return { svg: s, w: totalW, h: totalH };
 	}
 
 	// ===== Tuck Top Snap Lock (3) / Auto Bottom (4) — open size W=T+W+D+W/2+OL, L=2(W+L)+G =====
+	// Phase B: panel order G | L | W | L | W
 	function buildTuckTop(d, bottomStyle) {
 		var W = d.W, L = d.L, D = d.D, T = d.T, G = d.G, dust = d.dust;
 		var OL = d.OL || Math.max(8, W * 0.18);
 		var botH = W / 2;
 		var totalW = G + 2 * W + 2 * L, totalH = T + W + D + botH + OL;
-		var xP1 = G, xP2 = G + W, xP3 = G + W + L, xP4 = G + 2 * W + L;
+		var xP1 = G, xP2 = G + L, xP3 = G + L + W, xP4 = G + 2 * L + W;
 		var yTopMain = T, yWall = T + W, yWallBot = T + W + D, yBotEnd = T + W + D + botH;
+		var cr = Math.max(2, Math.min(D * 0.06, W * 0.08, 6));
 		var s = '';
 		// ลิ้นกาว + ผนัง 4 ด้าน
 		s += glueTab(G, G, yWall, D);
-		s += rectCut(xP1, yWall, W, D);
-		s += rectCut(xP2, yWall, L, D, '#eff6ff');
-		s += rectCut(xP3, yWall, W, D);
-		s += rectCut(xP4, yWall, L, D, '#eff6ff');
-		// ฝาบน (tuck top) บนผนัง L หลัง + ปีกข้าง
-		s += rectCut(xP2, yTopMain, L, W, '#ffffff');
-		s += tuckFlap(xP2, L, yTopMain, T, -1);
-		s += dustFlap(xP1, W, yWall, dust, -1); s += dustFlap(xP3, W, yWall, dust, -1);
+		s += rectCut(xP1, yWall, L, D, '#eff6ff');
+		s += rectCut(xP2, yWall, W, D);
+		s += rectCut(xP3, yWall, L, D, '#eff6ff');
+		s += rectCut(xP4, yWall, W, D);
+		// ฝาบน (tuck top) บนผนัง L แรก + ปีกข้าง
+		s += rectCut(xP1, yTopMain, L, W, '#ffffff');
+		s += tuckFlap(xP1, L, yTopMain, T, -1);
+		s += dustFlap(xP2, W, yWall, dust, -1); s += dustFlap(xP4, W, yWall, dust, -1);
+		// corner relief
+		[xP2, xP3, xP4, xP4 + W].forEach(function(x) { s += cornerRelief(x, yWall, cr); });
 		// ก้นกล่อง (auto/snap) — แผ่นล่างทั้ง 4 ผนัง
-		[[xP1, W], [xP2, L], [xP3, W], [xP4, L]].forEach(function (p) {
+		[[xP1, L], [xP2, W], [xP3, L], [xP4, W]].forEach(function (p) {
 			var px = p[0], pw = p[1];
 			s += pathCut(['M', r(px), r(yWallBot), 'L', r(px + pw * 0.1), r(yBotEnd),
 				'L', r(px + pw * 0.9), r(yBotEnd), 'L', r(px + pw), r(yWallBot), 'Z'].join(' '), '#fff7ed');
-			if (bottomStyle === 'auto') {           // TTAB: รอยพับทแยง (auto-lock)
+			if (bottomStyle === 'auto') {
 				s += foldLine(px, yWallBot, px + pw / 2, yBotEnd);
 				s += foldLine(px + pw, yWallBot, px + pw / 2, yBotEnd);
-			} else {                                  // TTSLB: ก้นล็อก รอยพับกลาง
+			} else {
 				s += foldLine(px + pw / 2, yWallBot, px + pw / 2, yBotEnd);
 			}
 			s += foldLine(px, yWallBot, px + pw, yWallBot);
 		});
-		// OL ลิ้นทากาว (เฉพาะ auto/TTAB) ใต้ผนัง L หลัง
+		// OL ลิ้นทากาว (เฉพาะ auto/TTAB) ใต้ผนัง L แรก
 		if (bottomStyle === 'auto') {
-			s += pathCut(['M', r(xP2 + L * 0.22), r(yBotEnd), 'L', r(xP2 + L * 0.27), r(yBotEnd + OL),
-				'L', r(xP2 + L * 0.73), r(yBotEnd + OL), 'L', r(xP2 + L * 0.78), r(yBotEnd), 'Z'].join(' '), '#fde68a');
-			s += label(xP2 + L / 2, yBotEnd + OL / 2, 'OL', 7);
+			s += pathCut(['M', r(xP1 + L * 0.22), r(yBotEnd), 'L', r(xP1 + L * 0.27), r(yBotEnd + OL),
+				'L', r(xP1 + L * 0.73), r(yBotEnd + OL), 'L', r(xP1 + L * 0.78), r(yBotEnd), 'Z'].join(' '), '#fde68a');
+			s += label(xP1 + L / 2, yBotEnd + OL / 2, 'OL', 7);
 		}
 		// เส้นพับผนัง + ฝาบน + ปีก
 		[xP1, xP2, xP3, xP4].forEach(function (x) { s += foldLine(x, yWall, x, yWallBot); });
-		s += foldLine(xP2, yWall, xP2 + L, yWall);
-		s += foldLine(xP2, yTopMain, xP2 + L, yTopMain);
-		s += foldLine(xP1, yWall, xP1 + W, yWall); s += foldLine(xP3, yWall, xP3 + W, yWall);
-		// ป้ายกำกับ
-		// (เลขขนาดแสดงด้วยเส้น dimension แทน — แบบ v1)
+		s += foldLine(xP1, yWall, xP1 + L, yWall);
+		s += foldLine(xP1, yTopMain, xP1 + L, yTopMain);
+		s += foldLine(xP2, yWall, xP2 + W, yWall); s += foldLine(xP4, yWall, xP4 + W, yWall);
 		s += label(G / 2, yWall + D / 2, 'กาว', 7);
-		s += label(xP2 + L / 2, yTopMain + W / 2, 'ฝาบน', 8);
+		s += label(xP1 + L / 2, yTopMain + W / 2, 'ฝาบน', 8);
 		s += label(G + (2 * W + 2 * L) / 2, yWallBot + botH * 0.55, bottomStyle === 'auto' ? 'ก้นทากาว (auto)' : 'ก้นล็อก (snap)', 8);
-		s += wallRowDims(W, L, D, xP1, yWall, yWallBot, totalW, totalH);
 		return { svg: s, w: totalW, h: totalH };
 	}
 
@@ -300,32 +349,35 @@
 	function buildSealEnd(d) {
 		var W = d.W, L = d.L, D = d.D, G = d.G, dust = d.dust;
 		var totalW = G + 2 * W + 2 * L, totalH = 2 * W + D;
-		var xP1 = G, xP2 = G + W, xP3 = G + W + L, xP4 = G + 2 * W + L;
-		var yMainTop = 0, yWall = W, yWallBot = W + D, yMainBot = W + D;
+		var xP1 = G, xP2 = G + L, xP3 = G + L + W, xP4 = G + 2 * L + W;
+		var yMainTop = 0, yWall = W, yWallBot = W + D;
+		var cr = Math.max(2, Math.min(D * 0.06, W * 0.08, 6));
 		var s = '';
 		s += glueTab(G, G, yWall, D);
-		s += rectCut(xP1, yWall, W, D);
-		s += rectCut(xP2, yWall, L, D, '#eff6ff');
-		s += rectCut(xP3, yWall, W, D);
-		s += rectCut(xP4, yWall, L, D, '#eff6ff');
-		// ฝาปิดบน/ล่าง = แผ่นทากาว (amber) ไม่มีลิ้นเสียบ
-		s += rectCut(xP2, yMainTop, L, W, '#fef3c7');
-		s += rectCut(xP4, yMainBot, L, W, '#fef3c7');
-		// ปีกข้าง
-		s += dustFlap(xP1, W, yWall, dust, -1); s += dustFlap(xP3, W, yWall, dust, -1);
-		s += dustFlap(xP1, W, yWallBot, dust, 1); s += dustFlap(xP3, W, yWallBot, dust, 1);
+		s += rectCut(xP1, yWall, L, D, '#eff6ff');
+		s += rectCut(xP2, yWall, W, D);
+		s += rectCut(xP3, yWall, L, D, '#eff6ff');
+		s += rectCut(xP4, yWall, W, D);
+		// ฝาปิดบน/ล่าง = แผ่นทากาว (amber) บนผนัง L แรก/ที่สอง
+		s += rectCut(xP1, yMainTop, L, W, '#fef3c7');
+		s += rectCut(xP3, yWallBot, L, W, '#fef3c7');
+		// ปีกข้าง บนผนัง W
+		s += dustFlap(xP2, W, yWall, dust, -1); s += dustFlap(xP4, W, yWall, dust, -1);
+		s += dustFlap(xP2, W, yWallBot, dust, 1); s += dustFlap(xP4, W, yWallBot, dust, 1);
+		// corner relief
+		[xP2, xP3, xP4, xP4 + W].forEach(function(x) {
+			s += cornerRelief(x, yWall, cr);
+			s += cornerRelief(x, yWallBot, cr);
+		});
 		// เส้นพับ
 		[xP1, xP2, xP3, xP4].forEach(function (x) { s += foldLine(x, yWall, x, yWallBot); });
-		s += foldLine(xP2, yWall, xP2 + L, yWall);
-		s += foldLine(xP4, yWallBot, xP4 + L, yWallBot);
-		s += foldLine(xP1, yWall, xP1 + W, yWall); s += foldLine(xP3, yWall, xP3 + W, yWall);
-		s += foldLine(xP1, yWallBot, xP1 + W, yWallBot); s += foldLine(xP3, yWallBot, xP3 + W, yWallBot);
-		// ป้าย
-		// (เลขขนาดแสดงด้วยเส้น dimension แทน — แบบ v1)
+		s += foldLine(xP1, yWall, xP1 + L, yWall);
+		s += foldLine(xP3, yWallBot, xP3 + L, yWallBot);
+		s += foldLine(xP2, yWall, xP2 + W, yWall); s += foldLine(xP4, yWall, xP4 + W, yWall);
+		s += foldLine(xP2, yWallBot, xP2 + W, yWallBot); s += foldLine(xP4, yWallBot, xP4 + W, yWallBot);
 		s += label(G / 2, yWall + D / 2, 'กาว', 7);
-		s += label(xP2 + L / 2, yMainTop + W / 2, 'ฝาปิด (ทากาว)', 8);
-		s += label(xP4 + L / 2, yMainBot + W / 2, 'ฝาปิด (ทากาว)', 8);
-		s += wallRowDims(W, L, D, xP1, yWall, yWallBot, totalW, totalH);
+		s += label(xP1 + L / 2, yMainTop + W / 2, 'ฝาปิด (ทากาว)', 8);
+		s += label(xP3 + L / 2, yWallBot + W / 2, 'ฝาปิด (ทากาว)', 8);
 		return { svg: s, w: totalW, h: totalH };
 	}
 
@@ -418,25 +470,28 @@
 		var W = d.W, L = d.L, D = d.D, T = d.T, G = d.G, dust = d.dust;
 		var OL = d.OL || Math.max(8, W * 0.18), botH = W / 2;
 		var totalW = G + 2 * W + 2 * L, totalH = T + 2 * D + botH + OL;
-		var xP1 = G, xP2 = G + W, xP3 = G + W + L, xP4 = G + 2 * W + L;
+		var xP1 = G, xP2 = G + L, xP3 = G + L + W, xP4 = G + 2 * L + W;
 		var yApex = T, yWall = T + D, yWallBot = T + 2 * D, yBotEnd = T + 2 * D + botH;
+		var cr = Math.max(2, Math.min(D * 0.06, W * 0.08, 6));
 		var s = '';
 		s += glueTab(G, G, yWall, D);
-		s += rectCut(xP1, yWall, W, D);
-		s += rectCut(xP2, yWall, L, D, '#eff6ff');
-		s += rectCut(xP3, yWall, W, D);
-		s += rectCut(xP4, yWall, L, D, '#eff6ff');
-		// จั่ว (สามเหลี่ยม) บนผนัง L หน้า/หลัง + ลิ้นยอด + หูหิ้ว
-		[xP2, xP4].forEach(function (px) {
+		s += rectCut(xP1, yWall, L, D, '#eff6ff');
+		s += rectCut(xP2, yWall, W, D);
+		s += rectCut(xP3, yWall, L, D, '#eff6ff');
+		s += rectCut(xP4, yWall, W, D);
+		// จั่ว (สามเหลี่ยม) บนผนัง L แรก/ที่สอง + ลิ้นยอด + หูหิ้ว
+		[xP1, xP3].forEach(function (px) {
 			s += pathCut(['M', r(px), r(yWall), 'L', r(px + L / 2), r(yApex), 'L', r(px + L), r(yWall), 'Z'].join(' '), '#fef9c3');
 			var tw = W * 0.15;
 			s += pathCut(['M', r(px + L / 2 - tw), r(yApex), 'L', r(px + L / 2 - tw), r(0), 'L', r(px + L / 2 + tw), r(0), 'L', r(px + L / 2 + tw), r(yApex), 'Z'].join(' '), '#ffffff');
 			s += '<ellipse cx="' + r(px + L / 2) + '" cy="' + r(yApex + D * 0.45) + '" rx="' + r(W * 0.2) + '" ry="' + r(Math.min(D * 0.12, 5)) + '" fill="none" stroke="' + CUT + '" stroke-width="1" />';
 		});
 		// ปีกข้างบนผนัง W
-		s += dustFlap(xP1, W, yWall, dust, -1); s += dustFlap(xP3, W, yWall, dust, -1);
+		s += dustFlap(xP2, W, yWall, dust, -1); s += dustFlap(xP4, W, yWall, dust, -1);
+		// corner relief
+		[xP2, xP3, xP4, xP4 + W].forEach(function(x) { s += cornerRelief(x, yWall, cr); });
 		// ก้นทากาว (auto) ทั้ง 4 ผนัง + รอยทแยง
-		[[xP1, W], [xP2, L], [xP3, W], [xP4, L]].forEach(function (p) {
+		[[xP1, L], [xP2, W], [xP3, L], [xP4, W]].forEach(function (p) {
 			var px = p[0], pw = p[1];
 			s += pathCut(['M', r(px), r(yWallBot), 'L', r(px + pw * 0.1), r(yBotEnd),
 				'L', r(px + pw * 0.9), r(yBotEnd), 'L', r(px + pw), r(yWallBot), 'Z'].join(' '), '#fff7ed');
@@ -444,17 +499,14 @@
 			s += foldLine(px + pw, yWallBot, px + pw / 2, yBotEnd);
 			s += foldLine(px, yWallBot, px + pw, yWallBot);
 		});
-		s += pathCut(['M', r(xP2 + L * 0.22), r(yBotEnd), 'L', r(xP2 + L * 0.27), r(yBotEnd + OL),
-			'L', r(xP2 + L * 0.73), r(yBotEnd + OL), 'L', r(xP2 + L * 0.78), r(yBotEnd), 'Z'].join(' '), '#fde68a');
+		s += pathCut(['M', r(xP1 + L * 0.22), r(yBotEnd), 'L', r(xP1 + L * 0.27), r(yBotEnd + OL),
+			'L', r(xP1 + L * 0.73), r(yBotEnd + OL), 'L', r(xP1 + L * 0.78), r(yBotEnd), 'Z'].join(' '), '#fde68a');
 		// เส้นพับผนัง + จั่ว
 		[xP1, xP2, xP3, xP4].forEach(function (x) { s += foldLine(x, yWall, x, yWallBot); });
-		s += foldLine(xP2, yWall, xP2 + L, yWall); s += foldLine(xP4, yWall, xP4 + L, yWall);
-		s += foldLine(xP1, yWall, xP1 + W, yWall); s += foldLine(xP3, yWall, xP3 + W, yWall);
-		// ป้าย
-		// (เลขขนาดแสดงด้วยเส้น dimension แทน — แบบ v1)
+		s += foldLine(xP1, yWall, xP1 + L, yWall); s += foldLine(xP3, yWall, xP3 + L, yWall);
+		s += foldLine(xP2, yWall, xP2 + W, yWall); s += foldLine(xP4, yWall, xP4 + W, yWall);
 		s += label(G / 2, yWall + D / 2, 'กาว', 7);
-		s += label(xP2 + L / 2, yApex + D * 0.78, 'จั่ว+หูหิ้ว', 7);
-		s += wallRowDims(W, L, D, xP1, yWall, yWallBot, totalW, totalH);
+		s += label(xP1 + L / 2, yApex + D * 0.78, 'จั่ว+หูหิ้ว', 7);
 		return { svg: s, w: totalW, h: totalH };
 	}
 
@@ -484,6 +536,50 @@
 	var _localBodyCache = {};
 	var LOCAL_TPL_TYPES = { 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1, 10: 1, 11: 1 };
 	var PT2MM = 1 / 2.834645669;
+	// คืน x-positions ของ vertical crease lines (mm, in body space) จาก template cache
+	function getTplFoldXs(tpl, bodyW) {
+		var xs = [];
+		(tpl.crease || []).forEach(function(dStr) {
+			var pts = _pathPoints(dStr);
+			if (pts.length < 2) return;
+			var p0 = pts[0], p1 = pts[pts.length-1];
+			var dx = Math.abs(p0[0]-p1[0]), dy = Math.abs(p0[1]-p1[1]);
+			if (dx < 1.5 && dy > tpl.h * 0.05) xs.push((p0[0]+p1[0])/2);
+		});
+		xs.sort(function(a,b){return a-b;});
+		var u = [];
+		xs.forEach(function(v){
+			if (!u.length || v - u[u.length-1] > tpl.w * 0.015) u.push(v);
+			else u[u.length-1] = (u[u.length-1]+v)/2;
+		});
+		return u.map(function(x){ return (x - tpl.minX) / tpl.w * bodyW; });
+	}
+	// คืน y-positions ของ horizontal crease lines (mm, in body space) จาก template cache
+	// กรองเส้นที่รวม dx ต่อ Y-level ≥ 35% ของความกว้าง template (ป้องกัน inner tuck fold ของ type 2 รบกวน)
+	function getTplFoldYs(tpl, bodyH) {
+		var raw = [];
+		(tpl.crease || []).forEach(function(dStr) {
+			var pts = _pathPoints(dStr);
+			if (pts.length < 2) return;
+			var p0 = pts[0], p1 = pts[pts.length-1];
+			var dx = Math.abs(p0[0]-p1[0]), dy = Math.abs(p0[1]-p1[1]);
+			if (dy < 1.5 && dx > tpl.w * 0.01) raw.push({y: (p0[1]+p1[1])/2, dx: dx});
+		});
+		raw.sort(function(a,b){ return a.y - b.y; });
+		var groups = [];
+		raw.forEach(function(item) {
+			var g = groups[groups.length-1];
+			if (g && item.y - g.y < tpl.h * 0.015) {
+				g.y = (g.y + item.y) / 2;
+				g.dx += item.dx;
+			} else {
+				groups.push({y: item.y, dx: item.dx});
+			}
+		});
+		return groups
+			.filter(function(g) { return g.dx > tpl.w * 0.35; })
+			.map(function(g) { return (g.y - tpl.minY) / tpl.h * bodyH; });
+	}
 	function _pathPoints(dStr) {
 		var t = dStr.match(/[MLAZmlaz]|-?\d*\.?\d+(?:[eE]-?\d+)?/g) || [], i = 0, cmd = null, pts = [];
 		function n() { return parseFloat(t[i++]); }
@@ -546,83 +642,6 @@
 		return { svg: svg, w: targetW, h: targetH };
 	}
 
-	function getTplFoldXs(tpl, bodyW) {
-		var xs = [];
-		(tpl.crease || []).forEach(function(dStr) {
-			var pts = _pathPoints(dStr);
-			if (pts.length < 2) return;
-			var p0 = pts[0], p1 = pts[pts.length-1];
-			var dx = Math.abs(p0[0]-p1[0]), dy = Math.abs(p0[1]-p1[1]);
-			if (dx < 1.5 && dy > tpl.h * 0.05) xs.push((p0[0]+p1[0])/2);
-		});
-		xs.sort(function(a,b){return a-b;});
-		var u = [];
-		xs.forEach(function(v){
-			if (!u.length || v - u[u.length-1] > tpl.w * 0.015) u.push(v);
-			else u[u.length-1] = (u[u.length-1]+v)/2;
-		});
-		return u.map(function(x){ return (x - tpl.minX) / tpl.w * bodyW; });
-	}
-	function getTplFoldYs(tpl, bodyH) {
-		var raw = [];
-		(tpl.crease || []).forEach(function(dStr) {
-			var pts = _pathPoints(dStr);
-			if (pts.length < 2) return;
-			var p0 = pts[0], p1 = pts[pts.length-1];
-			var dx = Math.abs(p0[0]-p1[0]), dy = Math.abs(p0[1]-p1[1]);
-			if (dy < 1.5 && dx > tpl.w * 0.01) raw.push({y: (p0[1]+p1[1])/2, dx: dx});
-		});
-		raw.sort(function(a,b){ return a.y - b.y; });
-		var groups = [];
-		raw.forEach(function(item) {
-			var g = groups[groups.length-1];
-			if (g && item.y - g.y < tpl.h * 0.015) {
-				g.y = (g.y + item.y) / 2;
-				g.dx += item.dx;
-			} else {
-				groups.push({y: item.y, dx: item.dx});
-			}
-		});
-		return groups
-			.filter(function(g) { return g.dx > tpl.w * 0.35; })
-			.map(function(g) { return (g.y - tpl.minY) / tpl.h * bodyH; });
-	}
-	function getPanelSegs(d) {
-		var W=d.W||0, L=d.L||0, D=d.D||0, T=d.T||15, G=d.G||10, OL=d.OL||Math.max(8,W*0.18);
-		if (d.type===1||d.type===2) return { cols:[G,L,W,L,W], rows:[T,W,D,W,T] };
-		if (d.type===3||d.type===4) return { cols:[G,L,W,L,W], rows:[T,W,D,W/2,OL] };
-		if (d.type===5)  return { cols:[D,W,D], rows:[D,L,D] };
-		if (d.type===6)  return { cols:[D,W,D], rows:[D,L,D] };
-		if (d.type===8)  return { cols:[G,L,W,L,W], rows:[T,D,D,W/2,OL] };
-		if (d.type===9)  return { cols:[G,W,L,W,L], rows:[D] };
-		if (d.type===11) return { cols:[G,L,W,L,W], rows:[W,D,W] };
-		return null;
-	}
-	function dimVr(y1, y2, x, value, fs) {
-		var aw = Math.max((y2 - y1) * 0.015, 2.5), col = '#dc2626', sw = 0.8;
-		var ty = (y1 + y2) / 2;
-		var lines = '<line x1="' + r(x) + '" y1="' + r(y1) + '" x2="' + r(x) + '" y2="' + r(y2) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
-			'<line x1="' + r(x - aw) + '" y1="' + r(y1) + '" x2="' + r(x + aw) + '" y2="' + r(y1) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
-			'<line x1="' + r(x - aw) + '" y1="' + r(y2) + '" x2="' + r(x + aw) + '" y2="' + r(y2) + '" stroke="' + col + '" stroke-width="' + sw + '"/>';
-		if ((y2 - y1) < fs * 3.2) {
-			return lines + '<text x="' + r(x + aw * 3.5) + '" y="' + r(ty) + '" font-size="' + r(fs) + '" fill="' + col + '" text-anchor="start" dominant-baseline="central" font-family="Prompt, sans-serif">' + value.toFixed(1) + ' mm</text>';
-		}
-		var tx = x + aw * 2.2;
-		return lines + '<text x="' + r(tx) + '" y="' + r(ty) + '" font-size="' + r(fs) + '" fill="' + col + '" text-anchor="middle" font-family="Prompt, sans-serif" transform="rotate(-90 ' + r(tx) + ' ' + r(ty) + ')">' + value.toFixed(1) + ' mm</text>';
-	}
-	function dimVl(y1, y2, x, value, fs) {
-		var aw = Math.max((y2 - y1) * 0.015, 2.5), col = '#dc2626', sw = 0.8;
-		var ty = (y1 + y2) / 2;
-		var lines = '<line x1="' + r(x) + '" y1="' + r(y1) + '" x2="' + r(x) + '" y2="' + r(y2) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
-			'<line x1="' + r(x - aw) + '" y1="' + r(y1) + '" x2="' + r(x + aw) + '" y2="' + r(y1) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
-			'<line x1="' + r(x - aw) + '" y1="' + r(y2) + '" x2="' + r(x + aw) + '" y2="' + r(y2) + '" stroke="' + col + '" stroke-width="' + sw + '"/>';
-		if ((y2 - y1) < fs * 3.2) {
-			// แนวนอน (text-anchor end = ข้อความชิดซ้ายของเส้น)
-			return lines + '<text x="' + r(x - aw * 3.5) + '" y="' + r(ty) + '" font-size="' + r(fs) + '" fill="' + col + '" text-anchor="end" dominant-baseline="central" font-family="Prompt, sans-serif">' + value.toFixed(1) + ' mm</text>';
-		}
-		var tx = x - aw * 2.2;
-		return lines + '<text x="' + r(tx) + '" y="' + r(ty) + '" font-size="' + r(fs) + '" fill="' + col + '" text-anchor="middle" font-family="Prompt, sans-serif" transform="rotate(-90 ' + r(tx) + ' ' + r(ty) + ')">' + value.toFixed(1) + ' mm</text>';
-	}
 	function dielineCore(d) {
 		var body;
 		if (d.type === 1 || d.type === 2) body = buildRTE(d);
@@ -1450,18 +1469,24 @@
 			'<div id="v2-svg-holder" class="bg-white" style="flex:1;overflow:auto;padding:16px;display:flex;align-items:center;justify-content:center"><div id="v2-svg-inner" style="transform-origin:center center;display:flex;align-items:center;justify-content:center;margin:auto"></div></div>' +
 			'<div id="v2-nest-panel" style="flex:1;overflow:auto;padding:16px;display:none"></div>' +
 			'</div>' +
-			'<div id="v2-zoombar" style="padding:12px 18px;border-top:1px solid #eee;background:#fafafa;display:flex;gap:8px;align-items:center;flex-wrap:wrap">' +
-			'<button class="v2-zoomout" style="width:34px;height:34px;background:#e2e8f0;border:0;border-radius:6px;font-size:18px;font-weight:bold;cursor:pointer">−</button>' +
+			'<div id="v2-zoombar" style="padding:10px 18px;border-top:1px solid #eee;background:#fafafa;display:flex;align-items:center;gap:10px;flex-wrap:wrap">' +
+			'<div style="display:flex;align-items:center;gap:4px">' +
+			'<button class="v2-zoomout" style="width:32px;height:32px;background:#e2e8f0;border:0;border-radius:6px;font-size:18px;font-weight:bold;cursor:pointer">−</button>' +
 			'<span id="v2-zoomlbl" style="min-width:46px;text-align:center;font-size:13px;color:#475569">100%</span>' +
-			'<button class="v2-zoomin" style="width:34px;height:34px;background:#e2e8f0;border:0;border-radius:6px;font-size:18px;font-weight:bold;cursor:pointer">+</button>' +
-			'<button class="v2-zoomreset" style="background:#e2e8f0;border:0;padding:7px 12px;border-radius:6px;font-size:12px;cursor:pointer">รีเซ็ต</button>' +
-			'<span style="font-size:11px;color:#94a3b8">(ลูกกลิ้งเมาส์ = ซูมที่จุดนั้น)</span>' +
-			'<label style="font-size:12px;color:#475569">พื้นหลัง <select class="v2-bg" style="padding:3px 5px;border:1px solid #cbd5e1;border-radius:5px"><option value="white">ขาว</option><option value="gray">เทา</option><option value="black">ดำ</option></select></label>' +
+			'<button class="v2-zoomin" style="width:32px;height:32px;background:#e2e8f0;border:0;border-radius:6px;font-size:18px;font-weight:bold;cursor:pointer">+</button>' +
+			'<button class="v2-zoomreset" style="background:#e2e8f0;border:0;padding:6px 11px;border-radius:6px;font-size:12px;cursor:pointer">รีเซ็ต</button>' +
+			'</div>' +
+			'<span style="font-size:11px;color:#b0bac8;white-space:nowrap">(ลูกกลิ้งเมาส์ = ซูมที่จุดนั้น)</span>' +
+			'<span style="width:1px;height:22px;background:#e2e8f0;flex-shrink:0"></span>' +
+			'<label style="font-size:12px;color:#475569;white-space:nowrap">พื้นหลัง <select class="v2-bg" style="padding:3px 6px;border:1px solid #cbd5e1;border-radius:5px"><option value="white">ขาว</option><option value="gray">เทา</option><option value="black">ดำ</option></select></label>' +
 			'<span style="flex:1"></span>' +
+			'<div style="display:flex;align-items:center;gap:8px">' +
 			'<button class="v2-3d" style="background:#7c3aed;' + btn + '">3D</button>' +
 			'<button class="v2-pdf" style="background:#dc2626;' + btn + '">PDF</button>' +
 			'<button class="v2-dl" style="background:#6d28d9;' + btn + '">SVG</button>' +
-			'<button class="v2-close" style="background:#eee;border:0;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer">ปิด</button>' +
+			'<span style="width:1px;height:22px;background:#e2e8f0;flex-shrink:0"></span>' +
+			'<button class="v2-close" style="background:#e2e8f0;border:0;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;color:#374151">ปิด</button>' +
+			'</div>' +
 			'</div></div></div>';
 		document.body.insertAdjacentHTML('beforeend', html);
 		var _prevBodyOverflow = document.body.style.overflow;

@@ -72,6 +72,7 @@ $(function () {
 
 	function renderBreakdown(mainData) {
 		const parts = []
+		parts.push(renderAISummarySection())
 		parts.push(renderJobHeader(mainData))
 		parts.push(renderQtySummary(mainData))      // อัปเดต: ราคารวมแต่ละยอดก่อน
 		parts.push(renderTotalPriceBySheet(mainData)) // ราคาแยกตามกระบวนการต่อยอด
@@ -150,7 +151,7 @@ $(function () {
 		}).join('')
 
 		return `
-			<div class="cb-section">
+			<div class="cb-section" id="cb-anchor-table">
 				<h3>📊 รายการค่าใช้จ่ายแบ่งตามยอด (totalprice[])</h3>
 				<table class="cb-formula">
 					<thead><tr>${header}</tr></thead>
@@ -335,7 +336,7 @@ $(function () {
 						`paper_net × unit_price = ${fmt(price.paper.qty, 4)} × ${fmt(price.paper.unit_price)} = <b>${fmt(price.paper.price)}</b> บาท`,
 					price: price.paper.price
 				}
-			]))
+			], lineIdx === 0 ? 'cb-anchor-material' : null))
 		}
 
 		// --- Plate ---
@@ -368,7 +369,7 @@ $(function () {
 					})
 				})
 			}
-			sections.push(renderCostSection('⚙️ ค่าเพลท (Plate)', plateRows))
+			sections.push(renderCostSection('⚙️ ค่าเพลท (Plate)', plateRows, lineIdx === 0 ? 'cb-anchor-plate' : null))
 		}
 
 		// --- Print ---
@@ -399,7 +400,7 @@ $(function () {
 					price: price.print.all.price
 				})
 			}
-			sections.push(renderCostSection('🖨️ ค่าพิมพ์ (Print)', printRows))
+			sections.push(renderCostSection('🖨️ ค่าพิมพ์ (Print)', printRows, lineIdx === 0 ? 'cb-anchor-print' : null))
 		}
 
 		// --- Foil Stamp / Emboss / Deboss --- (per addon arrays at component level)
@@ -459,7 +460,7 @@ $(function () {
 		`
 	}
 
-	function renderCostSection(title, rows) {
+	function renderCostSection(title, rows, anchorId) {
 		const rowsHtml = rows.map((r) => `
 			<tr ${r.highlight ? 'class="cb-sum"' : ''}>
 				<td style="width:24%">${escapeHtml(r.label)}</td>
@@ -467,7 +468,7 @@ $(function () {
 				${r.price != null ? `<td class="cb-num" style="width:15%">${fmt(r.price)}</td>` : '<td></td>'}
 			</tr>`).join('')
 		return `
-			<div style="margin-top:10px">
+			<div style="margin-top:10px"${anchorId ? ` id="${anchorId}"` : ''}>
 				<div style="font-weight:bold;font-size:13px;background:#f3f4f6;padding:6px 10px;border-radius:4px;margin-bottom:4px">${title}</div>
 				<table class="cb-formula"><tbody>${rowsHtml}</tbody></table>
 			</div>
@@ -518,6 +519,151 @@ $(function () {
 		})
 		return sections.join('')
 	}
+
+	// ===== AI plain-language explanation (🤖) =================================
+	// READ-ONLY: build a compact cost summary, ask /ai/explain-price to narrate
+	// WHY the price is what it is. All money figures shown come from this summary
+	// (real calc values) — the AI only supplies category selection + reasons.
+	const AI_EXPLAIN_URL = '/ai/explain-price'
+	const CAT_META = {
+		material:   { label: 'ค่าวัสดุ (กระดาษ)', anchor: 'cb-anchor-material' },
+		plate:      { label: 'ค่าเพลท', anchor: 'cb-anchor-plate' },
+		print:      { label: 'ค่าพิมพ์', anchor: 'cb-anchor-print' },
+		proof:      { label: 'ค่าปรู๊ฟ', anchor: 'cb-anchor-table' },
+		afterpress: { label: 'งานหลังพิมพ์ (เคลือบ/ปั๊ม/ไดคัท)', anchor: 'cb-anchor-table' },
+		delivery:   { label: 'ค่าขนส่ง', anchor: 'cb-anchor-table' },
+		other:      { label: 'อื่นๆ', anchor: 'cb-anchor-table' }
+	}
+
+	function extractPriceSummary(mainData, qtyIndex) {
+		const qtyArr = (mainData.qty && mainData.qty.totalqty) || []
+		const tp = mainData.totalprice || []
+		const i = qtyIndex != null ? qtyIndex : 0
+		const t = tp[i] || {}
+		const qty = qtyArr[i] || 0
+		const num = (v) => (typeof v === 'number' && isFinite(v) ? v : 0)
+		const totalOf = (x) => (x ? (x.total_with_price_diff != null ? x.total_with_price_diff : x.total_price) : null)
+		const total = totalOf(t)
+
+		const categories = {
+			material: num(t.material), plate: num(t.plate), print: num(t.print),
+			proof: num(t.proof), afterpress: num(t.afterpress),
+			delivery: num(t.delivery), other: num(t.other)
+		}
+		const qty_tiers = qtyArr.map((q, k) => {
+			const tot = totalOf(tp[k])
+			return { qty: q, unit_price: tot && q ? +(tot / q).toFixed(4) : null }
+		}).filter((x) => x.qty)
+
+		const job = mainData.job || {}
+		const comp = (mainData.component1 || [])[0] || {}
+		const bt = comp.box_type || {}
+		const ps = comp.packaging_size || {}
+		const color = comp.color || {}
+		const dim = [ps.width, ps.length, ps.depth].filter((x) => x != null && x !== '')
+		let coating = null
+		const cAdd = (comp.addon || []).find((a) => a && a.type === 'coating')
+		if (cAdd && cAdd.info) coating = [cAdd.info.option, cAdd.info.type].filter(Boolean).join(' ') || null
+
+		const spec = {
+			box_type: bt.type_name || comp.component_name || null,
+			box_template_id: bt.type_id != null ? bt.type_id : null,
+			size_mm: dim.length ? dim.join(' x ') : null,
+			paper: (comp.paper && comp.paper.paper_code) || null,
+			gram: comp.gram != null ? comp.gram : null,
+			colors_outside: color.outside != null ? color.outside : null,
+			colors_inside: color.inside != null ? color.inside : null,
+			coating: coating,
+			print_type: job.print_type || null,
+			ink: job.ink_type || 'conventional',
+			is_reprint: job.is_reprinted == 1,
+			uv: String(job.ink_type || '').toUpperCase() === 'UV',
+			markup_mode: job.is_profit_sharing ? 'Profit Sharing' : 'Standard'
+		}
+		return { qty, unit_price: total && qty ? +(total / qty).toFixed(4) : null, total, categories, spec, qty_tiers }
+	}
+
+	function renderAISummarySection() {
+		return `
+			<div class="cb-section" id="cb-ai-summary" style="border-color:#bfdbfe;background:linear-gradient(180deg,#eff6ff,#f9fafb)">
+				<h3 style="color:#1d4ed8">🤖 อธิบายแบบเข้าใจง่าย</h3>
+				<div id="cb-ai-body">
+					<button id="cb-ai-btn" type="button" style="background:linear-gradient(90deg,#0ea5e9,#2563eb);color:#fff;border:none;border-radius:6px;padding:8px 16px;font-weight:bold;cursor:pointer;font-size:13px">✨ อธิบายราคาให้ฟังหน่อย</button>
+					<span style="margin-left:10px;color:#6b7280;font-size:12px">ทำไมราคาเท่านี้ + ตัวขับราคาหลัก — เลขจริงจากการคำนวณ AI ไม่แต่ง</span>
+				</div>
+			</div>`
+	}
+
+	function renderAIResult(ai, summary) {
+		const cats = summary.categories || {}
+		const denom = Object.keys(cats).reduce((a, k) => a + (cats[k] || 0), 0) || 1
+		const drivers = (ai.drivers || []).filter((d) => d && CAT_META[d.category] && (cats[d.category] || 0) > 0)
+		const driverHtml = drivers.map((d, i) => {
+			const meta = CAT_META[d.category]
+			const amt = cats[d.category] || 0
+			const pct = Math.round((amt / denom) * 100)
+			return `
+				<div style="margin:8px 0">
+					<div style="font-weight:bold;color:#111827">
+						${i + 1}. ${escapeHtml(meta.label)}
+						<span style="font-family:monospace;color:#2563eb">${fmt(amt)}฿ (${pct}%)</span>
+						<a href="#" class="cb-see-formula" data-anchor="${meta.anchor}" style="font-size:11px;color:#2563eb;margin-left:6px;text-decoration:none">[ดูสูตร ↓]</a>
+					</div>
+					<div style="color:#4b5563;font-size:12px;margin-left:18px">↳ ${escapeHtml(d.why)}</div>
+				</div>`
+		}).join('')
+		const tips = (ai.reduce_tips || []).filter(Boolean)
+		const tipsHtml = tips.length ? `
+			<div style="margin-top:10px;background:#f0fdf4;border-left:3px solid #16a34a;padding:8px 12px;border-radius:4px">
+				<b>💡 ลดราคาได้โดย:</b>
+				<ul style="margin:4px 0 0 18px;padding:0">${tips.map((t) => `<li>${escapeHtml(t)}</li>`).join('')}</ul>
+			</div>` : ''
+		return `
+			<div style="font-size:14px;font-weight:bold;color:#111827;margin-bottom:2px">${escapeHtml(ai.headline || '')}</div>
+			<div style="font-size:12px;color:#6b7280;margin-bottom:6px">ยอด ${fmtInt(summary.qty)} ใบ • ${fmt(summary.unit_price, 2)} บาท/ใบ • รวม ${fmt(summary.total)} บาท</div>
+			${driverHtml}
+			${ai.qty_trend ? `<div style="margin-top:8px;font-size:12px;color:#374151"><b>📈 ตามยอดสั่ง:</b> ${escapeHtml(ai.qty_trend)}</div>` : ''}
+			${tipsHtml}
+			<div style="margin-top:10px;font-size:11px;color:#9ca3af;display:flex;justify-content:space-between;align-items:center;gap:8px">
+				<span>ℹ️ ตัวเลขเงิน/% ดึงจากการคำนวณจริง — AI อธิบายเฉพาะ "เหตุผล"</span>
+				<button class="cb-ai-retry" type="button" style="background:none;border:1px solid #d1d5db;border-radius:4px;padding:3px 8px;cursor:pointer;font-size:11px;color:#6b7280;white-space:nowrap">🔄 อธิบายใหม่</button>
+			</div>`
+	}
+
+	function requestAIExplanation() {
+		const $body = $('#cb-ai-body')
+		if (typeof est === 'undefined' || !est || !est.mainData) return
+		const summary = extractPriceSummary(est.mainData, 0)
+		$body.html('<div style="padding:10px;color:#2563eb">🤖 กำลังให้ AI อธิบาย... (สักครู่)</div>')
+		fetch(AI_EXPLAIN_URL, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			credentials: 'same-origin',
+			body: JSON.stringify({ summary })
+		}).then((r) => r.json()).then((res) => {
+			if (!res || !res.success || !res.data) {
+				$body.html('<div style="color:#dc2626;padding:8px">❌ อธิบายไม่สำเร็จ: ' + escapeHtml((res && res.error) || 'unknown') + ' <button class="cb-ai-retry" type="button" style="margin-left:6px">ลองใหม่</button></div>')
+				return
+			}
+			$body.html(renderAIResult(res.data, summary))
+		}).catch((e) => {
+			$body.html('<div style="color:#dc2626;padding:8px">❌ เชื่อมต่อ AI ไม่ได้: ' + escapeHtml(e.message) + ' <button class="cb-ai-retry" type="button" style="margin-left:6px">ลองใหม่</button></div>')
+		})
+	}
+
+	// Delegated once: AI button / retry, and the "ดูสูตร" jump-to-formula links.
+	$(document).on('click', '#cb-ai-btn, .cb-ai-retry', requestAIExplanation)
+	$(document).on('click', '.cb-see-formula', function (e) {
+		e.preventDefault()
+		const el = document.getElementById($(this).data('anchor'))
+		if (!el) return
+		$(el).parents('details').prop('open', true)
+		el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+		const prev = el.style.backgroundColor
+		el.style.transition = 'background-color .3s'
+		el.style.backgroundColor = '#fde68a'
+		setTimeout(() => { el.style.backgroundColor = prev || '' }, 1300)
+	})
 
 	function showModal(title, html) {
 		$('#calc-breakdown-modal').remove()

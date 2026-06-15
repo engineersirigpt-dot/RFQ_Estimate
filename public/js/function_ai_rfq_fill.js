@@ -24,6 +24,11 @@ $(function () {
 	sessionStorage.removeItem('ai_rfq_data')
 	sessionStorage.removeItem('ai_rfq_input')
 
+	$('<style>').text(
+		'.ai-uncertain { outline: 2px solid #f59e0b !important; background-color: #fffbeb !important; border-radius: 3px; }' +
+		'.ai-uncertain-wrap { outline: 2px solid #f59e0b !important; background-color: #fffbeb !important; border-radius: 4px; padding: 2px; }'
+	).appendTo('head')
+
 	waitForReady().then(() => fillForm(aiData, aiInput))
 
 	function waitForReady() {
@@ -122,7 +127,8 @@ $(function () {
 			if (d.is_multiple_f && Array.isArray(d.f_codes) && d.f_codes.length > 1) {
 				setTimeout(() => expandMultiFContainers(d.f_codes, d.components || []), 800)
 			}
-			showAIBanner(d, input)
+			const uncertainCount = highlightUncertain(d)
+			showAIBanner(d, input, uncertainCount)
 			if (typeof checkRequiredInput === 'function') checkRequiredInput()
 		} catch (e) {
 			console.error('AI auto-fill error', e)
@@ -175,6 +181,37 @@ $(function () {
 				})
 			}, 200)
 		})
+	}
+
+	function highlightUncertain(d) {
+		const fields = Array.isArray(d._uncertain) ? d._uncertain : []
+		if (fields.length === 0) return 0
+		const MAP = {
+			job_name:        () => $('#jobName input'),
+			customer_name:   () => $('#customerLabel'),
+			ae_name:         () => $('#aeLabel'),
+			print_type:      () => $('#print_type select'),
+			ink_type:        () => $('#ink_type select'),
+			quantities:      () => $('#qty_info .inputQty input'),
+			paper_type:      () => $('.paperType'),
+			paper_gram:      () => $('.paperGram'),
+			box_template_id: () => $('.boxType'),
+			color_outside:   () => $('.colorOutside'),
+			color_inside:    () => $('.colorInside'),
+			coatings:        () => $('.coatingInput'),
+			corrugated:      () => $('.corrugatedInput'),
+			dimensions_mm:   () => $('.specmm'),
+			deliveries:      () => $('.deliveryDestinationName'),
+		}
+		// Delay until all fills + their internal setTimeouts complete
+		setTimeout(() => {
+			fields.forEach((field) => {
+				const fn = MAP[field]
+				if (!fn) return
+				fn().addClass('ai-uncertain')
+			})
+		}, 1500)
+		return fields.length
 	}
 
 	function fillDeliveries(d) {
@@ -464,19 +501,31 @@ $(function () {
 			}, 350)
 		}
 
+		// Paper type — WAIT for the dropdown to be populated before matching.
+		// The .paperType option list is (re)built asynchronously and is filtered
+		// by the current print type's GSM range (getMasterData.js buildPaperType /
+		// getDefaultPaperTypeList). Matching synchronously here can run before the
+		// options exist and silently leave the field blank — the GEFEN "Duplex 350"
+		// case. gram/corrugated already guard with waitForOptions; do the same here.
 		const $papType = $comp.find('.paperType').first()
-		if (c.paper_type && $papType.length) {
-			const m = matchPaperType($papType, c.paper_type)
-			if (m) $papType.val(m).trigger('change')
+		const fillGram = ($papGram) => {
+			if (c.paper_gram == null || !$papGram || !$papGram.length) return
+			const m = findOptionMatch($papGram, c.paper_gram)
+			if (m) $papGram.val(m).trigger('change')
+			else $papGram.val(String(c.paper_gram)).trigger('change')
 		}
-		setTimeout(() => {
-			const $papGram = $comp.find('.paperGram').first()
-			if (c.paper_gram != null && $papGram.length) {
-				const m = findOptionMatch($papGram, c.paper_gram)
-				if (m) $papGram.val(m).trigger('change')
-				else $papGram.val(String(c.paper_gram)).trigger('change')
-			}
-		}, 250)
+		if (c.paper_type && $papType.length) {
+			waitForOptions($papType, 2000).then(($sel) => {
+				const $p = $sel || $papType
+				const m = matchPaperType($p, c.paper_type)
+				if (m) $p.val(m).trigger('change')
+				// gram options depend on the just-selected type — wait for them too
+				waitForOptions($comp.find('.paperGram').first(), 2000).then(($g) =>
+					fillGram($g || $comp.find('.paperGram').first()))
+			})
+		} else {
+			setTimeout(() => fillGram($comp.find('.paperGram').first()), 250)
+		}
 		if (c.paper_cost != null) $comp.find('.paperCost').first().val(c.paper_cost).trigger('change')
 		if (c.paper_percent != null) $comp.find('.paperPercent').first().val(c.paper_percent).trigger('change')
 		if (c.remark_paper) {
@@ -526,12 +575,12 @@ $(function () {
 				}).length > 0
 				if (hasOpt) {
 					$box.val(tid).trigger('change')
-					if (c.dimensions_mm) fillDimensionsAfterTemplate(i, c.dimensions_mm, c.flap_mm, openSize, extraSpec)
+					if (c.dimensions_mm) fillDimensionsAfterTemplate(i, c.dimensions_mm, c.flap_mm, openSize, extraSpec, c.box_template_id)
 					if (c.glued_spots != null) fillGluedSpots(i, parseInt(c.glued_spots, 10))
 				}
 			}, 500)
 		} else if (c.dimensions_mm) {
-			fillDimensionsAfterTemplate(i, c.dimensions_mm, c.flap_mm, openSize, extraSpec)
+			fillDimensionsAfterTemplate(i, c.dimensions_mm, c.flap_mm, openSize, extraSpec, c.box_template_id)
 			if (c.glued_spots != null) fillGluedSpots(i, parseInt(c.glued_spots, 10))
 		}
 	}
@@ -588,35 +637,44 @@ $(function () {
 		$row.find('.nameProcess textarea').first().val(procName).trigger('change').trigger('input')
 	}
 
-	function fillDimensionsAfterTemplate(componentIndex, dim, flap_mm, openSize, extraSpec) {
-		setTimeout(() => {
+	function fillDimensionsAfterTemplate(componentIndex, dim, flap_mm, openSize, extraSpec, templateId) {
+		// Custom = template 12 (open + packing size fields instead of W/L/H).
+		// Detect by the TEMPLATE ID, NOT by DOM presence: the dimension section
+		// renders late after the .boxType change, and a not-yet-rendered
+		// .specmm.width used to be misread as "Custom" — which silently skipped
+		// W/L/H. That was the Seal End #11 dieline bug (80×25×150 extracted by the
+		// AI but never filled). Poll until the right inputs actually exist.
+		const isCustom = String(templateId) === '12'
+		let tries = 0
+		const tick = () => {
+			if (++tries > 40) return // ~4s budget — give up rather than spin
 			const $iType = $('.inputType[index="' + componentIndex + '"]')
-			if (!$iType.length) return
-
-			// Template 12 (Custom) replaces width/length/depth with open + packing
-			// size fields. Detect by checking which inputs actually exist.
-			const $width = $iType.find('.specmm.width').first()
-			const isCustom = $width.length === 0 || !$width.is(':visible')
+			if (!$iType.length) return setTimeout(tick, 100)
 
 			if (isCustom) {
-				// For Custom template, prefer the OPEN size (flat sheet
-				// dimensions, e.g. 332 × 361.5 mm) — that's what the form
-				// expects. Fall back to dim (folded) if open size unavailable.
-				const openW = openSize && openSize.width != null ? openSize.width : (openSize && openSize.w != null ? openSize.w : dim.width)
-				const openL = openSize && openSize.length != null ? openSize.length : (openSize && openSize.l != null ? openSize.l : dim.length)
-
+				// Custom uses the OPEN/flat-sheet size (the overall dieline outer
+				// dimensions, e.g. 370×200), which is NOT the folded box W/L/H.
+				// Only fill when the AI gave a real open size — do NOT fall back to
+				// the box dimensions (that shoved garbage like 213×12321 into the
+				// flat fields). No reliable open size → leave blank for the user.
+				const ow = openSize && (openSize.width != null ? openSize.width : openSize.w)
+				const ol = openSize && (openSize.length != null ? openSize.length : openSize.l)
+				if (ow == null && ol == null) return // nothing reliable — leave blank
 				const $openMm = $iType.find('.openSizemm input')
-				if ($openMm.length >= 2) {
-					if (openW != null) $openMm.eq(0).val(openW).trigger('change')
-					if (openL != null) $openMm.eq(1).val(openL).trigger('change')
-				}
+				if ($openMm.length < 2) return setTimeout(tick, 100)
+				if (ow != null) $openMm.eq(0).val(ow).trigger('change')
+				if (ol != null) $openMm.eq(1).val(ol).trigger('change')
 				const $packMm = $iType.find('.packingsizemm input')
 				if ($packMm.length >= 2) {
-					if (openW != null && !$packMm.eq(0).val()) $packMm.eq(0).val(openW).trigger('change')
-					if (openL != null && !$packMm.eq(1).val()) $packMm.eq(1).val(openL).trigger('change')
+					if (ow != null && !$packMm.eq(0).val()) $packMm.eq(0).val(ow).trigger('change')
+					if (ol != null && !$packMm.eq(1).val()) $packMm.eq(1).val(ol).trigger('change')
 				}
-				return // no width/length/depth to fill on Custom
+				return
 			}
+
+			// Non-custom: WAIT for the W/L/H inputs to render, then fill.
+			const $width = $iType.find('.specmm.width').first()
+			if (!$width.length) return setTimeout(tick, 100)
 
 			if (dim.width != null) $iType.find('.specmm.width').val(dim.width).trigger('change')
 			if (dim.length != null) $iType.find('.specmm.length').val(dim.length).trigger('change')
@@ -631,10 +689,8 @@ $(function () {
 				}
 			}
 
-			// ติดกาว (side glue tab) and ฝาเสียบ (tuck flap) — these have form
-			// defaults (15/15) which are often wrong. Always override when AI
-			// provides a measured value from the dieline (AI is instructed to
-			// only fill these when the dieline shows them explicitly).
+			// ติดกาว (side glue tab) and ฝาเสียบ (tuck flap) — form defaults (15/15)
+			// are often wrong; override when the AI measured a value from the dieline.
 			if (extraSpec && extraSpec.glue_mm != null) {
 				const $glue = $iType.find('.specmm.glue').first()
 				if ($glue.length) $glue.val(extraSpec.glue_mm).trigger('change')
@@ -643,7 +699,8 @@ $(function () {
 				const $tuck = $iType.find('.specmm.tuck').first()
 				if ($tuck.length) $tuck.val(extraSpec.tuck_mm).trigger('change')
 			}
-		}, 800)
+		}
+		setTimeout(tick, 150)
 	}
 
 	// Process names that the backend / form already handle for every Packaging
@@ -1029,16 +1086,30 @@ $(function () {
 		}
 	}
 
-	function showAIBanner(d, input) {
+	function showAIBanner(d, input, uncertainCount) {
+		const uncertainMsg = uncertainCount > 0
+			? ' — <b style="color:#fde68a">⚠ ' + uncertainCount + ' field ไฮไลต์สีเหลือง</b> ต้องกรอกเพิ่มเติม'
+			: ''
 		const notes = d.notes ? '<div style="margin-top:6px;font-size:12px;color:#444"><b>หมายเหตุจาก AI:</b> ' + escapeHtml(d.notes) + '</div>' : ''
+		const packing = d.packing && (d.packing.shrink_per_unit != null || d.packing.units_per_carton != null || d.packing.carton_per_pallet != null || d.packing.remark)
+			? (() => {
+				const parts = []
+				if (d.packing.shrink_per_unit != null) parts.push(d.packing.shrink_per_unit + ' ชิ้น/Shrink')
+				if (d.packing.units_per_carton != null) parts.push(d.packing.units_per_carton + ' Shrink/ลัง')
+				if (d.packing.carton_per_pallet != null) parts.push(d.packing.carton_per_pallet + ' ลัง/พาเลท')
+				if (d.packing.remark) parts.push(d.packing.remark)
+				return '<div style="margin-top:6px;font-size:12px;color:#fde68a"><b>📦 ข้อมูลการบรรจุ (กรอกเองในส่วน Packing):</b> ' + escapeHtml(parts.join(' · ')) + '</div>'
+			  })()
+			: ''
 		const btnStyle =
 			'background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.5);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px;margin-left:8px'
 		const banner = $(`
 			<div id="ai-fill-banner" style="position:fixed;top:0;left:0;right:0;background:linear-gradient(90deg,#6a5af9,#a855f7);color:#fff;padding:10px 20px;z-index:9998;box-shadow:0 2px 6px rgba(0,0,0,0.2)">
 				<div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
 					<div style="flex:1">
-						<i class="fa fa-magic"></i> <b>AI ได้กรอกข้อมูลให้แล้ว</b> — กรุณาตรวจสอบทุกฟิลด์ โดยเฉพาะ <b>AE</b>, <b>Customer</b>, และ <b>จังหวัดส่งงาน</b> ต้องเลือกจากรายการ autocomplete อีกครั้ง
+						<i class="fa fa-magic"></i> <b>AI ได้กรอกข้อมูลให้แล้ว</b> — กรุณาตรวจสอบทุกฟิลด์ โดยเฉพาะ <b>AE</b>, <b>Customer</b>, และ <b>จังหวัดส่งงาน</b> ต้องเลือกจากรายการ autocomplete อีกครั้ง${uncertainMsg}
 						${notes}
+						${packing}
 					</div>
 					<div style="white-space:nowrap">
 						<button id="ai-show-input" type="button" style="${btnStyle}"><i class="fa fa-file-text-o"></i> ดู input ที่ส่งให้ AI</button>
