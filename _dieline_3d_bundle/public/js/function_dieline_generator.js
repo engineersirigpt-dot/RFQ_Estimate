@@ -546,6 +546,83 @@
 		return { svg: svg, w: targetW, h: targetH };
 	}
 
+	function getTplFoldXs(tpl, bodyW) {
+		var xs = [];
+		(tpl.crease || []).forEach(function(dStr) {
+			var pts = _pathPoints(dStr);
+			if (pts.length < 2) return;
+			var p0 = pts[0], p1 = pts[pts.length-1];
+			var dx = Math.abs(p0[0]-p1[0]), dy = Math.abs(p0[1]-p1[1]);
+			if (dx < 1.5 && dy > tpl.h * 0.05) xs.push((p0[0]+p1[0])/2);
+		});
+		xs.sort(function(a,b){return a-b;});
+		var u = [];
+		xs.forEach(function(v){
+			if (!u.length || v - u[u.length-1] > tpl.w * 0.015) u.push(v);
+			else u[u.length-1] = (u[u.length-1]+v)/2;
+		});
+		return u.map(function(x){ return (x - tpl.minX) / tpl.w * bodyW; });
+	}
+	function getTplFoldYs(tpl, bodyH) {
+		var raw = [];
+		(tpl.crease || []).forEach(function(dStr) {
+			var pts = _pathPoints(dStr);
+			if (pts.length < 2) return;
+			var p0 = pts[0], p1 = pts[pts.length-1];
+			var dx = Math.abs(p0[0]-p1[0]), dy = Math.abs(p0[1]-p1[1]);
+			if (dy < 1.5 && dx > tpl.w * 0.01) raw.push({y: (p0[1]+p1[1])/2, dx: dx});
+		});
+		raw.sort(function(a,b){ return a.y - b.y; });
+		var groups = [];
+		raw.forEach(function(item) {
+			var g = groups[groups.length-1];
+			if (g && item.y - g.y < tpl.h * 0.015) {
+				g.y = (g.y + item.y) / 2;
+				g.dx += item.dx;
+			} else {
+				groups.push({y: item.y, dx: item.dx});
+			}
+		});
+		return groups
+			.filter(function(g) { return g.dx > tpl.w * 0.35; })
+			.map(function(g) { return (g.y - tpl.minY) / tpl.h * bodyH; });
+	}
+	function getPanelSegs(d) {
+		var W=d.W||0, L=d.L||0, D=d.D||0, T=d.T||15, G=d.G||10, OL=d.OL||Math.max(8,W*0.18);
+		if (d.type===1||d.type===2) return { cols:[G,L,W,L,W], rows:[T,W,D,W,T] };
+		if (d.type===3||d.type===4) return { cols:[G,L,W,L,W], rows:[T,W,D,W/2,OL] };
+		if (d.type===5)  return { cols:[D,W,D], rows:[D,L,D] };
+		if (d.type===6)  return { cols:[D,W,D], rows:[D,L,D] };
+		if (d.type===8)  return { cols:[G,L,W,L,W], rows:[T,D,D,W/2,OL] };
+		if (d.type===9)  return { cols:[G,W,L,W,L], rows:[D] };
+		if (d.type===11) return { cols:[G,L,W,L,W], rows:[W,D,W] };
+		return null;
+	}
+	function dimVr(y1, y2, x, value, fs) {
+		var aw = Math.max((y2 - y1) * 0.015, 2.5), col = '#dc2626', sw = 0.8;
+		var ty = (y1 + y2) / 2;
+		var lines = '<line x1="' + r(x) + '" y1="' + r(y1) + '" x2="' + r(x) + '" y2="' + r(y2) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
+			'<line x1="' + r(x - aw) + '" y1="' + r(y1) + '" x2="' + r(x + aw) + '" y2="' + r(y1) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
+			'<line x1="' + r(x - aw) + '" y1="' + r(y2) + '" x2="' + r(x + aw) + '" y2="' + r(y2) + '" stroke="' + col + '" stroke-width="' + sw + '"/>';
+		if ((y2 - y1) < fs * 3.2) {
+			return lines + '<text x="' + r(x + aw * 3.5) + '" y="' + r(ty) + '" font-size="' + r(fs) + '" fill="' + col + '" text-anchor="start" dominant-baseline="central" font-family="Prompt, sans-serif">' + value.toFixed(1) + ' mm</text>';
+		}
+		var tx = x + aw * 2.2;
+		return lines + '<text x="' + r(tx) + '" y="' + r(ty) + '" font-size="' + r(fs) + '" fill="' + col + '" text-anchor="middle" font-family="Prompt, sans-serif" transform="rotate(-90 ' + r(tx) + ' ' + r(ty) + ')">' + value.toFixed(1) + ' mm</text>';
+	}
+	function dimVl(y1, y2, x, value, fs) {
+		var aw = Math.max((y2 - y1) * 0.015, 2.5), col = '#dc2626', sw = 0.8;
+		var ty = (y1 + y2) / 2;
+		var lines = '<line x1="' + r(x) + '" y1="' + r(y1) + '" x2="' + r(x) + '" y2="' + r(y2) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
+			'<line x1="' + r(x - aw) + '" y1="' + r(y1) + '" x2="' + r(x + aw) + '" y2="' + r(y1) + '" stroke="' + col + '" stroke-width="' + sw + '"/>' +
+			'<line x1="' + r(x - aw) + '" y1="' + r(y2) + '" x2="' + r(x + aw) + '" y2="' + r(y2) + '" stroke="' + col + '" stroke-width="' + sw + '"/>';
+		if ((y2 - y1) < fs * 3.2) {
+			// แนวนอน (text-anchor end = ข้อความชิดซ้ายของเส้น)
+			return lines + '<text x="' + r(x - aw * 3.5) + '" y="' + r(ty) + '" font-size="' + r(fs) + '" fill="' + col + '" text-anchor="end" dominant-baseline="central" font-family="Prompt, sans-serif">' + value.toFixed(1) + ' mm</text>';
+		}
+		var tx = x - aw * 2.2;
+		return lines + '<text x="' + r(tx) + '" y="' + r(ty) + '" font-size="' + r(fs) + '" fill="' + col + '" text-anchor="middle" font-family="Prompt, sans-serif" transform="rotate(-90 ' + r(tx) + ' ' + r(ty) + ')">' + value.toFixed(1) + ' mm</text>';
+	}
 	function dielineCore(d) {
 		var body;
 		if (d.type === 1 || d.type === 2) body = buildRTE(d);
@@ -560,27 +637,121 @@
 		else if (d.type === 9) body = buildSleeve(d);
 		else if (d.type === 12) body = buildCustom(d);
 		else body = buildGeneric(d);
-		// ถ้ามีเทมเพตจริง (1-7) → ใช้รูปทรงเทมเพต scale ให้ขนาด = ที่คำนวณ (ตามขนาดที่กรอก) → nesting/%เสีย ถูก
+		// ถ้ามีเทมเพตจริง (1-11) → ใช้รูปทรงเทมเพต scale ให้ขนาด = ที่คำนวณ (ตามขนาดที่กรอก) → visual ตาม template จริง
+		// template SVG ยังถูก cache ไว้สำหรับ fold detection ใน segDims
 		if (_localBodyCache[d.type] && body.w > 0 && body.h > 0) {
 			body = tplToBody(_localBodyCache[d.type], body.w, body.h);
 		}
 		var maxd = Math.max(body.w, body.h, 1);
 		var fs = Math.max(maxd * 0.03, 8);
-		var pad = maxd * 0.11 + 24;
-		var gap = pad * 0.5;
-		// เส้นบอกขนาดรวม (open size) หน่วย mm — บนสุด + ซ้ายสุด
-		var dims = _showDims ? (dimH(0, body.w, -gap, body.w, fs) + dimV(0, body.h, -gap, body.h, fs)) : '';
-		// GRAIN arrow — วางเหนือเส้นบอกขนาด
-		var vyTop = -pad, grain = '';
-		if (_showGrain) {
-			var dimTop = _showDims ? (gap + fs * 1.9) : gap;
-			var gY = -(dimTop + fs * 1.5);
-			grain = grainArrow(body.w, gY, fs);
-			vyTop = Math.min(-pad, gY - fs * 1.3);
+		var sfs = Math.max(fs * 0.46, 3.8);    // font สำหรับ segment dims (เล็กกว่า total)
+		var sfsI = sfs * 0.85;                  // font เล็กกว่าสำหรับ inner ซ้าย
+		var pad = Math.max(sfs * 10, maxd * 0.12 + 24);
+		// Engineering-drawing layout:
+		//   ซ้าย outer (xTotL): total height dimV
+		//   ซ้าย inner (xSegL): segment rows dimVl   ← ตรงที่ user ทำ yellow mark
+		//   ขวา  inner (xSegR): segment rows dimVr   ← ตรงที่ green fold marks
+		//   ล่าง inner (ySegB): segment cols dimHb
+		//   ล่าง outer (yTotB): total width  dimH
+		var xTotL = -(fs * 5.5);                // total vertical ซ้ายสุด (อิง fs ไม่ใช่ sfs)
+		var xSegL = -(sfs * 3.5);               // segment vertical ซ้าย inner
+		var xSegR = body.w + sfs * 3.0;         // segment vertical ขวา inner
+		var ySegB = body.h + sfs * 2.0;         // segment horizontal ล่าง inner
+		var yTotB = body.h + fs * 4.5;          // total horizontal ล่าง outer (อิง fs)
+		var dims = _showDims ? (
+			dimH(0, body.w, yTotB, body.w, fs) +
+			dimV(0, body.h, xTotL, body.h, fs)
+		) : '';
+		var segDims = '';
+		if (_showDims) {
+			var segs = getPanelSegs(d);
+			if (segs) {
+				var tplCache = _localBodyCache[d.type];
+				var minSegH = sfs * 1.8;    // threshold แนวนอน
+				var minSegV = sfs * 1.0;    // threshold แนวตั้ง (เล็กกว่า — รองรับ T แคบ)
+				// แนวนอน cols — ใต้ dieline inner, snap ตาม template fold
+				var colFolds = []; // interior fold x positions สำหรับ extension lines
+				if (tplCache) {
+					var foldXs = getTplFoldXs(tplCache, body.w);
+					var xs = [0].concat(foldXs).concat([body.w]);
+					if (xs.length - 1 === segs.cols.length) {
+						for (var ci = 0; ci < segs.cols.length; ci++) {
+							if (xs[ci+1] - xs[ci] >= minSegH) segDims += dimHb(xs[ci], xs[ci+1], ySegB, segs.cols[ci], sfs);
+						}
+						colFolds = foldXs; // ใช้ template positions
+					} else {
+						var sx = 0;
+						segs.cols.forEach(function(v, ci) {
+							if (v >= minSegH) segDims += dimHb(sx, sx+v, ySegB, v, sfs);
+							sx += v;
+							if (ci < segs.cols.length - 1) colFolds.push(sx);
+						});
+					}
+				} else {
+					var sx = 0;
+					segs.cols.forEach(function(v, ci) {
+						if (v >= minSegH) segDims += dimHb(sx, sx+v, ySegB, v, sfs);
+						sx += v;
+						if (ci < segs.cols.length - 1) colFolds.push(sx);
+					});
+				}
+				// แนวตั้ง rows — snap ให้ตรง template fold จริง, แบ่งซ้าย/ขวา
+				var tplFoldYs = tplCache ? getTplFoldYs(tplCache, body.h) : [];
+				var rowYs = (function(rows, fys, bh) {
+					var n = rows.length;
+					// perfect match
+					if (fys.length + 1 === n) return [0].concat(fys).concat([bh]);
+					// 2 folds + 5 rows: proportional split within top/bottom blocks
+					if (fys.length === 2 && n === 5) {
+						var f0 = fys[0], f1 = fys[1];
+						return [0, f0 * rows[0] / (rows[0] + rows[1]), f0, f1,
+							f1 + (bh - f1) * rows[3] / (rows[3] + rows[4]), bh];
+					}
+					// 3 folds + 5 rows: use fold positions directly, ignore extra
+					if (fys.length >= 4 && n === 5) return [0, fys[0], fys[1], fys[2], fys[3], bh];
+					// fallback: formula cumulative
+					var acc = [0], s = 0;
+					rows.forEach(function(v) { s += v; acc.push(s); });
+					return acc;
+				})(segs.rows, tplFoldYs, body.h);
+				// ซ้าย: +1 row สำหรับ n≥4 เพื่อให้ครบ (เช่น T,W,D,W_bot แทนที่จะเป็น T,W,D)
+				var n = segs.rows.length;
+				var halfCount = Math.min(Math.ceil(n / 2) + (n >= 4 ? 1 : 0), n);
+				var halfStart = Math.floor(n / 2);
+				for (var ri = 0; ri < halfCount; ri++) {
+					if (segs.rows[ri] >= minSegV)
+						segDims += dimVl(rowYs[ri], rowYs[ri + 1], xSegL, segs.rows[ri], sfsI);
+				}
+				for (var ri = halfStart; ri < n; ri++) {
+					if (segs.rows[ri] >= minSegV)
+						segDims += dimVr(rowYs[ri], rowYs[ri + 1], xSegR, segs.rows[ri], sfs);
+				}
+				// Extension lines: side-specific — ซ้ายเฉพาะ boundary ของซ้าย, ขวาเฉพาะของขวา
+				var eC = '#dc2626', eSw = 0.4, eGap = 1.2;
+				for (var ei = 1; ei <= halfCount; ei++) {
+					var ey = rowYs[ei];
+					segDims += '<line x1="' + r(-eGap) + '" y1="' + r(ey) + '" x2="' + r(xSegL) + '" y2="' + r(ey) + '" stroke="' + eC + '" stroke-width="' + eSw + '" stroke-dasharray="2,1.5"/>';
+				}
+				for (var ei = halfStart; ei < n; ei++) {
+					var ey = rowYs[ei];
+					segDims += '<line x1="' + r(body.w + eGap) + '" y1="' + r(ey) + '" x2="' + r(xSegR) + '" y2="' + r(ey) + '" stroke="' + eC + '" stroke-width="' + eSw + '" stroke-dasharray="2,1.5"/>';
+				}
+				// แนวตั้ง — ที่ทุก interior col fold (ล่าง)
+				colFolds.forEach(function(x) {
+					segDims += '<line x1="' + r(x) + '" y1="' + r(body.h + eGap) + '" x2="' + r(x) + '" y2="' + r(ySegB) + '" stroke="' + eC + '" stroke-width="' + eSw + '" stroke-dasharray="2,1.5"/>';
+				});
+			}
 		}
-		// โหมดเส้นล้วน (แบบ v1): เอาสีพื้นออก เหลือแต่เส้น
+		// GRAIN arrow — บนสุด
+		var gY = -(sfs * 3.0);
+		var grain = _showGrain ? grainArrow(body.w, gY, fs) : '';
+		var vyTop = _showGrain ? Math.min(-pad * 0.6, gY - fs * 1.2) : -pad * 0.6;
 		var styleB = _lineOnly ? '<style>rect,path,ellipse{fill:none !important}</style>' : '';
-		return { inner: styleB + body.svg + dims + grain, bodySvg: body.svg, vx: -pad, vy: vyTop, vw: body.w + pad * 2, vh: (body.h + pad) - vyTop, bw: body.w, bh: body.h };
+		// viewport คำนวณจาก position จริง
+		var vxL = Math.min(xTotL - fs * 4.5, -pad * 0.5);
+		var vwR = xSegR + sfs * 9.0;   // ขยายพอสำหรับ narrow-segment text
+		var vhBot = yTotB + fs * 2.2;
+		return { inner: styleB + body.svg + dims + segDims + grain, bodySvg: body.svg, vx: vxL, vy: vyTop, vw: vwR - vxL, vh: vhBot - vyTop, bw: body.w, bh: body.h };
 	}
 	// SVG สำหรับแสดงบนจอ (width 100%)
 	function buildDielineSVG(d) {
