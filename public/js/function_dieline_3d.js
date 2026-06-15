@@ -958,7 +958,8 @@
 			var _clipP = (isLip && parentPerp > 0) ? parentPerp * 1.02 : 0
 			panel.segs.forEach(function (s, i) { var la = w2l(frame, s.a), lb = w2l(frame, s.b); if (_clipP) { la[1] = Math.max(-_clipP, Math.min(_clipP, la[1])); lb[1] = Math.max(-_clipP, Math.min(_clipP, lb[1])) } if (i === 0) shape.moveTo(la[0], la[1]); shape.lineTo(lb[0], lb[1]); var arr = (ecount[ekeyG(s.a, s.b)] >= 2) ? foldV : cutV; arr.push(new THREE.Vector3(la[0], la[1], 0), new THREE.Vector3(lb[0], lb[1], 0)) })
 			var mesh = new THREE.Mesh(new THREE.ShapeGeometry(shape), material)
-			if (cutV.length) mesh.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(cutV), cutMat)); if (foldV.length) mesh.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(foldV), foldMat))
+			if (cutV.length) mesh.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(cutV), cutMat));
+			if (foldV.length) { var _fl = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(foldV), foldMat); _fl.userData.creaseSolid = true; mesh.add(_fl) }   // tag fold=crease → ซ่อนในโหมดเส้นนอก
 			var nc
 			if (node.hinge) {
 				var aP = w2l(pf, node.hinge.A), joint = new THREE.Group()
@@ -1165,8 +1166,8 @@
 	// toggle: โชว์เส้นพับสีจริง (เขียว=fold, แดง=cut) / ปิด=สีเดิม
 	Viewer.prototype._applyFoldLineColors = function () {
 		if (!this._lineMats) return
-		this._lineMats.cut.color.setHex(0x222222)
-		this._lineMats.fold.color.setHex(0x222222)
+		this._lineMats.cut.color.setHex(0xdc2626)    // เส้นนอก/ตัด = แดง
+		this._lineMats.fold.color.setHex(0x16a34a)   // เส้นใน/พับ = เขียว
 		this._lineMats.cut.depthTest = false; this._lineMats.fold.depthTest = false
 		this._dirty = true
 	}
