@@ -1166,8 +1166,9 @@
 	// toggle: โชว์เส้นพับสีจริง (เขียว=fold, แดง=cut) / ปิด=สีเดิม
 	Viewer.prototype._applyFoldLineColors = function () {
 		if (!this._lineMats) return
-		this._lineMats.cut.color.setHex(0xdc2626)    // เส้นนอก/ตัด = แดง
-		this._lineMats.fold.color.setHex(0x16a34a)   // เส้นใน/พับ = เขียว
+		var outer = this._outerOnly !== false
+		this._lineMats.cut.color.setHex(outer ? 0x222222 : 0xdc2626)   // เส้นนอก: ดำ(โหมดเส้นนอก) / แดง(โหมดทั้งหมด)
+		this._lineMats.fold.color.setHex(0x16a34a)                     // เส้นพับ = เขียว
 		this._lineMats.cut.depthTest = false; this._lineMats.fold.depthTest = false
 		this._dirty = true
 	}
@@ -1588,6 +1589,7 @@
 		$('#dieline-3d-overlay').off('click.d3lines', '#d3-showlines').on('click.d3lines', '#d3-showlines', function () {
 			if (!_viewer) return
 			_viewer._outerOnly = (_viewer._outerOnly === false)   // toggle: เส้นนอก ↔ ทั้งหมด
+			_viewer._applyFoldLineColors()   // อัปสีตามโหมด (เส้นนอก=ดำ / ทั้งหมด=แดง+เขียว)
 			_viewer._applyLineVisibility()
 			var allLines = (_viewer._outerOnly === false)
 			$(this).html('<i class="fa fa-th"></i> ' + (allLines ? 'เส้นนอก' : 'เส้นทั้งหมด'))
