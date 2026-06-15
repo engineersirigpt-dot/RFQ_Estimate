@@ -1167,8 +1167,8 @@
 	Viewer.prototype._applyFoldLineColors = function () {
 		if (!this._lineMats) return
 		var outer = this._outerOnly !== false
-		this._lineMats.cut.color.setHex(0xdc2626)                       // เส้นตัด = แดง (ซ่อนในโหมดเส้นนอก)
-		this._lineMats.fold.color.setHex(outer ? 0x222222 : 0x16a34a)   // เส้นพับ/โครง: ดำ(เส้นนอก) / เขียว(ทั้งหมด)
+		this._lineMats.cut.color.setHex(outer ? 0x222222 : 0xdc2626)    // เส้นตัด: ดำ(เส้นนอก) / แดง(ทั้งหมด)
+		this._lineMats.fold.color.setHex(outer ? 0x222222 : 0x16a34a)   // เส้นพับ: ดำ(เส้นนอก) / เขียว(ทั้งหมด)
 		this._lineMats.cut.depthTest = false; this._lineMats.fold.depthTest = false
 		this._dirty = true
 	}
