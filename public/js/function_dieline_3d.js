@@ -994,7 +994,9 @@
 			if (boxType === 5) {
 				// ทรง 5: เลือกทิศที่ปลายปีกชี้ "เข้าด้านในของ hinge" — dot(ปีก-hinge , กึ่งกลาง-hinge) แนวราบ XY · เด็ดขาดกว่าระยะ
 				function _score(sgn) { f.pivot.rotation.x = f.angle * sgn; holder.updateMatrixWorld(true); var fe = lc0.clone(); f.mesh.localToWorld(fe); var hg = new THREE.Vector3(); f.mesh.localToWorld(hg); return (fe.x - hg.x) * (_bc.x - hg.x) + (fe.y - hg.y) * (_bc.y - hg.y) }
-				if (_score(-f.sign) > _score(f.sign)) f.sign = -f.sign
+				var _sp5 = _score(f.sign), _sn5 = _score(-f.sign)
+				if (_sn5 > _sp5) f.sign = -f.sign
+				try { var _wc5 = lc0.clone(); f.pivot.rotation.x = f.angle * f.sign; holder.updateMatrixWorld(true); f.mesh.localToWorld(_wc5); console.log('[d3-flap5] pos', _wc5.x.toFixed(0), _wc5.y.toFixed(0), _wc5.z.toFixed(0), '| sign', f.sign, '| scoreP', _sp5.toFixed(1), 'scoreN', _sn5.toFixed(1), '| angle', f.angle.toFixed(2), 'depth', f._d) } catch (e) { }
 			} else {
 				var dp = dist(f.sign), dn = dist(-f.sign)
 				if (dn < dp) f.sign = -f.sign
