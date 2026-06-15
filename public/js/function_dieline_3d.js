@@ -992,11 +992,11 @@
 			var lc0 = f.mesh.geometry.boundingBox.getCenter(new THREE.Vector3())
 			function dist(sgn) { f.pivot.rotation.x = f.angle * sgn; holder.updateMatrixWorld(true); var c = lc0.clone(); f.mesh.localToWorld(c); return c.distanceTo(_bc) }
 			if (boxType === 5) {
-				// ทรง 5: เลือกทิศที่ปลายปีกชี้ "เข้าด้านในของ hinge" — dot(ปีก-hinge , กึ่งกลาง-hinge) แนวราบ XY · เด็ดขาดกว่าระยะ
-				function _score(sgn) { f.pivot.rotation.x = f.angle * sgn; holder.updateMatrixWorld(true); var fe = lc0.clone(); f.mesh.localToWorld(fe); var hg = new THREE.Vector3(); f.mesh.localToWorld(hg); return (fe.x - hg.x) * (_bc.x - hg.x) + (fe.y - hg.y) * (_bc.y - hg.y) }
-				var _sp5 = _score(f.sign), _sn5 = _score(-f.sign)
-				if (_sn5 > _sp5) f.sign = -f.sign
-				try { var _wc5 = lc0.clone(); f.pivot.rotation.x = f.angle * f.sign; holder.updateMatrixWorld(true); f.mesh.localToWorld(_wc5); console.log('[d3-flap5] pos', _wc5.x.toFixed(0), _wc5.y.toFixed(0), _wc5.z.toFixed(0), '| sign', f.sign, '| scoreP', _sp5.toFixed(1), 'scoreN', _sn5.toFixed(1), '| angle', f.angle.toFixed(2), 'depth', f._d) } catch (e) { }
+				// ทรง 5: ปีกพับเกือบ 180° → 2 ทิศ XY เท่ากัน ต่างแค่ z → ทดสอบที่ 90° (z ชัดสุด) เลือกทิศที่ z ใกล้กึ่งกลาง (พับเข้าใน)
+				function _zc(sgn) { f.pivot.rotation.x = HALF * sgn; holder.updateMatrixWorld(true); var c = lc0.clone(); f.mesh.localToWorld(c); return Math.abs(c.z - _bc.z) }
+				var _zp = _zc(f.sign), _zn = _zc(-f.sign)
+				if (_zn < _zp) f.sign = -f.sign
+				try { console.log('[d3-flap5] zP', _zp.toFixed(3), 'zN', _zn.toFixed(3), '-> sign', f.sign) } catch (e) { }
 			} else {
 				var dp = dist(f.sign), dn = dist(-f.sign)
 				if (dn < dp) f.sign = -f.sign
