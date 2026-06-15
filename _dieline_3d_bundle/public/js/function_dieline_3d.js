@@ -990,10 +990,15 @@
 			if (!f.leaf || !f.mesh) return
 			f.mesh.geometry.computeBoundingBox()
 			var lc0 = f.mesh.geometry.boundingBox.getCenter(new THREE.Vector3())
-			// ทรง 5: วัดระยะแนวราบ (XY) ไม่นับการยกขึ้น (z) → ปีกพับเข้าหากึ่งกลางสม่ำเสมอทั้ง 4 ตัว
-			function dist(sgn) { f.pivot.rotation.x = f.angle * sgn; holder.updateMatrixWorld(true); var c = lc0.clone(); f.mesh.localToWorld(c); if (boxType === 5) { var dx = c.x - _bc.x, dy = c.y - _bc.y; return Math.sqrt(dx * dx + dy * dy) } return c.distanceTo(_bc) }
-			var dp = dist(f.sign), dn = dist(-f.sign)
-			if (dn < dp) f.sign = -f.sign
+			function dist(sgn) { f.pivot.rotation.x = f.angle * sgn; holder.updateMatrixWorld(true); var c = lc0.clone(); f.mesh.localToWorld(c); return c.distanceTo(_bc) }
+			if (boxType === 5) {
+				// ทรง 5: เลือกทิศที่ปลายปีกชี้ "เข้าด้านในของ hinge" — dot(ปีก-hinge , กึ่งกลาง-hinge) แนวราบ XY · เด็ดขาดกว่าระยะ
+				function _score(sgn) { f.pivot.rotation.x = f.angle * sgn; holder.updateMatrixWorld(true); var fe = lc0.clone(); f.mesh.localToWorld(fe); var hg = new THREE.Vector3(); f.mesh.localToWorld(hg); return (fe.x - hg.x) * (_bc.x - hg.x) + (fe.y - hg.y) * (_bc.y - hg.y) }
+				if (_score(-f.sign) > _score(f.sign)) f.sign = -f.sign
+			} else {
+				var dp = dist(f.sign), dn = dist(-f.sign)
+				if (dn < dp) f.sign = -f.sign
+			}
 		})
 		// flatten: ปีกเล็กที่ตั้งฉากกับแกนยาว ณ ปลายปิดกล่อง → พับราบ 180° (เช่น dust flap RTE ที่ตั้งขึ้น 90°)
 		folds.forEach(function (f) { f.pivot.rotation.x = f.angle * f.sign })
