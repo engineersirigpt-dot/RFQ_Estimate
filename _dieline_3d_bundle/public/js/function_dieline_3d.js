@@ -958,8 +958,8 @@
 			var _clipP = (isLip && parentPerp > 0) ? parentPerp * 1.02 : 0
 			panel.segs.forEach(function (s, i) { var la = w2l(frame, s.a), lb = w2l(frame, s.b); if (_clipP) { la[1] = Math.max(-_clipP, Math.min(_clipP, la[1])); lb[1] = Math.max(-_clipP, Math.min(_clipP, lb[1])) } if (i === 0) shape.moveTo(la[0], la[1]); shape.lineTo(lb[0], lb[1]); var arr = (ecount[ekeyG(s.a, s.b)] >= 2) ? foldV : cutV; arr.push(new THREE.Vector3(la[0], la[1], 0), new THREE.Vector3(lb[0], lb[1], 0)) })
 			var mesh = new THREE.Mesh(new THREE.ShapeGeometry(shape), material)
-			if (cutV.length) mesh.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(cutV), cutMat));
-			if (foldV.length) { var _fl = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(foldV), foldMat); _fl.userData.creaseSolid = true; mesh.add(_fl) }   // tag fold=crease → ซ่อนในโหมดเส้นนอก
+			if (cutV.length) { var _cl = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(cutV), cutMat); _cl.userData.cutLine = true; mesh.add(_cl) }   // เส้นตัด(แดง) = ซ่อนในโหมดเส้นนอก
+			if (foldV.length) mesh.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(foldV), foldMat))   // เส้นพับ/โครงกล่อง(เขียว) = โชว์เสมอ
 			var nc
 			if (node.hinge) {
 				var aP = w2l(pf, node.hinge.A), joint = new THREE.Group()
@@ -1163,20 +1163,23 @@
 		this._updateCreases(this._t || 0)
 		this._dirty = true
 	}
-	// คุมสีเส้นตามโหมด: เส้นนอก = ดำทั้งหมด (กล่องครบ ไม่หาย) · เส้นทั้งหมด = แดง(ตัด)/เขียว(พับ)
+	// เส้นนอก = โชว์แค่เส้นพับ/โครงกล่องเป็นดำ (ซ่อนเส้นตัด) · เส้นทั้งหมด = ตัด=แดง พับ=เขียว
 	Viewer.prototype._applyFoldLineColors = function () {
 		if (!this._lineMats) return
 		var outer = this._outerOnly !== false
-		this._lineMats.cut.color.setHex(outer ? 0x222222 : 0xdc2626)    // ตัด: ดำ / แดง
-		this._lineMats.fold.color.setHex(outer ? 0x222222 : 0x16a34a)   // พับ: ดำ / เขียว
+		this._lineMats.cut.color.setHex(0xdc2626)                       // เส้นตัด = แดง (ซ่อนในโหมดเส้นนอก)
+		this._lineMats.fold.color.setHex(outer ? 0x222222 : 0x16a34a)   // เส้นพับ/โครง: ดำ(เส้นนอก) / เขียว(ทั้งหมด)
 		this._lineMats.cut.depthTest = false; this._lineMats.fold.depthTest = false
 		this._dirty = true
 	}
-	// โชว์ขอบทั้งหมดเสมอ (ไม่ซ่อน) — ต่างกันที่สีตามโหมด
+	// โหมดเส้นนอก: ซ่อนเส้นตัด (cutLine) เหลือแค่เส้นพับ/โครงกล่อง · เส้นทั้งหมด: โชว์หมด
 	Viewer.prototype._applyLineVisibility = function () {
 		if (!this._allLines) return
-		var show = !!this._showFolds
-		for (var i = 0; i < this._allLines.length; i++) this._allLines[i].visible = show
+		var show = !!this._showFolds, outer = this._outerOnly !== false
+		for (var i = 0; i < this._allLines.length; i++) {
+			var ln = this._allLines[i]
+			ln.visible = show && !(outer && ln.userData && ln.userData.cutLine)
+		}
 		if (show) this._updateCreases(this._t || 0)
 		this._dirty = true
 	}
