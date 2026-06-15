@@ -1174,6 +1174,8 @@
 		var outer = this._outerOnly !== false
 		this._lineMats.cut.color.setHex(outer ? 0x222222 : 0xdc2626)    // เส้นตัด: ดำ(เส้นนอก) / แดง(ทั้งหมด)
 		this._lineMats.fold.color.setHex(outer ? 0x222222 : 0x16a34a)   // เส้นพับ: ดำ(เส้นนอก) / เขียว(ทั้งหมด)
+		// เส้นนอก: เส้นพับ "ทึบ" (dashSize ใหญ่จนเต็มเส้น) · ทั้งหมด: เส้นประ
+		if (this._lineMats.fold.isLineDashedMaterial) { this._lineMats.fold.dashSize = outer ? 1e6 : 5; this._lineMats.fold.gapSize = outer ? 0 : 3 }
 		// เส้นนอก: เปิด depthTest → หน้ากล่องทึบบังเส้นด้านใน/หลัง เหลือแค่เส้นนอก · ทั้งหมด: ปิด (โชว์ทะลุ technical)
 		this._lineMats.cut.depthTest = outer; this._lineMats.fold.depthTest = outer
 		this._lineMats.cut.needsUpdate = true; this._lineMats.fold.needsUpdate = true
