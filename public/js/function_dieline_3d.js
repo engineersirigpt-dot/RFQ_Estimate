@@ -991,16 +991,8 @@
 			f.mesh.geometry.computeBoundingBox()
 			var lc0 = f.mesh.geometry.boundingBox.getCenter(new THREE.Vector3())
 			function dist(sgn) { f.pivot.rotation.x = f.angle * sgn; holder.updateMatrixWorld(true); var c = lc0.clone(); f.mesh.localToWorld(c); return c.distanceTo(_bc) }
-			if (boxType === 5) {
-				// ทรง 5: ปีกพับเกือบ 180° → 2 ทิศ XY เท่ากัน ต่างแค่ z → ทดสอบที่ 90° (z ชัดสุด) เลือกทิศที่ z ใกล้กึ่งกลาง (พับเข้าใน)
-				function _zc(sgn) { f.pivot.rotation.x = HALF * sgn; holder.updateMatrixWorld(true); var c = lc0.clone(); f.mesh.localToWorld(c); return Math.abs(c.z - _bc.z) }
-				var _zp = _zc(f.sign), _zn = _zc(-f.sign)
-				if (_zn < _zp) f.sign = -f.sign
-				try { console.log('[d3-flap5] zP', _zp.toFixed(3), 'zN', _zn.toFixed(3), '-> sign', f.sign) } catch (e) { }
-			} else {
-				var dp = dist(f.sign), dn = dist(-f.sign)
-				if (dn < dp) f.sign = -f.sign
-			}
+			var dp = dist(f.sign), dn = dist(-f.sign)
+			if (dn < dp) f.sign = -f.sign
 		})
 		// flatten: ปีกเล็กที่ตั้งฉากกับแกนยาว ณ ปลายปิดกล่อง → พับราบ 180° (เช่น dust flap RTE ที่ตั้งขึ้น 90°)
 		folds.forEach(function (f) { f.pivot.rotation.x = f.angle * f.sign })
@@ -1392,7 +1384,6 @@
 			'<span><i class="fa fa-spinner fa-pulse" style="font-size:28px"></i><br>กำลังสร้างโมเดล...</span></div></div>' +
 			'</div>' +
 			'<div style="flex-shrink:0;padding:12px 18px;border-top:1px solid #eee;background:#fafafa;display:flex;align-items:center;justify-content:flex-end;gap:12px">' +
-			'<button id="d3-showlines" style="background:#9ca3af;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-weight:bold;cursor:pointer;white-space:nowrap"><i class="fa fa-th"></i> เส้นทั้งหมด</button>' +
 			'<button id="d3-showdim" style="background:#9ca3af;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-weight:bold;cursor:pointer;white-space:nowrap"><i class="fa fa-arrows-alt"></i> ขนาด</button>' +
 			'<button id="d3-show2d" style="background:#0ea5e9;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-weight:bold;cursor:pointer;white-space:nowrap"><i class="fa fa-vector-square"></i> 2D Dieline</button>' +
 			'</div></div></div>')
@@ -1601,16 +1592,6 @@
 			})
 
 		// toggle แสดงป้ายขนาด
-		// toggle เส้นนอก ↔ เส้นทั้งหมด (รวมรอยพับ)
-		$('#dieline-3d-overlay').off('click.d3lines', '#d3-showlines').on('click.d3lines', '#d3-showlines', function () {
-			if (!_viewer) return
-			_viewer._outerOnly = (_viewer._outerOnly === false)   // toggle: เส้นนอก ↔ ทั้งหมด
-			_viewer._applyFoldLineColors()   // อัปสีตามโหมด (เส้นนอก=ดำ / ทั้งหมด=แดง+เขียว)
-			_viewer._applyLineVisibility()
-			var allLines = (_viewer._outerOnly === false)
-			$(this).html('<i class="fa fa-th"></i> ' + (allLines ? 'เส้นนอก' : 'เส้นทั้งหมด'))
-			$(this).css('background', allLines ? '#7c3aed' : '#9ca3af')   // โชว์ทั้งหมด=ม่วง / เส้นนอก=เทา
-		})
 		$('#dieline-3d-overlay').off('click.d3dim', '#d3-showdim').on('click.d3dim', '#d3-showdim', function () {
 			if (!_viewer) return
 			_viewer.showDims = !_viewer.showDims
