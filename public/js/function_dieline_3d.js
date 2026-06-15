@@ -989,7 +989,9 @@
 		folds.forEach(function (f) {
 			if (!f.leaf || !f.mesh) return
 			f.mesh.geometry.computeBoundingBox()
-			var lc0 = f.mesh.geometry.boundingBox.getCenter(new THREE.Vector3())
+			var _bb = f.mesh.geometry.boundingBox, lc0
+			if (boxType === 5) { var _fy = Math.abs(_bb.max.y) > Math.abs(_bb.min.y) ? _bb.max.y : _bb.min.y; lc0 = new THREE.Vector3((_bb.min.x + _bb.max.x) / 2, _fy, (_bb.min.z + _bb.max.z) / 2) }   // ทรง 5: ใช้ขอบปลายปีก (ไกล hinge) → ทิศพับชัดขึ้น
+			else lc0 = _bb.getCenter(new THREE.Vector3())
 			function dist(sgn) { f.pivot.rotation.x = f.angle * sgn; holder.updateMatrixWorld(true); var c = lc0.clone(); f.mesh.localToWorld(c); return c.distanceTo(_bc) }
 			var dp = dist(f.sign), dn = dist(-f.sign)
 			if (dn < dp) f.sign = -f.sign
