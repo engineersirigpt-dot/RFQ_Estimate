@@ -1374,6 +1374,7 @@
 			'<span><i class="fa fa-spinner fa-pulse" style="font-size:28px"></i><br>กำลังสร้างโมเดล...</span></div></div>' +
 			'</div>' +
 			'<div style="flex-shrink:0;padding:12px 18px;border-top:1px solid #eee;background:#fafafa;display:flex;align-items:center;justify-content:flex-end;gap:12px">' +
+			'<button id="d3-showlines" style="background:#9ca3af;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-weight:bold;cursor:pointer;white-space:nowrap"><i class="fa fa-th"></i> เส้นทั้งหมด</button>' +
 			'<button id="d3-showdim" style="background:#9ca3af;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-weight:bold;cursor:pointer;white-space:nowrap"><i class="fa fa-arrows-alt"></i> ขนาด</button>' +
 			'<button id="d3-show2d" style="background:#0ea5e9;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-weight:bold;cursor:pointer;white-space:nowrap"><i class="fa fa-vector-square"></i> 2D Dieline</button>' +
 			'</div></div></div>')
@@ -1582,6 +1583,15 @@
 			})
 
 		// toggle แสดงป้ายขนาด
+		// toggle เส้นนอก ↔ เส้นทั้งหมด (รวมรอยพับ)
+		$('#dieline-3d-overlay').off('click.d3lines', '#d3-showlines').on('click.d3lines', '#d3-showlines', function () {
+			if (!_viewer) return
+			_viewer._outerOnly = (_viewer._outerOnly === false)   // toggle: เส้นนอก ↔ ทั้งหมด
+			_viewer._applyLineVisibility()
+			var allLines = (_viewer._outerOnly === false)
+			$(this).html('<i class="fa fa-th"></i> ' + (allLines ? 'เส้นนอก' : 'เส้นทั้งหมด'))
+			$(this).css('background', allLines ? '#7c3aed' : '#9ca3af')   // โชว์ทั้งหมด=ม่วง / เส้นนอก=เทา
+		})
 		$('#dieline-3d-overlay').off('click.d3dim', '#d3-showdim').on('click.d3dim', '#d3-showdim', function () {
 			if (!_viewer) return
 			_viewer.showDims = !_viewer.showDims
