@@ -917,7 +917,7 @@
 			'<rect x="0" y="0" width="' + r(mx) + '" height="' + r(PL) + '" fill="#e2e8f0" fill-opacity="0.8"/>' +
 			'<rect x="' + r(PW - mx) + '" y="0" width="' + r(mx) + '" height="' + r(PL) + '" fill="#e2e8f0" fill-opacity="0.8"/>';
 		var debugMode = false;
-		var useReal = (unit.type === 10 || pieces.length <= 80) && unit.svg;   // ทรง 10 (Pillow) วาดรูปจริงเสมอ — ทรงอื่นคงเพดาน 80 เพื่อความลื่น
+		var useReal = !!unit.svg;   // ทุกทรงวาดรูป dieline จริงเสมอ (ใช้ <use> instanced — ไม่อืดแม้วางเยอะ)
 		if (useReal) s += '<defs><g id="du">' + unit.svg + '</g></defs>';
 		pieces.forEach(function (p, pi) {
 			var px = p[0], py = p[1], ang = p[2], rotd = (ang === 90 || ang === 270), rotated180 = (ang === 180 || ang === 270);
