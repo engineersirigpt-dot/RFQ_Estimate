@@ -1174,7 +1174,9 @@
 		var outer = this._outerOnly !== false
 		this._lineMats.cut.color.setHex(outer ? 0x222222 : 0xdc2626)    // เส้นตัด: ดำ(เส้นนอก) / แดง(ทั้งหมด)
 		this._lineMats.fold.color.setHex(outer ? 0x222222 : 0x16a34a)   // เส้นพับ: ดำ(เส้นนอก) / เขียว(ทั้งหมด)
-		this._lineMats.cut.depthTest = false; this._lineMats.fold.depthTest = false
+		// เส้นนอก: เปิด depthTest → หน้ากล่องทึบบังเส้นด้านใน/หลัง เหลือแค่เส้นนอก · ทั้งหมด: ปิด (โชว์ทะลุ technical)
+		this._lineMats.cut.depthTest = outer; this._lineMats.fold.depthTest = outer
+		this._lineMats.cut.needsUpdate = true; this._lineMats.fold.needsUpdate = true
 		this._dirty = true
 	}
 	// โหมดเส้นนอก: ซ่อนเส้นตัด (cutLine) เหลือแค่เส้นพับ/โครงกล่อง · เส้นทั้งหมด: โชว์หมด
