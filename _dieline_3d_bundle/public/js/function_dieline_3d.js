@@ -689,11 +689,10 @@
 
 	function buildBoxGroup(spec, finish) {
 		finish = finish || {}
-		var material = new THREE.MeshStandardMaterial({
+		// Flat shading (สไตล์ diagram) — แต่ละหน้าเป็นสีพื้นเดียว · คงสีกระดาษตามประเภทระบบ
+		var material = new THREE.MeshLambertMaterial({
 			color: (finish.paperColor != null ? finish.paperColor : 0xf4ecd8),
-			side: THREE.DoubleSide,
-			roughness: (finish.roughness != null ? finish.roughness : 0.92),
-			metalness: (finish.metalness != null ? finish.metalness : 0)
+			side: THREE.DoubleSide
 		})
 		var edgeMat = new THREE.LineBasicMaterial({ color: 0xffffff })
 		// ทรงพิเศษที่เป็น surface โค้ง (pillow) — ไม่ใช้ fold tree
@@ -937,7 +936,7 @@
 
 	function buildSVGGroup(svgText, fin, boxType) {
 		fin = fin || {}
-		var material = new THREE.MeshStandardMaterial({ color: (fin.paperColor != null ? fin.paperColor : 0xf4ecd8), side: THREE.DoubleSide, roughness: (fin.roughness != null ? fin.roughness : 0.92), metalness: (fin.metalness != null ? fin.metalness : 0), polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 })
+		var material = new THREE.MeshLambertMaterial({ color: (fin.paperColor != null ? fin.paperColor : 0xf4ecd8), side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 })   // Flat shading + คงสีกระดาษ
 		var edgeMat = new THREE.LineBasicMaterial({ color: 0xffffff })
 		var geo = SVGImp.fromSVG(svgText, {})
 		function ekeyG(a, b) { var r = function (n) { return Math.round(n * 2) / 2 }; var pa = r(a[0]) + ',' + r(a[1]), pb = r(b[0]) + ',' + r(b[1]); return pa < pb ? pa + '|' + pb : pb + '|' + pa }
@@ -1084,11 +1083,10 @@
 		this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
 		this.scene = new THREE.Scene()
 		// แสงนุ่มเป็นธรรมชาติ (hemisphere ฟ้า/พื้น + key + fill + เติมใต้)
-		this.scene.add(new THREE.HemisphereLight(0xffffff, 0xe6e2d6, 0.75))
-		this.scene.add(new THREE.AmbientLight(0xffffff, 0.30))
-		var dir = new THREE.DirectionalLight(0xffffff, 0.78); dir.position.set(1.6, 2.6, 1.9); this.scene.add(dir)
-		var dir2 = new THREE.DirectionalLight(0xffffff, 0.32); dir2.position.set(-1.6, 0.9, -1.2); this.scene.add(dir2)
-		var dir3 = new THREE.DirectionalLight(0xffffff, 0.16); dir3.position.set(0, -1, 0.6); this.scene.add(dir3)
+		// แสงสไตล์ flat/diagram: ฐานสว่างสม่ำเสมอ + key/fill ให้แต่ละหน้าเป็นเฉดพื้นเดียว (ไม่นุ่มเหมือน realistic)
+		this.scene.add(new THREE.AmbientLight(0xffffff, 0.64))
+		var dir = new THREE.DirectionalLight(0xffffff, 0.5); dir.position.set(1.4, 2.4, 1.6); this.scene.add(dir)   // key (บน/หน้า สว่าง)
+		var dir2 = new THREE.DirectionalLight(0xffffff, 0.2); dir2.position.set(-1.5, 0.6, -1.0); this.scene.add(dir2)   // fill (ข้าง)
 		this.camera = new THREE.PerspectiveCamera(45, 1, 0.001, 1000)
 		this.fovHalfSin = Math.sin((45 / 2) * Math.PI / 180)
 		this.target = new THREE.Vector3(0, 0, 0)
@@ -1546,10 +1544,8 @@
 			var fin2 = readFinish(0)
 			if (_viewer && _viewer.boxGroup) {
 				_viewer.boxGroup.traverse(function (o) {
-					if (o.material && o.material.isMeshStandardMaterial && !o.userData.corrEdge) {
-						o.material.color.setHex(fin2.paperColor)
-						o.material.roughness = fin2.roughness
-						o.material.metalness = fin2.metalness
+					if (o.material && (o.material.isMeshLambertMaterial || o.material.isMeshStandardMaterial) && !o.userData.corrEdge) {
+						o.material.color.setHex(fin2.paperColor)   // คงสีกระดาษตามประเภทระบบ (flat ไม่ใช้ roughness/metalness)
 					}
 				})
 				var isCorr = $('#d3-corrugated').is(':checked')
