@@ -19,6 +19,18 @@ const SUMMARIES = [
     spec: { box_type: 'Seal End', box_template_id: 11, size_mm: '50 x 50 x 150', paper: 'อาร์ตการ์ด', gram: 300, colors_outside: 4, colors_inside: 0, coating: 'Matt OPP', print_type: 'Offset', ink: 'conventional', is_reprint: false, uv: false, markup_mode: 'Profit Sharing' },
     qty_tiers: [{ qty: 3000, unit_price: 9.8 }, { qty: 5000, unit_price: 7.5 }],
   }],
+  // เคสจริง Pillow box (จากงาน DILI) — afterpress คือ ไดคัท+ติดกาว+เคลือบ ไม่มีปั๊ม
+  ['pillow-diecut-NO-foil', {
+    qty: 1000, unit_price: 16.59, total: 16594,
+    categories: { material: 2636, plate: 2400, print: 2100, proof: 0, afterpress: 7638, delivery: 1820, other: 0 },
+    afterpress_breakdown: [
+      { name: 'แม่พิมพ์ไดคัท', amount: 3000 }, { name: 'ติดกาว/ประกอบ', amount: 1500 },
+      { name: 'เคลือบ', amount: 1188 }, { name: 'ค่าแรงไดคัท', amount: 1000 },
+      { name: 'ชิป (ไส้ใน)', amount: 750 }, { name: 'ตรวจสอบ (QC)', amount: 200 },
+    ],
+    spec: { box_type: 'กล่องทรงหมอน : Pillow Box', box_template_id: 10, size_mm: '20 x 30 x 40', paper: 'AC C1s', gram: 350, colors_outside: 3, colors_inside: 0, coating: 'Matt OPP', print_type: 'Offset', ink: 'conventional', is_reprint: false, uv: false, markup_mode: 'Standard' },
+    qty_tiers: [{ qty: 1000, unit_price: 16.59 }, { qty: 2000, unit_price: 8.34 }, { qty: 3000, unit_price: 5.61 }, { qty: 5000, unit_price: 3.53 }],
+  }, { forbid: /ปั๊ม|foil|ฟอยล์|emboss|นูน/i, expectAny: /ไดคัท|เคลือบ|ติดกาว|แม่พิมพ์/ }],
 ]
 
 // ตรวจเลขเงิน/% หลุด (อนุญาต "350 แกรม", "3 สี" — จับเฉพาะ ฿/บาท/% ที่ติดเลข)
@@ -35,7 +47,7 @@ async function run(summary) {
 }
 
 ;(async () => {
-  for (const [label, s] of SUMMARIES) {
+  for (const [label, s, chk] of SUMMARIES) {
     console.log('\n===== ' + label + ' =====')
     try {
       const r = await run(s)
@@ -54,6 +66,12 @@ async function run(summary) {
       console.log(leaks.length ? '⚠️  เลขหลุด (฿/%): ' + leaks.join(', ') : '✅ ไม่มีเลขเงิน/% หลุด')
       const firstOk = (r.drivers || [])[0] && (r.drivers[0].category === topCats[0])
       console.log(firstOk ? '✅ driver#1 ตรง top category' : '⚠️  driver#1 ไม่ตรง top category')
+      // ตรวจ afterpress ห้ามเดา (forbid) + ต้องอ้างของจริง (expectAny)
+      if (chk) {
+        const apWhy = ((r.drivers || []).find((d) => d.category === 'afterpress') || {}).why || ''
+        if (chk.forbid) console.log(chk.forbid.test(apWhy) ? '❌ เดาผิด! เจอคำต้องห้าม ("ปั๊ม"/foil): ' + apWhy : '✅ ไม่เดา "ปั๊ม"/foil (ไม่มีในงาน)')
+        if (chk.expectAny) console.log(chk.expectAny.test(apWhy) ? '✅ อ้างรายการ afterpress จริง (ไดคัท/เคลือบ/ติดกาว)' : '⚠️  ไม่ได้อ้างรายการย่อยจริง: ' + apWhy)
+      }
     } catch (e) { console.log('ERROR', e.message) }
   }
 })().catch((e) => { console.error(e); process.exit(1) })

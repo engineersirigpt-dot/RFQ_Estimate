@@ -580,7 +580,25 @@ $(function () {
 			uv: String(job.ink_type || '').toUpperCase() === 'UV',
 			markup_mode: job.is_profit_sharing ? 'Profit Sharing' : 'Standard'
 		}
-		return { qty, unit_price: total && qty ? +(total / qty).toFixed(4) : null, total, categories, spec, qty_tiers }
+		// afterpress เป็นก้อนเดียวแต่รวมหลายอย่าง (ไดคัท/เคลือบ/ติดกาว/ปั๊ม) — แตกเป็น
+		// รายย่อยจริงให้ AI อธิบายตรง ไม่ต้องเดา (เคยเดา "ปั๊ม" ทั้งที่งานไม่มี).
+		const apLabel = { diecut: 'ไดคัท', assembly: 'ติดกาว/ประกอบ', chip: 'ชิป (ไส้ใน)', inspection: 'ตรวจสอบ (QC)', coating: 'เคลือบ', foilstamp: 'ปั๊มฟอยล์', emboss: 'ปั๊มนูน', deboss: 'ปั๊มจม' }
+		const apMap = {}
+		const apAdd = (k, v) => { if (typeof v === 'number' && v > 0) apMap[k] = (apMap[k] || 0) + v }
+		;(comp.process || []).forEach((p) => {
+			const ln = (p.line || [])[i] || {}
+			if (p.name === 'diecut') { apAdd('แม่พิมพ์ไดคัท', ln.block && ln.block.price); apAdd('ค่าแรงไดคัท', ln.labor && ln.labor.price) }
+			else apAdd(apLabel[p.name] || p.name || 'อื่นๆ', ln.price)
+		})
+		;(comp.addon || []).forEach((a) => {
+			apAdd(apLabel[a.type] || a.type || 'อื่นๆ', ((a.line || [])[i] || {}).price)
+		})
+		;(mainData.process || []).filter((p) => p && p.type === 'afterpress').forEach((p) => {
+			apAdd(apLabel[p.name] || p.name || 'อื่นๆ', ((p.line || [])[i] || {}).price)
+		})
+		const afterpress_breakdown = Object.entries(apMap).map(([name, amount]) => ({ name, amount: +amount.toFixed(2) })).sort((a, b) => b.amount - a.amount)
+
+		return { qty, unit_price: total && qty ? +(total / qty).toFixed(4) : null, total, categories, spec, qty_tiers, afterpress_breakdown }
 	}
 
 	function renderAISummarySection() {
@@ -602,6 +620,9 @@ $(function () {
 			const meta = CAT_META[d.category]
 			const amt = cats[d.category] || 0
 			const pct = Math.round((amt / denom) * 100)
+			// afterpress: โชว์รายการย่อยจริง (ตัวเลขจาก calc) เพื่อความลึก + ยืนยันว่า AI อ้างของจริง
+			const bd = d.category === 'afterpress' && Array.isArray(summary.afterpress_breakdown) ? summary.afterpress_breakdown : []
+			const subHtml = bd.length ? `<div style="margin:3px 0 0 18px;font-size:11px;color:#6b7280;line-height:1.7">${bd.map((s) => `<span style="display:inline-block;margin-right:12px">• ${escapeHtml(s.name)} <span style="font-family:monospace;color:#374151">${fmt(s.amount)}฿</span></span>`).join('')}</div>` : ''
 			return `
 				<div style="margin:8px 0">
 					<div style="font-weight:bold;color:#111827">
@@ -610,6 +631,7 @@ $(function () {
 						<a href="#" class="cb-see-formula" data-anchor="${meta.anchor}" style="font-size:11px;color:#2563eb;margin-left:6px;text-decoration:none">[ดูสูตร ↓]</a>
 					</div>
 					<div style="color:#4b5563;font-size:12px;margin-left:18px">↳ ${escapeHtml(d.why)}</div>
+					${subHtml}
 				</div>`
 		}).join('')
 		const tips = (ai.reduce_tips || []).filter(Boolean)
