@@ -190,6 +190,14 @@ function computeProcessBreakdown(mainData, qtyIndex, speeds) {
 	const asm = findProc('assembly')
 	if (asm) { const ln = (asm.line || [])[i] || {}; add('ติดกาว/ประกอบ', 'ใบ', orderQty, ln.price || 0, sp.assembly) } // piece-based
 
+	// process ระดับงาน (top-level) เช่น แกะ/strip-out — เป็นเครื่อง (ยกเว้น inspection = QC แมนนวล)
+	const PROC_LABEL = { chip: 'แกะ (strip-out)' }
+	;(mainData.process || []).forEach((p) => {
+		if (!p || p.name === 'inspection') return
+		const ln = (p.line || [])[i] || {}
+		add(PROC_LABEL[p.name] || p.name || 'อื่นๆ', 'ใบ', Number(ln.qty) || orderQty, ln.price || 0, sp[p.name] || sp.strip || sp.assembly) // piece-based
+	})
+
 	const bottleneck = procs.reduce((mx, p) => (!mx || p.hours > mx.hours ? p : mx), null)
 
 	// ตัวเลขเชิง BD จริง: ต่อ "ชั่วโมงคอขวด" (ทรัพยากรที่จำกัด — Theory of Constraints)
@@ -259,7 +267,7 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 		const PRICE_BTN = '#calc_price, #calc_price_after_change, #calc_price_after_packing'
 		const MOCKUP_SPEED = 5000 // แผ่น/ชม. — ⚠️ MOCKUP รอข้อมูลจริงจากพี่
 		const MOCKUP_TARGET = 10000 // เป้าหมายกำไร/ชม. (บาท) — ⚠️ MOCKUP รอตัวเลขจริง (= ต้นทุนเครื่อง/ชม.+กำไรที่ต้องการ)
-		const MOCKUP_PROCESS_SPEEDS = { print: 5000, coating: 6000, diecut: 4000, stamp: 3000, assembly: 3000 } // ⚠️ MOCKUP ความเร็วต่อ process รอข้อมูลจริง
+		const MOCKUP_PROCESS_SPEEDS = { print: 5000, coating: 6000, diecut: 4000, stamp: 3000, assembly: 3000, strip: 5000, chip: 5000 } // ⚠️ MOCKUP ความเร็วต่อ process รอข้อมูลจริง
 
 		function doInject() {
 			const $summary = $('#summary')

@@ -26,6 +26,10 @@ function makeData(outside, units, markupPct) {
 			material: 2636, plate: 2400, print: 2100, afterpress: cost - 2636 - 2400 - 2100 - 1820, delivery: 1820,
 			total_with_price_diff: +(cost * m).toFixed(2), // ราคาขาย = ต้นทุน × (1+markup)
 		})),
+		process: [ // top-level: แกะ (เครื่อง) + inspection (แมนนวล → ถูกตัด)
+			{ name: 'chip', line: [1000, 2000, 3000, 4000, 5000].map((q) => ({ qty: q, price: q * 0.75 })) },
+			{ name: 'inspection', line: [1000, 2000, 3000, 4000, 5000].map((q) => ({ qty: q, price: q * 0.05 })) },
+		],
 	}
 }
 
