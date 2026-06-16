@@ -191,13 +191,32 @@ function computeProcessBreakdown(mainData, qtyIndex, speeds) {
 	if (asm) { const ln = (asm.line || [])[i] || {}; add('ติดกาว/ประกอบ', 'ใบ', orderQty, ln.price || 0, sp.assembly) } // piece-based
 
 	const bottleneck = procs.reduce((mx, p) => (!mx || p.hours > mx.hours ? p : mx), null)
-	return { qty: orderQty, procs, bottleneck }
+
+	// ตัวเลขเชิง BD จริง: ต่อ "ชั่วโมงคอขวด" (ทรัพยากรที่จำกัด — Theory of Constraints)
+	const COST_KEYS = ['material', 'plate', 'print', 'proof', 'afterpress', 'delivery', 'other']
+	const total = tp.total_with_price_diff != null ? tp.total_with_price_diff : tp.total_price
+	const cost = COST_KEYS.reduce((s, k) => s + (Number(tp[k]) || 0), 0)
+	const margin = total != null ? total - cost : null
+	const bh = bottleneck ? bottleneck.hours : 0
+	return {
+		qty: orderQty, procs, bottleneck,
+		total: total != null ? +Number(total).toFixed(2) : null,
+		margin: margin != null ? +margin.toFixed(2) : null,
+		revenuePerBnHour: bh > 0 && total != null ? +(total / bh).toFixed(2) : null,   // ราคา/ชม.คอขวด
+		profitPerBnHour: bh > 0 && margin != null ? +(margin / bh).toFixed(2) : null,  // กำไร/ชม.คอขวด ← ตัวตัดสินจริง
+		capacity: bh > 0 ? +(8 / bh).toFixed(1) : null,                                 // กำลังผลิตจริง/กะ
+	}
 }
 
-function renderProcessBreakdown(pb) {
+function renderProcessBreakdown(pb, target) {
 	if (!pb || !pb.procs.length) return ''
 	const fmt = (n, d) => (n == null || isNaN(n) ? '-' : Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }))
 	const mins = (h) => fmt(h * 60, 1) + ' น.'
+	const hasTarget = target != null && target > 0
+	const verdict = !hasTarget || pb.profitPerBnHour == null ? ''
+		: pb.profitPerBnHour >= target
+			? ` <span style="color:#15803d;font-weight:bold">✅ คุ้ม (≥ เป้า ${fmt(target, 0)})</span>`
+			: ` <span style="color:#dc2626;font-weight:bold">⚠️ ต่ำกว่าเป้า ${fmt(target, 0)} — ควรขอเพิ่มราคา/เพิ่มยอด</span>`
 	const rows = pb.procs.map((p) => {
 		const bn = pb.bottleneck && p.label === pb.bottleneck.label
 		return `<tr style="${bn ? 'background:#fee2e2' : ''}">
@@ -223,7 +242,11 @@ function renderProcessBreakdown(pb) {
 				</tr></thead>
 				<tbody>${rows}</tbody>
 			</table>
-			${pb.bottleneck ? `<div style="margin-top:4px;font-size:11px;color:#b91c1c">🔴 <b>คอขวด = ${pb.bottleneck.label}</b> (${mins(pb.bottleneck.hours)}) — เครื่องนี้ตันสุด${pb.bottleneck.hours > 0 ? ` → <b>กำลังผลิตจริง ~${fmt(8 / pb.bottleneck.hours, 0)} ครั้ง/กะ</b> (8ชม., จำกัดโดยคอขวด ไม่ใช่เครื่องพิมพ์)` : ''}</div>` : ''}
+			${pb.bottleneck ? `<div style="margin-top:4px;font-size:11px;color:#b91c1c">🔴 <b>คอขวด = ${pb.bottleneck.label}</b> (${mins(pb.bottleneck.hours)}) — เครื่องนี้ตันสุด${pb.capacity != null ? ` → <b>กำลังผลิตจริง ~${fmt(pb.capacity, 0)} ครั้ง/กะ</b> (8ชม., จำกัดโดยคอขวด ไม่ใช่เครื่องพิมพ์)` : ''}</div>` : ''}
+			${pb.profitPerBnHour != null ? `<div style="margin-top:6px;font-size:12px;background:#ecfdf5;border-left:3px solid #059669;padding:6px 10px;border-radius:4px">
+				💎 <b>ตัวเลขจริงที่ใช้ตัดสิน</b> (ต่อชั่วโมง<b>คอขวด</b> = ทรัพยากรที่จำกัดจริง):
+				ราคา/ชม.คอขวด <b>${fmt(pb.revenuePerBnHour, 0)}</b> • <b>กำไร/ชม.คอขวด ${fmt(pb.profitPerBnHour, 0)}</b>${verdict}
+			</div>` : ''}
 		</div>`
 }
 
@@ -250,7 +273,7 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 						<span style="font-size:11px;color:#d97706;font-weight:normal">— ⚠️ ข้อมูล MOCKUP (ความเร็ว ${MOCKUP_SPEED.toLocaleString()} แผ่น/ชม. สมมติ รอข้อมูลจริงจากพี่)</span>
 					</div>
 					${renderMachineHourMetric(metric, MOCKUP_TARGET)}
-					${renderProcessBreakdown(computeProcessBreakdown(est.mainData, 0, MOCKUP_PROCESS_SPEEDS))}
+					${renderProcessBreakdown(computeProcessBreakdown(est.mainData, 0, MOCKUP_PROCESS_SPEEDS), MOCKUP_TARGET)}
 				</div>`)
 			return true
 		}
