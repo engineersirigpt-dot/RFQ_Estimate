@@ -1,6 +1,6 @@
 // Demo เมตริกชั่วโมงเครื่อง — เลขจริงงาน Pillow + ทดสอบ margin/makeready/capacity/passes
 // node bench/test_machine_hour.js [speed]
-const { computeMachineHourMetric } = require('../public/js/function_machine_hour_metric')
+const { computeMachineHourMetric, computeProcessBreakdown } = require('../public/js/function_machine_hour_metric')
 
 const sheetsPerTier = [360, 369, 378, 387, 396]
 const wastePerTier = [350, 350, 350, 350, 350]
@@ -16,6 +16,11 @@ function makeData(outside, units, markupPct) {
 			color: [{ outside, inside: 0 }],
 			paper_usage: { line: sheetsPerTier.map((s) => ({ paper_print: s })) },
 			waste: { waste: wastePerTier },
+			addon: [{ type: 'coating', line: [1188, 1217.7, 1247.4, 1277.1, 1306.8].map((p) => ({ price: p })) }],
+			process: [
+				{ name: 'diecut', line: sheetsPerTier.map(() => ({ block: { price: 3000 }, labor: { price: 1000 } })) },
+				{ name: 'assembly', line: [1500, 1500, 1800, 2030.76, 2294.1].map((p) => ({ price: p })) },
+			],
 		}],
 		totalprice: baseTotals.map((cost) => ({
 			material: 2636, plate: 2400, print: 2100, afterpress: cost - 2636 - 2400 - 2100 - 1820, delivery: 1820,
@@ -61,3 +66,12 @@ const fmt = (n, d) => (n == null ? '-' : Number(n).toLocaleString('en-US', { min
 	}
 })
 console.log('\n* markup 0 → กำไร/ชม.=0 • 2 component → เวลารวมทุกเครื่อง (ราคา/กำไร ระดับงาน ÷ เวลารวม)')
+
+// per-process: แยกเวลาต่อ process (แต่ละ process คนละเครื่อง) + หาคอขวด
+const procSpeeds = { print: 5000, coating: 6000, diecut: 4000, stamp: 3000, assembly: 3000 }
+;[0, 4].forEach((i) => {
+	const pb = computeProcessBreakdown(makeData(3, 6, 0), i, procSpeeds)
+	console.log(`\n=== per-process ยอด ${fmt(pb.qty, 0)} ===`)
+	pb.procs.forEach((p) => console.log('  ' + p.label.padEnd(16) + (fmt(p.qty, 0) + ' ' + p.unit).padEnd(12) + (fmt(p.hours * 60, 1) + ' น.').padStart(10) + ('ค่า ' + fmt(p.cost, 0)).padStart(12)))
+	console.log('  🔴 คอขวด = ' + pb.bottleneck.label + ' (' + fmt(pb.bottleneck.hours * 60, 1) + ' น.) — ไม่ใช่เครื่องพิมพ์!')
+})

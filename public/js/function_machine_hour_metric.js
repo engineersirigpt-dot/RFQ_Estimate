@@ -159,6 +159,75 @@ function renderMachineHourMetric(metric, target) {
 }
 
 // ============================================================================
+// แยกเวลาเครื่อง "ต่อ process" — แต่ละ process = คนละเครื่อง คนละความเร็ว
+//   sheet-based (เครื่องรันแผ่น): พิมพ์/เคลือบ/ไดคัท/ปั๊ม → ใช้ paper_print (แผ่น)
+//   piece-based (ต่อใบสำเร็จ): ติดกาว/ประกอบ → ใช้ยอดสั่ง (ใบ)
+//   เวลา = จำนวน ÷ ความเร็ว(process) • คอขวด = process ที่ใช้เวลานานสุด
+//   ⚠️ ความเร็วทุก process เป็น MOCKUP รอข้อมูลจริงต่อเครื่อง
+// ============================================================================
+function computeProcessBreakdown(mainData, qtyIndex, speeds) {
+	const comp = (mainData.component1 || [])[0] || {}
+	const i = qtyIndex || 0
+	const paperPrint = Number((((comp.paper_usage && comp.paper_usage.line) || [])[i] || {}).paper_print) || 0
+	const orderQty = ((mainData.qty && mainData.qty.totalqty) || [])[i] || 0
+	const tp = (mainData.totalprice || [])[i] || {}
+	const sp = speeds || {}
+	const procs = []
+	const add = (label, unit, qty, cost, speed) => {
+		const c = Number(cost) || 0
+		if (!(qty > 0) || !(speed > 0) || !(c > 0)) return // c=0 → process ไม่มีในงานนี้ → ข้าม
+		const hours = qty / speed
+		procs.push({ label, unit, qty, speed, cost: +c.toFixed(2), hours: +hours.toFixed(4), costPerHour: hours > 0 ? +(c / hours).toFixed(2) : null })
+	}
+	const sumAddon = (types) => (comp.addon || []).filter((a) => a && types.includes(a.type)).reduce((s, a) => s + (((a.line || [])[i] || {}).price || 0), 0)
+	const findProc = (name) => (comp.process || []).find((p) => p && p.name === name)
+
+	add('พิมพ์', 'แผ่น', paperPrint, Number(tp.print) || 0, sp.print)            // sheet-based
+	add('เคลือบ', 'แผ่น', paperPrint, sumAddon(['coating']), sp.coating)         // sheet-based
+	const dc = findProc('diecut')
+	if (dc) { const ln = (dc.line || [])[i] || {}; add('ไดคัท', 'แผ่น', paperPrint, ((ln.block && ln.block.price) || 0) + ((ln.labor && ln.labor.price) || 0), sp.diecut) }
+	add('ปั๊ม (ฟอยล์/นูน)', 'แผ่น', paperPrint, sumAddon(['foilstamp', 'emboss', 'deboss']), sp.stamp) // sheet-based
+	const asm = findProc('assembly')
+	if (asm) { const ln = (asm.line || [])[i] || {}; add('ติดกาว/ประกอบ', 'ใบ', orderQty, ln.price || 0, sp.assembly) } // piece-based
+
+	const bottleneck = procs.reduce((mx, p) => (!mx || p.hours > mx.hours ? p : mx), null)
+	return { qty: orderQty, procs, bottleneck }
+}
+
+function renderProcessBreakdown(pb) {
+	if (!pb || !pb.procs.length) return ''
+	const fmt = (n, d) => (n == null || isNaN(n) ? '-' : Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }))
+	const mins = (h) => fmt(h * 60, 1) + ' น.'
+	const rows = pb.procs.map((p) => {
+		const bn = pb.bottleneck && p.label === pb.bottleneck.label
+		return `<tr style="${bn ? 'background:#fee2e2' : ''}">
+			<td style="padding:4px 8px">${bn ? '🔴 ' : ''}${p.label}</td>
+			<td style="text-align:right">${fmt(p.qty, 0)} ${p.unit}</td>
+			<td style="text-align:right;color:#9ca3af">${fmt(p.speed, 0)}/ชม.</td>
+			<td style="text-align:right;font-weight:${bn ? 'bold' : 'normal'}">${mins(p.hours)}</td>
+			<td style="text-align:right">${fmt(p.cost, 2)}</td>
+			<td style="text-align:right">${fmt(p.costPerHour, 0)}</td>
+		</tr>`
+	}).join('')
+	return `
+		<div style="margin-top:10px">
+			<div style="font-weight:bold;font-size:13px;color:#7c3aed;margin-bottom:4px">🏭 เวลาเครื่องแยกตาม process (ยอด ${fmt(pb.qty, 0)} ใบ) — แต่ละอันคนละเครื่อง</div>
+			<table style="width:100%;border-collapse:collapse;font-size:12px">
+				<thead><tr style="background:#ede9fe">
+					<th style="padding:4px 8px;text-align:left">Process</th>
+					<th style="padding:4px 8px;text-align:right">จำนวน</th>
+					<th style="padding:4px 8px;text-align:right">ความเร็ว(mockup)</th>
+					<th style="padding:4px 8px;text-align:right">เวลา</th>
+					<th style="padding:4px 8px;text-align:right">ค่าใช้จ่าย</th>
+					<th style="padding:4px 8px;text-align:right">ค่า/ชม.</th>
+				</tr></thead>
+				<tbody>${rows}</tbody>
+			</table>
+			${pb.bottleneck ? `<div style="margin-top:4px;font-size:11px;color:#b91c1c">🔴 <b>คอขวด = ${pb.bottleneck.label}</b> (${mins(pb.bottleneck.hours)}) — เครื่องนี้ตันสุด กำหนดเวลางานจริง</div>` : ''}
+		</div>`
+}
+
+// ============================================================================
 // แทรกตารางลง "หน้า price จริง" ต่อท้ายตาราง summary (#summary)
 // ไม่แตะโค้ดเพื่อน — แค่ append ผ่าน DOM หลังกดคำนวณ price
 // ============================================================================
@@ -167,6 +236,7 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 		const PRICE_BTN = '#calc_price, #calc_price_after_change, #calc_price_after_packing'
 		const MOCKUP_SPEED = 5000 // แผ่น/ชม. — ⚠️ MOCKUP รอข้อมูลจริงจากพี่
 		const MOCKUP_TARGET = 10000 // เป้าหมายกำไร/ชม. (บาท) — ⚠️ MOCKUP รอตัวเลขจริง (= ต้นทุนเครื่อง/ชม.+กำไรที่ต้องการ)
+		const MOCKUP_PROCESS_SPEEDS = { print: 5000, coating: 6000, diecut: 4000, stamp: 3000, assembly: 3000 } // ⚠️ MOCKUP ความเร็วต่อ process รอข้อมูลจริง
 
 		function doInject() {
 			const $summary = $('#summary')
@@ -180,6 +250,7 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 						<span style="font-size:11px;color:#d97706;font-weight:normal">— ⚠️ ข้อมูล MOCKUP (ความเร็ว ${MOCKUP_SPEED.toLocaleString()} แผ่น/ชม. สมมติ รอข้อมูลจริงจากพี่)</span>
 					</div>
 					${renderMachineHourMetric(metric, MOCKUP_TARGET)}
+					${renderProcessBreakdown(computeProcessBreakdown(est.mainData, 0, MOCKUP_PROCESS_SPEEDS))}
 				</div>`)
 			return true
 		}
@@ -198,5 +269,5 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 
 // export สำหรับเทส (Node) — ในเบราว์เซอร์เรียกใช้ฟังก์ชันตรงๆ
 if (typeof module !== 'undefined' && module.exports) {
-	module.exports = { computeMachineHourMetric, renderMachineHourMetric }
+	module.exports = { computeMachineHourMetric, renderMachineHourMetric, computeProcessBreakdown, renderProcessBreakdown }
 }
