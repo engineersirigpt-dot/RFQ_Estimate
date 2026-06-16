@@ -886,6 +886,21 @@ RULES:
 - ห้ามใช้ชื่อตัวแปรภายใน (ups, sig, plate_ppu, after_waste, ink_factor ฯลฯ) — ใช้คำที่เซลส์/ลูกค้าเข้าใจ.
 - ภาษาไทยล้วน กระชับ. reduce_tips ถ้าไม่มีก็ []`
 
+// Remove money (฿ / บาท) and percent tokens from AI narrative text, leaving spec
+// references (e.g. "350 แกรม", "4 สี", "ขนาด 80x120") intact. Used to enforce the
+// "no figures in narrative" rule deterministically.
+function stripMoneyPct(s) {
+	if (typeof s !== 'string') return s
+	return s
+		.replace(/\(?\s*\d[\d,\.]*\s*%\s*\)?/g, '')                       // 50% , (12.5%)
+		.replace(/฿\s*\d[\d,\.]*/g, '')                                   // ฿1,234
+		.replace(/\d[\d,\.]*\s*บาท(\s*\/\s*(ใบ|ชิ้น|กล่อง|อัน))?/g, '')   // 4.2 บาท , 1,234 บาท/ใบ
+		.replace(/\s{2,}/g, ' ')                                          // collapse double spaces
+		.replace(/\s+([,.\)])/g, '$1')                                    // tidy space-before-punct
+		.replace(/\(\s*\)/g, '')                                          // drop empty parens left behind
+		.trim()
+}
+
 router.post('/explain-price', async (req, res) => {
 	try {
 		const summary = req.body && req.body.summary
@@ -906,6 +921,15 @@ router.post('/explain-price', async (req, res) => {
 			parsed = extractJson(reply)
 		} catch (e) {
 			return res.status(502).json({ success: false, error: 'AI ตอบกลับมาแต่ไม่ใช่ JSON ที่อ่านได้', raw: reply })
+		}
+		// Safety net: the prompt forbids money(฿/บาท)/percent in headline/why/qty_trend
+		// (real figures are injected by the frontend from calc data), but the AI slips
+		// sometimes. Strip ONLY money/percent tokens — keep spec refs like "350 แกรม",
+		// "4 สี", "ขนาด 80x120". reduce_tips is left intact (numbers allowed there).
+		if (parsed && typeof parsed === 'object') {
+			parsed.headline = stripMoneyPct(parsed.headline)
+			parsed.qty_trend = stripMoneyPct(parsed.qty_trend)
+			if (Array.isArray(parsed.drivers)) parsed.drivers.forEach((d) => { if (d) d.why = stripMoneyPct(d.why) })
 		}
 		res.json({ success: true, data: parsed, model: MODEL })
 	} catch (err) {

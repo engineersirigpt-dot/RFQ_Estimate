@@ -559,7 +559,7 @@ $(function () {
 		const comp = (mainData.component1 || [])[0] || {}
 		const bt = comp.box_type || {}
 		const ps = comp.packaging_size || {}
-		const color = comp.color || {}
+		const color = (comp.color && comp.color[0]) || {} // color is an array (1 per f_code) — calc reads color[0]
 		const dim = [ps.width, ps.length, ps.depth].filter((x) => x != null && x !== '')
 		let coating = null
 		const cAdd = (comp.addon || []).find((a) => a && a.type === 'coating')
