@@ -944,3 +944,13 @@ router.post('/explain-price', async (req, res) => {
 })
 
 module.exports = router
+
+// Test-only exports for the AI regression harness (bench/ai_test.js). Guarded by
+// env so production never exposes internal helpers — set AI_TEST=1 to enable.
+if (process.env.AI_TEST) {
+	Object.assign(module.exports, {
+		SYSTEM_PROMPT, MODEL, EXPLAIN_PRICE_PROMPT,
+		buildContentFromUpload, validateAndFix, extractJson, stripHallucinations,
+		createWithRetry, stripMoneyPct,
+	})
+}

@@ -1,0 +1,13 @@
+# AI harness OUTPUTS (regenerated on each run — not source)
+*_results.md
+pr_body.md
+
+# Test fixtures (sample-specific, อาจใหญ่/ลับ — เก็บ local)
+*.jpg
+*.jpeg
+*.png
+
+# One-off / ad-hoc probes (ไม่ใช่ harness ถาวร)
+inspect_excel.js
+test_open_size.js
+test_d3d_stable.js
