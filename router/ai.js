@@ -480,7 +480,19 @@ function validateAndFix(data) {
 			if (Array.isArray(comp.dieline_panels) && comp.dieline_panels.filter((p) => Number(p) > 0).length > 4) {
 				comp.box_template_id = 12
 			}
-			delete comp.dieline_panels
+			// Custom needs the FLAT-sheet size for the form's required กว้าง/ยาว, but
+				// the AI's own open_size_mm is flaky/often omitted. Derive it from numbers
+				// it reads reliably: ยาว(length) = sum of the dieline panels along the
+				// grain; กว้าง(width) = body height + top/bottom closures (tuck + flap).
+				// (D3D: 80+25+80+25+80+80 = 370 ยาว; 150+25+25 = 200 กว้าง.)
+				if (comp.box_template_id === 12 && Array.isArray(comp.dieline_panels)) { // override AI's unreliable open_size when panels available
+					const panels = comp.dieline_panels.map(Number).filter((n) => n > 0)
+					const lengthFlat = panels.length ? Math.round(panels.reduce((a, b) => a + b, 0)) : null
+					const h = comp.dimensions_mm && Number(comp.dimensions_mm.height)
+					const widthFlat = h ? Math.round(h + (Number(comp.tuck_mm) || 0) + (Number(comp.flap_mm) || 0)) : null
+					if (lengthFlat || widthFlat) comp.open_size_mm = { width: widthFlat || null, length: lengthFlat || null }
+				}
+				delete comp.dieline_panels
 
 			// paper_type too generic → remove (let user fill)
 			if (/^กระดาษ$/i.test(comp.paper_type || '') || /^paper$/i.test(comp.paper_type || '')) {
@@ -493,9 +505,11 @@ function validateAndFix(data) {
 			// string and OVERRIDE dimensions_mm; the length≥width swap below then
 			// normalises it.
 			if (typeof comp.stated_size === 'string') {
-				const sm = comp.stated_size.match(/(\d+(?:\.\d+)?)\s*[x×*]\s*(\d+(?:\.\d+)?)\s*[x×*]\s*(\d+(?:\.\d+)?)/i)
+				// (?:[a-z]\s*)? skips an optional W/L/H prefix before each number so
+				// "W80×L120×H40" parses too (the prompt itself uses that format).
+				const sm = comp.stated_size.match(/(?:[a-z]\s*)?(\d+(?:\.\d+)?)\s*[x×*]\s*(?:[a-z]\s*)?(\d+(?:\.\d+)?)\s*[x×*]\s*(?:[a-z]\s*)?(\d+(?:\.\d+)?)/i)
 				if (sm) {
-					const k = /\bmm\b/i.test(comp.stated_size) ? 1 : 10 // default cm
+					const k = /mm\b/i.test(comp.stated_size) ? 1 : 10 // default cm; /mm\b/ (not \bmm\b) so "150mm" attached to the number still matches
 					comp.dimensions_mm = {
 						width: Math.round(parseFloat(sm[1]) * k),
 						length: Math.round(parseFloat(sm[2]) * k),
@@ -516,10 +530,19 @@ function validateAndFix(data) {
 				const d = comp.dimensions_mm
 				const dd = [d.width, d.length, d.height].filter((x) => typeof x === 'number').sort((a, b) => a - b)
 				if (fm && dd.length === 3) {
-					const k = /\bmm\b/i.test(comp.stated_flat_size) ? 1 : 10
+					const k = /mm\b/i.test(comp.stated_flat_size) ? 1 : 10 // /mm\b/ matches "37mm" attached to the number, unlike \bmm\b
 					const flatW = Math.max(parseFloat(fm[1]), parseFloat(fm[2])) * k
 					const footprintPerim = 2 * (dd[0] + dd[1])
 					if (footprintPerim > 0 && flatW > footprintPerim * 1.3) comp.box_template_id = 12
+					// Custom: the verbatim stated flat size (e.g. "37x20 cm") is the most
+					// reliable source for the form's กว้าง/ยาว — it reads the overall outer
+					// dimension line directly, unlike the panels+height derivation which
+					// breaks when the AI misreads the height (came back 25 not 150). So it
+					// OVERRIDES any earlier value. ยาว = larger number, กว้าง = smaller.
+					if (comp.box_template_id === 12) {
+						const a = parseFloat(fm[1]) * k, b = parseFloat(fm[2]) * k
+						comp.open_size_mm = { width: Math.round(Math.min(a, b)), length: Math.round(Math.max(a, b)) }
+					}
 				}
 			}
 			delete comp.stated_flat_size
@@ -535,7 +558,19 @@ function validateAndFix(data) {
 				}
 			}
 
-			// paper_gram must be a positive number
+			// Same length>=width normalisation for the Custom flat size so the form's
+				// กว้าง/ยาว are consistent no matter the source — the AI's own open_size_mm
+				// follows {width:horizontal, length:vertical} (e.g. 370x200) while our
+				// derivation builds {width:vertical, length:horizontal}. Force ยาว = the
+				// longer side either way → กว้าง=200, ยาว=370.
+				if (comp.open_size_mm && typeof comp.open_size_mm === 'object') {
+					const om = comp.open_size_mm
+					if (typeof om.width === 'number' && typeof om.length === 'number' && om.width > om.length) {
+						const tmp = om.width; om.width = om.length; om.length = tmp
+					}
+				}
+
+				// paper_gram must be a positive number
 			if (comp.paper_gram !== undefined && !(Number(comp.paper_gram) > 0)) {
 				delete comp.paper_gram
 			}
@@ -642,7 +677,14 @@ async function stripHallucinations(parsed, userText, files) {
 		for (const c of parsed.components) {
 			if (!c) continue
 			if (!hasPaper && c.paper_type) { log('paper_type', c.paper_type); delete c.paper_type }
-			if (!hasGram && c.paper_gram != null) { log('paper_gram', c.paper_gram); delete c.paper_gram }
+			if (c.paper_gram != null) {
+					// Keep the gram even without a "แกรม/gsm" keyword when the exact
+					// number appears in the source next to a real paper type — the
+					// industry shorthand "A/C C1s 300" / "ดูเพล็กซ์ 400" omits the unit.
+					// Verify against source (number must literally appear) to stay safe.
+					const gramInText = new RegExp('\\b' + String(c.paper_gram).replace('.', '\\.') + '\\b').test(verifiable)
+					if (!hasGram && !(hasPaper && gramInText)) { log('paper_gram', c.paper_gram); delete c.paper_gram }
+				}
 			if (!hasPaper && c.remark_paper) { log('remark_paper', c.remark_paper); delete c.remark_paper }
 			if (!hasCorrugated) {
 				if (c.corrugated) { log('corrugated', c.corrugated); delete c.corrugated }
@@ -779,6 +821,15 @@ router.post('/parse-spec', upload.array('files', 10), async (req, res) => {
 		if (hasImageInput && Array.isArray(parsed.components) && parsed.components.length) {
 			if (!Array.isArray(parsed._uncertain)) parsed._uncertain = []
 			if (!parsed._uncertain.includes('box_template_id')) parsed._uncertain.push('box_template_id')
+			// Colour count can't be verified from artwork — 4-colour process, spot
+			// colours and a white underprint all look the same in a render, and the AI
+			// guesses it confidently from the image (D3D had no colour text yet returned
+			// color_outside=4 without flagging). Colour drives the plate + print cost, so
+			// flag it for the estimator whenever it was inferred from an image input.
+			const anyColorOut = parsed.components.some((c) => c && c.color_outside != null)
+			const anyColorIn = parsed.components.some((c) => c && Number(c.color_inside) > 0)
+			if (anyColorOut && !parsed._uncertain.includes('color_outside')) parsed._uncertain.push('color_outside')
+			if (anyColorIn && !parsed._uncertain.includes('color_inside')) parsed._uncertain.push('color_inside')
 		}
 
 		res.json({ success: true, data: parsed, model: MODEL })

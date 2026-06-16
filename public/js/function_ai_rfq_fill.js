@@ -652,18 +652,21 @@ $(function () {
 			if (!$iType.length) return setTimeout(tick, 100)
 
 			if (isCustom) {
-				// Custom uses the OPEN/flat-sheet size (the overall dieline outer
-				// dimensions, e.g. 370×200), which is NOT the folded box W/L/H.
-				// Only fill when the AI gave a real open size — do NOT fall back to
-				// the box dimensions (that shoved garbage like 213×12321 into the
-				// flat fields). No reliable open size → leave blank for the user.
+				// Custom: the user-facing inputs are กว้าง/ยาว (.specmm.width/.length)
+				// and they hold the FLAT sheet size (= AI open_size). The form mirrors
+				// them into Open Size and runs setSize4Template12 (readyFunction ~917).
+				// So fill .specmm (the primary, required fields) and let the form
+				// cascade — matches the original dev's flow + clears the pink required
+				// fields. Don't fall back to box dims if no flat size — leave blank.
 				const ow = openSize && (openSize.width != null ? openSize.width : openSize.w)
 				const ol = openSize && (openSize.length != null ? openSize.length : openSize.l)
 				if (ow == null && ol == null) return // nothing reliable — leave blank
-				const $openMm = $iType.find('.openSizemm input')
-				if ($openMm.length < 2) return setTimeout(tick, 100)
-				if (ow != null) $openMm.eq(0).val(ow).trigger('change')
-				if (ol != null) $openMm.eq(1).val(ol).trigger('change')
+				const $w = $iType.find('.specmm.width').first()
+				const $l = $iType.find('.specmm.length').first()
+				if (!$w.length && !$l.length) return setTimeout(tick, 100) // wait for fields
+				if (ow != null && $w.length) $w.val(ow).trigger('change') // → Open Size + setSize4Template12
+				if (ol != null && $l.length) $l.val(ol).trigger('change')
+				// Packing size: fill only if the cascade left it empty.
 				const $packMm = $iType.find('.packingsizemm input')
 				if ($packMm.length >= 2) {
 					if (ow != null && !$packMm.eq(0).val()) $packMm.eq(0).val(ow).trigger('change')
