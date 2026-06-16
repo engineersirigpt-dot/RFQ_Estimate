@@ -152,7 +152,7 @@ function renderMachineHourMetric(metric, target) {
 				<tbody>${rows}</tbody>
 			</table>
 			<div style="margin-top:8px;font-size:11px;color:#6b7280">
-				💡 <b>ข้อสังเกต:</b> %เซตเครื่อง ${mkRange} = งานยอดน้อยเสียเวลากับ makeready เยอะ • กำลังผลิต ~${fmt(maxJobs, 0)} ครั้งงานนี้/กะ (8 ชม., ทฤษฎี ไม่รวมเวลาสลับงาน)<br>
+				💡 <b>ข้อสังเกต:</b> %เซตเครื่อง ${mkRange} = งานยอดน้อยเสียเวลากับ makeready เยอะ • กำลังผลิต(เฉพาะเครื่องพิมพ์) ~${fmt(maxJobs, 0)} ครั้ง/กะ — ⚠️ <b>กำลังผลิตจริงจำกัดโดยคอขวด</b> (ดูตาราง process ด้านล่าง)<br>
 				* เทียบดูเฉยๆ ไม่บวกเข้าราคาขาย • <b>กำไร = ราคาขาย − ต้นทุน</b> (ขยับตาม markup, =0 ถ้าไม่บวกกำไร) • เวลา = แผ่นพิมพ์ × รอบพิมพ์ ÷ ความเร็ว
 			</div>
 		</div>`
@@ -223,7 +223,7 @@ function renderProcessBreakdown(pb) {
 				</tr></thead>
 				<tbody>${rows}</tbody>
 			</table>
-			${pb.bottleneck ? `<div style="margin-top:4px;font-size:11px;color:#b91c1c">🔴 <b>คอขวด = ${pb.bottleneck.label}</b> (${mins(pb.bottleneck.hours)}) — เครื่องนี้ตันสุด กำหนดเวลางานจริง</div>` : ''}
+			${pb.bottleneck ? `<div style="margin-top:4px;font-size:11px;color:#b91c1c">🔴 <b>คอขวด = ${pb.bottleneck.label}</b> (${mins(pb.bottleneck.hours)}) — เครื่องนี้ตันสุด${pb.bottleneck.hours > 0 ? ` → <b>กำลังผลิตจริง ~${fmt(8 / pb.bottleneck.hours, 0)} ครั้ง/กะ</b> (8ชม., จำกัดโดยคอขวด ไม่ใช่เครื่องพิมพ์)` : ''}</div>` : ''}
 		</div>`
 }
 
