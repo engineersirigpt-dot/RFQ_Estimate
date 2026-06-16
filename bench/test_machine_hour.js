@@ -72,7 +72,7 @@ const fmt = (n, d) => (n == null ? '-' : Number(n).toLocaleString('en-US', { min
 console.log('\n* markup 0 → กำไร/ชม.=0 • 2 component → เวลารวมทุกเครื่อง (ราคา/กำไร ระดับงาน ÷ เวลารวม)')
 
 // per-process: แยกเวลาต่อ process (แต่ละ process คนละเครื่อง) + หาคอขวด
-const procSpeeds = { print: 5000, coating: 6000, diecut: 4000, stamp: 3000, assembly: 3000 }
+const procSpeeds = { print: 5000, coating: 6000, diecut: 4000, stamp: 3000, assembly: 3000, strip: 5000, chip: 5000 }
 ;[0, 4].forEach((i) => {
 	const pb = computeProcessBreakdown(makeData(3, 6, 0), i, procSpeeds)
 	console.log(`\n=== per-process ยอด ${fmt(pb.qty, 0)} ===`)
