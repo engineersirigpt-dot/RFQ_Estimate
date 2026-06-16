@@ -22,49 +22,54 @@
  */
 function computeMachineHourMetric(mainData, speedSheetsPerHour) {
 	if (!mainData || !(speedSheetsPerHour > 0)) return null
-	const compCount = (mainData.component1 || []).length // โชว์เตือนถ้ามีหลาย component (draft คิดตัวแรก)
-	const comp = (mainData.component1 || [])[0] || {}
-	const machine = (comp.machine && comp.machine.machine_name) || '-'
-	const units = (comp.machine && comp.machine.color && Number(comp.machine.color.max)) || 0 // ชุดพิมพ์ (color units) ของเครื่อง
-	const color = (comp.color && comp.color[0]) || {}
-	const outside = Number(color.outside) || 0
-	const inside = Number(color.inside) || 0
-
-	// จำนวนรอบที่แผ่นวิ่งผ่านเครื่อง (passes): ถ้าสี > ชุดพิมพ์ ต้องวิ่งหลายรอบ
-	//   passes = ceil(สีหน้านอก/ชุดพิมพ์) + ceil(สีหน้าใน/ชุดพิมพ์)
-	//   units=0 (เครื่องดิจิทัล/ไม่มีข้อมูล) → ถือว่า 1 รอบ
-	// ⚠️ สมมติ "ความเร็ว = impressions/ชม. (ต่อรอบ)" จึงคูณ passes — ถ้าพี่บอกว่าเป็น
-	//   "แผ่นเสร็จ/ชม." (รวม passes แล้ว) ให้ลบการคูณ passes ออก (ตั้ง passes=1)
-	let passes = units > 0 ? (Math.ceil(outside / units) + Math.ceil(inside / units)) : 1
-	if (passes < 1) passes = 1
-
-	const lines = (comp.paper_usage && comp.paper_usage.line) || []
-	const wasteArr = (comp.waste && comp.waste.waste) || [] // แผ่น makeready/เผื่อเสีย ต่อยอด
+	const comps = mainData.component1 || []
+	if (!comps.length) return null
 	const tp = mainData.totalprice || []
 	const qtyArr = (mainData.qty && mainData.qty.totalqty) || []
 	const SHIFT_HOURS = 8 // กะมาตรฐาน 8 ชม. (ใช้คิดกำลังผลิต/กะ)
 	const COST_KEYS = ['material', 'plate', 'print', 'proof', 'afterpress', 'delivery', 'other']
 
+	// ข้อมูลคงที่ต่อ component — แต่ละ component อาจใช้คนละเครื่อง/คนละสี
+	//   passes = จำนวนรอบที่แผ่นวิ่งผ่านเครื่อง (สี > ชุดพิมพ์ → หลายรอบ)
+	//   units=0 (ดิจิทัล/ไม่มีข้อมูล) → 1 รอบ
+	//   ⚠️ สมมติ "ความเร็ว = impressions/ชม." จึงคูณ passes
+	const compInfo = comps.map((comp) => {
+		const machine = (comp.machine && comp.machine.machine_name) || '-'
+		const units = (comp.machine && comp.machine.color && Number(comp.machine.color.max)) || 0
+		const color = (comp.color && comp.color[0]) || {}
+		const outside = Number(color.outside) || 0
+		const inside = Number(color.inside) || 0
+		let passes = units > 0 ? (Math.ceil(outside / units) + Math.ceil(inside / units)) : 1
+		if (passes < 1) passes = 1
+		return {
+			machine, units, outside, inside, passes,
+			lines: (comp.paper_usage && comp.paper_usage.line) || [],
+			wasteArr: (comp.waste && comp.waste.waste) || [],
+		}
+	})
+
 	const rows = qtyArr.map((qty, i) => {
-		const ln = lines[i] || {}
-		const sheets = Number(ln.paper_print) || 0 // แผ่นที่เครื่องเดินจริง (รวม makeready/waste)
-		const impressions = sheets * passes        // จำนวนรอบพิมพ์รวม (แผ่น × passes)
+		// รวมเวลาเครื่องของทุก component (แต่ละตัววิ่งบนเครื่องของมัน)
+		let hours = 0, sheets = 0, wasteSheets = 0
+		const byComponent = compInfo.map((c) => {
+			const s = Number((c.lines[i] || {}).paper_print) || 0
+			const h = (s * c.passes) / speedSheetsPerHour
+			hours += h; sheets += s; wasteSheets += Number(c.wasteArr[i]) || 0
+			return { machine: c.machine, sheets: s, passes: c.passes, hours: +h.toFixed(4) }
+		})
 		const t = tp[i] || {}
 		const total = t.total_with_price_diff != null ? t.total_with_price_diff : t.total_price
 		const print = Number(t.print) || 0 // ค่าพิมพ์ (หมึก+พิมพ์) จาก calc — แบบ A
-		const cost = COST_KEYS.reduce((s, k) => s + (Number(t[k]) || 0), 0) // ต้นทุนรวมทุกหมวด
+		const cost = COST_KEYS.reduce((s, k) => s + (Number(t[k]) || 0), 0) // ต้นทุนรวมทุกหมวด (ระดับงาน)
 		const margin = total != null ? total - cost : null // กำไร = ราคาขาย − ต้นทุน (ขยับตาม markup)
-		const hours = impressions / speedSheetsPerHour
 		const costPerHour = hours > 0 && total != null ? total / hours : null
 		const printPerHour = hours > 0 ? print / hours : null
 		const marginPerHour = hours > 0 && margin != null ? margin / hours : null
-		const wasteSheets = Number(wasteArr[i]) || 0
-		const makereadyPct = sheets > 0 ? (wasteSheets / sheets) * 100 : null // % แผ่นที่เป็นเซตเครื่อง/เผื่อเสีย
-		const jobsPerShift = hours > 0 ? SHIFT_HOURS / hours : null            // ทำงานนี้ได้กี่ครั้ง/กะ (ทฤษฎี)
+		const makereadyPct = sheets > 0 ? (wasteSheets / sheets) * 100 : null
+		const jobsPerShift = hours > 0 ? SHIFT_HOURS / hours : null
 		return {
 			qty,
 			sheets,
-			impressions,
 			hours: +hours.toFixed(4),
 			total: total != null ? +Number(total).toFixed(2) : null,
 			costPerHour: costPerHour != null ? +costPerHour.toFixed(2) : null,
@@ -74,9 +79,17 @@ function computeMachineHourMetric(mainData, speedSheetsPerHour) {
 			marginPerHour: marginPerHour != null ? +marginPerHour.toFixed(2) : null,
 			makereadyPct: makereadyPct != null ? +makereadyPct.toFixed(1) : null,
 			jobsPerShift: jobsPerShift != null ? +jobsPerShift.toFixed(1) : null,
+			byComponent,
 		}
 	})
-	return { machine, units, colors: { outside, inside }, passes, speed: speedSheetsPerHour, shiftHours: SHIFT_HOURS, compCount, rows }
+	const first = compInfo[0]
+	return {
+		machine: compInfo.map((c) => c.machine).join(' + '), // หลาย component = ชื่อเครื่อง join
+		units: first.units, colors: { outside: first.outside, inside: first.inside }, passes: first.passes,
+		compCount: comps.length,
+		components: compInfo.map((c) => ({ machine: c.machine, units: c.units, outside: c.outside, inside: c.inside, passes: c.passes })),
+		speed: speedSheetsPerHour, shiftHours: SHIFT_HOURS, rows,
+	}
 }
 
 /**
@@ -100,16 +113,17 @@ function renderMachineHourMetric(metric) {
 	const mkVals = metric.rows.map((r) => r.makereadyPct).filter((x) => x != null)
 	const mkRange = mkVals.length ? (fmt(Math.min(...mkVals), 0) + '–' + fmt(Math.max(...mkVals), 0) + '%') : '-'
 	const maxJobs = Math.max(0, ...metric.rows.map((r) => r.jobsPerShift || 0))
+	const single = metric.compCount === 1
+	const passBadge = (p) => `<span style="color:${p > 1 ? '#dc2626' : '#16a34a'};font-weight:bold">${p} รอบ</span>${p > 1 ? ' (เวลา×' + p + ')' : ''}`
+	const compDetail = single
+		? `<b>ชุดพิมพ์:</b> ${metric.components[0].units} สี &nbsp;•&nbsp; <b>สีงาน:</b> ${metric.components[0].outside}+${metric.components[0].inside} &nbsp;•&nbsp; <b>รอบพิมพ์:</b> ${passBadge(metric.components[0].passes)}`
+		: metric.components.map((c, idx) => `<b>Comp${idx + 1} (${c.machine}):</b> ${c.units} ชุด / ${c.outside}+${c.inside} สี / ${passBadge(c.passes)}`).join('&nbsp;&nbsp;•&nbsp;&nbsp;')
 	return `
 		<div style="font-size:13px">
-			<div style="margin-bottom:6px">
-				<b>เครื่อง:</b> ${metric.machine} &nbsp;•&nbsp;
-				<b>ชุดพิมพ์:</b> ${metric.units} สี &nbsp;•&nbsp;
-				<b>สีงาน:</b> ${metric.colors.outside}+${metric.colors.inside} &nbsp;•&nbsp;
-				<b>รอบพิมพ์:</b> <span style="color:${metric.passes > 1 ? '#dc2626' : '#16a34a'};font-weight:bold">${metric.passes} รอบ</span>${metric.passes > 1 ? ' (สีเกินชุดพิมพ์ → เวลา×' + metric.passes + ')' : ''} &nbsp;•&nbsp;
-				<b>ความเร็ว:</b> ${fmt(metric.speed, 0)} แผ่น/ชม.
-				${metric.compCount > 1 ? `<span style="color:#dc2626">&nbsp;•&nbsp;⚠️ คิดเฉพาะ component 1 จาก ${metric.compCount}</span>` : ''}
+			<div style="margin-bottom:4px">
+				<b>เครื่อง:</b> ${metric.machine} &nbsp;•&nbsp; <b>ความเร็ว:</b> ${fmt(metric.speed, 0)} แผ่น/ชม.${metric.compCount > 1 ? ` &nbsp;•&nbsp; <span style="color:#2563eb;font-weight:bold">${metric.compCount} components (รวมเวลาทุกเครื่อง)</span>` : ''}
 			</div>
+			<div style="margin-bottom:6px;font-size:12px">${compDetail}</div>
 			<table style="width:100%;border-collapse:collapse">
 				<thead><tr style="background:#e5e7eb">
 					<th style="padding:5px 8px;text-align:left">ยอดสั่ง</th>
