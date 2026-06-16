@@ -95,8 +95,9 @@ function computeMachineHourMetric(mainData, speedSheetsPerHour) {
 /**
  * แปลงเมตริกเป็น HTML ตาราง (ใช้ใน modal/หน้าจอ — ภายหลัง)
  */
-function renderMachineHourMetric(metric) {
+function renderMachineHourMetric(metric, target) {
 	if (!metric || !metric.rows.length) return '<div>ยังไม่มีข้อมูล (ต้องคำนวณ price ก่อน + ใส่ความเร็วเครื่อง)</div>'
+	const hasTarget = target != null && target > 0 // เป้าหมายกำไร/ชม. (สมมติ) — ไว้ตัดสิน คุ้ม/ไม่คุ้ม
 	const fmt = (n, d) => (n == null || isNaN(n) ? '-' : Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }))
 	const mins = (h) => (h == null ? '-' : fmt(h * 60, 1) + ' นาที')
 	const rows = metric.rows.map((r) => `
@@ -107,7 +108,7 @@ function renderMachineHourMetric(metric) {
 			<td style="text-align:right">${fmt(r.hours, 3)} ชม.<br><span style="color:#9ca3af;font-size:11px">(${mins(r.hours)})</span></td>
 			<td style="text-align:right">${fmt(r.total, 2)}</td>
 			<td style="text-align:right;font-weight:bold;background:#fef3c7">${fmt(r.costPerHour, 2)}</td>
-			<td style="text-align:right;font-weight:bold;background:#dcfce7;color:${r.marginPerHour > 0 ? '#15803d' : '#6b7280'}">${fmt(r.marginPerHour, 2)}</td>
+			<td style="text-align:right;font-weight:bold;background:#dcfce7;color:${r.marginPerHour > 0 ? '#15803d' : '#6b7280'}">${fmt(r.marginPerHour, 2)}${hasTarget && r.marginPerHour != null ? (r.marginPerHour >= target ? ' <span title="ถึงเป้า">✅</span>' : ' <span title="ต่ำกว่าเป้า">⚠️</span>') : ''}</td>
 			<td style="text-align:right;font-weight:bold;background:#dbeafe">${fmt(r.printPerHour, 2)}</td>
 		</tr>`).join('')
 	const mkVals = metric.rows.map((r) => r.makereadyPct).filter((x) => x != null)
@@ -118,12 +119,25 @@ function renderMachineHourMetric(metric) {
 	const compDetail = single
 		? `<b>ชุดพิมพ์:</b> ${metric.components[0].units} สี &nbsp;•&nbsp; <b>สีงาน:</b> ${metric.components[0].outside}+${metric.components[0].inside} &nbsp;•&nbsp; <b>รอบพิมพ์:</b> ${passBadge(metric.components[0].passes)}`
 		: metric.components.map((c, idx) => `<b>Comp${idx + 1} (${c.machine}):</b> ${c.units} ชุด / ${c.outside}+${c.inside} สี / ${passBadge(c.passes)}`).join('&nbsp;&nbsp;•&nbsp;&nbsp;')
+	// go/no-go: เทียบกำไร/ชม. กับเป้าหมาย (สมมติ) → คุ้มกี่ยอด
+	let verdictHtml = ''
+	if (hasTarget) {
+		const mv = metric.rows.map((r) => r.marginPerHour).filter((x) => x != null)
+		const ok = mv.filter((x) => x >= target).length
+		const v = !mv.length ? '' : ok === mv.length
+			? `<span style="color:#15803d;font-weight:bold">✅ คุ้มเวลาเครื่องทุกยอด</span>`
+			: ok === 0
+				? `<span style="color:#dc2626;font-weight:bold">⚠️ กำไร/ชม. ต่ำกว่าเป้าทุกยอด — ควรขอเพิ่มราคา/เพิ่มยอด</span>`
+				: `<span style="color:#d97706;font-weight:bold">🟡 คุ้ม ${ok}/${mv.length} ยอด (ยอดน้อยยังไม่ถึงเป้า)</span>`
+		verdictHtml = `<div style="margin-bottom:6px;font-size:12px;background:#f0f9ff;border-left:3px solid #2563eb;padding:5px 10px;border-radius:4px">🎯 <b>เป้าหมายกำไร/ชม. (สมมติ):</b> ${fmt(target, 0)} บาท → ${v}</div>`
+	}
 	return `
 		<div style="font-size:13px">
 			<div style="margin-bottom:4px">
 				<b>เครื่อง:</b> ${metric.machine} &nbsp;•&nbsp; <b>ความเร็ว:</b> ${fmt(metric.speed, 0)} แผ่น/ชม.${metric.compCount > 1 ? ` &nbsp;•&nbsp; <span style="color:#2563eb;font-weight:bold">${metric.compCount} components (รวมเวลาทุกเครื่อง)</span>` : ''}
 			</div>
 			<div style="margin-bottom:6px;font-size:12px">${compDetail}</div>
+			${verdictHtml}
 			<table style="width:100%;border-collapse:collapse">
 				<thead><tr style="background:#e5e7eb">
 					<th style="padding:5px 8px;text-align:left">ยอดสั่ง</th>
@@ -152,6 +166,7 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 	jQuery(function ($) {
 		const PRICE_BTN = '#calc_price, #calc_price_after_change, #calc_price_after_packing'
 		const MOCKUP_SPEED = 5000 // แผ่น/ชม. — ⚠️ MOCKUP รอข้อมูลจริงจากพี่
+		const MOCKUP_TARGET = 10000 // เป้าหมายกำไร/ชม. (บาท) — ⚠️ MOCKUP รอตัวเลขจริง (= ต้นทุนเครื่อง/ชม.+กำไรที่ต้องการ)
 
 		function doInject() {
 			const $summary = $('#summary')
@@ -164,7 +179,7 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 					<div style="font-weight:bold;font-size:15px;color:#b45309;margin-bottom:8px">⏱️ ราคาต่อชั่วโมงเครื่อง
 						<span style="font-size:11px;color:#d97706;font-weight:normal">— ⚠️ ข้อมูล MOCKUP (ความเร็ว ${MOCKUP_SPEED.toLocaleString()} แผ่น/ชม. สมมติ รอข้อมูลจริงจากพี่)</span>
 					</div>
-					${renderMachineHourMetric(metric)}
+					${renderMachineHourMetric(metric, MOCKUP_TARGET)}
 				</div>`)
 			return true
 		}
