@@ -21,7 +21,7 @@
  * @param {number} speedSheetsPerHour  ความเร็วเครื่อง (แผ่น/ชั่วโมง) — จากพี่
  * @returns {{machine:string, rows:Array}|null}
  */
-function computeMachineHourMetric(mainData, speedSheetsPerHour) {
+function computeMachineHourMetric(mainData, speedSheetsPerHour, opts) {
 	if (!mainData || !(speedSheetsPerHour > 0)) return null
 	const comps = mainData.component1 || []
 	if (!comps.length) return null
@@ -29,15 +29,18 @@ function computeMachineHourMetric(mainData, speedSheetsPerHour) {
 	const qtyArr = (mainData.qty && mainData.qty.totalqty) || []
 	const SHIFT_HOURS = 8 // กะมาตรฐาน 8 ชม. (ใช้คิดกำลังผลิต/กะ)
 	const COST_KEYS = ['material', 'plate', 'print', 'proof', 'afterpress', 'delivery', 'other']
+	const o = opts || {}
+	const setupHours = Number(o.setupHours) > 0 ? Number(o.setupHours) : 0 // make_ready/เซตเครื่อง (ชม.) — พี่บอกเฉลี่ย ~1 ชม.
+	const speedByMachine = o.speedByMachine || {} // ชื่อเครื่อง → ความเร็วจริง (จากตารางพี่)
 
-	// ความเร็วต่อเครื่อง: ถ้า master ของเครื่องมี field ความเร็วจริง → ใช้ของจริง (ต่อเครื่อง)
-	//   ไม่มี → fallback เป็น speedSheetsPerHour (ค่า mockup ที่ส่งเข้ามา)
-	//   รองรับชื่อ field ที่พี่อาจตั้ง: machine_speed / speed_sheets_per_hour / speed
-	//   → วันที่พี่เพิ่ม field ลง master งานนี้ใช้ความเร็วจริงทันที ไม่ต้องแก้โค้ด
+	// ความเร็วต่อเครื่อง (ลำดับความสำคัญ): field ใน master > ตารางความเร็วตามชื่อเครื่อง (พี่) > fallback
 	const machineSpeedOf = (comp) => {
 		const m = (comp && comp.machine) || {}
 		const real = Number(m.machine_speed) || Number(m.speed_sheets_per_hour) || Number(m.speed)
-		return real > 0 ? real : speedSheetsPerHour
+		if (real > 0) return real
+		const byName = Number(speedByMachine[m.machine_name])
+		if (byName > 0) return byName
+		return speedSheetsPerHour
 	}
 
 	// ข้อมูลคงที่ต่อ component — แต่ละ component อาจใช้คนละเครื่อง/คนละสี/คนละความเร็ว
@@ -66,7 +69,8 @@ function computeMachineHourMetric(mainData, speedSheetsPerHour) {
 		let hours = 0, sheets = 0, wasteSheets = 0
 		const byComponent = compInfo.map((c) => {
 			const s = Number((c.lines[i] || {}).paper_print) || 0
-			const h = (s * c.passes) / c.speed // ความเร็วต่อเครื่อง (จริงจาก master ถ้ามี ไม่งั้น mockup)
+			// เวลา = เซตเครื่อง + (แผ่น × รอบพิมพ์ ÷ ความเร็ว) • ถ้าไม่มีงาน (s=0) → 0
+			const h = s > 0 ? setupHours + (s * c.passes) / c.speed : 0
 			hours += h; sheets += s; wasteSheets += Number(c.wasteArr[i]) || 0
 			return { machine: c.machine, sheets: s, passes: c.passes, hours: +h.toFixed(4) }
 		})
@@ -101,10 +105,10 @@ function computeMachineHourMetric(mainData, speedSheetsPerHour) {
 		units: first.units, colors: { outside: first.outside, inside: first.inside }, passes: first.passes,
 		compCount: comps.length,
 		components: compInfo.map((c) => ({ machine: c.machine, units: c.units, outside: c.outside, inside: c.inside, passes: c.passes, speed: c.speed, isRealSpeed: c.isRealSpeed })),
-		speed: speedSheetsPerHour, // ความเร็ว fallback (mockup) — เครื่องที่มีของจริงใช้ของตัวเองใน rows
-		allRealSpeed: compInfo.every((c) => c.isRealSpeed), // true = ทุกเครื่องใช้ความเร็วจริงจาก master แล้ว
+		speed: speedSheetsPerHour, // ความเร็ว fallback — เครื่องที่ระบุชื่อตรงตารางใช้ของจริงใน rows
+		allRealSpeed: compInfo.every((c) => c.isRealSpeed), // true = ทุกเครื่อง map ความเร็วเฉพาะเครื่องได้
 		anyRealSpeed: compInfo.some((c) => c.isRealSpeed),
-		shiftHours: SHIFT_HOURS, rows,
+		setupHours, shiftHours: SHIFT_HOURS, rows,
 	}
 }
 
@@ -169,7 +173,7 @@ function renderMachineHourMetric(metric, target) {
 			</table>
 			<div style="margin-top:8px;font-size:11px;color:#6b7280">
 				💡 <b>ข้อสังเกต:</b> %เซตเครื่อง ${mkRange} = งานยอดน้อยเสียเวลากับ makeready เยอะ • กำลังผลิต(เฉพาะเครื่องพิมพ์) ~${fmt(maxJobs, 0)} ครั้ง/กะ — ⚠️ <b>กำลังผลิตจริงจำกัดโดยคอขวด</b> (ดูตาราง process ด้านล่าง)<br>
-				* เทียบดูเฉยๆ ไม่บวกเข้าราคาขาย • <b>กำไร = ราคาขาย − ต้นทุน</b> (ขยับตาม markup, =0 ถ้าไม่บวกกำไร) • เวลา = แผ่นพิมพ์ × รอบพิมพ์ ÷ ความเร็ว
+				* เทียบดูเฉยๆ ไม่บวกเข้าราคาขาย • <b>กำไร = ราคาขาย − ต้นทุน</b> (ขยับตาม markup, =0 ถ้าไม่บวกกำไร) • เวลา = เซตเครื่อง${metric.setupHours ? ' ' + metric.setupHours + ' ชม.' : ''} + (แผ่นพิมพ์ × รอบพิมพ์ ÷ ความเร็ว)
 			</div>
 		</div>`
 }
@@ -178,8 +182,8 @@ function renderMachineHourMetric(metric, target) {
 // แยกเวลาเครื่อง "ต่อ process" — แต่ละ process = คนละเครื่อง คนละความเร็ว
 //   sheet-based (เครื่องรันแผ่น): พิมพ์/เคลือบ/ไดคัท/ปั๊ม → ใช้ paper_print (แผ่น)
 //   piece-based (ต่อใบสำเร็จ): ติดกาว/ประกอบ → ใช้ยอดสั่ง (ใบ)
-//   เวลา = จำนวน ÷ ความเร็ว(process) • คอขวด = process ที่ใช้เวลานานสุด
-//   ⚠️ ความเร็วทุก process เป็น MOCKUP รอข้อมูลจริงต่อเครื่อง
+//   เวลา = เซตเครื่อง + (จำนวน ÷ ความเร็ว process) • คอขวด = process ที่ใช้เวลานานสุด
+//   ความเร็วจริงจากตารางเครื่องของพี่ + setup เฉลี่ย ~1 ชม./เครื่อง
 // ============================================================================
 function computeProcessBreakdown(mainData, qtyIndex, speeds) {
 	const comp = (mainData.component1 || [])[0] || {}
@@ -188,11 +192,12 @@ function computeProcessBreakdown(mainData, qtyIndex, speeds) {
 	const orderQty = ((mainData.qty && mainData.qty.totalqty) || [])[i] || 0
 	const tp = (mainData.totalprice || [])[i] || {}
 	const sp = speeds || {}
+	const setupHours = Number(sp.setupHours) > 0 ? Number(sp.setupHours) : 0 // เซตเครื่อง/make_ready (ชม.)
 	const procs = []
 	const add = (label, unit, qty, cost, speed) => {
 		const c = Number(cost) || 0
 		if (!(qty > 0) || !(speed > 0) || !(c > 0)) return // c=0 → process ไม่มีในงานนี้ → ข้าม
-		const hours = qty / speed
+		const hours = setupHours + qty / speed // รวมเวลาเซตเครื่อง
 		procs.push({ label, unit, qty, speed, cost: +c.toFixed(2), hours: +hours.toFixed(4), costPerHour: hours > 0 ? +(c / hours).toFixed(2) : null })
 	}
 	const sumAddon = (types) => (comp.addon || []).filter((a) => a && types.includes(a.type)).reduce((s, a) => s + (((a.line || [])[i] || {}).price || 0), 0)
@@ -259,7 +264,7 @@ function renderProcessBreakdown(pb, target) {
 				<thead><tr style="background:#ede9fe">
 					<th style="padding:4px 8px;text-align:left">Process</th>
 					<th style="padding:4px 8px;text-align:right">จำนวน</th>
-					<th style="padding:4px 8px;text-align:right">ความเร็ว(mockup)</th>
+					<th style="padding:4px 8px;text-align:right">ความเร็ว/ชม.</th>
 					<th style="padding:4px 8px;text-align:right">เวลา</th>
 					<th style="padding:4px 8px;text-align:right">ค่าใช้จ่าย</th>
 					<th style="padding:4px 8px;text-align:right">ค่า/ชม.</th>
@@ -283,39 +288,56 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 		const PRICE_BTN = '#calc_price, #calc_price_after_change, #calc_price_after_packing'
 
 		// ────────────────────────────────────────────────────────────────────
-		// ⚙️ จุดเดียวที่ต้องแก้เมื่อพี่ส่งข้อมูลจริงมา (หรือ set window.MACHINE_HOUR_CONFIG
-		//    จากภายนอกก่อนโหลดไฟล์นี้ก็ได้ — ไม่ต้องแตะโค้ดในไฟล์เลย)
-		//  • speed         = ความเร็วเครื่องพิมพ์ default (แผ่น/ชม.) — ใช้กับเครื่องที่ master ยังไม่มีความเร็วจริง
-		//  • target        = เป้าหมายกำไร/ชม. (บาท) สำหรับ go/no-go (= ต้นทุนเครื่อง/ชม. + กำไรที่ต้องการ)
-		//  • processSpeeds = ความเร็วต่อ process (แต่ละ process คนละเครื่อง)
-		//  หมายเหตุ: ถ้า master ของเครื่อง (default.js) มี field machine_speed → ตารางใช้ของจริงต่อเครื่องอัตโนมัติ
+		// ⚙️ ข้อมูลจริงจากตารางเครื่องของพี่ (17 มิ.ย.) — แก้จุดเดียว หรือ set
+		//    window.MACHINE_HOUR_CONFIG จากภายนอกก็ได้ (ไม่ต้องแตะไฟล์)
+		//  • speed         = ความเร็วเครื่องพิมพ์ default (แผ่น/ชม.) — เครื่อง Sheet ส่วนใหญ่ 10,000
+		//  • setupHours    = เวลาเซตเครื่อง/make_ready (ชม.) เฉลี่ย ~1 ชม. (พี่บอก "เฉลี่ยๆเอา")
+		//  • target        = เป้าหมายกำไร/ชม. (บาท) — ⚠️ ยัง MOCKUP รอพี่ให้ตัวเลขจริง
+		//  • processSpeeds = ความเร็วต่อ process (ชิ้น/แผ่น ต่อ ชม.) จากตารางพี่
+		//  • speedByMachine= ความเร็วจริงรายเครื่องพิมพ์ (ชื่อ → แผ่น/ชม.) ใช้กับ per-component
+		//  ⚠️ ติดกาว(assembly) ยังไม่มีในตารางที่พี่ส่ง → ใช้ค่าประมาณไปก่อน
 		// ────────────────────────────────────────────────────────────────────
 		const DEFAULTS = {
-			speed: 5000, // ⚠️ MOCKUP รอข้อมูลจริงจากพี่
-			target: 10000, // ⚠️ MOCKUP
-			processSpeeds: { print: 5000, coating: 6000, diecut: 4000, stamp: 3000, assembly: 3000, strip: 5000, chip: 5000 }, // ⚠️ MOCKUP
+			speed: 10000,    // เครื่องพิมพ์ Sheet (ส่วนใหญ่ 10,000)
+			setupHours: 1,   // make_ready เฉลี่ย ~1 ชม.
+			target: 10000,   // ⚠️ MOCKUP — เป้ากำไร/ชม. ยังไม่ได้จากพี่
+			processSpeeds: {
+				print: 10000,   // Sheet presses
+				coating: 1500,  // Coating Packaging (water-base/ขัดเงา); UV 1,800-2,500, OPP 1,300
+				diecut: 2500,   // Die-cut auto (SANWA/SHIHENG 2,500, Yoco 3,000); manual 400
+				stamp: 500,     // Hot Stamp (300-600)
+				assembly: 3000, // ⚠️ ติดกาว — ยังไม่มีข้อมูลจริง (ค่าประมาณ)
+				strip: 2500,    // แกะ ผ่าน die-cut
+				chip: 2500,
+			},
+			speedByMachine: { // จากตารางเครื่อง Sheet ของพี่
+				'CD440A': 10000, 'LS440': 10000, 'LS244': 10000, 'L444SP': 10000, 'L444APC': 10000,
+				'L540APC': 10000, 'LS540APC': 10000, 'LS1029': 10000, 'L640': 10000,
+				'L640APC-B': 5000, 'GL640 UV': 10000, 'GL844 + C(IR)': 9000, 'L640C': 10000,
+			},
 		}
 		const override = (typeof window !== 'undefined' && window.MACHINE_HOUR_CONFIG) || {}
 		const CFG = {
 			speed: Number(override.speed) > 0 ? Number(override.speed) : DEFAULTS.speed,
+			setupHours: override.setupHours != null ? Number(override.setupHours) : DEFAULTS.setupHours,
 			target: Number(override.target) > 0 ? Number(override.target) : DEFAULTS.target,
 			processSpeeds: Object.assign({}, DEFAULTS.processSpeeds, override.processSpeeds || {}),
+			speedByMachine: Object.assign({}, DEFAULTS.speedByMachine, override.speedByMachine || {}),
 		}
 
 		function doInject() {
 			const $summary = $('#summary')
-			const metric = (typeof est !== 'undefined' && est && est.mainData) ? computeMachineHourMetric(est.mainData, CFG.speed) : null
+			const metricOpts = { setupHours: CFG.setupHours, speedByMachine: CFG.speedByMachine }
+			const metric = (typeof est !== 'undefined' && est && est.mainData) ? computeMachineHourMetric(est.mainData, CFG.speed, metricOpts) : null
 			if (!$summary.length || !metric || !metric.rows.length) return false
 			$('#machine_hour_metric').remove()
-			// ป้ายกำกับ: ถ้าทุกเครื่องดึงความเร็วจริงจาก master แล้ว → เขียว, ไม่งั้นเตือนว่ายัง mockup
-			const note = metric.allRealSpeed
-				? '<span style="font-size:11px;color:#15803d;font-weight:normal">— ✅ ใช้ความเร็วจริงจาก master</span>'
-				: `<span style="font-size:11px;color:#d97706;font-weight:normal">— ⚠️ ความเร็ว ${CFG.speed.toLocaleString()} แผ่น/ชม. (mockup รอข้อมูลจริงจากพี่)</span>`
+			const note = `<span style="font-size:11px;color:#15803d;font-weight:normal">— ✅ ความเร็วจริงจากพี่ + เซตเครื่อง ${CFG.setupHours} ชม. <span style="color:#d97706">(เป้ากำไร/ชม. ยังสมมติ)</span></span>`
+			const procSpeeds = Object.assign({ setupHours: CFG.setupHours }, CFG.processSpeeds)
 			$summary.after(`
 				<div id="machine_hour_metric" style="max-width:900px;margin:14px auto;border:1px solid #fcd34d;background:#fffbeb;border-radius:8px;padding:12px 14px;font-family:inherit">
 					<div style="font-weight:bold;font-size:15px;color:#b45309;margin-bottom:8px">⏱️ ราคาต่อชั่วโมงเครื่อง ${note}</div>
 					${renderMachineHourMetric(metric, CFG.target)}
-					${renderProcessBreakdown(computeProcessBreakdown(est.mainData, 0, CFG.processSpeeds), CFG.target)}
+					${renderProcessBreakdown(computeProcessBreakdown(est.mainData, 0, procSpeeds), CFG.target)}
 				</div>`)
 			return true
 		}

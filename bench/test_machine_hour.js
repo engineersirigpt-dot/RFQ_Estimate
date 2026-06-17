@@ -45,7 +45,8 @@ function makeMulti() {
 	return d
 }
 
-const speed = Number(process.argv[2]) || 5000
+const speed = Number(process.argv[2]) || 10000
+const SETUP = 1 // เซตเครื่อง 1 ชม. (เหมือนแอปจริง)
 const fmt = (n, d) => (n == null ? '-' : Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }))
 
 ;[
@@ -54,7 +55,7 @@ const fmt = (n, d) => (n == null ? '-' : Number(n).toLocaleString('en-US', { min
 	['สีเยอะ 8 สี (passes 2)', makeData(8, 6, 20)],
 	['2 component (L440 + LS1029)', makeMulti()],
 ].forEach(([label, data]) => {
-	const mt = computeMachineHourMetric(data, speed)
+	const mt = computeMachineHourMetric(data, speed, { setupHours: SETUP })
 	console.log(`\n===== ${label} =====`)
 	console.log(`เครื่อง: ${mt.machine} • ${mt.compCount} comp • ${fmt(speed, 0)} แผ่น/ชม.`)
 	if (mt.compCount > 1) mt.components.forEach((c, i) => console.log(`   Comp${i + 1}: ${c.machine} ชุด ${c.units}/สี ${c.outside}+${c.inside}/รอบ ${c.passes}`))
@@ -72,7 +73,8 @@ const fmt = (n, d) => (n == null ? '-' : Number(n).toLocaleString('en-US', { min
 console.log('\n* markup 0 → กำไร/ชม.=0 • 2 component → เวลารวมทุกเครื่อง (ราคา/กำไร ระดับงาน ÷ เวลารวม)')
 
 // per-process: แยกเวลาต่อ process (แต่ละ process คนละเครื่อง) + หาคอขวด
-const procSpeeds = { print: 5000, coating: 6000, diecut: 4000, stamp: 3000, assembly: 3000, strip: 5000, chip: 5000 }
+// ความเร็วจริงจากตารางพี่ + setup 1 ชม.
+const procSpeeds = { setupHours: 1, print: 10000, coating: 1500, diecut: 2500, stamp: 500, assembly: 3000, strip: 2500, chip: 2500 }
 ;[0, 4].forEach((i) => {
 	const pb = computeProcessBreakdown(makeData(3, 6, 0), i, procSpeeds)
 	console.log(`\n=== per-process ยอด ${fmt(pb.qty, 0)} ===`)
@@ -92,3 +94,16 @@ console.log('  ความเร็วที่ใช้: ' + fmt(mtReal.compon
 console.log('  allRealSpeed=' + mtReal.allRealSpeed + ' • เวลา ' + fmt(rr.hours * 60, 2) + ' น. (คาด ' + fmt(expHours * 60, 2) + ')')
 console.log('  ' + (ok ? '✅ PASS — ดึงความเร็วจริงจาก master ถูกต้อง' : '❌ FAIL'))
 if (!ok) process.exitCode = 1
+
+// ── ทดสอบ setup time + speedByMachine (opts) — เวลา = setup + แผ่น×passes÷ความเร็ว
+console.log('\n===== setup time + speedByMachine =====')
+const dOpt = makeData(3, 6, 0) // L440, 360 แผ่น, passes 1
+const mtOpt = computeMachineHourMetric(dOpt, 8000, { setupHours: 1, speedByMachine: { L440: 10000 } })
+const ro = mtOpt.rows[0]
+const expRun = 360 / 10000          // ใช้ความเร็วตามชื่อเครื่อง L440=10000 (ไม่ใช่ fallback 8000)
+const expWithSetup = 1 + expRun     // + setup 1 ชม.
+const okOpt = mtOpt.components[0].speed === 10000 && mtOpt.setupHours === 1 && Math.abs(ro.hours - +expWithSetup.toFixed(4)) < 1e-6
+console.log('  ความเร็ว(by name)=' + fmt(mtOpt.components[0].speed, 0) + ' setup=' + mtOpt.setupHours + ' ชม.')
+console.log('  เวลา ' + fmt(ro.hours, 4) + ' ชม. (คาด ' + fmt(expWithSetup, 4) + ' = 1 setup + ' + fmt(expRun, 4) + ' run)')
+console.log('  ' + (okOpt ? '✅ PASS — setup + speedByMachine ถูกต้อง' : '❌ FAIL'))
+if (!okOpt) process.exitCode = 1
