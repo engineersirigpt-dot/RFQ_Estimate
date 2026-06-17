@@ -1,5 +1,5 @@
 // AI regression harness — DETERMINISTIC unit tests (no API, instant, free).
-// รันก่อน commit ทุกครั้ง: ดักบั๊กที่เคยแก้ (mm ×10, paper_gram, prefix, stripMoneyPct)
+// รันก่อน commit ทุกครั้ง: ดักบั๊กที่เคยแก้ (mm ×10, paper_gram, prefix, stripMoneyPct, print-type safety net)
 // ใช้: node bench/ai_test.js   (exit 1 ถ้ามี fail)
 // เทสที่ยิง API จริง (accuracy) แยกไฟล์: golden_grader.js / test_print_types.js / test_explain_price.js
 process.env.AI_TEST = '1' // เปิด guarded test-exports ใน router/ai.js
@@ -53,6 +53,25 @@ console.log('\n=== 3. stripMoneyPct (เก็บ spec / ตัด เงิน-
 	const out = ai.stripMoneyPct(s)
 	const ok = exp instanceof RegExp ? !exp.test(out) : out === exp
 	check('"' + s + '" → "' + out + '"', ok, out)
+})
+
+console.log('\n=== 4. print-type rules (validateAndFix safety net) ===')
+// validateAndFix บังคับเฉพาะ safety ขั้นต่ำ — GSM range/ความเข้ากันได้อื่น เป็นหน้าที่ฟอร์ม validate
+;[
+	// Flexo = ลูกฟูกเท่านั้น → type ต้องถูกบังคับเป็น 3 แม้ AI อ่านมาเป็น 1
+	['Flexo type=1 → บังคับ 3', { print_type: 'Flexo', components: [{ type: 1 }] }, (o) => o.components[0].type === 3],
+	['Flexo type=3 คงเดิม', { print_type: 'Flexo', components: [{ type: 3 }] }, (o) => o.components[0].type === 3],
+	// Konica = ดิจิทัล max 4 สี/ด้าน → clamp ทั้งสองด้าน
+	['Konica 7/6 สี → clamp 4/4', { print_type: 'Konica', components: [{ color_outside: 7, color_inside: 6 }] }, (o) => o.components[0].color_outside === 4 && o.components[0].color_inside === 4],
+	['Konica 4/0 สี คงเดิม', { print_type: 'Konica', components: [{ color_outside: 4, color_inside: 0 }] }, (o) => o.components[0].color_outside === 4 && o.components[0].color_inside === 0],
+	// Offset ไม่ clamp สีตรงนี้ (ฟอร์ม validate ดูแลกฎสี/UV เอง)
+	['Offset 6 สี ไม่ถูก clamp', { print_type: 'Offset', components: [{ color_outside: 6, color_inside: 0 }] }, (o) => o.components[0].color_outside === 6],
+	// print_type ที่ไม่รู้จัก → default Offset (ไม่ปล่อยค่าเพี้ยนไปคำนวณ)
+	['print_type มั่ว → Offset', { print_type: 'Xerox', components: [{ type: 1 }] }, (o) => o.print_type === 'Offset'],
+	['print_type ว่าง → Offset', { components: [{ type: 1 }] }, (o) => o.print_type === 'Offset'],
+].forEach(([name, input, pred]) => {
+	const out = ai.validateAndFix(input)
+	check(name, pred(out), { print: out.print_type, c0: out.components[0] })
 })
 
 // stripHallucinations เป็น async — รอให้ครบก่อนสรุป
