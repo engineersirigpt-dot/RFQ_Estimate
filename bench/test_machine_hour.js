@@ -95,15 +95,29 @@ console.log('  allRealSpeed=' + mtReal.allRealSpeed + ' • เวลา ' + fmt
 console.log('  ' + (ok ? '✅ PASS — ดึงความเร็วจริงจาก master ถูกต้อง' : '❌ FAIL'))
 if (!ok) process.exitCode = 1
 
-// ── ทดสอบ setup time + speedByMachine (opts) — เวลา = setup + แผ่น×passes÷ความเร็ว
-console.log('\n===== setup time + speedByMachine =====')
+// ── ทดสอบ setup + machineByName (opts {speed,setup}) — เวลา = setup + แผ่น×passes÷ความเร็ว
+console.log('\n===== setup + machineByName (per-machine) =====')
 const dOpt = makeData(3, 6, 0) // L440, 360 แผ่น, passes 1
-const mtOpt = computeMachineHourMetric(dOpt, 8000, { setupHours: 1, speedByMachine: { L440: 10000 } })
+const mtOpt = computeMachineHourMetric(dOpt, 8000, { machineByName: { L440: { speed: 10000, setup: 0.5 } } })
 const ro = mtOpt.rows[0]
 const expRun = 360 / 10000          // ใช้ความเร็วตามชื่อเครื่อง L440=10000 (ไม่ใช่ fallback 8000)
-const expWithSetup = 1 + expRun     // + setup 1 ชม.
-const okOpt = mtOpt.components[0].speed === 10000 && mtOpt.setupHours === 1 && Math.abs(ro.hours - +expWithSetup.toFixed(4)) < 1e-6
-console.log('  ความเร็ว(by name)=' + fmt(mtOpt.components[0].speed, 0) + ' setup=' + mtOpt.setupHours + ' ชม.')
-console.log('  เวลา ' + fmt(ro.hours, 4) + ' ชม. (คาด ' + fmt(expWithSetup, 4) + ' = 1 setup + ' + fmt(expRun, 4) + ' run)')
-console.log('  ' + (okOpt ? '✅ PASS — setup + speedByMachine ถูกต้อง' : '❌ FAIL'))
+const expWithSetup = 0.5 + expRun   // + setup ของเครื่องนั้น 0.5 ชม.
+const okOpt = mtOpt.components[0].speed === 10000 && mtOpt.components[0].setup === 0.5 && Math.abs(ro.hours - +expWithSetup.toFixed(4)) < 1e-6
+console.log('  ความเร็ว(by name)=' + fmt(mtOpt.components[0].speed, 0) + ' setup=' + mtOpt.components[0].setup + ' ชม.')
+console.log('  เวลา ' + fmt(ro.hours, 4) + ' ชม. (คาด ' + fmt(expWithSetup, 4) + ' = 0.5 setup + ' + fmt(expRun, 4) + ' run)')
+console.log('  ' + (okOpt ? '✅ PASS — setup + machineByName ถูกต้อง' : '❌ FAIL'))
 if (!okOpt) process.exitCode = 1
+
+// ── ทดสอบ per-process รับ {speed,setup} object form + flute (ปะลูกฟูก)
+console.log('\n===== per-process {speed,setup} + flute =====')
+const dFlute = makeData(3, 6, 0)
+dFlute.component1[0].addon.push({ type: 'corrugated', line: sheetsPerTier.map(() => ({ price: 500 })) })
+const procCfg = { print: { speed: 10000, setup: 1 }, coating: { speed: 1500, setup: 1 }, diecut: { speed: 2500, setup: 1 }, stamp: { speed: 500, setup: 0 }, assembly: { speed: 10000, setup: 1 }, strip: { speed: 15000, setup: 0.5 }, chip: { speed: 15000, setup: 0.5 }, flute: { speed: 2000, setup: 0.3 } }
+const pbF = computeProcessBreakdown(dFlute, 0, procCfg)
+const fluteRow = pbF.procs.find((p) => p.label === 'ปะลูกฟูก')
+const printRow = pbF.procs.find((p) => p.label === 'พิมพ์')
+const expFlute = 0.3 + 360 / 2000 // setup 0.3 + 360 แผ่น ÷ 2000
+const okF = !!fluteRow && Math.abs(fluteRow.hours - +expFlute.toFixed(4)) < 1e-6 && !!printRow && Math.abs(printRow.hours - (1 + 360 / 10000)) < 1e-3
+console.log('  ปะลูกฟูก: ' + (fluteRow ? fmt(fluteRow.hours * 60, 1) + ' น. (คาด ' + fmt(expFlute * 60, 1) + ')' : 'ไม่พบ!'))
+console.log('  ' + (okF ? '✅ PASS — flute + object form ถูกต้อง' : '❌ FAIL'))
+if (!okF) process.exitCode = 1
