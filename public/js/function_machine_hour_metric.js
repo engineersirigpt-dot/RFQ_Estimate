@@ -305,10 +305,11 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 				print: 10000,   // Sheet presses
 				coating: 1500,  // Coating Packaging (water-base/ขัดเงา); UV 1,800-2,500, OPP 1,300
 				diecut: 2500,   // Die-cut auto (SANWA/SHIHENG 2,500, Yoco 3,000); manual 400
-				stamp: 500,     // Hot Stamp (300-600)
-				assembly: 3000, // ⚠️ ติดกาว — ยังไม่มีข้อมูลจริง (ค่าประมาณ)
-				strip: 2500,    // แกะ ผ่าน die-cut
-				chip: 2500,
+				stamp: 500,     // ปั๊มทอง Hot Stamp (300-600). ปั๊มจม/นูนไม่มีเครื่องเฉพาะ → ใช้ไดคัท(2,500)
+				                //   หรือเคโยกมือ(500-600) ใช้ 500 แบบ conservative
+				assembly: 10000,// ติดกาว Glue-1/2/3/4 (10,000) — ของจริงจากพี่ (เดิมเดา 3,000)
+				strip: 15000,   // แกะอัตโนมัติ 5520 MSCB-1080 (15,000)
+				chip: 15000,
 			},
 			speedByMachine: { // จากตารางเครื่อง Sheet ของพี่
 				'CD440A': 10000, 'LS440': 10000, 'LS244': 10000, 'L444SP': 10000, 'L444APC': 10000,

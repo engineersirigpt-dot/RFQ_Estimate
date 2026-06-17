@@ -74,7 +74,7 @@ console.log('\n* markup 0 → กำไร/ชม.=0 • 2 component → เว�
 
 // per-process: แยกเวลาต่อ process (แต่ละ process คนละเครื่อง) + หาคอขวด
 // ความเร็วจริงจากตารางพี่ + setup 1 ชม.
-const procSpeeds = { setupHours: 1, print: 10000, coating: 1500, diecut: 2500, stamp: 500, assembly: 3000, strip: 2500, chip: 2500 }
+const procSpeeds = { setupHours: 1, print: 10000, coating: 1500, diecut: 2500, stamp: 500, assembly: 10000, strip: 15000, chip: 15000 }
 ;[0, 4].forEach((i) => {
 	const pb = computeProcessBreakdown(makeData(3, 6, 0), i, procSpeeds)
 	console.log(`\n=== per-process ยอด ${fmt(pb.qty, 0)} ===`)
