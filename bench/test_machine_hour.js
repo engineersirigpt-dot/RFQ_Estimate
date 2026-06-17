@@ -1,6 +1,6 @@
 // Demo เมตริกชั่วโมงเครื่อง — เลขจริงงาน Pillow + ทดสอบ margin/makeready/capacity/passes
 // node bench/test_machine_hour.js [speed]
-const { computeMachineHourMetric, computeProcessBreakdown } = require('../public/js/function_machine_hour_metric')
+const { computeMachineHourMetric, computeProcessBreakdown, computeMachineComparison } = require('../public/js/function_machine_hour_metric')
 
 const sheetsPerTier = [360, 369, 378, 387, 396]
 const wastePerTier = [350, 350, 350, 350, 350]
@@ -121,3 +121,21 @@ const okF = !!fluteRow && Math.abs(fluteRow.hours - +expFlute.toFixed(4)) < 1e-6
 console.log('  ปะลูกฟูก: ' + (fluteRow ? fmt(fluteRow.hours * 60, 1) + ' น. (คาด ' + fmt(expFlute * 60, 1) + ')' : 'ไม่พบ!'))
 console.log('  ' + (okF ? '✅ PASS — flute + object form ถูกต้อง' : '❌ FAIL'))
 if (!okF) process.exitCode = 1
+
+// ── ทดสอบ [Prototype] เทียบเครื่องต่อ process — เรียงตามเวลา + ต้นทุน/ชิ้น
+console.log('\n===== [prototype] compare machines per process =====')
+const MT = [
+	[3407, 'LS440', 'Sheet', 10000, 1.0], [3606, 'GL844', 'Sheet', 9000, 0.5],
+	[5420, 'SANWA', 'Die-cut', 2500, 1.0], [5425, 'D 2 Manual', 'Die-cut', 400, 1.0], // เร็ว vs เครื่องมือ
+	[5512, 'Glue-2', 'Glue', 10000, 1.0], [5520, 'แกะอัตโนมัติ', 'Glue', 15000, 0.5],
+].map(([code, name, cat, speed, setup]) => ({ code, name, cat, speed, setup }))
+const cmp = computeMachineComparison(makeData(3, 6, 0), 0, MT, { defaultRatePerHour: 500 })
+const diecutCmp = cmp.processes.find((p) => p.key === 'diecut')
+// ไดคัทงาน 360 แผ่น: SANWA = 1 + 360/2500 = 1.144 ชม. < D2 Manual = 1 + 360/400 = 1.9 ชม.
+const expSanwa = 1 + 360 / 2500
+const okCmp = !!diecutCmp && diecutCmp.candidates.length === 2 &&
+	diecutCmp.candidates[0].name === 'SANWA' && Math.abs(diecutCmp.candidates[0].hours - +expSanwa.toFixed(4)) < 1e-6 &&
+	diecutCmp.candidates[0].costPerPiece != null && diecutCmp.candidates[0].costPerPiece < diecutCmp.candidates[1].costPerPiece
+if (diecutCmp) diecutCmp.candidates.forEach((c) => console.log('  ไดคัท: ' + c.name.padEnd(12) + fmt(c.hours * 60, 1) + ' น.  ต้นทุน/ชิ้น ' + fmt(c.costPerPiece, 3)))
+console.log('  ' + (okCmp ? '✅ PASS — เทียบเครื่อง เรียงตามเวลา + ต้นทุน/ชิ้น ถูกต้อง' : '❌ FAIL'))
+if (!okCmp) process.exitCode = 1

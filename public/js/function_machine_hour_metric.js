@@ -288,6 +288,93 @@ function renderProcessBreakdown(pb, target) {
 }
 
 // ============================================================================
+// [PROTOTYPE] เทียบเครื่องต่อ process — ถ้างานนี้ลงเครื่องไหนได้บ้าง อันไหนคุ้มกว่า
+//   แต่ละ process มีหลายเครื่อง (เร็ว/ช้า/เซตต่างกัน) → คิดเวลา+ต้นทุน/ชิ้น ของแต่ละตัว
+//   ⚠️ ต้นทุน/ชม. ตอนนี้ใช้ค่าสมมติ "เท่ากันทุกเครื่อง" — ยังไม่ได้แยกค่าจริงต่างกัน
+//   (ค่าเสื่อม/แรงงาน/ไฟ/overhead) → ดูได้แค่แนวโน้ม "เวลา" จริง ส่วน "คุ้มทุนจริง"
+//   ต้องรอต้นทุน/ชม. รายเครื่องจากพี่ → เสียบ opts.ratesByName ทีหลัง
+// ============================================================================
+function computeMachineComparison(mainData, qtyIndex, machineTable, opts) {
+	if (!mainData || !Array.isArray(machineTable)) return null
+	const o = opts || {}
+	const defaultRate = Number(o.defaultRatePerHour) > 0 ? Number(o.defaultRatePerHour) : 0 // ค่าเครื่อง/ชม. สมมติ (เท่ากันทุกเครื่อง)
+	const ratesByName = o.ratesByName || {} // ของจริงรายเครื่อง (เสียบทีหลัง) → ค่อย override
+	const comp = (mainData.component1 || [])[0] || {}
+	const i = qtyIndex || 0
+	const paperPrint = Number((((comp.paper_usage && comp.paper_usage.line) || [])[i] || {}).paper_print) || 0
+	const orderQty = ((mainData.qty && mainData.qty.totalqty) || [])[i] || 0
+	const sumAddon = (types) => (comp.addon || []).filter((a) => a && types.includes(a.type)).reduce((s, a) => s + (((a.line || [])[i] || {}).price || 0), 0)
+	const findProc = (name) => (comp.process || []).find((p) => p && p.name === name)
+	const hasTopProc = (name) => (mainData.process || []).some((p) => p && p.name === name)
+
+	// process ที่งานนี้ใช้จริง + ฐานจำนวน (แผ่น/ใบ) + ประเภทเครื่องที่ทำงานนั้นได้
+	const USES = []
+	if (paperPrint > 0) USES.push({ key: 'print', label: 'พิมพ์', qty: paperPrint, unit: 'แผ่น', cats: ['Sheet'] })
+	if (sumAddon(['coating']) > 0) USES.push({ key: 'coating', label: 'เคลือบ', qty: paperPrint, unit: 'แผ่น', cats: ['Coating', 'UV', 'OPP'] })
+	if (findProc('diecut')) USES.push({ key: 'diecut', label: 'ไดคัท', qty: paperPrint, unit: 'แผ่น', cats: ['Die-cut'] })
+	if (sumAddon(['foilstamp', 'emboss', 'deboss']) > 0) USES.push({ key: 'stamp', label: 'ปั๊ม (ฟอยล์/นูน)', qty: paperPrint, unit: 'แผ่น', cats: ['Hot Stamp', 'Die-cut'] })
+	if (findProc('assembly')) USES.push({ key: 'assembly', label: 'ติดกาว/ประกอบ', qty: orderQty, unit: 'ใบ', cats: ['Glue'] })
+	if (hasTopProc('chip')) USES.push({ key: 'strip', label: 'แกะ (strip-out)', qty: orderQty, unit: 'ใบ', cats: ['Glue'] })
+	if (sumAddon(['corrugated', 'flute', 'laminate']) > 0) USES.push({ key: 'flute', label: 'ปะลูกฟูก', qty: paperPrint, unit: 'แผ่น', cats: ['Flute'] })
+
+	const processes = USES.map((u) => {
+		const candidates = machineTable
+			.filter((m) => u.cats.includes(m.cat) && m.speed > 0)
+			.map((m) => {
+				const hours = m.setup + u.qty / m.speed
+				const rate = Number(ratesByName[m.name]) > 0 ? Number(ratesByName[m.name]) : defaultRate
+				const costPerPiece = rate > 0 && u.qty > 0 ? (rate * hours) / u.qty : null
+				return { name: m.name, cat: m.cat, speed: m.speed, setup: m.setup, hours: +hours.toFixed(4), costPerPiece: costPerPiece != null ? +costPerPiece.toFixed(4) : null }
+			})
+			.sort((a, b) => a.hours - b.hours) // เร็วสุดขึ้นก่อน (เมื่อมีค่าเครื่องจริงค่อยจัดอันดับด้วยต้นทุน/ชิ้น)
+		return { key: u.key, label: u.label, qty: u.qty, unit: u.unit, candidates }
+	}).filter((p) => p.candidates.length > 1) // โชว์เฉพาะ process ที่มีเครื่องให้เลือก >1
+
+	return { qty: orderQty, processes, usingRealRates: Object.keys(ratesByName).length > 0 }
+}
+
+function renderMachineComparison(cmp) {
+	if (!cmp || !cmp.processes.length) return ''
+	const fmt = (n, d) => (n == null || isNaN(n) ? '-' : Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }))
+	const mins = (h) => fmt(h * 60, 1) + ' น.'
+	const blocks = cmp.processes.map((p) => {
+		const rows = p.candidates.map((c, idx) => `
+			<tr style="${idx === 0 ? 'background:#dcfce7' : ''}">
+				<td style="padding:3px 8px">${idx === 0 ? '⚡ ' : ''}${c.name}</td>
+				<td style="text-align:right;color:#6b7280">${fmt(c.speed, 0)}/ชม.</td>
+				<td style="text-align:right;color:#6b7280">${fmt(c.setup, 2)} ชม.</td>
+				<td style="text-align:right;font-weight:${idx === 0 ? 'bold' : 'normal'}">${mins(c.hours)}</td>
+				<td style="text-align:right">${c.costPerPiece != null ? fmt(c.costPerPiece, 3) : '<span style="color:#9ca3af">รอค่าเครื่อง/ชม.</span>'}</td>
+			</tr>`).join('')
+		return `
+			<div style="margin-top:6px">
+				<div style="font-size:12px;font-weight:bold;color:#7c3aed">${p.label} <span style="font-weight:normal;color:#6b7280">(งานยอด ${fmt(p.qty, 0)} ${p.unit} — มี ${p.candidates.length} เครื่องที่ทำได้)</span></div>
+				<table style="width:100%;border-collapse:collapse;font-size:11px">
+					<thead><tr style="background:#f3f4f6;color:#374151">
+						<th style="padding:3px 8px;text-align:left">เครื่อง</th>
+						<th style="padding:3px 8px;text-align:right">ความเร็ว</th>
+						<th style="padding:3px 8px;text-align:right">เซต</th>
+						<th style="padding:3px 8px;text-align:right">เวลางานนี้</th>
+						<th style="padding:3px 8px;text-align:right">ต้นทุน/ชิ้น</th>
+					</tr></thead>
+					<tbody>${rows}</tbody>
+				</table>
+			</div>`
+	}).join('')
+	return `
+		<div style="margin-top:12px;border-top:1px dashed #c4b5fd;padding-top:8px">
+			<div style="font-weight:bold;font-size:13px;color:#6d28d9">🔬 [Prototype] เทียบเครื่องที่ทำงานนี้ได้ — อันไหนคุ้มกว่า (⚡ = เร็วสุด)</div>
+			${blocks}
+			<div style="margin-top:8px;font-size:11px;color:#b45309;background:#fffbeb;border:1px dashed #fcd34d;border-radius:4px;padding:6px 10px">
+				⚠️ <b>นี่เป็น Prototype</b> — ตอนนี้เทียบ "<b>เวลา</b>" จากความเร็วจริงเท่านั้น <b>ยังไม่ได้นับค่าต่างๆ ของแต่ละเครื่อง</b>
+				(ค่าเสื่อม/ค่าแรง/ค่าไฟ/overhead ที่ต่างกัน) → ต้นทุน/ชิ้นใช้ค่าสมมติเท่ากันทุกเครื่อง<br>
+				ดังนั้นยัง <b>ตัดสิน "คุ้มทุนจริง" ไม่ได้</b> — "เร็วสุด" อาจไม่ใช่ "คุ้มสุด" ถ้าเครื่องเร็วมีค่าเดินเครื่องแพงกว่า
+				<b>รอต้นทุน/ชม. รายเครื่องจากพี่</b> มาเสียบ แล้วตารางจะจัดอันดับ "คุ้มทุน" + บอกจุดคุ้มทุน (break-even) ได้จริง
+			</div>
+		</div>`
+}
+
+// ============================================================================
 // แทรกตารางลง "หน้า price จริง" ต่อท้ายตาราง summary (#summary)
 // ไม่แตะโค้ดเพื่อน — แค่ append ผ่าน DOM หลังกดคำนวณ price
 // ============================================================================
@@ -364,6 +451,8 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 				target: Number(override.target) > 0 ? Number(override.target) : 10000, // MOCKUP รอพี่ให้เป้ากำไร/ชม.
 				machineByName: Object.assign({}, machineByName, override.machineByName || {}),
 				process: Object.assign({}, PROCESS, override.processSpeeds || {}),
+				ratePerHour: Number(override.ratePerHour) > 0 ? Number(override.ratePerHour) : 500, // ⚠️ MOCKUP ค่าเครื่อง/ชม. เท่ากันทุกเครื่อง
+				ratesByName: override.ratesByName || {}, // ของจริงรายเครื่อง (เสียบทีหลัง → จัดอันดับคุ้มทุนจริง)
 			}
 
 			function doInject() {
@@ -381,6 +470,7 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 					<div style="font-weight:bold;font-size:15px;color:#b45309;margin-bottom:8px">⏱️ ราคาต่อชั่วโมงเครื่อง ${note}</div>
 					${renderMachineHourMetric(metric, CFG.target)}
 					${renderProcessBreakdown(computeProcessBreakdown(est.mainData, 0, procCfg), CFG.target)}
+					${renderMachineComparison(computeMachineComparison(est.mainData, 0, MACHINE_TABLE, { defaultRatePerHour: CFG.ratePerHour, ratesByName: CFG.ratesByName }))}
 				</div>`)
 			return true
 		}
@@ -399,5 +489,5 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 
 // export สำหรับเทส (Node) — ในเบราว์เซอร์เรียกใช้ฟังก์ชันตรงๆ
 if (typeof module !== 'undefined' && module.exports) {
-	module.exports = { computeMachineHourMetric, renderMachineHourMetric, computeProcessBreakdown, renderProcessBreakdown }
+	module.exports = { computeMachineHourMetric, renderMachineHourMetric, computeProcessBreakdown, renderProcessBreakdown, computeMachineComparison, renderMachineComparison }
 }
