@@ -79,3 +79,16 @@ const procSpeeds = { print: 5000, coating: 6000, diecut: 4000, stamp: 3000, asse
 	pb.procs.forEach((p) => console.log('  ' + p.label.padEnd(16) + (fmt(p.qty, 0) + ' ' + p.unit).padEnd(12) + (fmt(p.hours * 60, 1) + ' น.').padStart(10) + ('ค่า ' + fmt(p.cost, 0)).padStart(12)))
 	console.log('  🔴 คอขวด = ' + pb.bottleneck.label + ' (' + fmt(pb.bottleneck.hours * 60, 1) + ' น.) — ไม่ใช่เครื่องพิมพ์!')
 })
+
+// ── ทดสอบ "เสียบความเร็วจริงจาก master" — เครื่องมี machine_speed → ใช้ของจริง ไม่ใช้ fallback
+console.log('\n===== master speed auto-pickup =====')
+const dReal = makeData(3, 6, 0)
+dReal.component1[0].machine.machine_speed = 10000 // พี่เสียบความเร็วจริงลง master
+const mtReal = computeMachineHourMetric(dReal, 5000) // fallback 5000 (ควรถูกข้าม)
+const rr = mtReal.rows[0]
+const expHours = (360 * mtReal.components[0].passes) / 10000 // 360 แผ่น × passes ÷ 10000
+const ok = mtReal.allRealSpeed === true && mtReal.components[0].speed === 10000 && Math.abs(rr.hours - +expHours.toFixed(4)) < 1e-6
+console.log('  ความเร็วที่ใช้: ' + fmt(mtReal.components[0].speed, 0) + ' (master 10,000, fallback 5,000)')
+console.log('  allRealSpeed=' + mtReal.allRealSpeed + ' • เวลา ' + fmt(rr.hours * 60, 2) + ' น. (คาด ' + fmt(expHours * 60, 2) + ')')
+console.log('  ' + (ok ? '✅ PASS — ดึงความเร็วจริงจาก master ถูกต้อง' : '❌ FAIL'))
+if (!ok) process.exitCode = 1

@@ -8,10 +8,11 @@
 //            ชั่วโมงเดินเครื่อง = paper_print (แผ่นที่เครื่องเดินจริง รวม makeready) ÷ ความเร็ว(แผ่น/ชม.)
 //
 // หมายเหตุ:
-// - ยังไม่มีข้อมูลความเร็วใน master → รับ speedSheetsPerHour เป็น input (พี่จะเอาเลขจริงมาเสียบ)
+// - speedSheetsPerHour = ความเร็ว default (fallback). ถ้า master ของเครื่องมี field machine_speed
+//   (หรือ speed_sheets_per_hour / speed) → ใช้ของจริง "ต่อเครื่อง" อัตโนมัติ ไม่ต้องแก้โค้ด
 // - paper_print รวมแผ่น makeready/เผื่อเสีย (waste) อยู่แล้ว → เวลานี้คือเวลาที่เครื่องเดินจริง
 //   (ถ้าพี่ให้ "ความเร็วรันล้วน" แยกเวลาเซต ค่อยเพิ่มเวลาเซตทีหลัง — ตอนนี้ถือว่า flat)
-// - draft นี้คิด component แรกก่อน (TODO: รองรับหลาย component/หลายเครื่อง)
+// - รองรับหลาย component/หลายเครื่อง: รวมเวลาทุกเครื่อง แต่ละเครื่องใช้ความเร็วของตัวเอง
 // ============================================================================
 
 /**
@@ -29,7 +30,17 @@ function computeMachineHourMetric(mainData, speedSheetsPerHour) {
 	const SHIFT_HOURS = 8 // กะมาตรฐาน 8 ชม. (ใช้คิดกำลังผลิต/กะ)
 	const COST_KEYS = ['material', 'plate', 'print', 'proof', 'afterpress', 'delivery', 'other']
 
-	// ข้อมูลคงที่ต่อ component — แต่ละ component อาจใช้คนละเครื่อง/คนละสี
+	// ความเร็วต่อเครื่อง: ถ้า master ของเครื่องมี field ความเร็วจริง → ใช้ของจริง (ต่อเครื่อง)
+	//   ไม่มี → fallback เป็น speedSheetsPerHour (ค่า mockup ที่ส่งเข้ามา)
+	//   รองรับชื่อ field ที่พี่อาจตั้ง: machine_speed / speed_sheets_per_hour / speed
+	//   → วันที่พี่เพิ่ม field ลง master งานนี้ใช้ความเร็วจริงทันที ไม่ต้องแก้โค้ด
+	const machineSpeedOf = (comp) => {
+		const m = (comp && comp.machine) || {}
+		const real = Number(m.machine_speed) || Number(m.speed_sheets_per_hour) || Number(m.speed)
+		return real > 0 ? real : speedSheetsPerHour
+	}
+
+	// ข้อมูลคงที่ต่อ component — แต่ละ component อาจใช้คนละเครื่อง/คนละสี/คนละความเร็ว
 	//   passes = จำนวนรอบที่แผ่นวิ่งผ่านเครื่อง (สี > ชุดพิมพ์ → หลายรอบ)
 	//   units=0 (ดิจิทัล/ไม่มีข้อมูล) → 1 รอบ
 	//   ⚠️ สมมติ "ความเร็ว = impressions/ชม." จึงคูณ passes
@@ -41,8 +52,10 @@ function computeMachineHourMetric(mainData, speedSheetsPerHour) {
 		const inside = Number(color.inside) || 0
 		let passes = units > 0 ? (Math.ceil(outside / units) + Math.ceil(inside / units)) : 1
 		if (passes < 1) passes = 1
+		const speed = machineSpeedOf(comp)
 		return {
-			machine, units, outside, inside, passes,
+			machine, units, outside, inside, passes, speed,
+			isRealSpeed: speed !== speedSheetsPerHour, // true = ใช้ความเร็วจริงจาก master (ไม่ใช่ mockup)
 			lines: (comp.paper_usage && comp.paper_usage.line) || [],
 			wasteArr: (comp.waste && comp.waste.waste) || [],
 		}
@@ -53,7 +66,7 @@ function computeMachineHourMetric(mainData, speedSheetsPerHour) {
 		let hours = 0, sheets = 0, wasteSheets = 0
 		const byComponent = compInfo.map((c) => {
 			const s = Number((c.lines[i] || {}).paper_print) || 0
-			const h = (s * c.passes) / speedSheetsPerHour
+			const h = (s * c.passes) / c.speed // ความเร็วต่อเครื่อง (จริงจาก master ถ้ามี ไม่งั้น mockup)
 			hours += h; sheets += s; wasteSheets += Number(c.wasteArr[i]) || 0
 			return { machine: c.machine, sheets: s, passes: c.passes, hours: +h.toFixed(4) }
 		})
@@ -87,8 +100,11 @@ function computeMachineHourMetric(mainData, speedSheetsPerHour) {
 		machine: compInfo.map((c) => c.machine).join(' + '), // หลาย component = ชื่อเครื่อง join
 		units: first.units, colors: { outside: first.outside, inside: first.inside }, passes: first.passes,
 		compCount: comps.length,
-		components: compInfo.map((c) => ({ machine: c.machine, units: c.units, outside: c.outside, inside: c.inside, passes: c.passes })),
-		speed: speedSheetsPerHour, shiftHours: SHIFT_HOURS, rows,
+		components: compInfo.map((c) => ({ machine: c.machine, units: c.units, outside: c.outside, inside: c.inside, passes: c.passes, speed: c.speed, isRealSpeed: c.isRealSpeed })),
+		speed: speedSheetsPerHour, // ความเร็ว fallback (mockup) — เครื่องที่มีของจริงใช้ของตัวเองใน rows
+		allRealSpeed: compInfo.every((c) => c.isRealSpeed), // true = ทุกเครื่องใช้ความเร็วจริงจาก master แล้ว
+		anyRealSpeed: compInfo.some((c) => c.isRealSpeed),
+		shiftHours: SHIFT_HOURS, rows,
 	}
 }
 
@@ -265,23 +281,41 @@ function renderProcessBreakdown(pb, target) {
 if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 	jQuery(function ($) {
 		const PRICE_BTN = '#calc_price, #calc_price_after_change, #calc_price_after_packing'
-		const MOCKUP_SPEED = 5000 // แผ่น/ชม. — ⚠️ MOCKUP รอข้อมูลจริงจากพี่
-		const MOCKUP_TARGET = 10000 // เป้าหมายกำไร/ชม. (บาท) — ⚠️ MOCKUP รอตัวเลขจริง (= ต้นทุนเครื่อง/ชม.+กำไรที่ต้องการ)
-		const MOCKUP_PROCESS_SPEEDS = { print: 5000, coating: 6000, diecut: 4000, stamp: 3000, assembly: 3000, strip: 5000, chip: 5000 } // ⚠️ MOCKUP ความเร็วต่อ process รอข้อมูลจริง
+
+		// ────────────────────────────────────────────────────────────────────
+		// ⚙️ จุดเดียวที่ต้องแก้เมื่อพี่ส่งข้อมูลจริงมา (หรือ set window.MACHINE_HOUR_CONFIG
+		//    จากภายนอกก่อนโหลดไฟล์นี้ก็ได้ — ไม่ต้องแตะโค้ดในไฟล์เลย)
+		//  • speed         = ความเร็วเครื่องพิมพ์ default (แผ่น/ชม.) — ใช้กับเครื่องที่ master ยังไม่มีความเร็วจริง
+		//  • target        = เป้าหมายกำไร/ชม. (บาท) สำหรับ go/no-go (= ต้นทุนเครื่อง/ชม. + กำไรที่ต้องการ)
+		//  • processSpeeds = ความเร็วต่อ process (แต่ละ process คนละเครื่อง)
+		//  หมายเหตุ: ถ้า master ของเครื่อง (default.js) มี field machine_speed → ตารางใช้ของจริงต่อเครื่องอัตโนมัติ
+		// ────────────────────────────────────────────────────────────────────
+		const DEFAULTS = {
+			speed: 5000, // ⚠️ MOCKUP รอข้อมูลจริงจากพี่
+			target: 10000, // ⚠️ MOCKUP
+			processSpeeds: { print: 5000, coating: 6000, diecut: 4000, stamp: 3000, assembly: 3000, strip: 5000, chip: 5000 }, // ⚠️ MOCKUP
+		}
+		const override = (typeof window !== 'undefined' && window.MACHINE_HOUR_CONFIG) || {}
+		const CFG = {
+			speed: Number(override.speed) > 0 ? Number(override.speed) : DEFAULTS.speed,
+			target: Number(override.target) > 0 ? Number(override.target) : DEFAULTS.target,
+			processSpeeds: Object.assign({}, DEFAULTS.processSpeeds, override.processSpeeds || {}),
+		}
 
 		function doInject() {
 			const $summary = $('#summary')
-			const metric = (typeof est !== 'undefined' && est && est.mainData) ? computeMachineHourMetric(est.mainData, MOCKUP_SPEED) : null
+			const metric = (typeof est !== 'undefined' && est && est.mainData) ? computeMachineHourMetric(est.mainData, CFG.speed) : null
 			if (!$summary.length || !metric || !metric.rows.length) return false
 			$('#machine_hour_metric').remove()
-			// (debug log removed) — inject ตารางต่อท้าย #summary
+			// ป้ายกำกับ: ถ้าทุกเครื่องดึงความเร็วจริงจาก master แล้ว → เขียว, ไม่งั้นเตือนว่ายัง mockup
+			const note = metric.allRealSpeed
+				? '<span style="font-size:11px;color:#15803d;font-weight:normal">— ✅ ใช้ความเร็วจริงจาก master</span>'
+				: `<span style="font-size:11px;color:#d97706;font-weight:normal">— ⚠️ ความเร็ว ${CFG.speed.toLocaleString()} แผ่น/ชม. (mockup รอข้อมูลจริงจากพี่)</span>`
 			$summary.after(`
 				<div id="machine_hour_metric" style="max-width:900px;margin:14px auto;border:1px solid #fcd34d;background:#fffbeb;border-radius:8px;padding:12px 14px;font-family:inherit">
-					<div style="font-weight:bold;font-size:15px;color:#b45309;margin-bottom:8px">⏱️ ราคาต่อชั่วโมงเครื่อง
-						<span style="font-size:11px;color:#d97706;font-weight:normal">— ⚠️ ข้อมูล MOCKUP (ความเร็ว ${MOCKUP_SPEED.toLocaleString()} แผ่น/ชม. สมมติ รอข้อมูลจริงจากพี่)</span>
-					</div>
-					${renderMachineHourMetric(metric, MOCKUP_TARGET)}
-					${renderProcessBreakdown(computeProcessBreakdown(est.mainData, 0, MOCKUP_PROCESS_SPEEDS), MOCKUP_TARGET)}
+					<div style="font-weight:bold;font-size:15px;color:#b45309;margin-bottom:8px">⏱️ ราคาต่อชั่วโมงเครื่อง ${note}</div>
+					${renderMachineHourMetric(metric, CFG.target)}
+					${renderProcessBreakdown(computeProcessBreakdown(est.mainData, 0, CFG.processSpeeds), CFG.target)}
 				</div>`)
 			return true
 		}
