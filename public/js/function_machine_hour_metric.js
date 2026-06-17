@@ -299,6 +299,7 @@ function computeMachineComparison(mainData, qtyIndex, machineTable, opts) {
 	const o = opts || {}
 	const defaultRate = Number(o.defaultRatePerHour) > 0 ? Number(o.defaultRatePerHour) : 0 // ค่าเครื่อง/ชม. สมมติ (เท่ากันทุกเครื่อง)
 	const ratesByName = o.ratesByName || {} // ของจริงรายเครื่อง (เสียบทีหลัง) → ค่อย override
+	const forceSetup = o.setupHours != null ? Number(o.setupHours) : null // ถ้าระบุ → ใช้ setup นี้แทน make_ready ในตาราง
 	const comp = (mainData.component1 || [])[0] || {}
 	const i = qtyIndex || 0
 	const paperPrint = Number((((comp.paper_usage && comp.paper_usage.line) || [])[i] || {}).paper_print) || 0
@@ -321,10 +322,11 @@ function computeMachineComparison(mainData, qtyIndex, machineTable, opts) {
 		const candidates = machineTable
 			.filter((m) => u.cats.includes(m.cat) && m.speed > 0)
 			.map((m) => {
-				const hours = m.setup + u.qty / m.speed
+				const setup = forceSetup != null ? forceSetup : m.setup
+				const hours = setup + u.qty / m.speed
 				const rate = Number(ratesByName[m.name]) > 0 ? Number(ratesByName[m.name]) : defaultRate
 				const costPerPiece = rate > 0 && u.qty > 0 ? (rate * hours) / u.qty : null
-				return { name: m.name, cat: m.cat, speed: m.speed, setup: m.setup, hours: +hours.toFixed(4), costPerPiece: costPerPiece != null ? +costPerPiece.toFixed(4) : null }
+				return { name: m.name, cat: m.cat, speed: m.speed, setup, hours: +hours.toFixed(4), costPerPiece: costPerPiece != null ? +costPerPiece.toFixed(4) : null }
 			})
 			.sort((a, b) => a.hours - b.hours) // เร็วสุดขึ้นก่อน (เมื่อมีค่าเครื่องจริงค่อยจัดอันดับด้วยต้นทุน/ชิ้น)
 		return { key: u.key, label: u.label, qty: u.qty, unit: u.unit, candidates }
@@ -426,13 +428,20 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 				[5534, 'ติดเส้นฟอยล์ JTJ-330', 'Glue', 3500, 1.0], [5536, 'Glue-3', 'Glue', 10000, 1.0], [5544, 'ติดเทป 2 หน้า KQ', 'Glue', 3000, 1.0],
 			].map(([code, name, cat, speed, setup]) => ({ code, name, cat, speed, setup }))
 
-			// เครื่องพิมพ์: ชื่อ -> {speed, setup} (per-component ใช้ความเร็ว+make_ready ของเครื่องนั้นจริง)
+			// override ภายนอกได้ (window.MACHINE_HOUR_CONFIG)
+			const override = (typeof window !== 'undefined' && window.MACHINE_HOUR_CONFIG) || {}
+
+			// ⚙️ เวลาเซตเครื่อง (make_ready) = 1 ชม. เท่ากันทุกเครื่อง — ปรับเลขเดียวที่นี่ให้ง่าย
+			//    (MACHINE_TABLE เก็บ make_ready จริงรายเครื่องไว้แล้ว แต่ตอนนี้ยังไม่เอามาคิด)
+			const SETUP = override.setupHours != null ? Number(override.setupHours) : 1
+
+			// เครื่องพิมพ์: ชื่อ -> {speed(จริงรายเครื่อง), setup(=SETUP)}
 			const machineByName = {}
-			MACHINE_TABLE.filter((m) => m.cat === 'Sheet').forEach((m) => { machineByName[m.name] = { speed: m.speed, setup: m.setup } })
+			MACHINE_TABLE.filter((m) => m.cat === 'Sheet').forEach((m) => { machineByName[m.name] = { speed: m.speed, setup: SETUP } })
 
 			// process -> เครื่องตัวแทน (calc ไม่ผูกเครื่องเฉพาะต่อ process จึงเลือกตัวที่ใช้บ่อย)
 			const byCode = (c) => MACHINE_TABLE.find((m) => m.code === c) || {}
-			const spec = (c) => { const m = byCode(c); return { speed: m.speed || 0, setup: m.setup || 0 } }
+			const spec = (c) => { const m = byCode(c); return { speed: m.speed || 0, setup: SETUP } }
 			const PROCESS = {
 				coating: spec(5507),  // เคลือบวอเตอร์เบส (UV/OPP เร็ว-ช้าต่างกัน ดูตาราง)
 				diecut: spec(5420),   // SANWA (auto); manual = 400
@@ -443,11 +452,9 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 				flute: spec(5503),    // ปะลูกฟูก (cost ต่อเมื่อมี addon corrugated)
 			}
 
-			// override ภายนอกได้ (window.MACHINE_HOUR_CONFIG) — รวม target ที่ยังรอพี่
-			const override = (typeof window !== 'undefined' && window.MACHINE_HOUR_CONFIG) || {}
 			const CFG = {
 				defaultSpeed: Number(override.speed) > 0 ? Number(override.speed) : 10000,
-				defaultSetup: override.setupHours != null ? Number(override.setupHours) : 1,
+				setupHours: SETUP,
 				target: Number(override.target) > 0 ? Number(override.target) : 10000, // MOCKUP รอพี่ให้เป้ากำไร/ชม.
 				machineByName: Object.assign({}, machineByName, override.machineByName || {}),
 				process: Object.assign({}, PROCESS, override.processSpeeds || {}),
@@ -457,20 +464,20 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 
 			function doInject() {
 			const $summary = $('#summary')
-			const metricOpts = { setupHours: CFG.defaultSetup, machineByName: CFG.machineByName }
+			const metricOpts = { setupHours: CFG.setupHours, machineByName: CFG.machineByName }
 			const metric = (typeof est !== 'undefined' && est && est.mainData) ? computeMachineHourMetric(est.mainData, CFG.defaultSpeed, metricOpts) : null
 			if (!$summary.length || !metric || !metric.rows.length) return false
 			$('#machine_hour_metric').remove()
-			const note = `<span style="font-size:11px;color:#15803d;font-weight:normal">— ✅ ความเร็วจริงจากพี่ + เซตเครื่อง ${CFG.defaultSetup} ชม. <span style="color:#d97706">(เป้ากำไร/ชม. ยังสมมติ)</span></span>`
+			const note = `<span style="font-size:11px;color:#15803d;font-weight:normal">— ✅ ความเร็วจริงจากพี่ + เซตเครื่อง ${CFG.setupHours} ชม. (เท่ากันทุกเครื่อง ปรับได้) <span style="color:#d97706">(เป้ากำไร/ชม. ยังสมมติ)</span></span>`
 			const c0 = (est.mainData.component1 || [])[0] || {}
-				const printCfg = CFG.machineByName[c0.machine && c0.machine.machine_name] || { speed: CFG.defaultSpeed, setup: CFG.defaultSetup }
+				const printCfg = CFG.machineByName[c0.machine && c0.machine.machine_name] || { speed: CFG.defaultSpeed, setup: CFG.setupHours }
 				const procCfg = Object.assign({ print: printCfg }, CFG.process)
 			$summary.after(`
 				<div id="machine_hour_metric" style="max-width:900px;margin:14px auto;border:1px solid #fcd34d;background:#fffbeb;border-radius:8px;padding:12px 14px;font-family:inherit">
 					<div style="font-weight:bold;font-size:15px;color:#b45309;margin-bottom:8px">⏱️ ราคาต่อชั่วโมงเครื่อง ${note}</div>
 					${renderMachineHourMetric(metric, CFG.target)}
 					${renderProcessBreakdown(computeProcessBreakdown(est.mainData, 0, procCfg), CFG.target)}
-					${renderMachineComparison(computeMachineComparison(est.mainData, 0, MACHINE_TABLE, { defaultRatePerHour: CFG.ratePerHour, ratesByName: CFG.ratesByName }))}
+					${renderMachineComparison(computeMachineComparison(est.mainData, 0, MACHINE_TABLE, { defaultRatePerHour: CFG.ratePerHour, ratesByName: CFG.ratesByName, setupHours: CFG.setupHours }))}
 				</div>`)
 			return true
 		}
