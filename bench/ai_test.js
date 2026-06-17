@@ -74,6 +74,24 @@ console.log('\n=== 4. print-type rules (validateAndFix safety net) ===')
 	check(name, pred(out), { print: out.print_type, c0: out.components[0] })
 })
 
+console.log('\n=== 5. DPxxxg → กล่องแป้งหลังเทา (Duplex GBB) ===')
+// กฎธุรกิจ: "DP"+แกรม+"g" = หลังเทา ; "DP"+เลข (ไม่มี g) = รหัสแบบ ไม่ใช่กระดาษ
+;[
+	['DP350g → Duplex GBB 350', 'DP350g + UV + 6 Colors', { components: [{}], _uncertain: ['paper_type', 'paper_gram'] },
+		(o) => o.components[0].paper_type === 'Duplex GBB' && o.components[0].paper_gram === 350],
+	['DP350g เคลียร์ธง uncertain paper', 'DP350g', { components: [{}], _uncertain: ['paper_type', 'paper_gram', 'box_template_id'] },
+		(o) => !(o._uncertain || []).includes('paper_type') && !(o._uncertain || []).includes('paper_gram') && (o._uncertain || []).includes('box_template_id')],
+	['DP350 (ไม่มี g) → ไม่แตะกระดาษ (รหัสแบบ)', 'งานแบบ DP350 พิมพ์ 4 สี', { components: [{}] },
+		(o) => o.components[0].paper_type == null && o.components[0].paper_gram == null],
+	['DP 250 g (เว้นวรรค) → Duplex GBB 250', 'กระดาษ DP 250 g', { components: [{}] },
+		(o) => o.components[0].paper_type === 'Duplex GBB' && o.components[0].paper_gram === 250],
+	['ไม่ override กระดาษที่ AI อ่านมาแล้ว', 'DP350g', { components: [{ paper_type: 'A/C', paper_gram: 300 }] },
+		(o) => o.components[0].paper_type === 'A/C' && o.components[0].paper_gram === 300],
+].forEach(([name, txt, input, pred]) => {
+	const out = ai.inferDuplexFromDP(input, txt)
+	check(name, pred(out), { c0: out.components[0], unc: out._uncertain })
+})
+
 // stripHallucinations เป็น async — รอให้ครบก่อนสรุป
 let asyncDone = 0
 const ASYNC_TOTAL = 4

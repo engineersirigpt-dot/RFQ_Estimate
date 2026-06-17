@@ -598,6 +598,31 @@ function validateAndFix(data) {
 	return data
 }
 
+// "DPxxxg" shorthand → กล่องแป้งหลังเทา (Duplex GBB) ที่ xxx แกรม.
+// Business rule (ยืนยันกับฝ่ายประเมิน): ในร้านนี้ "DP" + แกรม + ตัว "g" ต่อท้าย
+// หมายถึงกระดาษกล่องแป้งหลังเทา (grey-back) ที่น้ำหนักนั้น. ถ้า "DP350" ไม่มี "g"
+// ต่อท้าย → เป็นรหัสแบบ (Drawing Pattern) ไม่ใช่กระดาษ — จึงบังคับต้องมี "g" ถึงจะตีเป็นกระดาษ
+// (กันชนกับเคสรหัสแบบ เช่น cookie box DP350). รันหลัง stripHallucinations/validateAndFix
+// เพื่อไม่ให้ค่าที่เติมโดน strip ตัดทิ้ง.
+function inferDuplexFromDP(parsed, sourceText) {
+	if (!parsed || !Array.isArray(parsed.components) || !parsed.components.length) return parsed
+	const m = /\bDP\s*(\d{2,4})\s*g\b/i.exec(sourceText || '')
+	if (!m) return parsed
+	const gram = parseInt(m[1], 10)
+	if (!(gram > 0)) return parsed
+	parsed.components.forEach((comp) => {
+		if (!comp) return
+		if (comp.paper_type == null || comp.paper_type === '') comp.paper_type = 'Duplex GBB'
+		if (!(Number(comp.paper_gram) > 0)) comp.paper_gram = gram
+	})
+	// มีคำตอบ deterministic แล้ว → เอาธง uncertain ของ paper ออก
+	if (Array.isArray(parsed._uncertain)) {
+		parsed._uncertain = parsed._uncertain.filter((k) => k !== 'paper_type' && k !== 'paper_gram')
+		if (!parsed._uncertain.length) delete parsed._uncertain
+	}
+	return parsed
+}
+
 function extractJson(text) {
 	const fenced = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
 	const candidate = fenced ? fenced[1] : text
@@ -813,6 +838,10 @@ router.post('/parse-spec', upload.array('files', 10), async (req, res) => {
 		}
 		parsed = validateAndFix(parsed)
 
+		// Deterministic paper shorthand: "DPxxxg" → Duplex GBB xxx แกรม (หลังเทา).
+		// รันหลัง strip/validate เพื่อไม่ให้ค่าที่เติมโดนตัด.
+		parsed = inferDuplexFromDP(parsed, text)
+
 		// Image/dieline inputs: classifying box construction from a drawing is
 		// unreliable and the AI won't flag it itself, so flag box_template_id
 		// deterministically here. The form highlights it yellow → the user verifies
@@ -954,6 +983,6 @@ if (process.env.AI_TEST) {
 	Object.assign(module.exports, {
 		SYSTEM_PROMPT, MODEL, EXPLAIN_PRICE_PROMPT,
 		buildContentFromUpload, validateAndFix, extractJson, stripHallucinations,
-		createWithRetry, stripMoneyPct,
+		createWithRetry, stripMoneyPct, inferDuplexFromDP,
 	})
 }
