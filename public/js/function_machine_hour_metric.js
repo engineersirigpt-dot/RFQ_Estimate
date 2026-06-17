@@ -11,7 +11,7 @@
 // - speedSheetsPerHour = ความเร็ว default (fallback). ถ้า master ของเครื่องมี field machine_speed
 //   (หรือ speed_sheets_per_hour / speed) → ใช้ของจริง "ต่อเครื่อง" อัตโนมัติ ไม่ต้องแก้โค้ด
 // - paper_print รวมแผ่น makeready/เผื่อเสีย (waste) อยู่แล้ว → เวลานี้คือเวลาที่เครื่องเดินจริง
-//   (ถ้าพี่ให้ "ความเร็วรันล้วน" แยกเวลาเซต ค่อยเพิ่มเวลาเซตทีหลัง — ตอนนี้ถือว่า flat)
+//   (ถ้าพี่ให้ "ความเร็วรันล้วน" แยกเวลาsetup ค่อยเพิ่มเวลาsetupทีหลัง — ตอนนี้ถือว่า flat)
 // - รองรับหลาย component/หลายเครื่อง: รวมเวลาทุกเครื่อง แต่ละเครื่องใช้ความเร็วของตัวเอง
 // ============================================================================
 
@@ -30,7 +30,7 @@ function computeMachineHourMetric(mainData, speedSheetsPerHour, opts) {
 	const SHIFT_HOURS = 8 // กะมาตรฐาน 8 ชม. (ใช้คิดกำลังผลิต/กะ)
 	const COST_KEYS = ['material', 'plate', 'print', 'proof', 'afterpress', 'delivery', 'other']
 	const o = opts || {}
-	const defaultSetup = Number(o.setupHours) > 0 ? Number(o.setupHours) : 0 // เซตเครื่อง fallback (ชม.)
+	const defaultSetup = Number(o.setupHours) > 0 ? Number(o.setupHours) : 0 // setup fallback (ชม.)
 	const machineByName = o.machineByName || {} // ชื่อเครื่อง → {speed, setup} จากตารางจริงของพี่
 
 	// คืน {speed(แผ่น/ชม.), setup(make_ready ชม.)} ต่อเครื่อง
@@ -71,7 +71,7 @@ function computeMachineHourMetric(mainData, speedSheetsPerHour, opts) {
 		let hours = 0, sheets = 0, wasteSheets = 0
 		const byComponent = compInfo.map((c) => {
 			const s = Number((c.lines[i] || {}).paper_print) || 0
-			// เวลา = เซตเครื่อง(ของเครื่องนั้น) + (แผ่น × รอบพิมพ์ ÷ ความเร็ว) • ไม่มีงาน (s=0) → 0
+			// เวลา = setup(ของเครื่องนั้น) + (แผ่น × รอบพิมพ์ ÷ ความเร็ว) • ไม่มีงาน (s=0) → 0
 			const h = s > 0 ? c.setup + (s * c.passes) / c.speed : 0
 			hours += h; sheets += s; wasteSheets += Number(c.wasteArr[i]) || 0
 			return { machine: c.machine, sheets: s, passes: c.passes, setup: c.setup, hours: +h.toFixed(4) }
@@ -156,7 +156,7 @@ function renderMachineHourMetric(metric, target) {
 	return `
 		<div style="font-size:13px">
 			<div style="margin-bottom:4px">
-				<b>เครื่อง:</b> ${metric.machine} &nbsp;•&nbsp; <b>ความเร็ว:</b> ${single ? fmt(metric.components[0].speed, 0) + ' แผ่น/ชม. (เซต ' + metric.components[0].setup + ' ชม.)' : 'หลายเครื่อง'}${metric.compCount > 1 ? ` &nbsp;•&nbsp; <span style="color:#2563eb;font-weight:bold">${metric.compCount} components (รวมเวลาทุกเครื่อง)</span>` : ''}
+				<b>เครื่อง:</b> ${metric.machine} &nbsp;•&nbsp; <b>ความเร็ว:</b> ${single ? fmt(metric.components[0].speed, 0) + ' แผ่น/ชม. (setup ' + metric.components[0].setup + ' ชม.)' : 'หลายเครื่อง'}${metric.compCount > 1 ? ` &nbsp;•&nbsp; <span style="color:#2563eb;font-weight:bold">${metric.compCount} components (รวมเวลาทุกเครื่อง)</span>` : ''}
 			</div>
 			<div style="margin-bottom:6px;font-size:12px">${compDetail}</div>
 			${verdictHtml}
@@ -164,7 +164,7 @@ function renderMachineHourMetric(metric, target) {
 				<thead><tr style="background:#e5e7eb">
 					<th style="padding:5px 8px;text-align:left">ยอดสั่ง</th>
 					<th style="padding:5px 8px;text-align:right">แผ่นที่พิมพ์</th>
-					<th style="padding:5px 8px;text-align:right">%เซตเครื่อง</th>
+					<th style="padding:5px 8px;text-align:right">%setup</th>
 					<th style="padding:5px 8px;text-align:right">เวลาเดินเครื่อง</th>
 					<th style="padding:5px 8px;text-align:right">ราคารวม</th>
 					<th style="padding:5px 8px;text-align:right">ราคารวม/ชั่วโมง</th>
@@ -174,8 +174,8 @@ function renderMachineHourMetric(metric, target) {
 				<tbody>${rows}</tbody>
 			</table>
 			<div style="margin-top:8px;font-size:11px;color:#6b7280">
-				💡 <b>ข้อสังเกต:</b> %เซตเครื่อง ${mkRange} = งานยอดน้อยเสียเวลากับ makeready เยอะ • กำลังผลิต(เฉพาะเครื่องพิมพ์) ~${fmt(maxJobs, 0)} ครั้ง/กะ — ⚠️ <b>กำลังผลิตจริงจำกัดโดยคอขวด</b> (ดูตาราง process ด้านล่าง)<br>
-				* เทียบดูเฉยๆ ไม่บวกเข้าราคาขาย • <b>กำไร = ราคาขาย − ต้นทุน</b> (ขยับตาม markup, =0 ถ้าไม่บวกกำไร) • เวลา = เซตเครื่อง(make_ready จริงต่อเครื่อง) + (แผ่นพิมพ์ × รอบพิมพ์ ÷ ความเร็ว)
+				💡 <b>ข้อสังเกต:</b> %setup ${mkRange} = งานยอดน้อยเสียเวลากับ makeready เยอะ • กำลังผลิต(เฉพาะเครื่องพิมพ์) ~${fmt(maxJobs, 0)} ครั้ง/กะ — ⚠️ <b>กำลังผลิตจริงจำกัดโดยคอขวด</b> (ดูตาราง process ด้านล่าง)<br>
+				* เทียบดูเฉยๆ ไม่บวกเข้าราคาขาย • <b>กำไร = ราคาขาย − ต้นทุน</b> (ขยับตาม markup, =0 ถ้าไม่บวกกำไร) • เวลา = setup(make_ready จริงต่อเครื่อง) + (แผ่นพิมพ์ × รอบพิมพ์ ÷ ความเร็ว)
 			</div>
 		</div>`
 }
@@ -184,7 +184,7 @@ function renderMachineHourMetric(metric, target) {
 // แยกเวลาเครื่อง "ต่อ process" — แต่ละ process = คนละเครื่อง คนละความเร็ว
 //   sheet-based (เครื่องรันแผ่น): พิมพ์/เคลือบ/ไดคัท/ปั๊ม → ใช้ paper_print (แผ่น)
 //   piece-based (ต่อใบสำเร็จ): ติดกาว/ประกอบ → ใช้ยอดสั่ง (ใบ)
-//   เวลา = เซตเครื่อง + (จำนวน ÷ ความเร็ว process) • คอขวด = process ที่ใช้เวลานานสุด
+//   เวลา = setup + (จำนวน ÷ ความเร็ว process) • คอขวด = process ที่ใช้เวลานานสุด
 //   ความเร็วจริงจากตารางเครื่องของพี่ + setup เฉลี่ย ~1 ชม./เครื่อง
 // ============================================================================
 function computeProcessBreakdown(mainData, qtyIndex, speeds) {
@@ -194,7 +194,7 @@ function computeProcessBreakdown(mainData, qtyIndex, speeds) {
 	const orderQty = ((mainData.qty && mainData.qty.totalqty) || [])[i] || 0
 	const tp = (mainData.totalprice || [])[i] || {}
 	const sp = speeds || {}
-	const globalSetup = Number(sp.setupHours) > 0 ? Number(sp.setupHours) : 0 // เซตเครื่อง fallback (ชม.)
+	const globalSetup = Number(sp.setupHours) > 0 ? Number(sp.setupHours) : 0 // setup fallback (ชม.)
 	// แต่ละ process: รับเป็น object {speed, setup} (ของจริงต่อเครื่อง) หรือเลขความเร็วล้วน (ใช้ globalSetup)
 	const resolve = (v) => (v && typeof v === 'object')
 		? { speed: Number(v.speed) || 0, setup: Number(v.setup) >= 0 ? Number(v.setup) : globalSetup }
@@ -204,7 +204,7 @@ function computeProcessBreakdown(mainData, qtyIndex, speeds) {
 		const { speed, setup } = resolve(speedCfg)
 		const c = Number(cost) || 0
 		if (!(qty > 0) || !(speed > 0) || !(c > 0)) return // c=0 → process ไม่มีในงานนี้ → ข้าม
-		const hours = setup + qty / speed // เซตเครื่อง(ของเครื่องนั้น) + เวลาเดิน
+		const hours = setup + qty / speed // setup(ของเครื่องนั้น) + เวลาเดิน
 		procs.push({ label, unit, qty, speed, setup, cost: +c.toFixed(2), hours: +hours.toFixed(4), costPerHour: hours > 0 ? +(c / hours).toFixed(2) : null })
 	}
 	const sumAddon = (types) => (comp.addon || []).filter((a) => a && types.includes(a.type)).reduce((s, a) => s + (((a.line || [])[i] || {}).price || 0), 0)
@@ -289,7 +289,7 @@ function renderProcessBreakdown(pb, target) {
 
 // ============================================================================
 // [PROTOTYPE] เทียบเครื่องต่อ process — ถ้างานนี้ลงเครื่องไหนได้บ้าง อันไหนคุ้มกว่า
-//   แต่ละ process มีหลายเครื่อง (เร็ว/ช้า/เซตต่างกัน) → คิดเวลา+ต้นทุน/ชิ้น ของแต่ละตัว
+//   แต่ละ process มีหลายเครื่อง (เร็ว/ช้า/setupต่างกัน) → คิดเวลา+ต้นทุน/ชิ้น ของแต่ละตัว
 //   ⚠️ ต้นทุน/ชม. ตอนนี้ใช้ค่าสมมติ "เท่ากันทุกเครื่อง" — ยังไม่ได้แยกค่าจริงต่างกัน
 //   (ค่าเสื่อม/แรงงาน/ไฟ/overhead) → ดูได้แค่แนวโน้ม "เวลา" จริง ส่วน "คุ้มทุนจริง"
 //   ต้องรอต้นทุน/ชม. รายเครื่องจากพี่ → เสียบ opts.ratesByName ทีหลัง
@@ -355,7 +355,7 @@ function renderMachineComparison(cmp) {
 					<thead><tr style="background:#f3f4f6;color:#374151">
 						<th style="padding:3px 8px;text-align:left">เครื่อง</th>
 						<th style="padding:3px 8px;text-align:right">ความเร็ว</th>
-						<th style="padding:3px 8px;text-align:right">เซต</th>
+						<th style="padding:3px 8px;text-align:right">setup</th>
 						<th style="padding:3px 8px;text-align:right">เวลางานนี้</th>
 						<th style="padding:3px 8px;text-align:right">ต้นทุน/ชิ้น</th>
 					</tr></thead>
@@ -388,7 +388,7 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 		// ⚙️ ข้อมูลจริงจากตารางเครื่องของพี่ (17 มิ.ย.) — แก้จุดเดียว หรือ set
 		//    window.MACHINE_HOUR_CONFIG จากภายนอกก็ได้ (ไม่ต้องแตะไฟล์)
 		//  • speed         = ความเร็วเครื่องพิมพ์ default (แผ่น/ชม.) — เครื่อง Sheet ส่วนใหญ่ 10,000
-		//  • setupHours    = เวลาเซตเครื่อง/make_ready (ชม.) เฉลี่ย ~1 ชม. (พี่บอก "เฉลี่ยๆเอา")
+		//  • setupHours    = เวลาsetup/make_ready (ชม.) เฉลี่ย ~1 ชม. (พี่บอก "เฉลี่ยๆเอา")
 		//  • target        = เป้าหมายกำไร/ชม. (บาท) — ⚠️ ยัง MOCKUP รอพี่ให้ตัวเลขจริง
 		//  • processSpeeds = ความเร็วต่อ process (ชิ้น/แผ่น ต่อ ชม.) จากตารางพี่
 		//  • speedByMachine= ความเร็วจริงรายเครื่องพิมพ์ (ชื่อ → แผ่น/ชม.) ใช้กับ per-component
@@ -431,7 +431,7 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 			// override ภายนอกได้ (window.MACHINE_HOUR_CONFIG)
 			const override = (typeof window !== 'undefined' && window.MACHINE_HOUR_CONFIG) || {}
 
-			// ⚙️ เวลาเซตเครื่อง (make_ready) = 1 ชม. เท่ากันทุกเครื่อง — ปรับเลขเดียวที่นี่ให้ง่าย
+			// ⚙️ เวลาsetup (make_ready) = 1 ชม. เท่ากันทุกเครื่อง — ปรับเลขเดียวที่นี่ให้ง่าย
 			//    (MACHINE_TABLE เก็บ make_ready จริงรายเครื่องไว้แล้ว แต่ตอนนี้ยังไม่เอามาคิด)
 			const SETUP = override.setupHours != null ? Number(override.setupHours) : 1
 
@@ -468,7 +468,7 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 			const metric = (typeof est !== 'undefined' && est && est.mainData) ? computeMachineHourMetric(est.mainData, CFG.defaultSpeed, metricOpts) : null
 			if (!$summary.length || !metric || !metric.rows.length) return false
 			$('#machine_hour_metric').remove()
-			const note = `<span style="font-size:11px;color:#15803d;font-weight:normal">— ✅ ความเร็วจริงจากพี่ + เซตเครื่อง ${CFG.setupHours} ชม. (เท่ากันทุกเครื่อง ปรับได้) <span style="color:#d97706">(เป้ากำไร/ชม. ยังสมมติ)</span></span>`
+			const note = `<span style="font-size:11px;color:#15803d;font-weight:normal">— ✅ ความเร็วจริงจากพี่ + setup ${CFG.setupHours} ชม. (เท่ากันทุกเครื่อง ปรับได้) <span style="color:#d97706">(เป้ากำไร/ชม. ยังสมมติ)</span></span>`
 			const c0 = (est.mainData.component1 || [])[0] || {}
 				const printCfg = CFG.machineByName[c0.machine && c0.machine.machine_name] || { speed: CFG.defaultSpeed, setup: CFG.setupHours }
 				const procCfg = Object.assign({ print: printCfg }, CFG.process)
