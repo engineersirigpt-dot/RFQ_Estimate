@@ -15,7 +15,8 @@ PAPER   - A/C C1s 350 gsm
 PRINT   - 6/0 Colors
 COATING   - Gloss OPP 1 s
 PROCESS   - ไดคัท แกะ ติดกาว 1 จุด
-PACKING   - kraftwrap 100 pcs/pac`
+PACKING   - kraftwrap 100 pcs/pack
+Qty 1000  2000   3000  5000`
 
 ;(async () => {
 	const content = await ai.buildContentFromUpload(TXT, [])
