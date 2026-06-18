@@ -131,15 +131,12 @@ function renderMachineHourMetric(metric, target) {
 		<tr>
 			<td>${fmt(r.qty, 0)}</td>
 			<td style="text-align:right">${fmt(r.sheets, 0)}</td>
-			<td style="text-align:right;color:${r.makereadyPct > 80 ? '#dc2626' : '#374151'}">${fmt(r.makereadyPct, 1)}%</td>
 			<td style="text-align:right">${fmt(r.hours, 3)} ชม.<br><span style="color:#9ca3af;font-size:11px">(${mins(r.hours)})</span></td>
 			<td style="text-align:right">${fmt(r.total, 2)}</td>
 			<td style="text-align:right;font-weight:bold;background:#fef3c7">${fmt(r.costPerHour, 2)}</td>
 			<td style="text-align:right;font-weight:bold;background:#dcfce7;color:${r.marginPerHour > 0 ? '#15803d' : '#6b7280'}">${fmt(r.marginPerHour, 2)}${hasTarget && r.marginPerHour != null ? (r.marginPerHour >= target ? ' <span title="ถึงเป้า">✅</span>' : ' <span title="ต่ำกว่าเป้า">⚠️</span>') : ''}</td>
 			<td style="text-align:right;font-weight:bold;background:#dbeafe">${fmt(r.printPerHour, 2)}</td>
 		</tr>`).join('')
-	const mkVals = metric.rows.map((r) => r.makereadyPct).filter((x) => x != null)
-	const mkRange = mkVals.length ? (fmt(Math.min(...mkVals), 0) + '–' + fmt(Math.max(...mkVals), 0) + '%') : '-'
 	const maxJobs = Math.max(0, ...metric.rows.map((r) => r.jobsPerShift || 0))
 	const single = metric.compCount === 1
 	const passBadge = (p) => `<span style="color:${p > 1 ? '#dc2626' : '#16a34a'};font-weight:bold">${p} รอบ</span>${p > 1 ? ' (เวลา×' + p + ')' : ''}`
@@ -169,7 +166,6 @@ function renderMachineHourMetric(metric, target) {
 				<thead><tr style="background:#e5e7eb">
 					<th style="padding:5px 8px;text-align:left">ยอดสั่ง</th>
 					<th style="padding:5px 8px;text-align:right">แผ่นที่พิมพ์</th>
-					<th style="padding:5px 8px;text-align:right">%setup</th>
 					<th style="padding:5px 8px;text-align:right">เวลาเดินเครื่อง</th>
 					<th style="padding:5px 8px;text-align:right">ราคารวม</th>
 					<th style="padding:5px 8px;text-align:right">ราคารวม/ชั่วโมง</th>
@@ -179,7 +175,7 @@ function renderMachineHourMetric(metric, target) {
 				<tbody>${rows}</tbody>
 			</table>
 			<div style="margin-top:8px;font-size:11px;color:#6b7280">
-				💡 <b>ข้อสังเกต:</b> %setup ${mkRange} = งานยอดน้อยเสียเวลากับ makeready เยอะ • กำลังผลิต(เฉพาะเครื่องพิมพ์) ~${fmt(maxJobs, 0)} ครั้ง/กะ — ⚠️ <b>กำลังผลิตจริงจำกัดโดยคอขวด</b> (ดูตาราง process ด้านล่าง)<br>
+				💡 <b>ข้อสังเกต:</b> กำลังผลิต(เฉพาะเครื่องพิมพ์) ~${fmt(maxJobs, 0)} ครั้ง/กะ — ⚠️ <b>กำลังผลิตจริงจำกัดโดยคอขวด</b> (ดูตาราง process ด้านล่าง)<br>
 				* เทียบดูเฉยๆ ไม่บวกเข้าราคาขาย • <b>กำไร = ราคาขาย − ต้นทุน</b> (ขยับตาม markup, =0 ถ้าไม่บวกกำไร) • เวลา = setup(make_ready จริงต่อเครื่อง) + (แผ่นพิมพ์ × รอบพิมพ์ ÷ ความเร็ว)
 			</div>
 		</div>`
