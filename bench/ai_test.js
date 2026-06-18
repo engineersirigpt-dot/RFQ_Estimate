@@ -92,17 +92,18 @@ console.log('\n=== 5. DPxxxg → กล่องแป้งหลังเท�
 	check(name, pred(out), { c0: out.components[0], unc: out._uncertain })
 })
 
-console.log('\n=== 6. W/L swap: ข้อความเคารพลำดับ / ไดไลน์สลับ length≥width ===')
-// ลูกค้าพิมพ์ W×L (110×75) = เคารพลำดับ ไม่สลับ ; ไดไลน์/รูป (width>length) = สลับ
+console.log('\n=== 6. W/L swap: ระบุ W/L (ข้อความ/รูปมี label) เคารพลำดับ / อนุมาน panel ไม่มี label สลับ ===')
+// มี label ชัด (ข้อความ หรือ รูปมี label) → ไม่มี dieline_panels → เคารพลำดับ
+// อนุมานเองจาก panel ไดไลน์ (ไม่มี label) → AI ส่ง dieline_panels → สลับ length≥width
 ;[
-	['ข้อความ 110×75 → คงลำดับ (ไม่สลับ)', { components: [{ dimensions_mm: { width: 110, length: 75, height: 155 } }] }, undefined,
+	['ข้อความ 110×75 → คงลำดับ (ไม่สลับ)', { components: [{ dimensions_mm: { width: 110, length: 75, height: 155 } }] },
 		(o) => o.components[0].dimensions_mm.width === 110 && o.components[0].dimensions_mm.length === 75],
-	['รูป (hasImageInput) 80×25 → สลับเป็น 25×80', { components: [{ dimensions_mm: { width: 80, length: 25, height: 150 } }] }, true,
+	['รูปมี label 110×75 (ไม่มี dieline_panels) → คงลำดับ', { components: [{ dimensions_mm: { width: 110, length: 75, height: 155 } }] },
+		(o) => o.components[0].dimensions_mm.width === 110 && o.components[0].dimensions_mm.length === 75],
+	['อนุมาน panel (dieline_panels) 80×25 → สลับเป็น 25×80', { components: [{ dimensions_mm: { width: 80, length: 25 }, dieline_panels: [80, 25, 80, 25] }] },
 		(o) => o.components[0].dimensions_mm.width === 25 && o.components[0].dimensions_mm.length === 80],
-	['ไดไลน์ (dieline_panels) 80×25 → สลับ', { components: [{ dimensions_mm: { width: 80, length: 25 }, dieline_panels: [80, 25, 80, 25] }] }, undefined,
-		(o) => o.components[0].dimensions_mm.width === 25 && o.components[0].dimensions_mm.length === 80],
-].forEach(([name, input, hasImg, pred]) => {
-	const out = ai.validateAndFix(input, hasImg)
+].forEach(([name, input, pred]) => {
+	const out = ai.validateAndFix(input)
 	check(name, pred(out), out.components[0].dimensions_mm)
 })
 
