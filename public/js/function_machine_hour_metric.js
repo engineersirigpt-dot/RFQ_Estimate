@@ -476,7 +476,10 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 			const metric = (typeof est !== 'undefined' && est && est.mainData) ? computeMachineHourMetric(est.mainData, CFG.defaultSpeed, metricOpts) : null
 			if (!$summary.length || !metric || !metric.rows.length) return false
 			$('#machine_hour_metric').remove()
-			const note = `<span style="font-size:11px;color:#15803d;font-weight:normal">— ✅ ความเร็วจริงจากพี่ + setup ${CFG.setupHours} ชม. (เท่ากันทุกเครื่อง ปรับได้) <span style="color:#d97706">(เป้ากำไร/ชม. ยังสมมติ)</span></span>`
+			// เตือนถ้าเครื่องพิมพ์ของงานนี้ไม่มีในตาราง (เช่น Jet Press/Konica) → ใช้ความเร็ว fallback
+			const note = metric.allRealSpeed
+				? `<span style="font-size:11px;color:#15803d;font-weight:normal">— ✅ ความเร็วจริงจากพี่ + setup ${CFG.setupHours} ชม. <span style="color:#d97706">(เป้ากำไร/ชม. ยังสมมติ)</span></span>`
+				: `<span style="font-size:11px;color:#dc2626;font-weight:normal">— ⚠️ เครื่องพิมพ์งานนี้ (${metric.machine}) ยังไม่มีความเร็วจริงในตาราง → ใช้ค่า fallback ${CFG.defaultSpeed.toLocaleString()} (รอความเร็วจริงจากพี่)</span>`
 			const c0 = (est.mainData.component1 || [])[0] || {}
 				const coatingType = detectCoatingType(c0) // OPP/UV/WATER → เลือกเครื่องเคลือบให้ตรงชนิด
 				const printCfg = CFG.machineByName[c0.machine && c0.machine.machine_name] || { speed: CFG.defaultSpeed, setup: CFG.setupHours }
