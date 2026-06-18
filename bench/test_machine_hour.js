@@ -122,20 +122,32 @@ console.log('  ปะลูกฟูก: ' + (fluteRow ? fmt(fluteRow.hours * 60
 console.log('  ' + (okF ? '✅ PASS — flute + object form ถูกต้อง' : '❌ FAIL'))
 if (!okF) process.exitCode = 1
 
-// ── ทดสอบ [Prototype] เทียบเครื่องต่อ process — เรียงตามเวลา + ต้นทุน/ชิ้น
-console.log('\n===== [prototype] compare machines per process =====')
+// ── ทดสอบ [Prototype] เทียบเครื่อง + fix: แยก strip/glue, เคลือบตามชนิด
+console.log('\n===== [prototype] compare + แยก strip/glue + เคลือบตามชนิด =====')
 const MT = [
 	[3407, 'LS440', 'Sheet', 10000, 1.0], [3606, 'GL844', 'Sheet', 9000, 0.5],
-	[5420, 'SANWA', 'Die-cut', 2500, 1.0], [5425, 'D 2 Manual', 'Die-cut', 400, 1.0], // เร็ว vs เครื่องมือ
-	[5512, 'Glue-2', 'Glue', 10000, 1.0], [5520, 'แกะอัตโนมัติ', 'Glue', 15000, 0.5],
+	[5420, 'SANWA', 'Die-cut', 2500, 1.0], [5519, 'Yoco', 'Die-cut', 3000, 1.0], [5425, 'D 2 Manual', 'Die-cut', 400, 1.0],
+	[5512, 'Glue-2', 'Glue', 10000, 1.0], [5510, 'Glue-1', 'Glue', 10000, 1.0], // gluers
+	[5520, 'แกะอัตโนมัติ', 'Strip', 15000, 0.5],                                   // strip แยกกลุ่มแล้ว
+	[5924, 'OPP wanchay', 'OPP', 1300, 1.0], [5931, 'OPP Yelee', 'OPP', 1300, 1.0], [5941, 'UV Steinemann', 'UV', 2500, 1.0], [5507, 'วอเตอร์เบส', 'Coating', 1500, 1.0],
 ].map(([code, name, cat, speed, setup]) => ({ code, name, cat, speed, setup }))
-const cmp = computeMachineComparison(makeData(3, 6, 0), 0, MT, { defaultRatePerHour: 500 })
-const diecutCmp = cmp.processes.find((p) => p.key === 'diecut')
-// ไดคัทงาน 360 แผ่น: SANWA = 1 + 360/2500 = 1.144 ชม. < D2 Manual = 1 + 360/400 = 1.9 ชม.
-const expSanwa = 1 + 360 / 2500
-const okCmp = !!diecutCmp && diecutCmp.candidates.length === 2 &&
-	diecutCmp.candidates[0].name === 'SANWA' && Math.abs(diecutCmp.candidates[0].hours - +expSanwa.toFixed(4)) < 1e-6 &&
-	diecutCmp.candidates[0].costPerPiece != null && diecutCmp.candidates[0].costPerPiece < diecutCmp.candidates[1].costPerPiece
-if (diecutCmp) diecutCmp.candidates.forEach((c) => console.log('  ไดคัท: ' + c.name.padEnd(12) + fmt(c.hours * 60, 1) + ' น.  ต้นทุน/ชิ้น ' + fmt(c.costPerPiece, 3)))
-console.log('  ' + (okCmp ? '✅ PASS — เทียบเครื่อง เรียงตามเวลา + ต้นทุน/ชิ้น ถูกต้อง' : '❌ FAIL'))
+// งานเคลือบ OPP (addon type coating มีคำว่า OPP) — ส่ง coatingType:'OPP'
+const dCmp = makeData(3, 6, 0)
+dCmp.component1[0].addon = [{ type: 'coating', line: sheetsPerTier.map(() => ({ price: 1000 })) }]
+const cmp = computeMachineComparison(dCmp, 0, MT, { defaultRatePerHour: 500, setupHours: 1, coatingType: 'OPP' })
+const get = (k) => cmp.processes.find((p) => p.key === k)
+const diecutCmp = get('diecut'), asmCmp = get('assembly'), stripCmp = get('strip'), coatCmp = get('coating')
+// (1) ไดคัท ⚡ = Yoco 3000 (เร็วสุด ไม่ใช่ SANWA)
+const okDiecut = !!diecutCmp && diecutCmp.candidates[0].name === 'Yoco'
+// (2) ติดกาว = เฉพาะ gluers (ไม่มี 'แกะอัตโนมัติ')
+const okAsm = !!asmCmp && asmCmp.candidates.every((c) => c.name !== 'แกะอัตโนมัติ') && asmCmp.candidates.some((c) => c.name === 'Glue-2')
+// (3) แกะ = เฉพาะเครื่อง Strip
+const okStrip = !stripCmp || stripCmp.candidates.every((c) => c.name === 'แกะอัตโนมัติ')
+// (4) เคลือบ OPP = เฉพาะเครื่อง OPP (ไม่มี UV/วอเตอร์เบส)
+const okCoat = !coatCmp || coatCmp.candidates.every((c) => c.name.startsWith('OPP'))
+console.log('  ไดคัท ⚡: ' + (diecutCmp ? diecutCmp.candidates[0].name : '-') + ' (คาด Yoco)')
+console.log('  ติดกาว มีแกะปนไหม: ' + (okAsm ? 'ไม่ปน ✓' : 'ปน ✗') + ' | แกะ: ' + (okStrip ? 'เฉพาะ strip ✓' : 'ปน ✗'))
+console.log('  เคลือบ OPP เฉพาะ OPP: ' + (okCoat ? '✓' : '✗') + ' (' + (coatCmp ? coatCmp.candidates.map((c) => c.name).join(',') : '-') + ')')
+const okCmp = okDiecut && okAsm && okStrip && okCoat
+console.log('  ' + (okCmp ? '✅ PASS — fix ครบ (ไดคัทเร็วสุด/แยก strip-glue/เคลือบตามชนิด)' : '❌ FAIL'))
 if (!okCmp) process.exitCode = 1

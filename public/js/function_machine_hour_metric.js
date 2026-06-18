@@ -300,6 +300,8 @@ function computeMachineComparison(mainData, qtyIndex, machineTable, opts) {
 	const defaultRate = Number(o.defaultRatePerHour) > 0 ? Number(o.defaultRatePerHour) : 0 // ค่าเครื่อง/ชม. สมมติ (เท่ากันทุกเครื่อง)
 	const ratesByName = o.ratesByName || {} // ของจริงรายเครื่อง (เสียบทีหลัง) → ค่อย override
 	const forceSetup = o.setupHours != null ? Number(o.setupHours) : null // ถ้าระบุ → ใช้ setup นี้แทน make_ready ในตาราง
+	const coatingType = o.coatingType || 'WATER' // OPP/UV/WATER → กรองเครื่องเคลือบให้ตรงชนิดงาน
+	const coatingCatsFor = (t) => (t === 'OPP' ? ['OPP'] : t === 'UV' ? ['UV'] : ['Coating'])
 	const comp = (mainData.component1 || [])[0] || {}
 	const i = qtyIndex || 0
 	const paperPrint = Number((((comp.paper_usage && comp.paper_usage.line) || [])[i] || {}).paper_print) || 0
@@ -311,11 +313,11 @@ function computeMachineComparison(mainData, qtyIndex, machineTable, opts) {
 	// process ที่งานนี้ใช้จริง + ฐานจำนวน (แผ่น/ใบ) + ประเภทเครื่องที่ทำงานนั้นได้
 	const USES = []
 	if (paperPrint > 0) USES.push({ key: 'print', label: 'พิมพ์', qty: paperPrint, unit: 'แผ่น', cats: ['Sheet'] })
-	if (sumAddon(['coating']) > 0) USES.push({ key: 'coating', label: 'เคลือบ', qty: paperPrint, unit: 'แผ่น', cats: ['Coating', 'UV', 'OPP'] })
+	if (sumAddon(['coating']) > 0) USES.push({ key: 'coating', label: 'เคลือบ (' + coatingType + ')', qty: paperPrint, unit: 'แผ่น', cats: coatingCatsFor(coatingType) })
 	if (findProc('diecut')) USES.push({ key: 'diecut', label: 'ไดคัท', qty: paperPrint, unit: 'แผ่น', cats: ['Die-cut'] })
 	if (sumAddon(['foilstamp', 'emboss', 'deboss']) > 0) USES.push({ key: 'stamp', label: 'ปั๊ม (ฟอยล์/นูน)', qty: paperPrint, unit: 'แผ่น', cats: ['Hot Stamp', 'Die-cut'] })
 	if (findProc('assembly')) USES.push({ key: 'assembly', label: 'ติดกาว/ประกอบ', qty: orderQty, unit: 'ใบ', cats: ['Glue'] })
-	if (hasTopProc('chip')) USES.push({ key: 'strip', label: 'แกะ (strip-out)', qty: orderQty, unit: 'ใบ', cats: ['Glue'] })
+	if (hasTopProc('chip')) USES.push({ key: 'strip', label: 'แกะ (strip-out)', qty: orderQty, unit: 'ใบ', cats: ['Strip'] })
 	if (sumAddon(['corrugated', 'flute', 'laminate']) > 0) USES.push({ key: 'flute', label: 'ปะลูกฟูก', qty: paperPrint, unit: 'แผ่น', cats: ['Flute'] })
 
 	const processes = USES.map((u) => {
@@ -422,7 +424,7 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 				// GLUE Packaging (ติดกาว/แกะ/ปะ)
 				[5505, 'ปะหน้าต่าง', 'Glue', 1500, 1.0], [5510, 'Glue-1', 'Glue', 10000, 1.0], [5512, 'Glue-2', 'Glue', 10000, 1.0],
 				[5513, 'เครื่องผ่าแผ่น ทับรอย', 'Glue', 0, 0.0], [5514, 'Presstypegluer 2000', 'Glue', 0, 0.0], [5516, 'Sourcevoltage 2000', 'Glue', 0, 0.0],
-				[5517, 'เครื่องติดกาว', 'Glue', 0, 0.0], [5518, 'เครื่องพิมพ์ Flexo', 'Glue', 600, 2.0], [5520, 'แกะอัตโนมัติ MSCB-1080', 'Glue', 15000, 0.5],
+				[5517, 'เครื่องติดกาว', 'Glue', 0, 0.0], [5518, 'เครื่องพิมพ์ Flexo', 'Glue', 600, 2.0], [5520, 'แกะอัตโนมัติ MSCB-1080', 'Strip', 15000, 0.5],
 				[5521, 'ปะกาวลิ้น 5521', 'Glue', 8000, 1.0], [5522, 'ปะกาวลิ้น 5522', 'Glue', 8000, 1.0], [5523, 'ติดเทปกาว Athos', 'Glue', 2000, 0.3],
 				[5526, 'Glue-4', 'Glue', 10000, 1.0], [5529, 'ติดเส้นใบเลื่อยฟอยล์', 'Glue', 1800, 1.0], [5532, 'แชมเบอร์เกอร์', 'Glue', 3000, 1.0],
 				[5534, 'ติดเส้นฟอยล์ JTJ-330', 'Glue', 3500, 1.0], [5536, 'Glue-3', 'Glue', 10000, 1.0], [5544, 'ติดเทป 2 หน้า KQ', 'Glue', 3000, 1.0],
@@ -439,17 +441,22 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 			const machineByName = {}
 			MACHINE_TABLE.filter((m) => m.cat === 'Sheet').forEach((m) => { machineByName[m.name] = { speed: m.speed, setup: SETUP } })
 
-			// process -> เครื่องตัวแทน (calc ไม่ผูกเครื่องเฉพาะต่อ process จึงเลือกตัวที่ใช้บ่อย)
-			const byCode = (c) => MACHINE_TABLE.find((m) => m.code === c) || {}
-			const spec = (c) => { const m = byCode(c); return { speed: m.speed || 0, setup: SETUP } }
-			const PROCESS = {
-				coating: spec(5507),  // เคลือบวอเตอร์เบส (UV/OPP เร็ว-ช้าต่างกัน ดูตาราง)
-				diecut: spec(5420),   // SANWA (auto); manual = 400
-				stamp: spec(5903),    // ปั๊มทอง Hot Stamp; ปั๊มจม/นูนใช้ไดคัท(2,500)/เคโยกมือ(500-600)
-				assembly: spec(5512), // ติดกาว Glue-2
-				strip: spec(5520),    // แกะอัตโนมัติ MSCB-1080
-				chip: spec(5520),
-				flute: spec(5503),    // ปะลูกฟูก (cost ต่อเมื่อมี addon corrugated)
+			// process -> "กลุ่มเครื่องที่ทำงานนั้นได้" (ใช้ร่วมทั้ง per-process และตารางเทียบ → สอดคล้องกัน)
+			//   per-process เลือก "ตัวเร็วสุด" ในกลุ่ม (= ⚡ ในตารางเทียบ) ; เคลือบเลือกตามชนิด (OPP/UV/water)
+			//   strip(แกะ) แยกกลุ่มจาก glue(ติดกาว) แล้ว → ไม่ปนกัน
+			const coatingCatsFor = (t) => (t === 'OPP' ? ['OPP'] : t === 'UV' ? ['UV'] : ['Coating'])
+			const detectCoatingType = (comp) => {
+				const blob = JSON.stringify(((comp && comp.addon) || []).filter((a) => a && a.type === 'coating')).toUpperCase()
+				return blob.includes('OPP') ? 'OPP' : blob.includes('UV') ? 'UV' : 'WATER'
+			}
+			const catsFor = (key, coatingType) => (({
+				print: ['Sheet'], coating: coatingCatsFor(coatingType), diecut: ['Die-cut'],
+				stamp: ['Hot Stamp'], assembly: ['Glue'], strip: ['Strip'], chip: ['Strip'], flute: ['Flute'],
+			})[key] || [])
+			// เครื่องเร็วสุดในกลุ่ม (ตรงกับ ⚡ ในตารางเทียบ) — setup = SETUP เท่ากันทุกเครื่อง
+			const fastestOf = (cats) => {
+				const best = MACHINE_TABLE.filter((m) => cats.includes(m.cat) && m.speed > 0).reduce((a, b) => (!a || b.speed > a.speed ? b : a), null)
+				return { speed: best ? best.speed : 0, setup: SETUP }
 			}
 
 			const CFG = {
@@ -457,7 +464,6 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 				setupHours: SETUP,
 				target: Number(override.target) > 0 ? Number(override.target) : 10000, // MOCKUP รอพี่ให้เป้ากำไร/ชม.
 				machineByName: Object.assign({}, machineByName, override.machineByName || {}),
-				process: Object.assign({}, PROCESS, override.processSpeeds || {}),
 				ratePerHour: Number(override.ratePerHour) > 0 ? Number(override.ratePerHour) : 500, // ⚠️ MOCKUP ค่าเครื่อง/ชม. เท่ากันทุกเครื่อง
 				ratesByName: override.ratesByName || {}, // ของจริงรายเครื่อง (เสียบทีหลัง → จัดอันดับคุ้มทุนจริง)
 			}
@@ -470,14 +476,25 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 			$('#machine_hour_metric').remove()
 			const note = `<span style="font-size:11px;color:#15803d;font-weight:normal">— ✅ ความเร็วจริงจากพี่ + setup ${CFG.setupHours} ชม. (เท่ากันทุกเครื่อง ปรับได้) <span style="color:#d97706">(เป้ากำไร/ชม. ยังสมมติ)</span></span>`
 			const c0 = (est.mainData.component1 || [])[0] || {}
+				const coatingType = detectCoatingType(c0) // OPP/UV/WATER → เลือกเครื่องเคลือบให้ตรงชนิด
 				const printCfg = CFG.machineByName[c0.machine && c0.machine.machine_name] || { speed: CFG.defaultSpeed, setup: CFG.setupHours }
-				const procCfg = Object.assign({ print: printCfg }, CFG.process)
+				// per-process: เลือก "ตัวเร็วสุด" ในแต่ละกลุ่ม → ตรงกับ ⚡ ในตารางเทียบเสมอ
+				const procCfg = Object.assign({
+					print: printCfg,
+					coating: fastestOf(catsFor('coating', coatingType)),
+					diecut: fastestOf(catsFor('diecut')),
+					stamp: fastestOf(catsFor('stamp')),
+					assembly: fastestOf(catsFor('assembly')),
+					strip: fastestOf(catsFor('strip')),
+					chip: fastestOf(catsFor('chip')),
+					flute: fastestOf(catsFor('flute')),
+				}, override.processSpeeds || {})
 			$summary.after(`
 				<div id="machine_hour_metric" style="max-width:900px;margin:14px auto;border:1px solid #fcd34d;background:#fffbeb;border-radius:8px;padding:12px 14px;font-family:inherit">
 					<div style="font-weight:bold;font-size:15px;color:#b45309;margin-bottom:8px">⏱️ ราคาต่อชั่วโมงเครื่อง ${note}</div>
 					${renderMachineHourMetric(metric, CFG.target)}
 					${renderProcessBreakdown(computeProcessBreakdown(est.mainData, 0, procCfg), CFG.target)}
-					${renderMachineComparison(computeMachineComparison(est.mainData, 0, MACHINE_TABLE, { defaultRatePerHour: CFG.ratePerHour, ratesByName: CFG.ratesByName, setupHours: CFG.setupHours }))}
+					${renderMachineComparison(computeMachineComparison(est.mainData, 0, MACHINE_TABLE, { defaultRatePerHour: CFG.ratePerHour, ratesByName: CFG.ratesByName, setupHours: CFG.setupHours, coatingType }))}
 				</div>`)
 			return true
 		}
