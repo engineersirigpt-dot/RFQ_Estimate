@@ -32,16 +32,21 @@ function computeMachineHourMetric(mainData, speedSheetsPerHour, opts) {
 	const o = opts || {}
 	const defaultSetup = Number(o.setupHours) > 0 ? Number(o.setupHours) : 0 // setup fallback (ชม.)
 	const machineByName = o.machineByName || {} // ชื่อเครื่อง → {speed, setup} จากตารางจริงของพี่
+	const machineById = o.machineById || {}     // machine_id → {name, speed, setup} (จับคู่ด้วย id กันชื่อเพี้ยน)
 
-	// คืน {speed(แผ่น/ชม.), setup(make_ready ชม.)} ต่อเครื่อง
-	//   ลำดับความสำคัญ: field ใน master (machine_speed/_setup) > ตารางพี่ตามชื่อเครื่อง > fallback
+	// คืน {name, speed(แผ่น/ชม.), setup(make_ready ชม.), real}
+	//   ลำดับ: field ใน master > จับคู่ด้วย machine_id (กันชื่อเพี้ยน L440/LS440) > จับด้วยชื่อ > fallback
+	//   ใช้ "ชื่อจากตารางพี่" (โดย id) เป็นชื่อแสดง → หัวตารางกับลิสต์เทียบตรงกัน ไม่ต้องแก้ default.js
 	const machineSpecOf = (comp) => {
 		const m = (comp && comp.machine) || {}
+		const calcName = m.machine_name || '-'
 		const real = Number(m.machine_speed) || Number(m.speed_sheets_per_hour) || Number(m.speed)
-		if (real > 0) return { speed: real, setup: Number(m.machine_setup) >= 0 ? Number(m.machine_setup) : defaultSetup, real: true }
-		const t = machineByName[m.machine_name]
-		if (t && Number(t.speed) > 0) return { speed: Number(t.speed), setup: Number(t.setup) || 0, real: true }
-		return { speed: speedSheetsPerHour, setup: defaultSetup, real: false }
+		if (real > 0) return { name: calcName, speed: real, setup: Number(m.machine_setup) >= 0 ? Number(m.machine_setup) : defaultSetup, real: true }
+		const byId = machineById[m.machine_id]
+		if (byId && Number(byId.speed) > 0) return { name: byId.name || calcName, speed: Number(byId.speed), setup: Number(byId.setup) || 0, real: true }
+		const t = machineByName[calcName]
+		if (t && Number(t.speed) > 0) return { name: calcName, speed: Number(t.speed), setup: Number(t.setup) || 0, real: true }
+		return { name: calcName, speed: speedSheetsPerHour, setup: defaultSetup, real: false }
 	}
 
 	// ข้อมูลคงที่ต่อ component — แต่ละ component อาจใช้คนละเครื่อง/คนละสี/คนละความเร็ว
@@ -49,7 +54,6 @@ function computeMachineHourMetric(mainData, speedSheetsPerHour, opts) {
 	//   units=0 (ดิจิทัล/ไม่มีข้อมูล) → 1 รอบ
 	//   ⚠️ สมมติ "ความเร็ว = impressions/ชม." จึงคูณ passes
 	const compInfo = comps.map((comp) => {
-		const machine = (comp.machine && comp.machine.machine_name) || '-'
 		const units = (comp.machine && comp.machine.color && Number(comp.machine.color.max)) || 0
 		const color = (comp.color && comp.color[0]) || {}
 		const outside = Number(color.outside) || 0
@@ -57,6 +61,7 @@ function computeMachineHourMetric(mainData, speedSheetsPerHour, opts) {
 		let passes = units > 0 ? (Math.ceil(outside / units) + Math.ceil(inside / units)) : 1
 		if (passes < 1) passes = 1
 		const spec = machineSpecOf(comp)
+		const machine = spec.name || '-' // ชื่อจากตารางพี่ (โดย id) → ตรงกับลิสต์เทียบ
 		return {
 			machine, units, outside, inside, passes,
 			speed: spec.speed, setup: spec.setup,
@@ -398,9 +403,9 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 		// ────────────────────────────────────────────────────────────────────
 		const MACHINE_TABLE = [
 				// Sheet (เครื่องพิมพ์)
-				// ⚠️ id 3407: default.js (calc) เรียก "L440" แต่ตารางแอดมินพี่เรียก "LS440" — เครื่องเดียวกัน
-				//    ใช้ชื่อ "L440" ให้ตรงกับ comp.machine.machine_name ที่หน้า estimate อ่าน (จับคู่ความเร็วได้ + หัว/ลิสต์ตรงกัน)
-				[3403, 'CD440A', 'Sheet', 10000, 1.0], [3407, 'L440', 'Sheet', 10000, 0.0], [3408, 'LS244', 'Sheet', 10000, 1.0],
+				// ⚠️ id 3407: default.js (calc/เพื่อน) เรียก "L440" (พิมพ์ย่อ) แต่ชื่อจริง = "LS440" (ตารางพี่)
+				//    metric จับคู่ด้วย machine_id แล้วโชว์ "LS440" → ไม่ต้องแก้ default.js ของเพื่อน
+				[3403, 'CD440A', 'Sheet', 10000, 1.0], [3407, 'LS440', 'Sheet', 10000, 0.0], [3408, 'LS244', 'Sheet', 10000, 1.0],
 				[3422, 'L444SP', 'Sheet', 10000, 1.0], [3423, 'L444APC', 'Sheet', 10000, 1.0], [3505, 'L540APC', 'Sheet', 10000, 1.0],
 				[3506, 'LS540APC', 'Sheet', 10000, 1.0], [3507, 'LS1029', 'Sheet', 10000, 1.0], [3601, 'L640', 'Sheet', 10000, 1.0],
 				[3604, 'L640APC-B', 'Sheet', 5000, 1.0], [3605, 'GL640 UV', 'Sheet', 10000, 0.5], [3606, 'GL844 + C(IR)', 'Sheet', 9000, 0.5],
@@ -442,6 +447,9 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 			// เครื่องพิมพ์: ชื่อ -> {speed(จริงรายเครื่อง), setup(=SETUP)}
 			const machineByName = {}
 			MACHINE_TABLE.filter((m) => m.cat === 'Sheet').forEach((m) => { machineByName[m.name] = { speed: m.speed, setup: SETUP } })
+			// machine_id -> {name, speed, setup} ทุกเครื่อง (จับคู่ด้วย id กันชื่อเพี้ยน L440/LS440)
+			const machineById = {}
+			MACHINE_TABLE.forEach((m) => { machineById[m.code] = { name: m.name, speed: m.speed, setup: SETUP } })
 
 			// process -> "กลุ่มเครื่องที่ทำงานนั้นได้" (ใช้ร่วมทั้ง per-process และตารางเทียบ → สอดคล้องกัน)
 			//   per-process เลือก "ตัวเร็วสุด" ในกลุ่ม (= ⚡ ในตารางเทียบ) ; เคลือบเลือกตามชนิด (OPP/UV/water)
@@ -466,13 +474,14 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 				setupHours: SETUP,
 				target: Number(override.target) > 0 ? Number(override.target) : 10000, // MOCKUP รอพี่ให้เป้ากำไร/ชม.
 				machineByName: Object.assign({}, machineByName, override.machineByName || {}),
+				machineById: Object.assign({}, machineById, override.machineById || {}),
 				ratePerHour: Number(override.ratePerHour) > 0 ? Number(override.ratePerHour) : 500, // ⚠️ MOCKUP ค่าเครื่อง/ชม. เท่ากันทุกเครื่อง
 				ratesByName: override.ratesByName || {}, // ของจริงรายเครื่อง (เสียบทีหลัง → จัดอันดับคุ้มทุนจริง)
 			}
 
 			function doInject() {
 			const $summary = $('#summary')
-			const metricOpts = { setupHours: CFG.setupHours, machineByName: CFG.machineByName }
+			const metricOpts = { setupHours: CFG.setupHours, machineByName: CFG.machineByName, machineById: CFG.machineById }
 			const metric = (typeof est !== 'undefined' && est && est.mainData) ? computeMachineHourMetric(est.mainData, CFG.defaultSpeed, metricOpts) : null
 			if (!$summary.length || !metric || !metric.rows.length) return false
 			$('#machine_hour_metric').remove()
@@ -482,7 +491,8 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 				: `<span style="font-size:11px;color:#dc2626;font-weight:normal">— ⚠️ เครื่องพิมพ์งานนี้ (${metric.machine}) ยังไม่มีความเร็วจริงในตาราง → ใช้ค่า fallback ${CFG.defaultSpeed.toLocaleString()} (รอความเร็วจริงจากพี่)</span>`
 			const c0 = (est.mainData.component1 || [])[0] || {}
 				const coatingType = detectCoatingType(c0) // OPP/UV/WATER → เลือกเครื่องเคลือบให้ตรงชนิด
-				const printCfg = CFG.machineByName[c0.machine && c0.machine.machine_name] || { speed: CFG.defaultSpeed, setup: CFG.setupHours }
+				// เครื่องพิมพ์งานนี้: จับด้วย id ก่อน (กันชื่อเพี้ยน) แล้วค่อยชื่อ
+				const printCfg = CFG.machineById[c0.machine && c0.machine.machine_id] || CFG.machineByName[c0.machine && c0.machine.machine_name] || { speed: CFG.defaultSpeed, setup: CFG.setupHours }
 				// per-process: เลือก "ตัวเร็วสุด" ในแต่ละกลุ่ม → ตรงกับ ⚡ ในตารางเทียบเสมอ
 				const procCfg = Object.assign({
 					print: printCfg,

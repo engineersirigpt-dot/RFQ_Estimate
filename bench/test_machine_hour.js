@@ -108,6 +108,16 @@ console.log('  เวลา ' + fmt(ro.hours, 4) + ' ชม. (คาด ' + fmt(
 console.log('  ' + (okOpt ? '✅ PASS — setup + machineByName ถูกต้อง' : '❌ FAIL'))
 if (!okOpt) process.exitCode = 1
 
+// ── ทดสอบ machineById: เครื่องชื่อเพี้ยน (calc=L440) แต่ id 3407 → โชว์ชื่อจริง LS440 + ความเร็วถูก
+console.log('\n===== machineById (ชื่อเพี้ยน L440→LS440 จับด้วย id) =====')
+const dId = makeData(3, 6, 0)
+dId.component1[0].machine = { machine_name: 'L440', machine_id: 3407, color: { max: 6 } } // calc เรียก L440
+const mtId = computeMachineHourMetric(dId, 8000, { machineById: { 3407: { name: 'LS440', speed: 10000, setup: 1 } } })
+const okId = mtId.machine === 'LS440' && mtId.components[0].speed === 10000 && mtId.components[0].isRealSpeed === true
+console.log('  ชื่อแสดง: ' + mtId.machine + ' (calc ส่ง L440, ตาราง id 3407 = LS440) • ความเร็ว ' + fmt(mtId.components[0].speed, 0))
+console.log('  ' + (okId ? '✅ PASS — จับด้วย id โชว์ชื่อจริง LS440 + ความเร็วถูก ไม่ fallback' : '❌ FAIL'))
+if (!okId) process.exitCode = 1
+
 // ── ทดสอบ per-process รับ {speed,setup} object form + flute (ปะลูกฟูก)
 console.log('\n===== per-process {speed,setup} + flute =====')
 const dFlute = makeData(3, 6, 0)
