@@ -1041,6 +1041,12 @@ class Estimate {
 				}
 			})
 
+			//* [เฮีย 18/06/26] ค่าเผื่อเพิ่ม: (2) ตั้งสีพิเศษ (spot) สีละ N แผ่น • (3) เผื่อสีเสีย M% ของจำนวนพิมพ์
+			//   N = default_color_limit.special_ink_waste (100) • M = spoilage_percent (2) • ฐาน 2% = after_ups (แผ่นพิมพ์)
+			const numSpecialInk = Array.isArray(colorDetail?.special_ink) ? colorDetail.special_ink.length : 0
+			waste += numSpecialInk * (default_color_limit?.special_ink_waste || 0)
+			waste += Math.ceil((item1.after_ups || 0) * ((default_color_limit?.spoilage_percent || 0) / 100))
+
 			item.waste.waste.push(waste)
 		})
 	}

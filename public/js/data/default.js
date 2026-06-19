@@ -7,10 +7,12 @@ const defaultData = {
 	},
 	color_limit: {
 		max_color: 4,
-		paper_waste: 300, //* 100 -> 300 22/02/23
+		paper_waste: 300, //* ตั้งสี (makeready) — เฮียขอ 200 แต่ตัวจริงอยู่ DB waste_info.print_rate → แก้ที่ DB
 		paper_waste_per_color: 50,
 		jetpress_paper_waste: 150,
-		jetpress_paper_waste_per_color: 20
+		jetpress_paper_waste_per_color: 20,
+		special_ink_waste: 100, //* [เฮีย 18/06/26] ตั้งสีพิเศษ (spot) สีละ 100 แผ่น (ใช้ใน setWaste) — verified
+		spoilage_percent: 2 //* [เฮีย 18/06/26] เผื่อสีเสีย (ชักดู) 2% ของจำนวนพิมพ์ (ใช้ใน setWaste) — verified
 	},
 	special_customer_marking: 7, //* 7% extended
 	paper_price_marking: 10, //* default 10% profit sharing 18%
@@ -111,7 +113,7 @@ const defaultData = {
 			print_min_price: 0,
 			reduce_paper_waste_percent: 0,
 			color_limit_waste: {
-				waste: 300,
+				waste: 300, //* ตั้งสี (เฉพาะงานลิมิตสี) — item 1 ตัวจริงอยู่ DB waste_info
 				waste_per_color: 50
 			},
 			component_type: [1, 2, 3]
@@ -144,7 +146,7 @@ const defaultData = {
 			print_min_price: 0,
 			reduce_paper_waste_percent: 0,
 			color_limit_waste: {
-				waste: 300,
+				waste: 300, //* ตั้งสี (เฉพาะงานลิมิตสี) — item 1 ตัวจริงอยู่ DB waste_info
 				waste_per_color: 50
 			},
 			component_type: [3]
