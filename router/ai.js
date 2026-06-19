@@ -431,7 +431,18 @@ function fixCoating(c) {
 	return type ? { ...c, type } : null
 }
 
-function validateAndFix(data) {
+// หน่วยของขนาดกล่อง → ตัวคูณเป็น mm (mm=1, cm=10). ตรวจจาก: สตริงขนาด > ข้อความเต็ม
+// (รองรับป้ายแยก เช่น "SIZE (mm.) : 90 x 100 x 120" ที่ stated_size อาจไม่มีหน่วยติดมา)
+// ไม่เจอหน่วยเลย → เดาจากขนาด (กล่อง mm ปกติ ≥ 40, cm มักเลขเล็ก)
+function detectUnitFactor(statedStr, sourceText, nums) {
+	const blob = String(statedStr || '') + ' ' + String(sourceText || '')
+	if (/mm\b|มิลลิ|มม/i.test(blob)) return 1   // "150mm", "(mm.)", "มม."
+	if (/cm\b|ซม|เซน|เซ็น/i.test(blob)) return 10 // "8cm", "(cm.)", "ซม."
+	const max = Math.max(0, ...(nums || []).map((n) => parseFloat(n) || 0))
+	return max >= 40 ? 1 : 10 // ไม่มีหน่วย: ใหญ่=mm เล็ก=cm
+}
+
+function validateAndFix(data, sourceText) {
 	if (!data || typeof data !== 'object') return data
 
 	// 1. print_type — must be a known value
@@ -514,7 +525,7 @@ function validateAndFix(data) {
 				// "W80×L120×H40" parses too (the prompt itself uses that format).
 				const sm = comp.stated_size.match(/(?:[a-z]\s*)?(\d+(?:\.\d+)?)\s*[x×*]\s*(?:[a-z]\s*)?(\d+(?:\.\d+)?)\s*[x×*]\s*(?:[a-z]\s*)?(\d+(?:\.\d+)?)/i)
 				if (sm) {
-					const k = /mm\b/i.test(comp.stated_size) ? 1 : 10 // default cm; /mm\b/ (not \bmm\b) so "150mm" attached to the number still matches
+					const k = detectUnitFactor(comp.stated_size, sourceText, [sm[1], sm[2], sm[3]]) // mm/cm จากสตริง+ข้อความ+ขนาด
 					comp.dimensions_mm = {
 						width: Math.round(parseFloat(sm[1]) * k),
 						length: Math.round(parseFloat(sm[2]) * k),
@@ -535,7 +546,7 @@ function validateAndFix(data) {
 				const d = comp.dimensions_mm
 				const dd = [d.width, d.length, d.height].filter((x) => typeof x === 'number').sort((a, b) => a - b)
 				if (fm && dd.length === 3) {
-					const k = /mm\b/i.test(comp.stated_flat_size) ? 1 : 10 // /mm\b/ matches "37mm" attached to the number, unlike \bmm\b
+					const k = detectUnitFactor(comp.stated_flat_size, sourceText, [fm[1], fm[2]])
 					const flatW = Math.max(parseFloat(fm[1]), parseFloat(fm[2])) * k
 					const footprintPerim = 2 * (dd[0] + dd[1])
 					if (footprintPerim > 0 && flatW > footprintPerim * 1.3) comp.box_template_id = 12
@@ -843,7 +854,7 @@ router.post('/parse-spec', upload.array('files', 10), async (req, res) => {
 			console.warn('[AI strip] error (non-fatal): ' + e.message)
 		}
 		const hasImageInput = (files || []).some((f) => (f.mimetype || '').toLowerCase().startsWith('image/'))
-		parsed = validateAndFix(parsed) // length≥width สลับเฉพาะมิติที่อนุมานจาก panel ไดไลน์ (ดูในฟังก์ชัน)
+		parsed = validateAndFix(parsed, text) // ส่ง text เพื่อตรวจหน่วย mm/cm จากป้าย (เช่น "SIZE (mm.)")
 
 		// Deterministic paper shorthand: "DPxxxg" → Duplex GBB xxx แกรม (หลังเทา).
 		// รันหลัง strip/validate เพื่อไม่ให้ค่าที่เติมโดนตัด.

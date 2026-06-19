@@ -28,6 +28,18 @@ console.log('\n=== 1. stated_size parse (mm/cm/prefix) — บั๊ก ×10 ===
 	check('"' + s + '" → ' + JSON.stringify(exp), eq(got, exp.slice().sort((a, b) => a - b)), got)
 })
 
+console.log('\n=== 1b. หน่วยจากป้าย/ข้อความ + เดาจากขนาด (บั๊ก "(mm.)" ×10) ===')
+;[
+	['90 x 100 x 120', 'SIZE (mm.) : 90 x 100 x 120', [90, 100, 120]], // stated ไม่มีหน่วย แต่ข้อความมี (mm.) → ไม่ ×10
+	['90 x 100 x 120', '', [90, 100, 120]],   // ไม่มีหน่วยเลย เลขใหญ่ → เดา mm
+	['8 x 2.5 x 15', '', [80, 25, 150]],      // ไม่มีหน่วย เลขเล็ก → เดา cm (×10)
+	['8 x 2.5 x 15', 'ขนาด 8 x 2.5 x 15 cm', [80, 25, 150]], // ข้อความมี cm → ×10
+].forEach(([s, src, exp]) => {
+	const out = ai.validateAndFix({ components: [{ stated_size: s, dimensions_mm: { width: 1, length: 1, height: 1 } }] }, src)
+	const got = sortDim(out.components[0].dimensions_mm)
+	check('stated "' + s + '" + text "' + src.slice(0, 18) + '" → ' + JSON.stringify(exp), eq(got, exp.slice().sort((a, b) => a - b)), got)
+})
+
 console.log('\n=== 2. paper_gram strip (เก็บ legit / ตัด hallucinate) ===')
 ;[
 	['A/C C1s 300 ขนาด 50x85x150mm', 300, true],   // gram ติดเกรด ไม่มีคำว่าแกรม → เก็บ
