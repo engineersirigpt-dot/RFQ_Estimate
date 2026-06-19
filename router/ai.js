@@ -13,7 +13,10 @@ const upload = multer({
 	limits: { fileSize: 25 * 1024 * 1024, files: 10 }
 })
 
-const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-5'
+const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-5'        // ข้อความ/รูปชัด — เร็ว/ถูก
+const IMAGE_MODEL = process.env.ANTHROPIC_IMAGE_MODEL || 'claude-opus-4-8' // มีรูป (โดยเฉพาะลายมือ) — แม่นกว่า
+// เลือกโมเดลตามชนิด input: มีรูป → Opus (vision แม่นกว่า) ไม่งั้น → Sonnet (ประหยัด)
+const pickModel = (files) => ((files || []).some((f) => (f.mimetype || '').toLowerCase().startsWith('image/')) ? IMAGE_MODEL : MODEL)
 
 // Load the box-template reference PDF + template images once at startup.
 // They're sent with every request (cached by Anthropic prompt cache) so the AI
@@ -802,9 +805,10 @@ router.post('/parse-spec', upload.array('files', 10), async (req, res) => {
 			maxRetries: 3
 		})
 		const userContent = await buildContentFromUpload(text, files)
+		const useModel = pickModel(files) // มีรูป → Opus, ข้อความ → Sonnet
 
 		const msg = await createWithRetry(client, {
-			model: MODEL,
+			model: useModel,
 			max_tokens: 4000,
 			temperature,
 			// system as a structured array so we can attach cache_control —
@@ -823,11 +827,11 @@ router.post('/parse-spec', upload.array('files', 10), async (req, res) => {
 			'cache_create=' + (u.cache_creation_input_tokens || 0),
 			'cache_read=' + (u.cache_read_input_tokens || 0),
 			'output=' + (u.output_tokens || 0),
-			'model=' + MODEL
+			'model=' + useModel
 		)
 
 		// เก็บ log การใช้งาน AI ลงไฟล์ LogAI/ (ของพี่ — usage tracking)
-		logAIUsage({ user: req.cookies && req.cookies.emp_id, model: MODEL, usage: u, status: 'OK' })
+		logAIUsage({ user: req.cookies && req.cookies.emp_id, model: useModel, usage: u, status: 'OK' })
 
 		const reply = msg.content
 			.filter((c) => c.type === 'text')
@@ -878,10 +882,10 @@ router.post('/parse-spec', upload.array('files', 10), async (req, res) => {
 			if (anyColorIn && !parsed._uncertain.includes('color_inside')) parsed._uncertain.push('color_inside')
 		}
 
-		res.json({ success: true, data: parsed, model: MODEL })
+		res.json({ success: true, data: parsed, model: useModel })
 	} catch (err) {
 		console.error('AI parse-spec error:', err)
-		logAIUsage({ user: req.cookies && req.cookies.emp_id, model: MODEL, status: 'ERROR', error: err.message })
+		logAIUsage({ user: req.cookies && req.cookies.emp_id, model: pickModel(req.files), status: 'ERROR', error: err.message })
 		// Friendly Thai messages for common transient failures.
 		let friendly = err.message || 'unknown error'
 		const status = err && err.status
