@@ -807,17 +807,19 @@ router.post('/parse-spec', upload.array('files', 10), async (req, res) => {
 		const userContent = await buildContentFromUpload(text, files)
 		const useModel = pickModel(files) // มีรูป → Opus, ข้อความ → Sonnet
 
-		const msg = await createWithRetry(client, {
+		const payload = {
 			model: useModel,
 			max_tokens: 4000,
-			temperature,
 			// system as a structured array so we can attach cache_control —
 			// caches the (mostly stable) prompt across requests.
 			system: [
 				{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }
 			],
 			messages: [{ role: 'user', content: userContent }]
-		})
+		}
+		// temperature ใช้ไม่ได้กับ Opus 4.7+/Fable (deprecated → 400) — ใส่เฉพาะรุ่นที่รองรับ (Sonnet/Haiku/Opus4.6-)
+		if (!/opus-4-[789]|fable|mythos/i.test(useModel)) payload.temperature = temperature
+		const msg = await createWithRetry(client, payload)
 
 		// Log cache hit/miss + cost for visibility.
 		const u = msg.usage || {}
@@ -961,13 +963,14 @@ router.post('/explain-price', async (req, res) => {
 			return res.status(400).json({ success: false, error: 'ต้องส่ง summary (object) มาด้วย' })
 		}
 		const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, timeout: 60000, maxRetries: 3 })
-		const msg = await createWithRetry(client, {
+		const explainPayload = {
 			model: MODEL,
 			max_tokens: 1200,
-			temperature: 0,
 			system: [{ type: 'text', text: EXPLAIN_PRICE_PROMPT }],
 			messages: [{ role: 'user', content: 'ข้อมูลราคา (JSON):\n' + JSON.stringify(summary, null, 1) }]
-		})
+		}
+		if (!/opus-4-[789]|fable|mythos/i.test(MODEL)) explainPayload.temperature = 0 // Opus 4.7+/Fable ไม่รับ temperature
+		const msg = await createWithRetry(client, explainPayload)
 		const reply = msg.content.filter((c) => c.type === 'text').map((c) => c.text).join('\n')
 		let parsed
 		try {
