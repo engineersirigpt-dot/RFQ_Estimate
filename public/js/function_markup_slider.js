@@ -61,9 +61,12 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 			if (!$summary.length || !$(ROW_MAT).length) return false
 			addSliders(ROW_MAT)
 			addSliders(ROW_PROD)
-			// [Art] ให้พิมพ์ติดลบ/เกินช่วงในช่อง % ได้ (mask เดิมรับเฉพาะเลขบวก) — re-apply อนุญาต "-"
+			// [Art] ให้พิมพ์ในช่อง % ได้อิสระ (รวมติดลบ) — เอา inputmask เดิมออก (มันบล็อกพิมพ์ + รับเฉพาะเลขบวก)
+			//   handler เดิม (changeMarkingEvent) validate ค่าให้อยู่แล้วตอน change
 			if ($.fn.inputmask) {
-				try { $(ROW_MAT + ' input, ' + ROW_PROD + ' input').inputmask({ regex: '^-?[0-9]{0,3}(\\.\\d{1,2})?$', placeholder: '' }) } catch (e) {}
+				$(ROW_MAT + ' input, ' + ROW_PROD + ' input').each(function () {
+					try { $(this).inputmask('remove') } catch (e) {}
+				})
 			}
 			// [Art 19/06/26] default = 0 (ไม่ตั้งค่าเริ่มต้นให้ — ปล่อยตามฟอร์ม)
 			syncSliders(ROW_MAT); syncSliders(ROW_PROD)
