@@ -133,8 +133,6 @@ function renderMachineHourMetric(metric, target) {
 			<td style="text-align:right">${fmt(r.sheets, 0)}</td>
 			<td style="text-align:right">${fmt(r.hours, 3)} ชม.<br><span style="color:#9ca3af;font-size:11px">(${mins(r.hours)})</span></td>
 			<td style="text-align:right">${fmt(r.total, 2)}</td>
-			<td style="text-align:right;font-weight:bold;background:#fef3c7">${fmt(r.costPerHour, 2)}</td>
-			<td style="text-align:right;font-weight:bold;background:#dcfce7;color:${r.marginPerHour > 0 ? '#15803d' : '#6b7280'}">${fmt(r.marginPerHour, 2)}${hasTarget && r.marginPerHour != null ? (r.marginPerHour >= target ? ' <span title="ถึงเป้า">✅</span>' : ' <span title="ต่ำกว่าเป้า">⚠️</span>') : ''}</td>
 			<td style="text-align:right;font-weight:bold;background:#dbeafe">${fmt(r.printPerHour, 2)}</td>
 		</tr>`).join('')
 	const maxJobs = Math.max(0, ...metric.rows.map((r) => r.jobsPerShift || 0))
@@ -143,40 +141,26 @@ function renderMachineHourMetric(metric, target) {
 	const compDetail = single
 		? `<b>ชุดพิมพ์:</b> ${metric.components[0].units} สี &nbsp;•&nbsp; <b>สีงาน:</b> ${metric.components[0].outside}+${metric.components[0].inside} &nbsp;•&nbsp; <b>รอบพิมพ์:</b> ${passBadge(metric.components[0].passes)}`
 		: metric.components.map((c, idx) => `<b>Comp${idx + 1} (${c.machine}):</b> ${c.units} ชุด / ${c.outside}+${c.inside} สี / ${passBadge(c.passes)}`).join('&nbsp;&nbsp;•&nbsp;&nbsp;')
-	// go/no-go: เทียบกำไร/ชม. กับเป้าหมาย (สมมติ) → คุ้มกี่ยอด
-	let verdictHtml = ''
-	if (hasTarget) {
-		const mv = metric.rows.map((r) => r.marginPerHour).filter((x) => x != null)
-		const ok = mv.filter((x) => x >= target).length
-		const v = !mv.length ? '' : ok === mv.length
-			? `<span style="color:#15803d;font-weight:bold">✅ คุ้มเวลาเครื่องทุกยอด</span>`
-			: ok === 0
-				? `<span style="color:#dc2626;font-weight:bold">⚠️ กำไร/ชม. ต่ำกว่าเป้าทุกยอด — ควรขอเพิ่มราคา/เพิ่มยอด</span>`
-				: `<span style="color:#d97706;font-weight:bold">🟡 คุ้ม ${ok}/${mv.length} ยอด (ยอดน้อยยังไม่ถึงเป้า)</span>`
-		verdictHtml = `<div style="margin-bottom:6px;font-size:12px;background:#f0f9ff;border-left:3px solid #2563eb;padding:5px 10px;border-radius:4px">🎯 <b>เป้าหมายกำไร/ชม. (สมมติ):</b> ${fmt(target, 0)} บาท → ${v}</div>`
-	}
-	return `
+		// go/no-go (กำไร/ชม.) ย้ายไป 💎 box ของ per-process (คอขวดจริง) — ตาราง ⏱️ นี้โชว์เฉพาะเครื่องพิมพ์
+		return `
 		<div style="font-size:13px">
 			<div style="margin-bottom:4px">
 				<b>เครื่อง:</b> ${metric.machine} &nbsp;•&nbsp; <b>ความเร็ว:</b> ${single ? fmt(metric.components[0].speed, 0) + ' แผ่น/ชม. (setup ' + metric.components[0].setup + ' ชม.)' : 'หลายเครื่อง'}${metric.compCount > 1 ? ` &nbsp;•&nbsp; <span style="color:#2563eb;font-weight:bold">${metric.compCount} components (รวมเวลาทุกเครื่อง)</span>` : ''}
 			</div>
 			<div style="margin-bottom:6px;font-size:12px">${compDetail}</div>
-			${verdictHtml}
 			<table style="width:100%;border-collapse:collapse">
 				<thead><tr style="background:#e5e7eb">
 					<th style="padding:5px 8px;text-align:left">ยอดสั่ง</th>
 					<th style="padding:5px 8px;text-align:right">แผ่นที่พิมพ์</th>
 					<th style="padding:5px 8px;text-align:right">เวลาเดินเครื่อง</th>
 					<th style="padding:5px 8px;text-align:right">ราคารวม</th>
-					<th style="padding:5px 8px;text-align:right">ราคารวม/ชั่วโมง</th>
-					<th style="padding:5px 8px;text-align:right">กำไร/ชั่วโมง</th>
 					<th style="padding:5px 8px;text-align:right">ค่าพิมพ์(สี)/ชั่วโมง</th>
 				</tr></thead>
 				<tbody>${rows}</tbody>
 			</table>
 			<div style="margin-top:8px;font-size:11px;color:#6b7280">
-				💡 <b>ข้อสังเกต:</b> กำลังผลิต(เฉพาะเครื่องพิมพ์) ~${fmt(maxJobs, 0)} ครั้ง/กะ — ⚠️ <b>กำลังผลิตจริงจำกัดโดยคอขวด</b> (ดูตาราง process ด้านล่าง)<br>
-				* เทียบดูเฉยๆ ไม่บวกเข้าราคาขาย • <b>กำไร = ราคาขาย − ต้นทุน</b> (ขยับตาม markup, =0 ถ้าไม่บวกกำไร) • เวลา = setup(make_ready จริงต่อเครื่อง) + (แผ่นพิมพ์ × รอบพิมพ์ ÷ ความเร็ว)
+				💡 <b>ตาราง ⏱️ นี้ = เฉพาะเครื่องพิมพ์</b> • <b>ราคารวม</b> = ราคาทั้งงาน (อ้างอิง รวมทุก process) • <b>ค่าพิมพ์/ชม.</b> = ค่าพิมพ์ ÷ เวลาพิมพ์ (เครื่องพิมพ์แท้ๆ)<br>
+				⚠️ ราคา/กำไรต่อชั่วโมง "ที่ใช้ตัดสิน" → ดู <b>💎 ตาราง process ด้านล่าง (ต่อชั่วโมงคอขวดจริง)</b> • กำลังผลิตเครื่องพิมพ์ ~${fmt(maxJobs, 0)} ครั้ง/กะ
 			</div>
 		</div>`
 }
