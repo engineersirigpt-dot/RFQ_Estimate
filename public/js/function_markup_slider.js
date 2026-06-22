@@ -4,16 +4,14 @@
 //   (ไม่งั้นจะไปชน selector ".MarkingPercentMaterial input" ของ handler เดิม) แล้วเลื่อน →
 //   set ช่อง % เดิม + trigger 'change' → handler เดิม (changeMarkingEvent) คำนวณราคาใหม่เอง
 //   • เลื่อนช่องไหนของ Materials → set ทุกยอดให้เท่ากัน (markup ปกติเท่ากันทุกยอด) เช่นเดียวกับ Production
-//   • ตั้ง default Materials = 15% ครั้งแรกที่ตารางขึ้น (เฉพาะถ้ายังเป็น 0 — ไม่ทับงานเก่า)
+//   • scale -100 ถึง +100 (ติดลบ=ลดราคา) • default = 0 (ไม่ตั้งค่าเริ่มต้น) [Art]
 //   Materials = กำไรบนค่ากระดาษ/วัสดุ • Production = กำไรบนค่างานผลิต (เพลท/พิมพ์/process/แพ็ค)
 // ============================================================================
 if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 	jQuery(function ($) {
 		const PRICE_BTN = '#calc_price, #calc_price_after_change, #calc_price_after_packing'
-		const DEFAULT_MATERIAL = 15
 		const ROW_MAT = '.MarkingPercentMaterial'
 		const ROW_PROD = '.MarkingPercentProduction'
-		let defaultApplied = false
 
 		const pctInput = ($div) => $div.find('input').first() // ช่อง % เดิม (slider เราอยู่นอก div)
 		const curVal = (rowSel) => parseFloat(pctInput($(rowSel).first()).val() || 0) || 0
@@ -53,10 +51,7 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 			if ($.fn.inputmask) {
 				try { $(ROW_MAT + ' input, ' + ROW_PROD + ' input').inputmask({ regex: '^-?[0-9]{0,3}(\\.\\d{1,2})?$', placeholder: '' }) } catch (e) {}
 			}
-			if (!defaultApplied) {
-				defaultApplied = true
-				if (!(curVal(ROW_MAT) > 0)) setAllRow(ROW_MAT, DEFAULT_MATERIAL) // default 15% ครั้งเดียว
-			}
+			// [Art 19/06/26] default = 0 (ไม่ตั้งค่าเริ่มต้นให้ — ปล่อยตามฟอร์ม)
 			syncSliders(ROW_MAT); syncSliders(ROW_PROD)
 			return true
 		}
