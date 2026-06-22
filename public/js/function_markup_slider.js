@@ -18,15 +18,28 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 		// [Art 19/06/26] scale slider = -100 ถึง +100 (ติดลบ = mark down/ลดราคา) • พิมพ์ในช่องเกินช่วงได้
 		const clamp = (v) => Math.max(-100, Math.min(100, parseFloat(v) || 0))
 
-		// set ทุกยอดในแถวให้เท่ากัน + ให้ handler เดิมคำนวณ
-		function setAllRow(rowSel, val) {
-			const v = clamp(val)
-			$(rowSel).each(function () { pctInput($(this)).val(v).trigger('change') })
-			syncSliders(rowSel)
+		// โชว์เลข % ทุกยอด (ไม่ recalc) — สำหรับให้เลขขึ้นสดๆ ตอนลาก
+		function setRowDisplay(rowSel, v) {
+			$(rowSel).each(function () { pctInput($(this)).val(v) })
 		}
-		// อัปเดตตำแหน่ง slider ทุกตัวให้ตรงค่า % ปัจจุบัน (เผื่อผู้ใช้พิมพ์ในช่องเอง/คำนวณใหม่)
+		// สั่ง handler เดิม (changeMarkingEvent) คำนวณราคาใหม่ — trigger change ทุก cell
+		function recalcRow(rowSel) {
+			$(rowSel).each(function () { pctInput($(this)).trigger('change') })
+		}
+		// set + คำนวณ + sync slider (ตอนปล่อย/พิมพ์เสร็จ)
+		function setAllRow(rowSel, val) {
+			setRowDisplay(rowSel, clamp(val)); recalcRow(rowSel); syncSliders(rowSel)
+		}
+		// ลากแบบ realtime: เลขขึ้นสดทันที + recalc ราคาแบบ throttle (กัน lag จากการ trigger หลายยอด)
+		const pending = {}
+		function liveDrag(rowSel, val) {
+			setRowDisplay(rowSel, clamp(val)) // เลข % ขึ้นตาม slider ทันที
+			if (pending[rowSel]) return
+			pending[rowSel] = setTimeout(function () { pending[rowSel] = null; recalcRow(rowSel) }, 60) // ราคาอัปเดตทุก ~60ms
+		}
+		// อัปเดตตำแหน่ง slider ทุกตัวให้ตรงค่า % ปัจจุบัน
 		function syncSliders(rowSel) {
-			$(rowSel).each(function () { $(this).next('.mk_slider').val(parseFloat(pctInput($(this)).val() || 0) || 0) })
+			$(rowSel).each(function () { $(this).next('.mk_slider').val(clamp(pctInput($(this)).val())) })
 		}
 
 		// ใส่ slider ใต้ช่อง % แต่ละช่อง (นอก div เดิม)
@@ -34,11 +47,12 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 			$(rowSel).each(function () {
 				const $div = $(this)
 				if ($div.next('.mk_slider').length) return // ใส่แล้ว
-				const v = parseFloat(pctInput($div).val() || 0) || 0
+				const v = clamp(pctInput($div).val())
 				const $s = $('<input type="range" class="mk_slider" min="-100" max="100" step="1" title="เลื่อนปรับ markup -100 ถึง +100 (ติดลบ=ลดราคา) ทุกยอด">')
 					.val(v).css({ display: 'block', width: '90%', margin: '3px auto 0', 'accent-color': '#2563eb', cursor: 'pointer' })
 				$div.after($s)
-				$s.on('change', function () { setAllRow(rowSel, this.value) }) // คำนวณตอนปล่อย (กัน lag)
+				$s.on('input', function () { liveDrag(rowSel, this.value) })  // realtime ระหว่างลาก
+				$s.on('change', function () { setAllRow(rowSel, this.value) }) // ครั้งสุดท้ายตอนปล่อย
 			})
 		}
 
@@ -55,6 +69,11 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 			syncSliders(ROW_MAT); syncSliders(ROW_PROD)
 			return true
 		}
+
+		// พิมพ์ % ในช่องเอง → slider เลื่อนตามทันที (ผูกครั้งเดียว, delegated)
+		$('body').on('input keyup', ROW_MAT + ' input, ' + ROW_PROD + ' input', function () {
+			$(this).closest(ROW_MAT + ', ' + ROW_PROD).next('.mk_slider').val(clamp($(this).val()))
+		})
 
 		function tryInject(n) { if (inject()) return; if (n > 0) setTimeout(() => tryInject(n - 1), 400) }
 		$('body').on('click', PRICE_BTN, function () { setTimeout(() => tryInject(10), 500) })
