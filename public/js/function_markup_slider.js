@@ -17,7 +17,8 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 
 		const pctInput = ($div) => $div.find('input').first() // ช่อง % เดิม (slider เราอยู่นอก div)
 		const curVal = (rowSel) => parseFloat(pctInput($(rowSel).first()).val() || 0) || 0
-		const clamp = (v) => Math.max(0, Math.min(50, parseFloat(v) || 0))
+		// [Art 19/06/26] scale slider = -100 ถึง +100 (ติดลบ = mark down/ลดราคา) • พิมพ์ในช่องเกินช่วงได้
+		const clamp = (v) => Math.max(-100, Math.min(100, parseFloat(v) || 0))
 
 		// set ทุกยอดในแถวให้เท่ากัน + ให้ handler เดิมคำนวณ
 		function setAllRow(rowSel, val) {
@@ -36,7 +37,7 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 				const $div = $(this)
 				if ($div.next('.mk_slider').length) return // ใส่แล้ว
 				const v = parseFloat(pctInput($div).val() || 0) || 0
-				const $s = $('<input type="range" class="mk_slider" min="0" max="50" step="1" title="เลื่อนปรับ markup (ทุกยอด)">')
+				const $s = $('<input type="range" class="mk_slider" min="-100" max="100" step="1" title="เลื่อนปรับ markup -100 ถึง +100 (ติดลบ=ลดราคา) ทุกยอด">')
 					.val(v).css({ display: 'block', width: '90%', margin: '3px auto 0', 'accent-color': '#2563eb', cursor: 'pointer' })
 				$div.after($s)
 				$s.on('change', function () { setAllRow(rowSel, this.value) }) // คำนวณตอนปล่อย (กัน lag)
@@ -48,6 +49,10 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 			if (!$summary.length || !$(ROW_MAT).length) return false
 			addSliders(ROW_MAT)
 			addSliders(ROW_PROD)
+			// [Art] ให้พิมพ์ติดลบ/เกินช่วงในช่อง % ได้ (mask เดิมรับเฉพาะเลขบวก) — re-apply อนุญาต "-"
+			if ($.fn.inputmask) {
+				try { $(ROW_MAT + ' input, ' + ROW_PROD + ' input').inputmask({ regex: '^-?[0-9]{0,3}(\\.\\d{1,2})?$', placeholder: '' }) } catch (e) {}
+			}
 			if (!defaultApplied) {
 				defaultApplied = true
 				if (!(curVal(ROW_MAT) > 0)) setAllRow(ROW_MAT, DEFAULT_MATERIAL) // default 15% ครั้งเดียว
