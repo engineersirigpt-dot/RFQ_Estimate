@@ -364,6 +364,52 @@ function renderMachineComparison(cmp) {
 }
 
 // ============================================================================
+// ตารางต่อชั่วโมง "คอลัมน์ละ quantity" (สลับ view กับตารางราคาเขียว)
+//   แต่ละ quantity (1000/2000/.../5000) = 1 คอลัมน์ โชว์ตัวเลขต่อชั่วโมงของยอดนั้น
+//   เน้น "กำไร/ชม.คอขวด" (= ตัวเลขที่ใช้ตัดสินจริง)
+// ============================================================================
+function computeHourlyByQty(mainData, procCfg) {
+	const qtyArr = (mainData && mainData.qty && mainData.qty.totalqty) || []
+	return qtyArr.map((qty, i) => {
+		const pb = computeProcessBreakdown(mainData, i, procCfg)
+		return { qty, bottleneck: pb.bottleneck, total: pb.total, margin: pb.margin, procs: pb.procs,
+			revenuePerBnHour: pb.revenuePerBnHour, profitPerBnHour: pb.profitPerBnHour, capacity: pb.capacity }
+	})
+}
+
+function renderHourlyByQty(perQty, target) {
+	if (!perQty || !perQty.length) return '<div style="padding:10px">ยังไม่มีข้อมูล (กดคำนวณ price ก่อน)</div>'
+	const fmt = (n, d) => (n == null || isNaN(n) ? '-' : Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }))
+	const mins = (h) => (h == null ? '-' : fmt(h * 60, 1) + ' น.')
+	const hasTarget = target != null && target > 0
+	const th = perQty.map((p) => `<th style="padding:6px 10px;text-align:right">${fmt(p.qty, 0)}</th>`).join('')
+	const row = (label, cellFn, style) => `<tr style="${style || ''}"><td style="padding:5px 10px;text-align:left">${label}</td>${perQty.map((p) => `<td style="padding:5px 10px;text-align:right">${cellFn(p)}</td>`).join('')}</tr>`
+	const profitCell = (p) => {
+		if (p.profitPerBnHour == null) return '-'
+		const badge = hasTarget ? (p.profitPerBnHour >= target ? ' <span title="ถึงเป้า">✅</span>' : ' <span title="ต่ำกว่าเป้า">⚠️</span>') : ''
+		return `<b style="color:${p.profitPerBnHour > 0 ? '#15803d' : '#6b7280'}">${fmt(p.profitPerBnHour, 0)}</b>${badge}`
+	}
+	return `
+		<div style="overflow-x:auto;font-family:inherit">
+			<div style="font-weight:bold;font-size:15px;color:#6d28d9;margin:6px 0 8px">⏱️ ต่อชั่วโมง (คอขวด) — แยกตามยอดสั่ง${hasTarget ? ` • เป้ากำไร/ชม. ${fmt(target, 0)} (สมมติ)` : ''}</div>
+			<table style="width:100%;border-collapse:collapse;font-size:13px;min-width:600px">
+				<thead><tr style="background:#ede9fe"><th style="padding:6px 10px;text-align:left">ยอดสั่ง →</th>${th}</tr></thead>
+				<tbody>
+					${row('ราคารวม (บาท)', (p) => fmt(p.total, 2))}
+					${row('🔴 คอขวด', (p) => p.bottleneck ? p.bottleneck.label : '-')}
+					${row('เวลาคอขวด', (p) => p.bottleneck ? mins(p.bottleneck.hours) : '-')}
+					${row('กำลังผลิต/กะ (8ชม.)', (p) => p.capacity != null ? fmt(p.capacity, 0) + ' ครั้ง' : '-')}
+					${row('ราคา/ชม.คอขวด', (p) => fmt(p.revenuePerBnHour, 0))}
+					${row('💎 <b>กำไร/ชม.คอขวด</b>', profitCell, 'background:#ecfdf5')}
+				</tbody>
+			</table>
+			<div style="margin-top:6px;font-size:11px;color:#6b7280">
+				* แต่ละคอลัมน์ = ยอดสั่งนั้นๆ • <b>กำไร/ชม.คอขวด</b> = (ราคาขาย−ต้นทุน) ÷ เวลาเครื่องที่ตันสุด = ตัวเลขที่ใช้ตัดสินจริง (กำไร=0 ถ้ายังไม่บวก markup) • เทียบดูเฉยๆ ไม่บวกเข้าราคา
+			</div>
+		</div>`
+}
+
+// ============================================================================
 // แทรกตารางลง "หน้า price จริง" ต่อท้ายตาราง summary (#summary)
 // ไม่แตะโค้ดเพื่อน — แค่ append ผ่าน DOM หลังกดคำนวณ price
 // ============================================================================
@@ -484,6 +530,27 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 					chip: fastestOf(catsFor('chip')),
 					flute: fastestOf(catsFor('flute')),
 				}, override.processSpeeds || {})
+
+				// ── ปุ่มสลับ view: ราคา (ตารางเขียว) ↔ ต่อชั่วโมง (คอลัมน์ละ quantity) ──
+				$('#mh_view_toggle, #hourly_by_qty').remove()
+				const hourly = computeHourlyByQty(est.mainData, procCfg)
+				const tabCss = 'cursor:pointer;border:1px solid #c4b5fd;padding:5px 14px;border-radius:6px;font-weight:bold;font-size:13px'
+				$summary.before(`
+					<div id="mh_view_toggle" style="max-width:900px;margin:8px auto 0;display:flex;gap:6px;align-items:center;font-family:inherit">
+						<span style="font-size:12px;color:#6b7280">มุมมอง:</span>
+						<span class="mh_tab" data-v="price" style="${tabCss};background:#2563eb;color:#fff">💰 ราคา</span>
+						<span class="mh_tab" data-v="hours" style="${tabCss};background:#fff;color:#6d28d9">⏱️ ต่อชั่วโมง</span>
+					</div>
+					<div id="hourly_by_qty" style="display:none;max-width:1100px;margin:10px auto;border:1px solid #c4b5fd;background:#faf5ff;border-radius:8px;padding:12px 14px">${renderHourlyByQty(hourly, CFG.target)}</div>
+				`)
+				$('body').off('click.mhview').on('click.mhview', '.mh_tab', function () {
+					const v = $(this).attr('data-v')
+					$('.mh_tab').css({ background: '#fff', color: '#6d28d9' })
+					$(this).css({ background: '#2563eb', color: '#fff' })
+					if (v === 'hours') { $('#summary').hide(); $('#hourly_by_qty').show() }
+					else { $('#summary').show(); $('#hourly_by_qty').hide() }
+				})
+
 			$summary.after(`
 				<div id="machine_hour_metric" style="max-width:900px;margin:14px auto;border:1px solid #fcd34d;background:#fffbeb;border-radius:8px;padding:12px 14px;font-family:inherit">
 					<div style="font-weight:bold;font-size:15px;color:#b45309;margin-bottom:8px">⏱️ ราคาต่อชั่วโมงเครื่อง ${note}</div>
@@ -508,5 +575,5 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 
 // export สำหรับเทส (Node) — ในเบราว์เซอร์เรียกใช้ฟังก์ชันตรงๆ
 if (typeof module !== 'undefined' && module.exports) {
-	module.exports = { computeMachineHourMetric, renderMachineHourMetric, computeProcessBreakdown, renderProcessBreakdown, computeMachineComparison, renderMachineComparison }
+	module.exports = { computeMachineHourMetric, renderMachineHourMetric, computeProcessBreakdown, renderProcessBreakdown, computeMachineComparison, renderMachineComparison, computeHourlyByQty, renderHourlyByQty }
 }

@@ -1,6 +1,6 @@
 // Demo เมตริกชั่วโมงเครื่อง — เลขจริงงาน Pillow + ทดสอบ margin/makeready/capacity/passes
 // node bench/test_machine_hour.js [speed]
-const { computeMachineHourMetric, computeProcessBreakdown, computeMachineComparison } = require('../public/js/function_machine_hour_metric')
+const { computeMachineHourMetric, computeProcessBreakdown, computeMachineComparison, computeHourlyByQty } = require('../public/js/function_machine_hour_metric')
 
 const sheetsPerTier = [360, 369, 378, 387, 396]
 const wastePerTier = [350, 350, 350, 350, 350]
@@ -161,3 +161,17 @@ console.log('  เคลือบ OPP เฉพาะ OPP: ' + (okCoat ? '✓' :
 const okCmp = okDiecut && okAsm && okStrip && okCoat
 console.log('  ' + (okCmp ? '✅ PASS — fix ครบ (ไดคัทเร็วสุด/แยก strip-glue/เคลือบตามชนิด)' : '❌ FAIL'))
 if (!okCmp) process.exitCode = 1
+
+// ── ทดสอบ computeHourlyByQty: 1 คอลัมน์ต่อ 1 ยอดสั่ง, แต่ละช่อง = ต่อชั่วโมงคอขวดของยอดนั้น
+console.log('\n===== computeHourlyByQty (คอลัมน์ละ quantity) =====')
+const hq = computeHourlyByQty(makeData(3, 6, 20), procSpeeds)
+const okHQ =
+	hq.length === 5 &&                                            // 5 ยอด = 5 คอลัมน์
+	hq.every((p, i) => p.qty === [1000, 2000, 3000, 4000, 5000][i]) && // ยอดเรียงตรง
+	hq.every((p) => p.profitPerBnHour != null && p.profitPerBnHour > 0) && // markup 20% → มีกำไร/ชม.
+	hq.every((p) => p.bottleneck && p.capacity != null)          // มีคอขวด + กำลังผลิต/กะ
+hq.forEach((p) => console.log(
+	'  ยอด ' + fmt(p.qty, 0).padStart(5) + ' → คอขวด ' + (p.bottleneck ? p.bottleneck.label : '-').padEnd(14) +
+	' กำไร/ชม.คอขวด ' + fmt(p.profitPerBnHour, 0).padStart(9) + ' • กำลังผลิต/กะ ' + fmt(p.capacity, 0)))
+console.log('  ' + (okHQ ? '✅ PASS — แต่ละยอดให้คอขวด+กำไร/ชม.คอขวดของยอดนั้นๆ' : '❌ FAIL'))
+if (!okHQ) process.exitCode = 1
