@@ -402,9 +402,10 @@ const VALID_PRINT_TYPES = ['Offset', 'Flexo', 'Jet Press', 'Konica', 'Digital']
 const OPTION_PREFIXES   = ['Gloss ', 'Matt ', 'Other ']
 // Alias map: regex matches product-name part → canonical name (sides suffix preserved)
 const COATING_ALIASES   = [
-	[/^Hi[\s-]+Rub\b/i,               'Waterbase'],
-	[/^WB\s+Hi[\s-]+Rub\b/i,          'Waterbase'],
-	[/^Waterbase\s+Hi[\s-]+Rub\b/i,   'Waterbase'],
+	// Hi-Rub = ตัวเลือก dropdown แยกของมันเอง ('Waterbase Hi-Rub') — ห้ามยุบเป็น Waterbase เฉยๆ (Hi-Rub หาย)
+	[/^WB\s+Hi[\s-]+Rub\b/i,          'Waterbase Hi-Rub'],
+	[/^Waterbase\s+Hi[\s-]+Rub\b/i,   'Waterbase Hi-Rub'],
+	[/^Hi[\s-]+Rub\b/i,               'Waterbase Hi-Rub'],
 	[/^WB\s+Coating\b/i,              'Waterbase'],
 	[/^WB\b/i,                        'Waterbase'],
 	[/^Hi[\s-]+Gloss\s+Waterbase\b/i, 'Hi-gloss waterbase'],
