@@ -575,7 +575,9 @@ $(function () {
 				}).length > 0
 				if (hasOpt) {
 					$box.val(tid).trigger('change')
-					if (c.dimensions_mm) fillDimensionsAfterTemplate(i, c.dimensions_mm, c.flap_mm, openSize, extraSpec, c.box_template_id)
+					// Custom (12) กรอกขนาดจาก open_size (แผ่นแบนไม่มี dimensions_mm) — เรียกถ้ามี dim หรือ (Custom + openSize)
+					const isCustom12 = String(c.box_template_id) === '12'
+					if (c.dimensions_mm || (isCustom12 && openSize)) fillDimensionsAfterTemplate(i, c.dimensions_mm || {}, c.flap_mm, openSize, extraSpec, c.box_template_id)
 					if (c.glued_spots != null) fillGluedSpots(i, parseInt(c.glued_spots, 10))
 				}
 			}, 500)
