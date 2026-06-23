@@ -382,28 +382,31 @@ function renderHourlyByQty(perQty, target) {
 	const fmt = (n, d) => (n == null || isNaN(n) ? '-' : Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }))
 	const mins = (h) => (h == null ? '-' : fmt(h * 60, 1) + ' น.')
 	const hasTarget = target != null && target > 0
-	const th = perQty.map((p) => `<th style="padding:6px 10px;text-align:right">${fmt(p.qty, 0)}</th>`).join('')
-	const row = (label, cellFn, style) => `<tr style="${style || ''}"><td style="padding:5px 10px;text-align:left">${label}</td>${perQty.map((p) => `<td style="padding:5px 10px;text-align:right">${cellFn(p)}</td>`).join('')}</tr>`
+	// ใช้ template เดียวกับตารางราคา (เขียว): <table border cellpadding="5"> + แถวสรุปใช้ class .totalRow (เขียว bold)
+	const th = perQty.map((p) => `<th class="alCenter">${fmt(p.qty, 0)}</th>`).join('')
+	const row = (label, cellFn, cls) => `<tr${cls ? ` class="${cls}"` : ''}><td class="alLeft">${label}</td>${perQty.map((p) => `<td class="alRight">${cellFn(p)}</td>`).join('')}</tr>`
 	const profitCell = (p) => {
 		if (p.profitPerBnHour == null) return '-'
 		const badge = hasTarget ? (p.profitPerBnHour >= target ? ' <span title="ถึงเป้า">✅</span>' : ' <span title="ต่ำกว่าเป้า">⚠️</span>') : ''
-		return `<b style="color:${p.profitPerBnHour > 0 ? '#15803d' : '#6b7280'}">${fmt(p.profitPerBnHour, 0)}</b>${badge}`
+		return `${fmt(p.profitPerBnHour, 0)}${badge}`
 	}
 	return `
 		<div style="overflow-x:auto;font-family:inherit">
-			<div style="font-weight:bold;font-size:15px;color:#6d28d9;margin:6px 0 8px">⏱️ ต่อชั่วโมง (คอขวด) — แยกตามยอดสั่ง${hasTarget ? ` • เป้ากำไร/ชม. ${fmt(target, 0)} (สมมติ)` : ''}</div>
-			<table style="width:100%;border-collapse:collapse;font-size:13px;min-width:600px">
-				<thead><tr style="background:#ede9fe"><th style="padding:6px 10px;text-align:left">ยอดสั่ง →</th>${th}</tr></thead>
+			<div style="font-weight:bold;font-size:15px;color:#15803d;margin:6px 0 10px;text-align:center">⏱️ ต่อชั่วโมง (คอขวด) — แยกตามยอดสั่ง${hasTarget ? ` • เป้ากำไร/ชม. ${fmt(target, 0)} (สมมติ)` : ''}</div>
+			<table border cellpadding="5" align="center" style="border-collapse:collapse;margin:0 auto;font-size:14px">
+				<thead>
+					<tr class="totalRow"><th class="alLeft">รายการ (ต่อชั่วโมง · คอขวด)</th>${th}</tr>
+				</thead>
 				<tbody>
 					${row('ราคารวม (บาท)', (p) => fmt(p.total, 2))}
 					${row('🔴 คอขวด', (p) => p.bottleneck ? p.bottleneck.label : '-')}
 					${row('เวลาคอขวด', (p) => p.bottleneck ? mins(p.bottleneck.hours) : '-')}
 					${row('กำลังผลิต/กะ (8ชม.)', (p) => p.capacity != null ? fmt(p.capacity, 0) + ' ครั้ง' : '-')}
 					${row('ราคา/ชม.คอขวด', (p) => fmt(p.revenuePerBnHour, 0))}
-					${row('💎 <b>กำไร/ชม.คอขวด</b>', profitCell, 'background:#ecfdf5')}
+					${row('💎 กำไร/ชม.คอขวด', profitCell, 'totalRow')}
 				</tbody>
 			</table>
-			<div style="margin-top:6px;font-size:11px;color:#6b7280">
+			<div style="margin:10px auto 0;max-width:900px;font-size:11px;color:#6b7280;text-align:center">
 				* แต่ละคอลัมน์ = ยอดสั่งนั้นๆ • <b>กำไร/ชม.คอขวด</b> = (ราคาขาย−ต้นทุน) ÷ เวลาเครื่องที่ตันสุด = ตัวเลขที่ใช้ตัดสินจริง (กำไร=0 ถ้ายังไม่บวก markup) • เทียบดูเฉยๆ ไม่บวกเข้าราคา
 			</div>
 		</div>`
@@ -541,7 +544,7 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 						<span class="mh_tab" data-v="price" style="${tabCss};background:#2563eb;color:#fff">💰 ราคา</span>
 						<span class="mh_tab" data-v="hours" style="${tabCss};background:#fff;color:#6d28d9">⏱️ ต่อชั่วโมง</span>
 					</div>
-					<div id="hourly_by_qty" style="display:none;max-width:1100px;margin:10px auto;border:1px solid #c4b5fd;background:#faf5ff;border-radius:8px;padding:12px 14px">${renderHourlyByQty(hourly, CFG.target)}</div>
+					<div id="hourly_by_qty" style="display:none;margin:10px auto;padding:6px 4px">${renderHourlyByQty(hourly, CFG.target)}</div>
 				`)
 				$('body').off('click.mhview').on('click.mhview', '.mh_tab', function () {
 					const v = $(this).attr('data-v')
