@@ -522,7 +522,7 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 			const CFG = {
 				defaultSpeed: Number(override.speed) > 0 ? Number(override.speed) : 10000,
 				setupHours: SETUP,
-				target: Number(override.target) > 0 ? Number(override.target) : 10000, // MOCKUP รอพี่ให้เป้ากำไร/ชม.
+				target: Number(override.target) > 0 ? Number(override.target) : null, // ไม่มีเป้าปลอม — เฮียกรอกเองในช่อง (รอเลขจริง)
 				machineByName: Object.assign({}, machineByName, override.machineByName || {}),
 				machineById: Object.assign({}, machineById, override.machineById || {}),
 				ratePerHour: Number(override.ratePerHour) > 0 ? Number(override.ratePerHour) : 500, // ⚠️ MOCKUP ค่าเครื่อง/ชม. เท่ากันทุกเครื่อง
@@ -559,20 +559,39 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 				$('#mh_view_toggle, #hourly_by_qty').remove()
 				const hourly = computeHourlyByQty(est.mainData, procCfg)
 				const tabCss = 'cursor:pointer;border:1px solid #c4b5fd;padding:5px 14px;border-radius:6px;font-weight:bold;font-size:13px'
+				const targetVal = CFG.target != null ? CFG.target : '' // เป้าปัจจุบัน (ว่าง = ยังไม่ตั้ง)
 				$summary.before(`
-					<div id="mh_view_toggle" style="max-width:900px;margin:8px auto 0;display:flex;gap:6px;align-items:center;font-family:inherit">
+					<div id="mh_view_toggle" style="max-width:900px;margin:8px auto 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-family:inherit">
 						<span style="font-size:12px;color:#6b7280">มุมมอง:</span>
 						<span class="mh_tab" data-v="price" style="${tabCss};background:#2563eb;color:#fff">💰 ราคา</span>
 						<span class="mh_tab" data-v="hours" style="${tabCss};background:#fff;color:#6d28d9">⏱️ ต่อชั่วโมง</span>
+						<span id="mh_target_box" style="display:none;align-items:center;gap:5px;font-size:12px;color:#6b7280;margin-left:auto">
+							🎯 เป้ากำไร/ชม.:
+							<input id="mh_target_input" type="number" min="0" step="500" placeholder="ใส่เลขเป้า" value="${targetVal}"
+								style="width:90px;padding:3px 6px;border:1px solid #c4b5fd;border-radius:5px;text-align:right;font-size:12px">
+							<span style="color:#9ca3af">บาท (ว่าง = ไม่เทียบเป้า)</span>
+						</span>
 					</div>
-					<div id="hourly_by_qty" style="display:none;margin:10px auto;padding:6px 4px">${renderHourlyByQty(hourly, CFG.target)}</div>
+					<div id="hourly_by_qty" style="display:none;margin:10px auto;padding:6px 4px"></div>
 				`)
+				// state เป้าเก็บนอก scope ฟังก์ชัน เพื่อให้กรอกแล้วจำได้ข้ามการกดคำนวณ
+				if (typeof window !== 'undefined' && window.MH_TARGET == null && CFG.target != null) window.MH_TARGET = CFG.target
+				const curTarget = () => (typeof window !== 'undefined' && Number(window.MH_TARGET) > 0 ? Number(window.MH_TARGET) : null)
+				const drawHourly = () => { $('#hourly_by_qty').html(renderHourlyByQty(hourly, curTarget())) }
+				drawHourly()
+				$('#mh_target_input').val(curTarget() != null ? curTarget() : '')
 				$('body').off('click.mhview').on('click.mhview', '.mh_tab', function () {
 					const v = $(this).attr('data-v')
 					$('.mh_tab').css({ background: '#fff', color: '#6d28d9' })
 					$(this).css({ background: '#2563eb', color: '#fff' })
-					if (v === 'hours') { $('#summary').hide(); $('#hourly_by_qty').show() }
-					else { $('#summary').show(); $('#hourly_by_qty').hide() }
+					if (v === 'hours') { $('#summary').hide(); $('#hourly_by_qty').show(); $('#mh_target_box').css('display', 'flex') }
+					else { $('#summary').show(); $('#hourly_by_qty').hide(); $('#mh_target_box').hide() }
+				})
+				// กรอกเป้า → จำค่า + วาดตารางใหม่ (badge ✅/⚠️ ขึ้นตาม)
+				$('body').off('input.mhtarget').on('input.mhtarget', '#mh_target_input', function () {
+					const v = parseFloat(this.value)
+					if (typeof window !== 'undefined') window.MH_TARGET = v > 0 ? v : null
+					drawHourly()
 				})
 
 			$summary.after(`
