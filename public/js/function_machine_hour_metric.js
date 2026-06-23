@@ -384,30 +384,47 @@ function renderHourlyByQty(perQty, target) {
 	const hasTarget = target != null && target > 0
 	// ใช้ template เดียวกับตารางราคา (เขียว): <table border cellpadding="5"> + แถวสรุปใช้ class .totalRow (เขียว bold)
 	const th = perQty.map((p) => `<th class="alCenter">${fmt(p.qty, 0)}</th>`).join('')
-	const row = (label, cellFn, cls) => `<tr${cls ? ` class="${cls}"` : ''}><td class="alLeft">${label}</td>${perQty.map((p) => `<td class="alRight">${cellFn(p)}</td>`).join('')}</tr>`
+	const row = (label, cellFn, cls) => `<tr${cls ? ` class="${cls}"` : ''}><td class="alLeft">${label}</td>${perQty.map((p, i) => `<td class="alRight">${cellFn(p, i)}</td>`).join('')}</tr>`
 	const profitCell = (p) => {
 		if (p.profitPerBnHour == null) return '-'
 		const badge = hasTarget ? (p.profitPerBnHour >= target ? ' <span title="ถึงเป้า">✅</span>' : ' <span title="ต่ำกว่าเป้า">⚠️</span>') : ''
 		return `${fmt(p.profitPerBnHour, 0)}${badge}`
 	}
+	// รวมรายชื่อ process ทั้งหมด (เรียงตามยอดที่มี process มากสุด) — แต่ละแถว = 1 process
+	let procLabels = []
+	perQty.forEach((p) => { (p.procs || []).forEach((pr) => { if (!procLabels.includes(pr.label)) procLabels.push(pr.label) }) })
+	const procOf = (p, label) => (p.procs || []).find((pr) => pr.label === label)
+	// แถวเวลาแต่ละ process: ช่องที่เป็นคอขวดของยอดนั้น = แดงตัวหนา
+	const procRows = procLabels.map((label) => {
+		const cells = perQty.map((p) => {
+			const pr = procOf(p, label)
+			if (!pr) return `<td class="alRight">-</td>`
+			const isBn = p.bottleneck && p.bottleneck.label === label
+			return `<td class="alRight"${isBn ? ' style="background:#fee2e2;color:#b91c1c;font-weight:bold"' : ''}>${mins(pr.hours)}${isBn ? ' 🔴' : ''}</td>`
+		}).join('')
+		return `<tr><td class="alLeft">${label}</td>${cells}</tr>`
+	}).join('')
 	return `
 		<div style="overflow-x:auto;font-family:inherit">
-			<div style="font-weight:bold;font-size:15px;color:#15803d;margin:6px 0 10px;text-align:center">⏱️ ต่อชั่วโมง (คอขวด) — แยกตามยอดสั่ง${hasTarget ? ` • เป้ากำไร/ชม. ${fmt(target, 0)} (สมมติ)` : ''}</div>
+			<div style="font-weight:bold;font-size:15px;color:#15803d;margin:6px 0 10px;text-align:center">⏱️ ต่อชั่วโมง — แยกตาม process + คอขวด ตามยอดสั่ง${hasTarget ? ` • เป้ากำไร/ชม. ${fmt(target, 0)} (สมมติ)` : ''}</div>
 			<table border cellpadding="5" align="center" style="border-collapse:collapse;margin:0 auto;font-size:14px">
 				<thead>
-					<tr class="totalRow"><th class="alLeft">รายการ (ต่อชั่วโมง · คอขวด)</th>${th}</tr>
+					<tr class="totalRow"><th class="alLeft">รายการ (ยอดสั่ง →)</th>${th}</tr>
 				</thead>
 				<tbody>
+					<tr class="weightRow"><td class="alLeft" colspan="${perQty.length + 1}">⏱️ เวลาเดินเครื่องแต่ละ process (🔴 = คอขวดของยอดนั้น)</td></tr>
+					${procRows}
+					<tr class="weightRow"><td class="alLeft" colspan="${perQty.length + 1}">💰 สรุปต่อยอดสั่ง</td></tr>
 					${row('ราคารวม (บาท)', (p) => fmt(p.total, 2))}
 					${row('🔴 คอขวด', (p) => p.bottleneck ? p.bottleneck.label : '-')}
-					${row('เวลาคอขวด', (p) => p.bottleneck ? mins(p.bottleneck.hours) : '-')}
+					${row('เวลาคอขวด (รวม)', (p) => p.bottleneck ? mins(p.bottleneck.hours) : '-')}
 					${row('กำลังผลิต/กะ (8ชม.)', (p) => p.capacity != null ? fmt(p.capacity, 0) + ' ครั้ง' : '-')}
 					${row('ราคา/ชม.คอขวด', (p) => fmt(p.revenuePerBnHour, 0))}
 					${row('💎 กำไร/ชม.คอขวด', profitCell, 'totalRow')}
 				</tbody>
 			</table>
 			<div style="margin:10px auto 0;max-width:900px;font-size:11px;color:#6b7280;text-align:center">
-				* แต่ละคอลัมน์ = ยอดสั่งนั้นๆ • <b>กำไร/ชม.คอขวด</b> = (ราคาขาย−ต้นทุน) ÷ เวลาเครื่องที่ตันสุด = ตัวเลขที่ใช้ตัดสินจริง (กำไร=0 ถ้ายังไม่บวก markup) • เทียบดูเฉยๆ ไม่บวกเข้าราคา
+				* แต่ละคอลัมน์ = ยอดสั่งนั้นๆ • 🔴 = process ที่ใช้เวลานานสุด (คอขวด) ของยอดนั้น • <b>กำไร/ชม.คอขวด</b> = (ราคาขาย−ต้นทุน) ÷ เวลาคอขวด = ตัวเลขที่ใช้ตัดสินจริง (กำไร=0 ถ้ายังไม่บวก markup) • เทียบดูเฉยๆ ไม่บวกเข้าราคา
 			</div>
 		</div>`
 }
