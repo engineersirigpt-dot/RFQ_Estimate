@@ -394,31 +394,36 @@ function renderHourlyByQty(perQty, target) {
 	let procLabels = []
 	perQty.forEach((p) => { (p.procs || []).forEach((pr) => { if (!procLabels.includes(pr.label)) procLabels.push(pr.label) }) })
 	const procOf = (p, label) => (p.procs || []).find((pr) => pr.label === label)
-	// กำไร/ชั่วโมง ของแต่ละ process = กำไรทั้งงาน ÷ เวลาที่ process นั้นใช้
-	//   ตัวต่ำสุด = คอขวด = อัตราจริงที่ได้ (process อื่นวิ่งเร็วกว่าแต่ติดคอขวด) → ไฮไลต์แดง
-	const procRows = procLabels.map((label) => {
+	// สร้างชุดแถว process ตาม "ค่าที่อยากโชว์" (valueFn) — ช่องคอขวดของยอดนั้น = ไฮไลต์แดง + เวลากำกับ
+	const procSection = (valueFn) => procLabels.map((label) => {
 		const cells = perQty.map((p) => {
 			const pr = procOf(p, label)
 			if (!pr) return `<td class="alRight">-</td>`
 			const isBn = p.bottleneck && p.bottleneck.label === label
-			const ph = p.margin != null && pr.hours > 0 ? p.margin / pr.hours : null
-			const phTxt = ph == null ? '-' : fmt(ph, 0)
+			const v = valueFn(p, pr)
 			const tip = `<span style="font-size:10px;color:#9ca3af">(${mins(pr.hours)})</span>`
-			return `<td class="alRight"${isBn ? ' style="background:#fee2e2;color:#b91c1c;font-weight:bold"' : ''}>${phTxt}${isBn ? ' 🔴' : ''}<br>${tip}</td>`
+			return `<td class="alRight"${isBn ? ' style="background:#fee2e2;color:#b91c1c;font-weight:bold"' : ''}>${v == null ? '-' : fmt(v, 0)}${isBn ? ' 🔴' : ''}<br>${tip}</td>`
 		}).join('')
 		return `<tr><td class="alLeft">${label}</td>${cells}</tr>`
 	}).join('')
+	// (1) ค่าใช้จ่าย/ชม. = ค่างานของ process นั้น ÷ เวลา (มีเลขจริงเสมอ ไม่ต้องรอ markup)
+	const costRows = procSection((p, pr) => (pr.hours > 0 ? pr.cost / pr.hours : null))
+	// (2) กำไร/ชม. = กำไรทั้งงาน ÷ เวลาที่ process นั้นใช้ (0 จนกว่าตั้ง markup)
+	const profitRows = procSection((p, pr) => (p.margin != null && pr.hours > 0 ? p.margin / pr.hours : null))
+	const span = perQty.length + 1
 	return `
 		<div style="overflow-x:auto;font-family:inherit">
-			<div style="font-weight:bold;font-size:15px;color:#15803d;margin:6px 0 10px;text-align:center">⏱️ กำไร/ชั่วโมง — แยกตาม process ตามยอดสั่ง${hasTarget ? ` • เป้ากำไร/ชม. ${fmt(target, 0)} (สมมติ)` : ''}</div>
+			<div style="font-weight:bold;font-size:15px;color:#15803d;margin:6px 0 10px;text-align:center">⏱️ ต่อชั่วโมง — แยกตาม process ตามยอดสั่ง${hasTarget ? ` • เป้ากำไร/ชม. ${fmt(target, 0)}` : ''}</div>
 			<table border cellpadding="5" align="center" style="border-collapse:collapse;margin:0 auto;font-size:14px">
 				<thead>
 					<tr class="totalRow"><th class="alLeft">รายการ (ยอดสั่ง →)</th>${th}</tr>
 				</thead>
 				<tbody>
-					<tr class="weightRow"><td class="alLeft" colspan="${perQty.length + 1}">💵 กำไร/ชั่วโมง ของแต่ละ process — บาท/ชม. <span style="font-weight:normal;font-size:11px">(ตัวเลขเล็ก = เวลาเดินเครื่อง • 🔴 = คอขวด = อัตราจริง)</span></td></tr>
-					${procRows}
-					<tr class="weightRow"><td class="alLeft" colspan="${perQty.length + 1}">💰 สรุปต่อยอดสั่ง</td></tr>
+					<tr class="weightRow"><td class="alLeft" colspan="${span}">💵 <b>ค่าใช้จ่าย/ชม.</b> ของแต่ละ process — ค่างาน ÷ เวลา (บาท/ชม.) <span style="font-weight:normal;font-size:11px">(ตัวเลขเล็ก = เวลาเดินเครื่อง • 🔴 = คอขวด)</span></td></tr>
+					${costRows}
+					<tr class="weightRow"><td class="alLeft" colspan="${span}">💎 <b>กำไร/ชม.</b> ของแต่ละ process — กำไรงาน ÷ เวลา (บาท/ชม.) <span style="font-weight:normal;font-size:11px">(=0 ถ้ายังไม่บวก markup)</span></td></tr>
+					${profitRows}
+					<tr class="weightRow"><td class="alLeft" colspan="${span}">💰 สรุปต่อยอดสั่ง</td></tr>
 					${row('ราคารวม (บาท)', (p) => fmt(p.total, 2))}
 					${row('🔴 คอขวด', (p) => p.bottleneck ? p.bottleneck.label : '-')}
 					${row('เวลาคอขวด (รวม)', (p) => p.bottleneck ? mins(p.bottleneck.hours) : '-')}
@@ -428,7 +433,7 @@ function renderHourlyByQty(perQty, target) {
 				</tbody>
 			</table>
 			<div style="margin:10px auto 0;max-width:900px;font-size:11px;color:#6b7280;text-align:center">
-				* <b>กำไร/ชม. ของแต่ละ process</b> = กำไรทั้งงาน ÷ เวลาที่ process นั้นใช้ — แต่ละเครื่องวิ่งเร็วต่างกัน • <b>🔴 ตัวต่ำสุด = คอขวด = อัตราจริงที่ได้</b> (เครื่องอื่นวิ่งเร็วกว่าแต่ต้องรอคอขวดอยู่ดี) • กำไร=0 ถ้ายังไม่บวก markup • เทียบดูเฉยๆ ไม่บวกเข้าราคา
+				* <b>ค่าใช้จ่าย/ชม.</b> = ค่างานของ process นั้น ÷ เวลา (มีเลขจริงเสมอ) • <b>กำไร/ชม.</b> = กำไรทั้งงาน ÷ เวลา (0 จนกว่าตั้ง markup เพราะกำไรเป็นของทั้งงาน คิดแยก process ไม่ได้) • <b>🔴 = คอขวด</b> (process ที่ช้าสุดของยอดนั้น) • เทียบดูเฉยๆ ไม่บวกเข้าราคา
 			</div>
 		</div>`
 }
