@@ -15,8 +15,14 @@ const upload = multer({
 
 const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-5'        // ข้อความ/รูปชัด — เร็ว/ถูก
 const IMAGE_MODEL = process.env.ANTHROPIC_IMAGE_MODEL || 'claude-opus-4-8' // มีรูป (โดยเฉพาะลายมือ) — แม่นกว่า
-// เลือกโมเดลตามชนิด input: มีรูป → Opus (vision แม่นกว่า) ไม่งั้น → Sonnet (ประหยัด)
-const pickModel = (files) => ((files || []).some((f) => (f.mimetype || '').toLowerCase().startsWith('image/')) ? IMAGE_MODEL : MODEL)
+// เลือกโมเดลตามชนิด input: มีรูป/PDF → Opus (vision แม่นกว่า โดยเฉพาะไดไลน์ที่มักส่งเป็น PDF)
+//   ไม่งั้น (ข้อความล้วน/docx/xlsx) → Sonnet (ประหยัด)
+const isVisualFile = (f) => {
+	const m = (f.mimetype || '').toLowerCase()
+	const n = (f.originalname || '').toLowerCase()
+	return m.startsWith('image/') || m === 'application/pdf' || n.endsWith('.pdf')
+}
+const pickModel = (files) => ((files || []).some(isVisualFile) ? IMAGE_MODEL : MODEL)
 
 // Load the box-template reference PDF + template images once at startup.
 // They're sent with every request (cached by Anthropic prompt cache) so the AI
