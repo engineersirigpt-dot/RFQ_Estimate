@@ -453,7 +453,7 @@ function renderHourlyByQty(perQty, target, rates) {
 
 	return `
 		<div style="overflow-x:auto;font-family:inherit">
-			<div style="font-weight:bold;font-size:15px;color:#15803d;margin:6px 0 4px;text-align:center">📊 เทียบราคา: สูตรเดิม vs เวลา×เรท (วิธี Art)</div>
+			<div style="font-weight:bold;font-size:15px;color:#15803d;margin:6px 0 4px;text-align:center">📊 เทียบราคา: สูตรเดิม vs เวลา×เรท</div>
 			<div style="font-size:11px;color:#6b7280;text-align:center;margin-bottom:8px">กรอกเรท บาท/ชม.เอง • พิมพ์ = เรท×เวลา×สี • <b style="color:#b91c1c">ต่าง แดง = วิธีเวลาแพงกว่า</b> / <b style="color:#15803d">เขียว = ถูกกว่า</b></div>
 			<table border cellpadding="5" align="center" style="border-collapse:collapse;margin:0 auto 16px;font-size:14px">
 				<thead>
