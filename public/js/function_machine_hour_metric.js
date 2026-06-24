@@ -214,6 +214,10 @@ function computeProcessBreakdown(mainData, qtyIndex, speeds) {
 
 	const bottleneck = procs.reduce((mx, p) => (!mx || p.hours > mx.hours ? p : mx), null)
 
+	// จำนวนสีรวม (นอก+ใน ทุก component) — ใช้กับเรทพิมพ์แบบ "สีละ X บาท/ชม." (Art)
+	const colors = (mainData.component1 || []).reduce((s, c) =>
+		s + (c.color || []).reduce((s2, cc) => s2 + (Number(cc.outside) || 0) + (Number(cc.inside) || 0), 0), 0)
+
 	// ตัวเลขเชิง BD จริง: ต่อ "ชั่วโมงคอขวด" (ทรัพยากรที่จำกัด — Theory of Constraints)
 	const COST_KEYS = ['material', 'plate', 'print', 'proof', 'afterpress', 'delivery', 'other']
 	const total = tp.total_with_price_diff != null ? tp.total_with_price_diff : tp.total_price
@@ -221,7 +225,7 @@ function computeProcessBreakdown(mainData, qtyIndex, speeds) {
 	const margin = total != null ? total - cost : null
 	const bh = bottleneck ? bottleneck.hours : 0
 	return {
-		qty: orderQty, procs, bottleneck,
+		qty: orderQty, procs, bottleneck, colors,
 		total: total != null ? +Number(total).toFixed(2) : null,
 		margin: margin != null ? +margin.toFixed(2) : null,
 		revenuePerBnHour: bh > 0 && total != null ? +(total / bh).toFixed(2) : null,   // ราคา/ชม.คอขวด
@@ -372,16 +376,25 @@ function computeHourlyByQty(mainData, procCfg) {
 	const qtyArr = (mainData && mainData.qty && mainData.qty.totalqty) || []
 	return qtyArr.map((qty, i) => {
 		const pb = computeProcessBreakdown(mainData, i, procCfg)
-		return { qty, bottleneck: pb.bottleneck, total: pb.total, margin: pb.margin, procs: pb.procs,
+		return { qty, bottleneck: pb.bottleneck, total: pb.total, margin: pb.margin, procs: pb.procs, colors: pb.colors,
 			revenuePerBnHour: pb.revenuePerBnHour, profitPerBnHour: pb.profitPerBnHour, capacity: pb.capacity }
 	})
 }
 
-function renderHourlyByQty(perQty, target) {
+// process ที่คิดเรทแบบ "สีละ X บาท/ชม." (พิมพ์) — เรท × เวลา × จำนวนสี
+const PER_COLOR_PROC = { 'พิมพ์': true }
+// ราคาคิดจากเวลา (วิธี Art): เรท(บาท/ชม.) × เวลา  [พิมพ์ = × จำนวนสีด้วย]
+function timePriceOf(label, hours, rate, colors) {
+	if (!(rate > 0) || !(hours > 0)) return null
+	return PER_COLOR_PROC[label] ? rate * hours * (colors > 0 ? colors : 1) : rate * hours
+}
+
+function renderHourlyByQty(perQty, target, rates) {
 	if (!perQty || !perQty.length) return '<div style="padding:10px">ยังไม่มีข้อมูล (กดคำนวณ price ก่อน)</div>'
 	const fmt = (n, d) => (n == null || isNaN(n) ? '-' : Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }))
 	const mins = (h) => (h == null ? '-' : fmt(h * 60, 1) + ' น.')
 	const hasTarget = target != null && target > 0
+	const rateOf = (label) => { const r = rates && rates[label]; return r != null && r !== '' && !isNaN(r) ? Number(r) : null }
 	// ใช้ template เดียวกับตารางราคา (เขียว): <table border cellpadding="5"> + แถวสรุปใช้ class .totalRow (เขียว bold)
 	const th = perQty.map((p) => `<th class="alCenter">${fmt(p.qty, 0)}</th>`).join('')
 	const row = (label, cellFn, cls) => `<tr${cls ? ` class="${cls}"` : ''}><td class="alLeft">${label}</td>${perQty.map((p, i) => `<td class="alRight">${cellFn(p, i)}</td>`).join('')}</tr>`
@@ -411,6 +424,26 @@ function renderHourlyByQty(perQty, target) {
 	// (2) กำไร/ชม. = กำไรทั้งงาน ÷ เวลาที่ process นั้นใช้ (0 จนกว่าตั้ง markup)
 	const profitRows = procSection((p, pr) => (p.margin != null && pr.hours > 0 ? p.margin / pr.hours : null))
 	const span = perQty.length + 1
+
+	// (0) 💵 ราคาคิดจากเวลา (วิธี Art): กรอกเรท บาท/ชม. เอง → ราคา = เรท × เวลา (พิมพ์ = × จำนวนสี)
+	const priceRows = procLabels.map((label) => {
+		const isPerColor = !!PER_COLOR_PROC[label]
+		const rate = rateOf(label)
+		const rateInput = `<input type="number" min="0" step="100" class="mh_rate_input" data-proc="${label}" value="${rate != null ? rate : ''}" placeholder="กรอกเรท" style="width:78px;padding:2px 5px;border:1px solid #c4b5fd;border-radius:4px;text-align:right;font-size:12px"> <span style="font-size:10px;color:#9ca3af">บ./ชม.${isPerColor ? '/สี' : ''}</span>`
+		const cells = perQty.map((p) => {
+			const pr = procOf(p, label)
+			if (!pr) return `<td class="alRight">-</td>`
+			const v = timePriceOf(label, pr.hours, rate, p.colors)
+			const note = isPerColor && v != null && p.colors > 0 ? ` <span style="font-size:10px;color:#9ca3af">(${p.colors}สี)</span>` : ''
+			return `<td class="alRight">${v == null ? '<span style="color:#cbd5e1">รอเรท</span>' : fmt(v, 2)}${note}</td>`
+		}).join('')
+		return `<tr><td class="alLeft" style="white-space:nowrap">${label}<br>${rateInput}</td>${cells}</tr>`
+	}).join('')
+	const priceTotalRow = `<tr class="totalRow"><td class="alLeft">💰 รวมราคา (เรท × เวลา)</td>${perQty.map((p) => {
+		let sum = 0, has = false
+		procLabels.forEach((label) => { const pr = procOf(p, label); const v = pr ? timePriceOf(label, pr.hours, rateOf(label), p.colors) : null; if (v != null) { sum += v; has = true } })
+		return `<td class="alRight">${has ? fmt(sum, 2) : '-'}</td>`
+	}).join('')}</tr>`
 	return `
 		<div style="overflow-x:auto;font-family:inherit">
 			<div style="font-weight:bold;font-size:15px;color:#15803d;margin:6px 0 10px;text-align:center">⏱️ ต่อชั่วโมง — แยกตาม process ตามยอดสั่ง${hasTarget ? ` • เป้ากำไร/ชม. ${fmt(target, 0)}` : ''}</div>
@@ -419,6 +452,9 @@ function renderHourlyByQty(perQty, target) {
 					<tr class="totalRow"><th class="alLeft">รายการ (ยอดสั่ง →)</th>${th}</tr>
 				</thead>
 				<tbody>
+					<tr class="weightRow"><td class="alLeft" colspan="${span}">💵 <b>ราคาคิดจากเวลา (เรท × เวลา)</b> — วิธี Art <span style="font-weight:normal;font-size:11px">(กรอกเรท บาท/ชม. เอง • พิมพ์ = เรท × เวลา × จำนวนสี)</span></td></tr>
+					${priceRows}
+					${priceTotalRow}
 					<tr class="weightRow"><td class="alLeft" colspan="${span}">💵 <b>ค่าใช้จ่าย/ชม.</b> ของแต่ละ process — ค่างาน ÷ เวลา (บาท/ชม.) <span style="font-weight:normal;font-size:11px">(ตัวเลขเล็ก = เวลาเดินเครื่อง • 🔴 = คอขวด)</span></td></tr>
 					${costRows}
 					<tr class="weightRow"><td class="alLeft" colspan="${span}">💎 <b>กำไร/ชม.</b> ของแต่ละ process — กำไรงาน ÷ เวลา (บาท/ชม.) <span style="font-weight:normal;font-size:11px">(=0 ถ้ายังไม่บวก markup)</span></td></tr>
@@ -433,7 +469,7 @@ function renderHourlyByQty(perQty, target) {
 				</tbody>
 			</table>
 			<div style="margin:10px auto 0;max-width:900px;font-size:11px;color:#6b7280;text-align:center">
-				* <b>ค่าใช้จ่าย/ชม.</b> = ค่างานของ process นั้น ÷ เวลา (มีเลขจริงเสมอ) • <b>กำไร/ชม.</b> = กำไรทั้งงาน ÷ เวลา (0 จนกว่าตั้ง markup เพราะกำไรเป็นของทั้งงาน คิดแยก process ไม่ได้) • <b>🔴 = คอขวด</b> (process ที่ช้าสุดของยอดนั้น) • เทียบดูเฉยๆ ไม่บวกเข้าราคา
+				* <b>ราคาคิดจากเวลา</b> = เรท(กรอกเอง) × เวลา — พิมพ์คูณจำนวนสีด้วย (Art: สีละ 2,500/ชม.) • <b>ค่าใช้จ่าย/ชม.</b> = ค่างาน ÷ เวลา (เรทโดยปริยายจากสูตรเดิม ใช้อ้างอิงตอนตั้งเรท) • <b>กำไร/ชม.</b> = กำไรทั้งงาน ÷ เวลา (0 จนกว่าตั้ง markup) • <b>🔴 = คอขวด</b> • เทียบดูเฉยๆ ไม่บวกเข้าราคาจริง
 			</div>
 		</div>`
 }
@@ -582,7 +618,10 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 				// state เป้าเก็บนอก scope ฟังก์ชัน เพื่อให้กรอกแล้วจำได้ข้ามการกดคำนวณ
 				if (typeof window !== 'undefined' && window.MH_TARGET == null && CFG.target != null) window.MH_TARGET = CFG.target
 				const curTarget = () => (typeof window !== 'undefined' && Number(window.MH_TARGET) > 0 ? Number(window.MH_TARGET) : null)
-				const drawHourly = () => { $('#hourly_by_qty').html(renderHourlyByQty(hourly, curTarget())) }
+				// เรท บาท/ชม. ต่อ process (กรอกเอง, จำข้ามการกดคำนวณ) — เติมพิมพ์ 2,500/สี ตาม Art
+				if (typeof window !== 'undefined' && !window.MH_RATES) window.MH_RATES = { 'พิมพ์': 2500 }
+				const curRates = () => (typeof window !== 'undefined' && window.MH_RATES) || {}
+				const drawHourly = () => { $('#hourly_by_qty').html(renderHourlyByQty(hourly, curTarget(), curRates())) }
 				drawHourly()
 				$('#mh_target_input').val(curTarget() != null ? curTarget() : '')
 				$('body').off('click.mhview').on('click.mhview', '.mh_tab', function () {
@@ -596,6 +635,13 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 				$('body').off('input.mhtarget').on('input.mhtarget', '#mh_target_input', function () {
 					const v = parseFloat(this.value)
 					if (typeof window !== 'undefined') window.MH_TARGET = v > 0 ? v : null
+					drawHourly()
+				})
+				// กรอกเรท บาท/ชม. ต่อ process → จำค่า + คิดราคา(เรท×เวลา)ใหม่ (ใช้ change กันโฟกัสหลุดตอนพิมพ์)
+				$('body').off('change.mhrate').on('change.mhrate', '.mh_rate_input', function () {
+					const proc = $(this).attr('data-proc')
+					const v = parseFloat(this.value)
+					if (typeof window !== 'undefined') { window.MH_RATES = window.MH_RATES || {}; if (v > 0) window.MH_RATES[proc] = v; else delete window.MH_RATES[proc] }
 					drawHourly()
 				})
 
@@ -623,5 +669,5 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 
 // export สำหรับเทส (Node) — ในเบราว์เซอร์เรียกใช้ฟังก์ชันตรงๆ
 if (typeof module !== 'undefined' && module.exports) {
-	module.exports = { computeMachineHourMetric, renderMachineHourMetric, computeProcessBreakdown, renderProcessBreakdown, computeMachineComparison, renderMachineComparison, computeHourlyByQty, renderHourlyByQty }
+	module.exports = { computeMachineHourMetric, renderMachineHourMetric, computeProcessBreakdown, renderProcessBreakdown, computeMachineComparison, renderMachineComparison, computeHourlyByQty, renderHourlyByQty, timePriceOf }
 }
