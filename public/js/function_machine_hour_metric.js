@@ -425,43 +425,53 @@ function renderHourlyByQty(perQty, target, rates) {
 	const profitRows = procSection((p, pr) => (p.margin != null && pr.hours > 0 ? p.margin / pr.hours : null))
 	const span = perQty.length + 1
 
-	// (0) 📊 เทียบราคา: สูตรเดิม vs เวลา×เรท (วิธี Art) — แต่ละช่องโชว์ เดิม/เวลา/ต่าง ซ้อนกัน (ไม่ต้องสลับ view)
+	// ── 📊 ตารางเทียบ (Art): แต่ละยอดสั่งแบ่ง 3 ช่องย่อย เดิม|เวลา|ต่าง (มีเส้นขีดแยก) ──
 	const diffHtml = (d) => `<b style="color:${d > 0 ? '#b91c1c' : d < 0 ? '#15803d' : '#6b7280'}">${d > 0 ? '+' : ''}${fmt(d, 0)}</b>`
-	const priceRows = procLabels.map((label) => {
+	const cmpHead1 = perQty.map((p) => `<th colspan="3" class="alCenter">${fmt(p.qty, 0)}</th>`).join('')
+	const cmpHead2 = perQty.map(() => `<th class="alCenter" style="font-size:11px;font-weight:normal">เดิม</th><th class="alCenter" style="font-size:11px;font-weight:normal">เวลา</th><th class="alCenter" style="font-size:11px;font-weight:normal">ต่าง</th>`).join('')
+	const cmpRows = procLabels.map((label) => {
 		const isPerColor = !!PER_COLOR_PROC[label]
 		const rate = rateOf(label)
 		const rateInput = `<input type="number" min="0" step="100" class="mh_rate_input" data-proc="${label}" value="${rate != null ? rate : ''}" placeholder="กรอกเรท" style="width:78px;padding:2px 5px;border:1px solid #c4b5fd;border-radius:4px;text-align:right;font-size:12px"> <span style="font-size:10px;color:#9ca3af">บ./ชม.${isPerColor ? '/สี' : ''}</span>`
 		const cells = perQty.map((p) => {
 			const pr = procOf(p, label)
-			if (!pr) return `<td class="alRight">-</td>`
+			if (!pr) return `<td class="alRight">-</td><td class="alRight">-</td><td class="alRight">-</td>`
 			const old = pr.cost
 			const v = timePriceOf(label, pr.hours, rate, p.colors)
-			const note = isPerColor && v != null && p.colors > 0 ? ` <span style="font-size:10px;color:#9ca3af">×${p.colors}สี</span>` : ''
-			const last = v == null ? '<span style="color:#cbd5e1">รอเรท</span>' : diffHtml(v - old)
-			return `<td class="alRight" style="font-size:12px;line-height:1.6">เดิม ${fmt(old, 0)}<br>เวลา ${v == null ? '-' : fmt(v, 0)}${note}<br>ต่าง ${last}</td>`
+			const note = isPerColor && v != null && p.colors > 0 ? `<span style="font-size:9px;color:#9ca3af"> ×${p.colors}</span>` : ''
+			const diffC = v == null ? '<span style="color:#cbd5e1;font-size:11px">รอเรท</span>' : diffHtml(v - old)
+			return `<td class="alRight">${fmt(old, 0)}</td><td class="alRight">${v == null ? '-' : fmt(v, 0) + note}</td><td class="alRight">${diffC}</td>`
 		}).join('')
 		return `<tr><td class="alLeft" style="white-space:nowrap">${label}<br>${rateInput}</td>${cells}</tr>`
 	}).join('')
-	const priceTotalRow = `<tr class="totalRow"><td class="alLeft">💰 รวม <span style="font-weight:normal;font-size:10px">(เฉพาะ process ที่ใส่เรทแล้ว)</span></td>${perQty.map((p) => {
+	const cmpTotal = `<tr class="totalRow"><td class="alLeft">💰 รวม <span style="font-weight:normal;font-size:10px">(เฉพาะมีเรท)</span></td>${perQty.map((p) => {
 		let oldSum = 0, vSum = 0, has = false
 		procLabels.forEach((label) => { const pr = procOf(p, label); if (!pr) return; const v = timePriceOf(label, pr.hours, rateOf(label), p.colors); if (v != null) { oldSum += pr.cost; vSum += v; has = true } })
-		if (!has) return `<td class="alRight">-</td>`
-		return `<td class="alRight" style="font-size:12px;line-height:1.6">เดิม ${fmt(oldSum, 0)}<br>เวลา ${fmt(vSum, 0)}<br>ต่าง ${diffHtml(vSum - oldSum)}</td>`
+		if (!has) return `<td class="alRight">-</td><td class="alRight">-</td><td class="alRight">-</td>`
+		return `<td class="alRight">${fmt(oldSum, 0)}</td><td class="alRight">${fmt(vSum, 0)}</td><td class="alRight">${diffHtml(vSum - oldSum)}</td>`
 	}).join('')}</tr>`
+
 	return `
 		<div style="overflow-x:auto;font-family:inherit">
-			<div style="font-weight:bold;font-size:15px;color:#15803d;margin:6px 0 10px;text-align:center">⏱️ ต่อชั่วโมง — แยกตาม process ตามยอดสั่ง${hasTarget ? ` • เป้ากำไร/ชม. ${fmt(target, 0)}` : ''}</div>
+			<div style="font-weight:bold;font-size:15px;color:#15803d;margin:6px 0 4px;text-align:center">📊 เทียบราคา: สูตรเดิม vs เวลา×เรท (วิธี Art)</div>
+			<div style="font-size:11px;color:#6b7280;text-align:center;margin-bottom:8px">กรอกเรท บาท/ชม.เอง • พิมพ์ = เรท×เวลา×สี • <b style="color:#b91c1c">ต่าง แดง = วิธีเวลาแพงกว่า</b> / <b style="color:#15803d">เขียว = ถูกกว่า</b></div>
+			<table border cellpadding="5" align="center" style="border-collapse:collapse;margin:0 auto 16px;font-size:14px">
+				<thead>
+					<tr class="totalRow"><th rowspan="2" class="alLeft">รายการ (กรอกเรท)</th>${cmpHead1}</tr>
+					<tr class="totalRow">${cmpHead2}</tr>
+				</thead>
+				<tbody>${cmpRows}${cmpTotal}</tbody>
+			</table>
+
+			<div style="font-weight:bold;font-size:14px;color:#6d28d9;margin:14px 0 8px;text-align:center">⏱️ วิเคราะห์ต่อชั่วโมง (ประกอบการตั้งเรท)${hasTarget ? ` • เป้ากำไร/ชม. ${fmt(target, 0)}` : ''}</div>
 			<table border cellpadding="5" align="center" style="border-collapse:collapse;margin:0 auto;font-size:14px">
 				<thead>
 					<tr class="totalRow"><th class="alLeft">รายการ (ยอดสั่ง →)</th>${th}</tr>
 				</thead>
 				<tbody>
-					<tr class="weightRow"><td class="alLeft" colspan="${span}">📊 <b>เทียบราคา: สูตรเดิม vs เวลา×เรท (วิธี Art)</b> <span style="font-weight:normal;font-size:11px">— กรอกเรท บาท/ชม.เอง • พิมพ์ = เรท×เวลา×สี • <span style="color:#b91c1c">แดง=วิธีเวลาแพงกว่า</span> / <span style="color:#15803d">เขียว=ถูกกว่า</span></span></td></tr>
-					${priceRows}
-					${priceTotalRow}
-					<tr class="weightRow"><td class="alLeft" colspan="${span}">💵 <b>ค่าใช้จ่าย/ชม.</b> ของแต่ละ process — ค่างาน ÷ เวลา (บาท/ชม.) <span style="font-weight:normal;font-size:11px">(ตัวเลขเล็ก = เวลาเดินเครื่อง • 🔴 = คอขวด)</span></td></tr>
+					<tr class="weightRow"><td class="alLeft" colspan="${span}">💵 <b>ค่าใช้จ่าย/ชม.</b> ของแต่ละ process — ค่างาน ÷ เวลา (= เรทโดยปริยายจากสูตรเดิม ใช้อ้างอิงตอนตั้งเรท) <span style="font-weight:normal;font-size:11px">(ตัวเลขเล็ก = เวลา • 🔴 = คอขวด)</span></td></tr>
 					${costRows}
-					<tr class="weightRow"><td class="alLeft" colspan="${span}">💎 <b>กำไร/ชม.</b> ของแต่ละ process — กำไรงาน ÷ เวลา (บาท/ชม.) <span style="font-weight:normal;font-size:11px">(=0 ถ้ายังไม่บวก markup)</span></td></tr>
+					<tr class="weightRow"><td class="alLeft" colspan="${span}">💎 <b>กำไร/ชม.</b> ของแต่ละ process — กำไรงาน ÷ เวลา <span style="font-weight:normal;font-size:11px">(=0 ถ้ายังไม่บวก markup)</span></td></tr>
 					${profitRows}
 					<tr class="weightRow"><td class="alLeft" colspan="${span}">💰 สรุปต่อยอดสั่ง</td></tr>
 					${row('ราคารวม (บาท)', (p) => fmt(p.total, 2))}
@@ -473,7 +483,7 @@ function renderHourlyByQty(perQty, target, rates) {
 				</tbody>
 			</table>
 			<div style="margin:10px auto 0;max-width:900px;font-size:11px;color:#6b7280;text-align:center">
-				* <b>ราคาคิดจากเวลา</b> = เรท(กรอกเอง) × เวลา — พิมพ์คูณจำนวนสีด้วย (Art: สีละ 2,500/ชม.) • <b>ค่าใช้จ่าย/ชม.</b> = ค่างาน ÷ เวลา (เรทโดยปริยายจากสูตรเดิม ใช้อ้างอิงตอนตั้งเรท) • <b>กำไร/ชม.</b> = กำไรทั้งงาน ÷ เวลา (0 จนกว่าตั้ง markup) • <b>🔴 = คอขวด</b> • เทียบดูเฉยๆ ไม่บวกเข้าราคาจริง
+				* <b>ตารางบน</b> = เทียบราคา (เดิม=สูตรปัจจุบัน / เวลา=เรท×เวลา×สี) • <b>ตารางล่าง</b> = ตัวเลขช่วยตั้งเรท • READ-ONLY ไม่บวกเข้าราคาจริง
 			</div>
 		</div>`
 }
