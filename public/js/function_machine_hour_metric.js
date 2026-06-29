@@ -214,9 +214,11 @@ function computeProcessBreakdown(mainData, qtyIndex, speeds) {
 
 	const bottleneck = procs.reduce((mx, p) => (!mx || p.hours > mx.hours ? p : mx), null)
 
-	// จำนวนสีรวม (นอก+ใน ทุก component) — ใช้กับเรทพิมพ์แบบ "สีละ X บาท/ชม." (Art)
-	const colors = (mainData.component1 || []).reduce((s, c) =>
-		s + (c.color || []).reduce((s2, cc) => s2 + (Number(cc.outside) || 0) + (Number(cc.inside) || 0) + (Array.isArray(cc.special_ink) ? cc.special_ink.length : 0), 0), 0) // [ทีม] นับสีพิเศษด้วย (เรท 500/สี รวมสีพิเศษ)
+	// แยกนับสี: สีปกติ (นอก+ใน) vs สีพิเศษ (special_ink) — เรทต่างกัน (ปกติ 500/สี, พิเศษ 2,000/สี ทั้งคู่ ×เวลา) [ทีม]
+	const cc2 = (fn) => (mainData.component1 || []).reduce((s, c) => s + (c.color || []).reduce((s2, x) => s2 + fn(x), 0), 0)
+	const colorsNormal = cc2((x) => (Number(x.outside) || 0) + (Number(x.inside) || 0))
+	const colorsSpecial = cc2((x) => (Array.isArray(x.special_ink) ? x.special_ink.length : 0))
+	const colors = colorsNormal + colorsSpecial
 
 	// ตัวเลขเชิง BD จริง: ต่อ "ชั่วโมงคอขวด" (ทรัพยากรที่จำกัด — Theory of Constraints)
 	const COST_KEYS = ['material', 'plate', 'print', 'proof', 'afterpress', 'delivery', 'other']
@@ -225,7 +227,7 @@ function computeProcessBreakdown(mainData, qtyIndex, speeds) {
 	const margin = total != null ? total - cost : null
 	const bh = bottleneck ? bottleneck.hours : 0
 	return {
-		qty: orderQty, procs, bottleneck, colors,
+		qty: orderQty, procs, bottleneck, colors, colorsNormal, colorsSpecial,
 		total: total != null ? +Number(total).toFixed(2) : null,
 		margin: margin != null ? +margin.toFixed(2) : null,
 		revenuePerBnHour: bh > 0 && total != null ? +(total / bh).toFixed(2) : null,   // ราคา/ชม.คอขวด
@@ -376,17 +378,21 @@ function computeHourlyByQty(mainData, procCfg) {
 	const qtyArr = (mainData && mainData.qty && mainData.qty.totalqty) || []
 	return qtyArr.map((qty, i) => {
 		const pb = computeProcessBreakdown(mainData, i, procCfg)
-		return { qty, bottleneck: pb.bottleneck, total: pb.total, margin: pb.margin, procs: pb.procs, colors: pb.colors,
+		return { qty, bottleneck: pb.bottleneck, total: pb.total, margin: pb.margin, procs: pb.procs, colors: pb.colors, colorsNormal: pb.colorsNormal, colorsSpecial: pb.colorsSpecial,
 			revenuePerBnHour: pb.revenuePerBnHour, profitPerBnHour: pb.profitPerBnHour, capacity: pb.capacity }
 	})
 }
 
 // process ที่คิดเรทแบบ "สีละ X บาท/ชม." (พิมพ์) — เรท × เวลา × จำนวนสี
 const PER_COLOR_PROC = { 'พิมพ์': true }
-// ราคาคิดจากเวลา (วิธี Art): เรท(บาท/ชม.) × เวลา  [พิมพ์ = × จำนวนสีด้วย]
-function timePriceOf(label, hours, rate, colors) {
+const PRINT_SPECIAL_RATE = 2000 // [ทีม] สีพิเศษ 2,000/สี/ชม. (× เวลา) — สีธรรมดาใช้เรทที่กรอก (500)
+// ราคาคิดจากเวลา (วิธี Art): เรท × เวลา • พิมพ์ = เวลา × (เรท×สีปกติ + 2,000×สีพิเศษ)
+function timePriceOf(label, hours, rate, normalColors, specialColors) {
 	if (!(rate > 0) || !(hours > 0)) return null
-	return PER_COLOR_PROC[label] ? rate * hours * (colors > 0 ? colors : 1) : rate * hours
+	if (!PER_COLOR_PROC[label]) return rate * hours
+	const nc = Number(normalColors) || 0, sc = Number(specialColors) || 0
+	const colorPart = rate * nc + PRINT_SPECIAL_RATE * sc
+	return hours * (colorPart > 0 ? colorPart : rate) // ไม่มีสีเลย → อย่างน้อยคิดเรท×เวลา 1 สี
 }
 
 function renderHourlyByQty(perQty, target, rates) {
@@ -432,15 +438,17 @@ function renderHourlyByQty(perQty, target, rates) {
 	const cmpRows = procLabels.map((label) => {
 		const isPerColor = !!PER_COLOR_PROC[label]
 		const rate = rateOf(label)
-		// [Art] พิมพ์: เอาจำนวนสีไปไว้ที่ชื่อแถว "พิมพ์ (3 สี)" แทนที่จะใส่ ×3 ในแต่ละช่อง
-		const colorN = perQty.length ? (perQty[0].colors || 0) : 0
-		const labelTxt = isPerColor && colorN > 0 ? `${label} (${colorN} สี)` : label
-		const rateInput = `<input type="number" min="0" step="100" class="mh_rate_input" data-proc="${label}" value="${rate != null ? rate : ''}" placeholder="กรอกเรท" style="width:78px;padding:2px 5px;border:1px solid #c4b5fd;border-radius:4px;text-align:right;font-size:12px"> <span style="font-size:10px;color:#9ca3af">บ./ชม.${isPerColor ? '/สี' : ''}</span>`
+		// [Art] พิมพ์: เอาจำนวนสีไปไว้ที่ชื่อแถว "พิมพ์ (3 สี + 2 พิเศษ)" แทนที่จะใส่ ×N ในแต่ละช่อง
+		const cN = perQty.length ? (perQty[0].colorsNormal || 0) : 0
+		const cS = perQty.length ? (perQty[0].colorsSpecial || 0) : 0
+		const colorTxt = cN + (cN > 0 ? ' สี' : '') + (cS > 0 ? `${cN > 0 ? ' + ' : ''}${cS} พิเศษ` : (cN === 0 ? ' สี' : ''))
+		const labelTxt = isPerColor && (cN + cS) > 0 ? `${label} (${colorTxt})` : label
+		const rateInput = `<input type="number" min="0" step="100" class="mh_rate_input" data-proc="${label}" value="${rate != null ? rate : ''}" placeholder="กรอกเรท" style="width:78px;padding:2px 5px;border:1px solid #c4b5fd;border-radius:4px;text-align:right;font-size:12px"> <span style="font-size:10px;color:#9ca3af">บ./ชม.${isPerColor ? '/สี' + (cS > 0 ? ' • พิเศษ 2,000' : '') : ''}</span>`
 		const cells = perQty.map((p) => {
 			const pr = procOf(p, label)
 			if (!pr) return `<td class="alRight">-</td><td class="alRight">-</td><td class="alRight">-</td>`
 			const old = pr.cost
-			const v = timePriceOf(label, pr.hours, rate, p.colors)
+			const v = timePriceOf(label, pr.hours, rate, p.colorsNormal, p.colorsSpecial)
 			const diffC = v == null ? '<span style="color:#cbd5e1;font-size:11px">รอเรท</span>' : diffHtml(v - old)
 			return `<td class="alRight">${fmt(old, 0)}</td><td class="alRight">${v == null ? '-' : fmt(v, 0)}</td><td class="alRight">${diffC}</td>`
 		}).join('')
@@ -448,7 +456,7 @@ function renderHourlyByQty(perQty, target, rates) {
 	}).join('')
 	const cmpTotal = `<tr class="totalRow"><td class="alLeft">💰 รวม <span style="font-weight:normal;font-size:10px">(เฉพาะมีเรท)</span></td>${perQty.map((p) => {
 		let oldSum = 0, vSum = 0, has = false
-		procLabels.forEach((label) => { const pr = procOf(p, label); if (!pr) return; const v = timePriceOf(label, pr.hours, rateOf(label), p.colors); if (v != null) { oldSum += pr.cost; vSum += v; has = true } })
+		procLabels.forEach((label) => { const pr = procOf(p, label); if (!pr) return; const v = timePriceOf(label, pr.hours, rateOf(label), p.colorsNormal, p.colorsSpecial); if (v != null) { oldSum += pr.cost; vSum += v; has = true } })
 		if (!has) return `<td class="alRight">-</td><td class="alRight">-</td><td class="alRight">-</td>`
 		return `<td class="alRight">${fmt(oldSum, 0)}</td><td class="alRight">${fmt(vSum, 0)}</td><td class="alRight">${diffHtml(vSum - oldSum)}</td>`
 	}).join('')}</tr>`
