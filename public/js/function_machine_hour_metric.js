@@ -633,7 +633,16 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 				if (typeof window !== 'undefined' && window.MH_TARGET == null && CFG.target != null) window.MH_TARGET = CFG.target
 				const curTarget = () => (typeof window !== 'undefined' && Number(window.MH_TARGET) > 0 ? Number(window.MH_TARGET) : null)
 				// เรท บาท/ชม. ต่อ process (กรอกเอง, จำข้ามการกดคำนวณ) — เติมพิมพ์ 2,500/สี ตาม Art
-				if (typeof window !== 'undefined' && !window.MH_RATES) window.MH_RATES = { 'พิมพ์': 500 } // [ทีม] เรทพิมพ์ 500/สี/ชม. (รวมสีพิเศษ)
+				// เรท บาท/ชม. ต่อ process — พิมพ์ 500/สี (ทีม) • อื่นๆ = ประมาณจาก "ราคาปัจจุบัน ÷ เวลา" (เรทเริ่มต้น รอทีมยืนยันจริง)
+				if (typeof window !== 'undefined' && !window.MH_RATES) window.MH_RATES = {
+					'พิมพ์': 500,                 // /สี/ชม. (ทีมให้)
+					'เคลือบ': 1200,
+					'ไดคัท': 3300,                // เครื่องใหญ่/ช้า → เรทสูง
+					'ปั๊ม (ฟอยล์/นูน)': 1500,
+					'ปะลูกฟูก': 1500,
+					'ติดกาว/ประกอบ': 1800,
+					'แกะ (strip-out)': 700,       // งานเร็ว/ง่าย → เรทต่ำ
+				}
 				const curRates = () => (typeof window !== 'undefined' && window.MH_RATES) || {}
 				const drawHourly = () => { $('#hourly_by_qty').html(renderHourlyByQty(hourly, curTarget(), curRates())) }
 				drawHourly()
