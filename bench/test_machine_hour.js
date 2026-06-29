@@ -127,8 +127,11 @@ const pbF = computeProcessBreakdown(dFlute, 0, procCfg)
 const fluteRow = pbF.procs.find((p) => p.label === 'ปะลูกฟูก')
 const printRow = pbF.procs.find((p) => p.label === 'พิมพ์')
 const expFlute = 0.3 + 360 / 2000 // setup 0.3 + 360 แผ่น ÷ 2000
-const okF = !!fluteRow && Math.abs(fluteRow.hours - +expFlute.toFixed(4)) < 1e-6 && !!printRow && Math.abs(printRow.hours - (1 + 360 / 10000)) < 1e-3
+// [Art] พิมพ์ setup = ตามจำนวนสี: 3 สีปกติ × 0.25 = 0.75 ชม. + แผ่น÷ความเร็ว (ไม่ใช้ setup:1 ใน cfg แล้ว)
+const expPrint = 3 * 0.25 + 360 / 10000
+const okF = !!fluteRow && Math.abs(fluteRow.hours - +expFlute.toFixed(4)) < 1e-6 && !!printRow && Math.abs(printRow.hours - expPrint) < 1e-3
 console.log('  ปะลูกฟูก: ' + (fluteRow ? fmt(fluteRow.hours * 60, 1) + ' น. (คาด ' + fmt(expFlute * 60, 1) + ')' : 'ไม่พบ!'))
+console.log('  พิมพ์ (3 สี): ' + (printRow ? fmt(printRow.hours, 4) + ' ชม. (คาด ' + fmt(expPrint, 4) + ' = 0.75 setup + 0.036 run)' : 'ไม่พบ!'))
 console.log('  ' + (okF ? '✅ PASS — flute + object form ถูกต้อง' : '❌ FAIL'))
 if (!okF) process.exitCode = 1
 

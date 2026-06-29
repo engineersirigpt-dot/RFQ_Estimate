@@ -184,18 +184,28 @@ function computeProcessBreakdown(mainData, qtyIndex, speeds) {
 	const resolve = (v) => (v && typeof v === 'object')
 		? { speed: Number(v.speed) || 0, setup: Number(v.setup) >= 0 ? Number(v.setup) : globalSetup }
 		: { speed: Number(v) || 0, setup: globalSetup }
+	// แยกนับสี: สีปกติ (นอก+ใน) vs สีพิเศษ (special_ink) — ใช้คิด "เวลาตั้งเครื่อง" ของพิมพ์ [Art]
+	const cc2 = (fn) => (mainData.component1 || []).reduce((s, c) => s + (c.color || []).reduce((s2, x) => s2 + fn(x), 0), 0)
+	const colorsNormal = cc2((x) => (Number(x.outside) || 0) + (Number(x.inside) || 0))
+	const colorsSpecial = cc2((x) => (Array.isArray(x.special_ink) ? x.special_ink.length : 0))
+	const colors = colorsNormal + colorsSpecial
+	// เวลาตั้งเครื่องพิมพ์ (Art): สีปกติ 0.25 ชม./สี (4 สี=1ชม.) + สีพิเศษ 1 ชม./สี
+	const printSetup = colorsNormal * 0.25 + colorsSpecial * 1
+
 	const procs = []
-	const add = (label, unit, qty, cost, speedCfg) => {
+	// setupOverride: ใช้แทน setup ปกติ (สำหรับพิมพ์ที่ setup ขึ้นกับจำนวนสี)
+	const add = (label, unit, qty, cost, speedCfg, setupOverride) => {
 		const { speed, setup } = resolve(speedCfg)
 		const c = Number(cost) || 0
 		if (!(qty > 0) || !(speed > 0) || !(c > 0)) return // c=0 → process ไม่มีในงานนี้ → ข้าม
-		const hours = setup + qty / speed // setup(ของเครื่องนั้น) + เวลาเดิน
-		procs.push({ label, unit, qty, speed, setup, cost: +c.toFixed(2), hours: +hours.toFixed(4), costPerHour: hours > 0 ? +(c / hours).toFixed(2) : null })
+		const eff = setupOverride != null ? setupOverride : setup
+		const hours = eff + qty / speed // setup + เวลาเดิน
+		procs.push({ label, unit, qty, speed, setup: eff, cost: +c.toFixed(2), hours: +hours.toFixed(4), costPerHour: hours > 0 ? +(c / hours).toFixed(2) : null })
 	}
 	const sumAddon = (types) => (comp.addon || []).filter((a) => a && types.includes(a.type)).reduce((s, a) => s + (((a.line || [])[i] || {}).price || 0), 0)
 	const findProc = (name) => (comp.process || []).find((p) => p && p.name === name)
 
-	add('พิมพ์', 'แผ่น', paperPrint, Number(tp.print) || 0, sp.print)            // sheet-based
+	add('พิมพ์', 'แผ่น', paperPrint, Number(tp.print) || 0, sp.print, printSetup) // setup = ตามจำนวนสี (Art)
 	add('เคลือบ', 'แผ่น', paperPrint, sumAddon(['coating']), sp.coating)         // sheet-based
 	const dc = findProc('diecut')
 	if (dc) { const ln = (dc.line || [])[i] || {}; add('ไดคัท', 'แผ่น', paperPrint, ((ln.block && ln.block.price) || 0) + ((ln.labor && ln.labor.price) || 0), sp.diecut) }
@@ -213,12 +223,6 @@ function computeProcessBreakdown(mainData, qtyIndex, speeds) {
 	})
 
 	const bottleneck = procs.reduce((mx, p) => (!mx || p.hours > mx.hours ? p : mx), null)
-
-	// แยกนับสี: สีปกติ (นอก+ใน) vs สีพิเศษ (special_ink) — เรทต่างกัน (ปกติ 500/สี, พิเศษ 2,000/สี ทั้งคู่ ×เวลา) [ทีม]
-	const cc2 = (fn) => (mainData.component1 || []).reduce((s, c) => s + (c.color || []).reduce((s2, x) => s2 + fn(x), 0), 0)
-	const colorsNormal = cc2((x) => (Number(x.outside) || 0) + (Number(x.inside) || 0))
-	const colorsSpecial = cc2((x) => (Array.isArray(x.special_ink) ? x.special_ink.length : 0))
-	const colors = colorsNormal + colorsSpecial
 
 	// ตัวเลขเชิง BD จริง: ต่อ "ชั่วโมงคอขวด" (ทรัพยากรที่จำกัด — Theory of Constraints)
 	const COST_KEYS = ['material', 'plate', 'print', 'proof', 'afterpress', 'delivery', 'other']
@@ -383,16 +387,13 @@ function computeHourlyByQty(mainData, procCfg) {
 	})
 }
 
-// process ที่คิดเรทแบบ "สีละ X บาท/ชม." (พิมพ์) — เรท × เวลา × จำนวนสี
+// PRINT_PROC = แถวพิมพ์ (เรทเป็น "บาท/ชม. ของเครื่อง" + โชว์จำนวนสีในชื่อแถว — สีอยู่ในเวลาแล้ว)
 const PER_COLOR_PROC = { 'พิมพ์': true }
-const PRINT_SPECIAL_RATE = 2000 // [ทีม] สีพิเศษ 2,000/สี/ชม. (× เวลา) — สีธรรมดาใช้เรทที่กรอก (500)
-// ราคาคิดจากเวลา (วิธี Art): เรท × เวลา • พิมพ์ = เวลา × (เรท×สีปกติ + 2,000×สีพิเศษ)
-function timePriceOf(label, hours, rate, normalColors, specialColors) {
+// ราคาคิดจากเวลา (วิธี Art): ราคา = เวลา × เรทเครื่อง (บาท/ชม.) — ทุก process เหมือนกัน
+//   (พิมพ์: จำนวนสีถูกคิดเป็นเวลาตั้งเครื่องไปแล้วใน computeProcessBreakdown)
+function timePriceOf(label, hours, rate) {
 	if (!(rate > 0) || !(hours > 0)) return null
-	if (!PER_COLOR_PROC[label]) return rate * hours
-	const nc = Number(normalColors) || 0, sc = Number(specialColors) || 0
-	const colorPart = rate * nc + PRINT_SPECIAL_RATE * sc
-	return hours * (colorPart > 0 ? colorPart : rate) // ไม่มีสีเลย → อย่างน้อยคิดเรท×เวลา 1 สี
+	return rate * hours
 }
 
 function renderHourlyByQty(perQty, target, rates) {
@@ -438,17 +439,17 @@ function renderHourlyByQty(perQty, target, rates) {
 	const cmpRows = procLabels.map((label) => {
 		const isPerColor = !!PER_COLOR_PROC[label]
 		const rate = rateOf(label)
-		// [Art] พิมพ์: เอาจำนวนสีไปไว้ที่ชื่อแถว "พิมพ์ (3 สี + 2 พิเศษ)" แทนที่จะใส่ ×N ในแต่ละช่อง
+		// [Art] พิมพ์: ชื่อแถวโชว์จำนวนสี (สีปกติ 0.25ชม. + พิเศษ 1ชม. = อยู่ในเวลา) • เรท = บาท/ชม.เครื่อง
 		const cN = perQty.length ? (perQty[0].colorsNormal || 0) : 0
 		const cS = perQty.length ? (perQty[0].colorsSpecial || 0) : 0
-		const colorTxt = cN + (cN > 0 ? ' สี' : '') + (cS > 0 ? `${cN > 0 ? ' + ' : ''}${cS} พิเศษ` : (cN === 0 ? ' สี' : ''))
+		const colorTxt = `${cN} สี${cS > 0 ? ` + ${cS} พิเศษ` : ''}`
 		const labelTxt = isPerColor && (cN + cS) > 0 ? `${label} (${colorTxt})` : label
-		const rateInput = `<input type="number" min="0" step="100" class="mh_rate_input" data-proc="${label}" value="${rate != null ? rate : ''}" placeholder="กรอกเรท" style="width:78px;padding:2px 5px;border:1px solid #c4b5fd;border-radius:4px;text-align:right;font-size:12px"> <span style="font-size:10px;color:#9ca3af">บ./ชม.${isPerColor ? '/สี' + (cS > 0 ? ' • พิเศษ 2,000' : '') : ''}</span>`
+		const rateInput = `<input type="number" min="0" step="100" class="mh_rate_input" data-proc="${label}" value="${rate != null ? rate : ''}" placeholder="กรอกเรท" style="width:78px;padding:2px 5px;border:1px solid #c4b5fd;border-radius:4px;text-align:right;font-size:12px"> <span style="font-size:10px;color:#9ca3af">บ./ชม.${isPerColor ? ' (เครื่อง)' : ''}</span>`
 		const cells = perQty.map((p) => {
 			const pr = procOf(p, label)
 			if (!pr) return `<td class="alRight">-</td><td class="alRight">-</td><td class="alRight">-</td>`
 			const old = pr.cost
-			const v = timePriceOf(label, pr.hours, rate, p.colorsNormal, p.colorsSpecial)
+			const v = timePriceOf(label, pr.hours, rate)
 			const diffC = v == null ? '<span style="color:#cbd5e1;font-size:11px">รอเรท</span>' : diffHtml(v - old)
 			return `<td class="alRight">${fmt(old, 0)}</td><td class="alRight">${v == null ? '-' : fmt(v, 0)}</td><td class="alRight">${diffC}</td>`
 		}).join('')
@@ -456,7 +457,7 @@ function renderHourlyByQty(perQty, target, rates) {
 	}).join('')
 	const cmpTotal = `<tr class="totalRow"><td class="alLeft">💰 รวม <span style="font-weight:normal;font-size:10px">(เฉพาะมีเรท)</span></td>${perQty.map((p) => {
 		let oldSum = 0, vSum = 0, has = false
-		procLabels.forEach((label) => { const pr = procOf(p, label); if (!pr) return; const v = timePriceOf(label, pr.hours, rateOf(label), p.colorsNormal, p.colorsSpecial); if (v != null) { oldSum += pr.cost; vSum += v; has = true } })
+		procLabels.forEach((label) => { const pr = procOf(p, label); if (!pr) return; const v = timePriceOf(label, pr.hours, rateOf(label)); if (v != null) { oldSum += pr.cost; vSum += v; has = true } })
 		if (!has) return `<td class="alRight">-</td><td class="alRight">-</td><td class="alRight">-</td>`
 		return `<td class="alRight">${fmt(oldSum, 0)}</td><td class="alRight">${fmt(vSum, 0)}</td><td class="alRight">${diffHtml(vSum - oldSum)}</td>`
 	}).join('')}</tr>`
@@ -642,10 +643,18 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 				// state เป้าเก็บนอก scope ฟังก์ชัน เพื่อให้กรอกแล้วจำได้ข้ามการกดคำนวณ
 				if (typeof window !== 'undefined' && window.MH_TARGET == null && CFG.target != null) window.MH_TARGET = CFG.target
 				const curTarget = () => (typeof window !== 'undefined' && Number(window.MH_TARGET) > 0 ? Number(window.MH_TARGET) : null)
-				// เรท บาท/ชม. ต่อ process (กรอกเอง, จำข้ามการกดคำนวณ) — เติมพิมพ์ 2,500/สี ตาม Art
-				// เรท บาท/ชม. ต่อ process — พิมพ์ 500/สี (ทีม) • อื่นๆ = ประมาณจาก "ราคาปัจจุบัน ÷ เวลา" (เรทเริ่มต้น รอทีมยืนยันจริง)
+				// [Art] เรทเครื่องพิมพ์ บาท/ชม. ตามเครื่อง: 28×40=2,500 • GL844=3,500 • SP444(2หน้า)=4,000 • UV=5,000
+				const printMachineRate = (() => {
+					const mn = String((c0.machine && c0.machine.machine_name) || '').toUpperCase()
+					const ink = String((est.mainData.job && est.mainData.job.ink_type) || '').toUpperCase()
+					if (ink === 'UV' || mn.includes('UV')) return 5000
+					if (mn.includes('SP444') || mn.includes('444SP') || mn.includes('SP-444')) return 4000
+					if (mn.includes('GL844') || mn.includes('GL-844')) return 3500
+					return 2500 // default = เครื่อง 28×40
+				})()
+				// เรท บาท/ชม. ต่อ process (กรอกเอง, จำข้ามการกดคำนวณ) — พิมพ์ = เรทเครื่อง • อื่นๆ ประมาณจากราคาปัจจุบัน÷เวลา
 				if (typeof window !== 'undefined' && !window.MH_RATES) window.MH_RATES = {
-					'พิมพ์': 500,                 // /สี/ชม. (ทีมให้)
+					'พิมพ์': printMachineRate,    // บาท/ชม. ของเครื่องพิมพ์ (สีอยู่ในเวลาแล้ว)
 					'เคลือบ': 1200,
 					'ไดคัท': 3300,                // เครื่องใหญ่/ช้า → เรทสูง
 					'ปั๊ม (ฟอยล์/นูน)': 1500,
