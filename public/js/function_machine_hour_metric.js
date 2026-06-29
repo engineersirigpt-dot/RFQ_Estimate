@@ -216,7 +216,7 @@ function computeProcessBreakdown(mainData, qtyIndex, speeds) {
 
 	// จำนวนสีรวม (นอก+ใน ทุก component) — ใช้กับเรทพิมพ์แบบ "สีละ X บาท/ชม." (Art)
 	const colors = (mainData.component1 || []).reduce((s, c) =>
-		s + (c.color || []).reduce((s2, cc) => s2 + (Number(cc.outside) || 0) + (Number(cc.inside) || 0), 0), 0)
+		s + (c.color || []).reduce((s2, cc) => s2 + (Number(cc.outside) || 0) + (Number(cc.inside) || 0) + (Array.isArray(cc.special_ink) ? cc.special_ink.length : 0), 0), 0) // [ทีม] นับสีพิเศษด้วย (เรท 500/สี รวมสีพิเศษ)
 
 	// ตัวเลขเชิง BD จริง: ต่อ "ชั่วโมงคอขวด" (ทรัพยากรที่จำกัด — Theory of Constraints)
 	const COST_KEYS = ['material', 'plate', 'print', 'proof', 'afterpress', 'delivery', 'other']
@@ -597,7 +597,7 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 			const c0 = (est.mainData.component1 || [])[0] || {}
 				const coatingType = detectCoatingType(c0) // OPP/UV/WATER → เลือกเครื่องเคลือบให้ตรงชนิด
 				// เครื่องพิมพ์งานนี้: จับด้วย id ก่อน (กันชื่อเพี้ยน) แล้วค่อยชื่อ
-				const printCfg = CFG.machineById[c0.machine && c0.machine.machine_id] || CFG.machineByName[c0.machine && c0.machine.machine_name] || { speed: CFG.defaultSpeed, setup: CFG.setupHours }
+				const printCfg = { speed: 6000, setup: CFG.setupHours } // [ทีม] เครื่องพิมพ์ความเร็ว 6,000 แผ่น/ชม. ทุกเครื่อง (override)
 				// per-process: เลือก "ตัวเร็วสุด" ในแต่ละกลุ่ม → ตรงกับ ⚡ ในตารางเทียบเสมอ
 				const procCfg = Object.assign({
 					print: printCfg,
@@ -633,7 +633,7 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 				if (typeof window !== 'undefined' && window.MH_TARGET == null && CFG.target != null) window.MH_TARGET = CFG.target
 				const curTarget = () => (typeof window !== 'undefined' && Number(window.MH_TARGET) > 0 ? Number(window.MH_TARGET) : null)
 				// เรท บาท/ชม. ต่อ process (กรอกเอง, จำข้ามการกดคำนวณ) — เติมพิมพ์ 2,500/สี ตาม Art
-				if (typeof window !== 'undefined' && !window.MH_RATES) window.MH_RATES = { 'พิมพ์': 2500 }
+				if (typeof window !== 'undefined' && !window.MH_RATES) window.MH_RATES = { 'พิมพ์': 500 } // [ทีม] เรทพิมพ์ 500/สี/ชม. (รวมสีพิเศษ)
 				const curRates = () => (typeof window !== 'undefined' && window.MH_RATES) || {}
 				const drawHourly = () => { $('#hourly_by_qty').html(renderHourlyByQty(hourly, curTarget(), curRates())) }
 				drawHourly()
