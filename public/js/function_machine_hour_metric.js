@@ -432,17 +432,19 @@ function renderHourlyByQty(perQty, target, rates) {
 	const cmpRows = procLabels.map((label) => {
 		const isPerColor = !!PER_COLOR_PROC[label]
 		const rate = rateOf(label)
+		// [Art] พิมพ์: เอาจำนวนสีไปไว้ที่ชื่อแถว "พิมพ์ (3 สี)" แทนที่จะใส่ ×3 ในแต่ละช่อง
+		const colorN = perQty.length ? (perQty[0].colors || 0) : 0
+		const labelTxt = isPerColor && colorN > 0 ? `${label} (${colorN} สี)` : label
 		const rateInput = `<input type="number" min="0" step="100" class="mh_rate_input" data-proc="${label}" value="${rate != null ? rate : ''}" placeholder="กรอกเรท" style="width:78px;padding:2px 5px;border:1px solid #c4b5fd;border-radius:4px;text-align:right;font-size:12px"> <span style="font-size:10px;color:#9ca3af">บ./ชม.${isPerColor ? '/สี' : ''}</span>`
 		const cells = perQty.map((p) => {
 			const pr = procOf(p, label)
 			if (!pr) return `<td class="alRight">-</td><td class="alRight">-</td><td class="alRight">-</td>`
 			const old = pr.cost
 			const v = timePriceOf(label, pr.hours, rate, p.colors)
-			const note = isPerColor && v != null && p.colors > 0 ? `<span style="font-size:9px;color:#9ca3af"> ×${p.colors}</span>` : ''
 			const diffC = v == null ? '<span style="color:#cbd5e1;font-size:11px">รอเรท</span>' : diffHtml(v - old)
-			return `<td class="alRight">${fmt(old, 0)}</td><td class="alRight">${v == null ? '-' : fmt(v, 0) + note}</td><td class="alRight">${diffC}</td>`
+			return `<td class="alRight">${fmt(old, 0)}</td><td class="alRight">${v == null ? '-' : fmt(v, 0)}</td><td class="alRight">${diffC}</td>`
 		}).join('')
-		return `<tr><td class="alLeft" style="white-space:nowrap">${label}<br>${rateInput}</td>${cells}</tr>`
+		return `<tr><td class="alLeft" style="white-space:nowrap">${labelTxt}<br>${rateInput}</td>${cells}</tr>`
 	}).join('')
 	const cmpTotal = `<tr class="totalRow"><td class="alLeft">💰 รวม <span style="font-weight:normal;font-size:10px">(เฉพาะมีเรท)</span></td>${perQty.map((p) => {
 		let oldSum = 0, vSum = 0, has = false
