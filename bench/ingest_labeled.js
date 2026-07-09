@@ -8,7 +8,6 @@
 //
 // ตัวอย่าง:
 //   node bench/ingest_labeled.js --src ./export_images --map ./export_map.csv --max 30
-require('fs')
 const fs = require('fs')
 const path = require('path')
 
@@ -16,6 +15,8 @@ const arg = (k, d) => { const i = process.argv.indexOf(k); return i > -1 ? proce
 const src = arg('--src')
 const map = arg('--map')
 const MAX = Number(arg('--max', 30)) // เก็บทรงละไม่เกินกี่ใบ (few-shot ไม่ต้องเยอะ)
+const MAXPX = 1568 // ย่อรูปยาวสุดที่ 1568px — เท่าที่ Anthropic ย่อเองพอดี, และ ≤2000px
+//   (กฎ many-image request >20 รูป บังคับทุกรูป ≤2000px มิเช่นนั้น 400)
 const dest = path.join(__dirname, '..', 'router', 'labeled_dielines')
 
 if (!src || !map) {
@@ -23,25 +24,42 @@ if (!src || !map) {
 	process.exit(1)
 }
 
-const lines = fs.readFileSync(map, 'utf8').split(/\r?\n/).filter((l) => l.trim())
-const perT = {}
-let ok = 0, skip = 0, miss = 0
-for (const line of lines) {
-	const parts = line.split(/[\t,]/).map((s) => s.trim().replace(/^"|"$/g, ''))
-	// หา 2 ช่อง: ชื่อไฟล์ (มีนามสกุลรูป) + เลข template
-	const file = parts.find((p) => /\.(jpe?g|png|pdf|webp)$/i.test(p))
-	const tmpl = parts.map(Number).find((n) => Number.isInteger(n) && n >= 1 && n <= 12)
-	if (!file || !tmpl) { skip++; continue }
-	perT[tmpl] = perT[tmpl] || 0
-	if (perT[tmpl] >= MAX) { skip++; continue }
-	const s = path.join(src, file)
-	if (!fs.existsSync(s)) { miss++; continue }
-	const d = path.join(dest, String(tmpl))
-	fs.mkdirSync(d, { recursive: true })
-	fs.copyFileSync(s, path.join(d, file))
-	perT[tmpl]++; ok++
+// jimp ใช้ย่อรูป — ถ้าไม่มีก็ copy ตรงๆ (เตือนให้ติดตั้ง)
+let Jimp = null
+try { Jimp = require('jimp').Jimp } catch (e) { console.warn('เตือน: ไม่มี jimp → copy รูปตรงๆ ไม่ย่อ (อาจ 400 ตอน few-shot >20 รูป). ติดตั้ง: npm install jimp --no-save') }
+
+// ย่อรูป (ถ้าใหญ่กว่า MAXPX) แล้วเซฟเป็น jpeg; PDF/ไม่มี jimp → copy ตรงๆ
+async function placeImage(srcPath, destPath) {
+	const isPdf = /\.pdf$/i.test(srcPath)
+	if (isPdf || !Jimp) { fs.copyFileSync(srcPath, destPath); return }
+	const img = await Jimp.read(srcPath)
+	const w = img.bitmap.width, h = img.bitmap.height
+	const long = Math.max(w, h)
+	if (long > MAXPX) img.resize(w >= h ? { w: MAXPX } : { h: MAXPX })
+	const buf = await img.getBuffer('image/jpeg', { quality: 82 })
+	fs.writeFileSync(destPath.replace(/\.(png|webp)$/i, '.jpg'), buf)
 }
-console.log('เท labeled เข้า', dest)
-console.log('  สำเร็จ:', ok, '| ข้าม(เกิน max/ไม่เข้าเกณฑ์):', skip, '| หาไฟล์ไม่เจอ:', miss)
-console.log('  ต่อทรง:', JSON.stringify(perT))
-console.log('\nจากนั้น: AI_FEWSHOT_DIELINES=1 แล้วรันเทสวัด accuracy')
+
+;(async () => {
+	const lines = fs.readFileSync(map, 'utf8').split(/\r?\n/).filter((l) => l.trim())
+	const perT = {}
+	let ok = 0, skip = 0, miss = 0
+	for (const line of lines) {
+		const parts = line.split(/[\t,]/).map((s) => s.trim().replace(/^"|"$/g, ''))
+		// หา 2 ช่อง: ชื่อไฟล์ (มีนามสกุลรูป) + เลข template
+		const file = parts.find((p) => /\.(jpe?g|png|pdf|webp)$/i.test(p))
+		const tmpl = parts.map(Number).find((n) => Number.isInteger(n) && n >= 1 && n <= 12)
+		if (!file || !tmpl) { skip++; continue }
+		perT[tmpl] = perT[tmpl] || 0
+		if (perT[tmpl] >= MAX) { skip++; continue }
+		const s = path.join(src, file)
+		if (!fs.existsSync(s)) { miss++; continue }
+		const d = path.join(dest, String(tmpl))
+		fs.mkdirSync(d, { recursive: true })
+		try { await placeImage(s, path.join(d, file)); perT[tmpl]++; ok++ } catch (e) { console.warn('ข้าม (อ่านรูปไม่ได้): ' + file); skip++ }
+	}
+	console.log('เท labeled เข้า', dest, '(ย่อ ≤' + MAXPX + 'px)')
+	console.log('  สำเร็จ:', ok, '| ข้าม:', skip, '| หาไฟล์ไม่เจอ:', miss)
+	console.log('  ต่อทรง:', JSON.stringify(perT))
+	console.log('\nจากนั้น: AI_FEWSHOT_DIELINES=1 แล้วรันเทสวัด accuracy')
+})().catch((e) => { console.error('ERROR:', e.message); process.exit(1) })
