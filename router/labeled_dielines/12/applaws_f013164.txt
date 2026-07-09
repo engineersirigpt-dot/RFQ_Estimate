@@ -1,0 +1,1 @@
+Custom display carton. The main front panel has a SCALLOPED / PEAKED top edge (retail pet-food display front). Even though the base has a tuck top + auto-bottom, that arched display panel means templates 1-11 cannot represent it, so it is Custom (12). NOT Template 3/4/8.

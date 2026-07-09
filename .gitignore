@@ -22,3 +22,16 @@ _*
 !_dieline_3d_bundle/**
 /LogAI
 notes.txt
+
+# AI dieline labeling — large image copies / generated outputs (local only)
+test/classified_by_ai/
+test/named_dielines/
+test/label_candidates/
+test/uploads/
+test/uploads.zip
+bench/dieline_index.csv
+bench/noname_refined.csv
+bench/*_log.txt
+bench/*_results.md
+bench/compete_results.json
+bench/dieline_index.csv
