@@ -35,3 +35,7 @@ bench/*_log.txt
 bench/*_results.md
 bench/compete_results.json
 bench/dieline_index.csv
+
+# large data / outputs (ไม่ commit)
+/answer_key/
+*.xlsx

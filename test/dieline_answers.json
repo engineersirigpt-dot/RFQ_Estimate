@@ -1,0 +1,46 @@
+{
+  "_comment": "เฉลยทรงกล่อง (box_template_id) จากไดไลน์จริง — ยืนยันโดยผู้ใช้/ประชุม ใช้เทสความแม่นของ AI จับทรงจากรูป",
+  "_templates": {
+    "1": "Reverse Tuck End (ฝาเสียบสลับ)",
+    "2": "Straight Tuck End (ฝาเสียบตรง)",
+    "4": "Tuck Top Auto Bottom (ก้นล็อก)",
+    "12": "Custom (ไม่เข้าทรงมาตรฐาน 1-11)"
+  },
+  "cases": [
+    {
+      "file": "{3BBB066F-410B-44F9-8CC9-1FCC2447BFC7}.png",
+      "product": "Applaws F013164 (Chicken Breast Tuna, cat food)",
+      "expected_box_template_id": 12,
+      "reason": "ขอบบนหยัก/เว้า (scalloped display front) + ลูกฟูก E-flute — ไม่เข้าทรงมาตรฐาน",
+      "source": "meeting (สีส้ม: AI จับ 8 → ที่ถูก 12)"
+    },
+    {
+      "file": "messageImage_1783407667263.jpg",
+      "product": "Happy Jim PRO+ Rose Cider (probiotic drink)",
+      "expected_box_template_id": 1,
+      "reason": "tuck ธรรมดา ขอบสี่เหลี่ยม ฝาเสียบสลับ",
+      "source": "meeting (สีชมพู: AI จับ 4 → ที่ถูก 1)"
+    },
+    {
+      "file": "D3D.jpg",
+      "product": "D3D Hybrid Sunscreen SPF50+",
+      "expected_box_template_id": 12,
+      "reason": "6 พาเนล (8/2.5/8/2.5/8/8) + ช่องแขวน (hang slot) + หน้าต่างโชว์สินค้า",
+      "source": "user confirmed"
+    },
+    {
+      "file": "รูปBloss triple collagen_240522_152326.jpg",
+      "product": "Bloss Natura Tripeptide Collagen Pomegranate",
+      "expected_box_template_id": 1,
+      "reason": "tuck ฝาเสียบสลับ ขอบสี่เหลี่ยม ไม่มีฟีเจอร์พิเศษ",
+      "source": "user confirmed"
+    },
+    {
+      "file": "GENT.jpg",
+      "product": "The Gent herbal pills (dietary supplement)",
+      "expected_box_template_id": 12,
+      "reason": "ขอบบนโค้ง (thumb-notch) + ก้นล็อก — รวมแล้วไม่เข้าทรงมาตรฐาน ตีเป็น Custom",
+      "source": "user confirmed (แรกเข้าใจว่าเป็น 1)"
+    }
+  ]
+}

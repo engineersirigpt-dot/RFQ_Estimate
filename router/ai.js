@@ -279,6 +279,7 @@ Rules:
     * Interlocking rectangular flaps at bottom, no diagonal lines → snap-lock (Template 3)
     * Straight tuck flaps top + bottom on the SAME side → Template 2
     * Straight tuck flaps top + bottom on OPPOSITE sides → Template 1
+    * DECIDING 1/2 vs 4 (the most common tuck mistake) — the BOTTOM decides it: Template 4 (auto-bottom) REQUIRES the bottom flaps to show DIAGONAL crash-lock/auto-lock fold lines (a glued pop-open bottom). If BOTH ends are a plain SYMMETRIC tuck flap with dust wings and the bottom is just a MIRROR of the top tuck (no diagonal creases at the bottom), it is Template 1 or 2 — NEVER Template 4. For an image-only dieline with no spec text, a symmetric tuck bottom defaults to 1/2, not 4.
     * Flat tray, diagonal folds at all 4 corners, no top → Template 5 or 6 (6 if extra inner frame visible)
     * Tray + attached lid panel → Template 7 (bento)
     * Peaked/gable top + handle slot → Template 8
@@ -294,6 +295,8 @@ Rules:
     * "protruding_tab" — an extra hang tab / euro-slot / lock tongue sticks OUT past the rectangle.
     * "handle_or_slot" — a carry handle or finger slot is cut into the box.
     * "curved_or_scalloped_edge" — a MAIN panel's outer/top edge is CURVED, arched, scalloped, or PEAKED (e.g. a retail display-carton front like a pet-food box). CHECK THE TOP EDGE: if it dips, curves, or peaks instead of being a flat straight line, choose THIS.
+    * "window_or_cutout" — a die-cut WINDOW or cut-out OPENING is punched INTO a main panel (e.g. a display window to show the product through the box). This is INTERIOR to the outline — inspect the panels themselves, not just the outer edge. An otherwise-rectangular box with a product window is still Custom.
+    * "open_cover_or_wrap" — the flat is an open COVER / LID / WRAP / band ("ฝาครอบ") with NO tuck-in end or glued end that fully closes a box on its own — it just wraps or caps another tray/box. (A real self-closing tuck/seal carton is NOT this.)
     * "irregular" — the overall outline is stepped / non-rectangular / an odd 2D die-cut.
   Anything that is NOT "plain_rectangle" is a shape that wastes material and breaks the interlocking NEST when the dies are laid out for cutting → that is what makes a box "custom" in production. The system uses this: outer_shape != "plain_rectangle" → Custom (12); outer_shape == "plain_rectangle" → classify 1-11 by construction (tuck-flap directions, bottom type), IGNORING which side the glue tab is on.
 - CUSTOM FLAT SIZE: For a Custom box (more than 4 body panels), the form needs the FLAT-SHEET size, NOT the folded box W/L/H. Output open_size_mm = {width, length} = the OVERALL OUTERMOST dimensions of the flat dieline — the largest total width × total height labelled on the drawing (e.g. a flat measuring 37cm wide × 20cm tall → {width:370, length:200}). Use the TOTAL outer numbers, never a single panel's width, and never the folded box size. Still also output dimensions_mm (the folded box W/L/H) for reference. If you cannot read the overall flat size confidently, OMIT open_size_mm — the user will enter it — rather than guess.
@@ -325,6 +328,8 @@ Rules:
 4. deliveries: ONLY fill when an actual Thai province name appears in the text (กรุงเทพ, นนทบุรี, สมุทรปราการ, etc.) tied to a delivery context ('ส่งที่', 'ส่งงาน', 'จัดส่ง', 'delivery'). DO NOT default to 'กรุงเทพ' just because the box has no destination. EMPTY 'Customer' field is NOT a destination. If no destination is stated, OMIT 'deliveries' entirely.
 
 5. box_template_id = 8 (Gable Top): did you verify there is a visible HANDLE CUT-OUT slot in the dieline? If no handle, it is NOT Template 8 — most likely Template 4 (TTAB) or Template 1.
+
+5b. box_template_id = 4 (Tuck Top Auto Bottom): did you actually SEE DIAGONAL crash-lock fold lines (and/or bottom glue) at the BOTTOM of the dieline? Template 4's bottom is a GLUED auto-lock. If the bottom is a plain SYMMETRIC tuck flap that MIRRORS the top (dust wings + straight tuck, NO diagonal creases, NO bottom glue), it is Template 1 (or 2), NOT 4. On an image-only dieline with symmetric top/bottom tuck flaps and no visible diagonal bottom creases, choose Template 1 — do NOT guess 4.
 
 6. dimensions_mm:
    • LENGTH vs WIDTH — by HOW the dimension is known (not by source type):
@@ -572,9 +577,10 @@ function validateAndFix(data, sourceText) {
 			if (Array.isArray(comp.dieline_panels) && comp.dieline_panels.filter((p) => Number(p) > 0).length > 4) {
 				comp.box_template_id = 12
 			}
-			// OUTER SHAPE → CUSTOM (Art's production rule): any outline that is NOT a plain
-			// rectangle (protruding tab, handle/slot, curved/scalloped/peaked edge, irregular)
-			// wastes material and breaks the interlocking die NEST when cutting → custom shape.
+			// OUTER SHAPE → CUSTOM (Art's production rule): any shape that is NOT a plain
+			// rectangle (protruding tab, handle/slot, curved/scalloped/peaked edge, die-cut
+			// window/cut-out, open cover/wrap, irregular) wastes material and breaks the
+			// interlocking die NEST when cutting → custom shape.
 			// A MIRRORED glue seam stays "plain_rectangle" and must NOT trigger this (mirror
 			// keeps Template 1/2). The AI reports the category; the decision is deterministic.
 			if (typeof comp.outer_shape === 'string' && comp.outer_shape.trim() && comp.outer_shape.trim().toLowerCase() !== 'plain_rectangle') {

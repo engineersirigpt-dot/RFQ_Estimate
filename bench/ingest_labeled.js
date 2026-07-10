@@ -24,20 +24,28 @@ if (!src || !map) {
 	process.exit(1)
 }
 
-// jimp ใช้ย่อรูป — ถ้าไม่มีก็ copy ตรงๆ (เตือนให้ติดตั้ง)
-let Jimp = null
-try { Jimp = require('jimp').Jimp } catch (e) { console.warn('เตือน: ไม่มี jimp → copy รูปตรงๆ ไม่ย่อ (อาจ 400 ตอน few-shot >20 รูป). ติดตั้ง: npm install jimp --no-save') }
+// jimp = ย่อรูป, pdf-to-img = แปลง PDF→รูป (ไดไลน์ส่วนใหญ่เป็น PDF, loader อ่านแค่ jpg/png)
+let Jimp = null, pdfToImg = null
+try { Jimp = require('jimp').Jimp } catch (e) { console.warn('เตือน: ไม่มี jimp → ไม่ย่อ. ติดตั้ง: npm install jimp --no-save') }
 
-// ย่อรูป (ถ้าใหญ่กว่า MAXPX) แล้วเซฟเป็น jpeg; PDF/ไม่มี jimp → copy ตรงๆ
+async function loadImgBuffer(srcPath) {
+	if (/\.pdf$/i.test(srcPath)) {
+		if (!pdfToImg) pdfToImg = (await import('pdf-to-img')).pdf
+		const doc = await pdfToImg(srcPath, { scale: 2 })
+		for await (const page of doc) return page // หน้าแรกพอ
+		throw new Error('PDF ว่าง')
+	}
+	return fs.readFileSync(srcPath)
+}
+
+// แปลง(ถ้า PDF) + ย่อ ≤MAXPX → เซฟเป็น .jpg
 async function placeImage(srcPath, destPath) {
-	const isPdf = /\.pdf$/i.test(srcPath)
-	if (isPdf || !Jimp) { fs.copyFileSync(srcPath, destPath); return }
-	const img = await Jimp.read(srcPath)
+	const dest = destPath.replace(/\.(png|webp|pdf)$/i, '.jpg')
+	if (!Jimp) { fs.copyFileSync(srcPath, destPath); return }
+	const img = await Jimp.read(await loadImgBuffer(srcPath))
 	const w = img.bitmap.width, h = img.bitmap.height
-	const long = Math.max(w, h)
-	if (long > MAXPX) img.resize(w >= h ? { w: MAXPX } : { h: MAXPX })
-	const buf = await img.getBuffer('image/jpeg', { quality: 82 })
-	fs.writeFileSync(destPath.replace(/\.(png|webp)$/i, '.jpg'), buf)
+	if (Math.max(w, h) > MAXPX) img.resize(w >= h ? { w: MAXPX } : { h: MAXPX })
+	fs.writeFileSync(dest, await img.getBuffer('image/jpeg', { quality: 82 }))
 }
 
 ;(async () => {
@@ -45,7 +53,7 @@ async function placeImage(srcPath, destPath) {
 	const perT = {}
 	let ok = 0, skip = 0, miss = 0
 	for (const line of lines) {
-		const parts = line.split(/[\t,]/).map((s) => s.trim().replace(/^"|"$/g, ''))
+		const parts = line.split('\t').map((s) => s.trim().replace(/^"|"$/g, '')) // TSV — กันชื่อไฟล์มี comma
 		// หา 2 ช่อง: ชื่อไฟล์ (มีนามสกุลรูป) + เลข template
 		const file = parts.find((p) => /\.(jpe?g|png|pdf|webp)$/i.test(p))
 		const tmpl = parts.map(Number).find((n) => Number.isInteger(n) && n >= 1 && n <= 12)
