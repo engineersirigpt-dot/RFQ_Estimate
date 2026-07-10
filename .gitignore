@@ -39,3 +39,4 @@ bench/dieline_index.csv
 # large data / outputs (ไม่ commit)
 /answer_key/
 *.xlsx
+/bench/results/
