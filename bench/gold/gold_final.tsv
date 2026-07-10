@@ -1,0 +1,10 @@
+file	gold	source	reason
+1649131510785_050422_134807.jpg	1	claude	ทุกแหล่ง=1
+Oat fiber spaghetti_300522_085445.jpg	1	claude	ไม่มีหน้าต่าง = tuck (GPT hallucinate)
+060622_092147.jpg	12	claude	GENT — Custom (proxy=1 ผิด)
+090822_100200-382414.pdf	9	claude	sleeve
+ART_2PAGB000890_050422_101202.pdf	12	claude	NATUR — มีหน้าต่าง PET จริง (proxy=3 ผิด)
+F009929 กล่อง  FETTUCCINE REV.1_280522_161722.pdf	1	expert	FETTUCCINE — ก้นเสียบ = tuck 1
+FAHW0007  กล่องสี (2)_060522_155152.PDF	2	expert	ZOE — ฝาเสียบทางเดียวกัน = 2
+LAY F007346 31012660 กล่องพิมพ์ GPO DICLOX (DICLOXACILIN) 250 MG.-1_160522_151313.pdf	12	expert	GPO DICLOX — มี OL แต่ไม่ auto-lock/ไม่มีหูหิ้ว = Custom (proxy=4 ผิด)
+messageImage_1652165848325_110522_110040.jpg	2	expert	NAH LAPIS — ฝาเสียบทางเดียวกัน = 2
