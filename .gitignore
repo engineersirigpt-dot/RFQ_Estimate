@@ -42,3 +42,5 @@ bench/dieline_index.csv
 /bench/results/
 /bench/dieline_train.zip
 /bench/finetune_data/
+/bench/gold/img/
+/bench/gold/img2/
