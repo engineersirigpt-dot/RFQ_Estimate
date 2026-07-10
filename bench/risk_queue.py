@@ -50,13 +50,17 @@ def knn(v,fm,k=7):
     c2=vt.most_common(2)[1][1] if len(vt)>1 else 0
     return t1, c1/k, (c1-c2)/k
 
-def classify(claude,cv,purity,margin):
+# === Round 12 verdict: 2-tier CHECKLIST/ROUTINE (ยุบ ALERT) ===
+def classify(claude,cv,purity):
     tuck_or_custom = (claude in TUCK or cv in TUCK or claude==12 or cv==12)
-    if claude!=cv and purity>=P and margin>=Mg:        # ขัดแย้งเชิงบวก + CV มั่นใจ
-        return 'ALERT'
-    if tuck_or_custom and (claude!=cv or purity<P):    # tuck/custom ที่ CV ไม่มั่นใจ/ขัด
+    if tuck_or_custom and (claude!=cv or purity<P):    # tuck/custom ที่ขัด/CV ไม่มั่นใจ → inline focus cue
         return 'CHECKLIST'
     return 'ROUTINE'
+# ALERT = research field only (log ไว้ วัด precision แยกเมื่อมี gold; ยังไม่ขึ้น UI)
+def alert_reason(claude,cv,purity,margin):
+    if claude!=cv and purity>=P and margin>=Mg: return 'high_purity_cv_disagreement'
+    # structural_fact_contradiction / retrieval_prototype_contradiction → รอ signal ใหม่
+    return 'none'
 def axisof(g): return 'custom' if g==12 else ('tuck' if g in TUCK else ('weak' if g in WEAK else 'other'))
 
 R=[]
@@ -64,24 +68,27 @@ for r in p0:
     v=emb.get(r['file'])
     if not v: continue
     cv,pur,mar=knn(v,fam(r['file']))
-    R.append(dict(claude=r['claude'],cv=cv,gold=r['gold'],pur=pur,mar=mar,
-                  q=classify(r['claude'],cv,pur,mar),axis=axisof(r['gold']),wrong=r['claude']!=r['gold']))
+    R.append(dict(claude=r['claude'],cv=cv,gold=r['gold'],pur=pur,mar=mar,q=classify(r['claude'],cv,pur),
+                  areason=alert_reason(r['claude'],cv,pur,mar),axis=axisof(r['gold']),wrong=r['claude']!=r['gold']))
 n=len(R); err=[x for x in R if x['wrong']]
-A=[x for x in R if x['q']=='ALERT']; C=[x for x in R if x['q']=='CHECKLIST']; RO=[x for x in R if x['q']=='ROUTINE']
+C=[x for x in R if x['q']=='CHECKLIST']; RO=[x for x in R if x['q']=='ROUTINE']
 def line(k,d,lab):
     lo,hi=wilson(k,d); ev='' if d>=10 else ' ⚠️insuf'
-    return f'  {lab:34s} {k}/{d}={100*k//d if d else 0:3d}% [CI {100*lo:.0f}-{100*hi:.0f}]{ev}'
-print(f'=== risk queue (p={P}, m={Mg}, group-safe proxy n={n}) ===')
-print(f'  display: ALERT {len(A)} ({100*len(A)//n}%) | CHECKLIST {len(C)} ({100*len(C)//n}%) | ROUTINE {len(RO)} ({100*len(RO)//n}%)')
-print('\n  metrics:')
-print(line(len([x for x in err if x['q']in('ALERT','CHECKLIST')]),len(err),'queue_recall P(A∪C|err)'))
-print(line(len([x for x in A if x['wrong']]),len(A),'alert_precision P(err|ALERT)'))
-print(line(len([x for x in err if x['q']=='ALERT']),len(err),'alert_recall P(ALERT|err)'))
-print(line(len([x for x in RO if x['wrong']]),len(err),'false_comfort P(ROUTINE|err)'))
-print('\n  🎯 error concentration ordering (ต้อง ALERT > CHECKLIST > ROUTINE):')
-for lab,S in [('P(err|ALERT)',A),('P(err|CHECKLIST)',C),('P(err|ROUTINE)',RO)]:
-    print(line(len([x for x in S if x['wrong']]),len(S),lab))
-print('\n  per-axis queue_recall:')
+    return f'  {lab:36s} {k}/{d}={100*k//d if d else 0:3d}% [CI {100*lo:.0f}-{100*hi:.0f}]{ev}'
+print(f'=== risk queue 2-tier (Round 12 verdict, p={P}, group-safe proxy n={n}) ===')
+print(f'  display: CHECKLIST {len(C)} ({100*len(C)//n}%) | ROUTINE {len(RO)} ({100*len(RO)//n}%)')
+print('\n  metrics (ตาม GPT R12):')
+print(line(len([x for x in err if x['q']=='CHECKLIST']),len(err),'queue_recall P(CHECKLIST|err)'))
+print(line(len([x for x in RO if x['wrong']]),len(err),'routine_miss P(ROUTINE|err)'))
+print('\n  🎯 error concentration (ต้อง CHECKLIST > ROUTINE):')
+print(line(len([x for x in C if x['wrong']]),len(C),'P(err|CHECKLIST)'))
+print(line(len([x for x in RO if x['wrong']]),len(RO),'P(err|ROUTINE)'))
+print('\n  per-axis queue_recall (CHECKLIST|err):')
 for ax in ['tuck','custom','weak','other']:
     ae=[x for x in err if x['axis']==ax]
-    if ae: print(line(len([x for x in ae if x['q']in('ALERT','CHECKLIST')]),len(ae),ax))
+    if ae: print(line(len([x for x in ae if x['q']=='CHECKLIST']),len(ae),ax))
+print('\n  candidate_alert_reason (research field — ยังไม่ขึ้น UI):')
+rc=collections.Counter(x['areason'] for x in R)
+for k,v in rc.items():
+    prec=[x for x in R if x['areason']==k]
+    print(f'    {k:32s}: {v} ใบ | precision(err) {len([x for x in prec if x["wrong"]])}/{v}')
