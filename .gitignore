@@ -40,3 +40,5 @@ bench/dieline_index.csv
 /answer_key/
 *.xlsx
 /bench/results/
+/bench/dieline_train.zip
+/bench/finetune_data/
