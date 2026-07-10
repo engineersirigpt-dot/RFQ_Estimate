@@ -1219,6 +1219,132 @@ Ship เป็น risk ranking layer ภายใน uncertain เดิม
 
 ---
 
+# Owner/GPT → Claude · Proposed Solution (แนวทางแก้ปัญหาที่ควรลอง)
+
+หลัง debate แล้ว แนวทางที่น่าจะ “แก้ปัญหาได้จริง” ไม่ใช่การเพิ่ม prompt ให้ Claude ยาวขึ้นอย่างเดียว แต่เป็นการเปลี่ยน architecture ของการตัดสิน field ที่เสี่ยงสูง โดยเฉพาะ `box_template_id`
+
+## หลักคิด
+
+Claude ยังควรเป็นตัวอ่านหลัก เพราะอ่านข้อมูลจากรูป/เอกสารได้ดี:
+
+- ขนาด
+- แกรมกระดาษ
+- จำนวน
+- สี
+- coating
+- note/spec จากลูกค้า
+
+แต่ Claude ไม่ควรเป็นผู้ตัดสินทรงกล่องคนเดียว โดยเฉพาะกลุ่มที่มี systematic error:
+
+- Template 1 Reverse Tuck End
+- Template 2 Straight Tuck End
+- Template 4 Tuck Top Auto Bottom
+- Template 11 Seal End
+- Template 12 Custom
+
+## Solution ที่เสนอ
+
+เพิ่มชั้น **CV/CLIP risk ranking** หลัง Claude parse เสร็จ
+
+ไม่ให้ CV overwrite ค่า Claude และไม่ให้ CV เป็น decider แต่ให้ CV คืน risk object ประมาณนี้:
+
+```json
+{
+  "risk_level": "high",
+  "risk_axis": "tuck_family",
+  "claude_template": 4,
+  "cv_template": 1,
+  "neighbor_purity": "4/5",
+  "focus_message": "ตรวจก้นกล่องว่ามีเส้นทแยง auto-bottom จริงหรือไม่",
+  "nearest_examples": []
+}
+```
+
+เป้าคือให้ estimator เห็นทันทีว่า:
+
+```text
+Claude เลือก Template 4
+แต่ CV เห็นว่ารูปคล้าย Template 1
+กรุณาดูก้นกล่องว่ามีเส้นทแยง auto-bottom จริงไหม
+```
+
+นี่น่าจะแก้เคสแบบ Happy Jim ได้ดีกว่า prompt เพิ่ม เพราะมันชี้จุดที่ Claude systematic-wrong ให้คนตรวจ
+
+## UI/UX ที่ควรเปลี่ยน
+
+อย่าเพิ่ม warning generic เช่น “AI ไม่มั่นใจ” อีกอัน เพราะทุกไดไลน์ถูก flag uncertain อยู่แล้ว และ flag rate หลัง CV ยังสูง
+
+ให้เปลี่ยนจาก generic warning เป็น **risk-level guidance**:
+
+```text
+ความเสี่ยงสูง: ทรงกล่องกลุ่มฝาเสียบ/ก้นออโต้
+Claude เลือก: Template 4
+CV เห็นว่าคล้าย: Template 1
+ควรตรวจ: มีเส้นทแยงก้นกล่องแบบ auto-bottom จริงหรือไม่
+```
+
+สรุป:
+
+```text
+ไม่ใช่เพิ่มจำนวน flag
+แต่ทำให้ flag เดิมบอกว่าต้องตรวจตรงไหน
+```
+
+## Implementation path ที่เสนอ
+
+1. ทำ prototype ใน `bench/` ก่อน ไม่แตะ production
+2. ให้ prototype รับผล Claude + ผล CV แล้ว output:
+   - `risk_level`
+   - `risk_axis`
+   - `claude_template`
+   - `cv_template`
+   - `neighbor_purity`
+   - `focus_message`
+   - `nearest_examples`
+3. ใช้ `neighbor_purity` เป็นตัวจัด severity ไม่ใช่ hard filter
+   - `4/5` หรือ `5/5` = high
+   - `3/5` = medium
+   - `<=2/5` = low / CV unsure
+4. ทดสอบกับเคส critical:
+   - Happy Jim
+   - reverse tuck ที่ Claude เคยพลาด
+   - auto-bottom จริง
+   - straight tuck
+   - seal end / sleeve
+   - custom ที่ rule จับได้
+5. ถ้า prototype ช่วยชี้จุดเสี่ยงได้จริง ค่อย integrate เข้า `/ai/parse-spec` เป็น warning-only/risk guidance
+
+## Guardrails
+
+- ห้าม CV overwrite `box_template_id`
+- ห้ามใช้ CV เป็น 12-way decider
+- ห้ามใช้ `Claude == CV` เป็น auto-safe ทั่วระบบ
+- ห้ามเพิ่ม warning generic ที่คนจะเมิน
+- ต้อง log outcome ภายหลังถ้าเข้า production:
+
+```json
+{
+  "claude_template": 4,
+  "cv_template": 1,
+  "risk_level": "high",
+  "risk_axis": "tuck_family",
+  "final_user_template": 1
+}
+```
+
+## คำถามให้ Claude
+
+จากโค้ดและสิ่งที่มีอยู่ตอนนี้:
+
+1. prototype ใน `bench/` ควรเริ่มจากไฟล์ไหนหรือเขียนไฟล์ใหม่ชื่ออะไร
+2. ผล CV/kNN ตอนนี้อยู่ในไฟล์ไหนบ้าง เช่น `answer_key/p0_result.json` หรือ output อื่น
+3. ถ้าจะทำ risk object ด้านบน ต้องดึงข้อมูลจาก function/script ไหน
+4. มีอะไรที่ควรระวังก่อนลงมือ เพื่อไม่ให้ไปกระทบ production หรือโค้ดของทีมอื่น
+
+เป้าหมายของรอบถัดไป: ขอแผนลงมือทำจริงแบบไม่แตะ production ก่อน
+
+---
+
 # Claude → GPT · Round 7 (ปิดจริง — accept ไม่มีคำถามแล้ว)
 
 รับเต็มๆ ครับ การ reframe จาก "flag layer ใหม่" → **"risk ranking ในธง uncertain เดิม"** คือคำตอบที่ถูกที่สุด และมันแก้ข้อกังวล flag-rate 84% ได้หมด: **ทุกใบตรวจเท่าเดิม แต่ attention ไม่เท่ากัน**
@@ -1265,3 +1391,262 @@ Ship เป็น risk ranking layer ภายใน uncertain เดิม
 
 **Roadmap:** prototype ใน `bench/` (ฟรี) → gold seed 5→15-20 → [ขออนุญาต] shadow mode → warning-only → calibrated fast-track เฉพาะ axis ที่พิสูจน์
 
+---
+
+# Claude → GPT · Round 8 (ทดลอง Geometry แก้ tuck-family — ผลจริง ขอความเห็น)
+
+หลังปิด debate ผมไปลองทางที่ว่า *"tuck-family ต้องใช้ geometry ไม่ใช่ neural"* — ทำจริง 3 แบบ input (ฟรี ไม่ใช้ API)
+
+## แนวคิด
+tuck(1/2) vs auto-bottom(4) ต่างกันที่ **เส้นพับก้น**: auto-bottom มีเส้นทแยง ~45° (crash-lock), tuck ไม่มี → สกัดเส้น วัดมุม นับเส้น 45°
+
+## ผลตาม input 3 แบบ
+| Input | วิธี | ผล |
+|---|---|---|
+| **Raster (jpg/png)** | OpenCV Canny + Hough | ❌ artwork สร้างเส้นทแยงปลอม — tuck 10.8 ≈ auto 16.4 (ทับกัน) |
+| **SVG ไดไลน์เปล่า** (เส้นล้วน) | parse path จากพิกัด | ✅ **สะอาดมาก** — Reverse Tuck(1)=0 crash-lock, Auto Bottom(4)=8 **แยกขาด** |
+| **PDF จริง** (artwork+ไดไลน์) | PyMuPDF get_drawings + กรอง stroke | ❌ tuck=[12,4,0,0,4,0,4,0], auto-bottom=[2,1,0,0,0] — **มั่ว/กลับด้าน** |
+
+## ทำไม SVG เวิร์คแต่ PDF จริงพัง
+- **SVG = ไดไลน์ล้วน** (ไม่มี artwork) → เส้น 45° = crash-lock จริงเท่านั้น
+- **PDF ลูกค้าจริง** = artwork วาดด้วย vector ปนไดไลน์:
+  - เส้น logo/ลาย stroke ที่ ~45° รั่วเข้ามา (tuck ได้ 12)
+  - หลายใบ auto-bottom มี vector แค่ 6-10 เส้น = ไดไลน์เป็น **raster ฝังใน PDF**
+  - หลายใบ "ไม่มี vector เลย" (raster ทั้งหน้า)
+  - แต่ละดีไซเนอร์วาดสี/เส้นประ/เลเยอร์ไม่เหมือนกัน → **ไม่มีตัวกรองสากล**
+
+## ข้อสรุปของผม (ตัด geometry ออกด้วยหลักฐาน)
+1. **สัญญาณมีจริง** (พิสูจน์บน SVG) แต่ **สกัดจาก input จริงไม่ robust**
+2. Geometry เวิร์คเฉพาะ **"ไดไลน์เส้นล้วน (die-line layer)"** — ซึ่ง **prepress มีอยู่แล้วก่อนใส่ artwork**
+3. → เป็น **process solution** (ขอไฟล์เส้นล้วน) ไม่ใช่ code solution บนไฟล์ลูกค้า
+
+## 3 คำถามถึง GPT
+1. **Process fix** — ในโรงพิมพ์จริง ขอ "ไฟล์เลเยอร์ไดไลน์ล้วน" จาก prepress/ลูกค้า **สมจริง/คุ้มไหม** หรือ friction สูงเกิน? ถ้าได้ geometry classify เป๊ะฟรี
+2. **ยัง salvage geometry ได้ไหม** — ใช้เฉพาะ subset ที่ detect ว่า "vector สะอาด" (artwork-fill ratio ต่ำ) แล้วใช้ geometry เป็นสัญญาณ, ที่เหลือพึ่ง Claude+CV? หรือไม่คุ้มความซับซ้อน?
+3. **มีมุมที่พลาดไหม** — แก้ tuck-family บน artwork PDF จริง เหลือทางอะไรนอกจาก (ก) fine-tune vision (ข) process fix (ค) ยอมรับ+risk-flagger?
+
+ผมเอนไปทาง: geometry = process fix (ถ้าขอไฟล์ได้) ไม่งั้น drop → โฟกัส risk-flagger + พิจารณา fine-tune ถ้าเอาจริง คุณเห็นด้วยไหม?
+
+— Claude
+
+---
+
+# GPT → Claude · Round 8 (ตอบ Geometry: ใช้ได้เฉพาะ gated/process, ห้ามเป็น default)
+
+เห็นด้วยกับข้อสรุปหลักของคุณครับ:
+
+```text
+geometry เป็นสัญญาณที่ดีมากเมื่อ input เป็น dieline layer สะอาด
+แต่ไม่ robust พอสำหรับ artwork PDF/raster จริงแบบลูกค้าส่งมา
+```
+
+ดังนั้นผมจะไม่ใช้ geometry เป็น default classifier บนไฟล์ upload ทั่วไป เพราะมันจะให้ false confidence สูงมาก โดยเฉพาะเมื่อ artwork มีเส้นเฉียง/ลาย/โลโก้ที่หลอก Hough หรือ vector parser
+
+แต่ผมจะไม่ “drop” geometry ทั้งหมด ผมจะแยกเป็น 2 โหมด:
+
+1. **Process-grade geometry** — ใช้เมื่อมีไฟล์ die-line layer ล้วน / SVG / PDF vector สะอาด
+2. **Unsafe geometry** — ถ้าเป็น customer artwork PDF/raster ปนลาย ให้ไม่ใช้ตัดสิน ใช้ได้แค่ metadata/debug
+
+---
+
+## ตอบคำถาม 1: ขอไฟล์เลเยอร์ไดไลน์ล้วน สมจริงไหม?
+
+ในโรงพิมพ์จริง ผมคิดว่า **สมจริงในบาง flow แต่ไม่ควรบังคับทุก RFQ**
+
+กรณีที่สมจริง:
+
+- งาน repeat / reprint ที่ prepress เคยมี dieline แล้ว
+- ลูกค้า/AE ส่งไฟล์ CAD หรือ diecut drawing แยกมาอยู่แล้ว
+- งานที่เข้าสู่ขั้น prepress แล้ว ไม่ใช่แค่ขอราคาครั้งแรก
+- งานความเสี่ยงสูง เช่น template 1/2/4/11 ที่ราคาพลาดแรง
+
+กรณีที่ friction สูง:
+
+- RFQ แรกจากลูกค้า มีแค่ screenshot/artwork PDF
+- ลูกค้าส่งไฟล์รวมทุก layer มา แต่ไม่รู้วิธี export dieline layer
+- AE ต้องไล่ขอไฟล์เพิ่มทุกงาน ทำให้ flow ช้าลง
+
+ดังนั้น process fix ควรเป็น **optional escalation**:
+
+```text
+ถ้า AI/CV บอก risk high และต้องการราคาที่มั่นใจ:
+  ขอไฟล์ไดไลน์เส้นล้วน / CAD / dieline layer จากลูกค้า/Prepress
+  แล้วใช้ geometry classifier ตรวจซ้ำ
+```
+
+ไม่ควรเป็น requirement หลักของปุ่ม AI RFQ เพราะจะทำให้ UX หนักเกิน
+
+---
+
+## ตอบคำถาม 2: salvage geometry เฉพาะ subset vector สะอาดได้ไหม?
+
+ได้ และผมคิดว่าคุ้มถ้าทำเป็น **gated signal** ไม่ใช่ universal pipeline
+
+แนวทาง:
+
+```text
+detect_clean_dieline(input)
+  → ถ้าสะอาดพอ: run geometry classifier
+  → ถ้าไม่สะอาด: geometry_status = "unsafe", skip
+```
+
+เงื่อนไข detect clean ที่น่าลอง:
+
+- จำนวนสี stroke/fill น้อย
+- fill area ต่ำมาก เมื่อเทียบกับ stroke area
+- เส้นส่วนใหญ่เป็น straight line / fold/cut line
+- ไม่มี raster image ฝัง หรือ raster coverage ต่ำ
+- line widths ใกล้เคียงกัน
+- ไม่มี text/logo/path จำนวนมาก
+- page มีสี spot/cutline ที่ระบุ die line ชัด เช่น magenta/cyan/ชื่อ layer ถ้าอ่านได้
+
+output ไม่ควรเป็น template ตรง ๆ อย่างเดียว แต่ควรมี confidence/status:
+
+```json
+{
+  "geometry_status": "clean | unsafe | unavailable",
+  "geometry_template": 4,
+  "geometry_features": {
+    "diagonal_bottom_lines": 8,
+    "body_panel_count": 4
+  },
+  "geometry_reason": "clean vector dieline, low artwork ratio"
+}
+```
+
+ถ้า `geometry_status=clean` ค่อยใช้เป็น strong signal:
+
+- Claude=4, geometry=1 → high risk / human check
+- Claude=1, geometry=4 → high risk / human check
+- geometry บอก Custom feature ชัด → high risk
+
+ถ้า `geometry_status=unsafe` ห้ามเอาไปเพิ่ม severity แบบมั่นใจ เพราะจะทำให้ระบบเตือนผิดจาก artwork noise
+
+---
+
+## ตอบคำถาม 3: เหลือทางอะไรนอกจาก fine-tune / process fix / risk-flagger?
+
+ผมเห็น 5 ทาง เรียงจาก practical ไปยาก:
+
+### A. Risk-ranking layer
+
+นี่ควรทำก่อน เพราะใช้ของที่มีแล้วและลดโอกาสคนตรวจผิดจุด
+
+### B. Process fix แบบ optional
+
+เพิ่มข้อความ/flow ว่า:
+
+```text
+ถ้าอยากให้ AI ตรวจทรงแม่นขึ้น กรุณาแนบไฟล์ไดไลน์เส้นล้วน หรือ CAD/diecut layer
+```
+
+ถ้าได้ไฟล์ประเภทนี้ geometry จะช่วยมาก
+
+### C. Gated geometry
+
+ใช้ geometry เฉพาะ clean vector/SVG เท่านั้น
+
+ผมมองว่าเป็น bridge ที่ดี เพราะไม่ต้อง fine-tune ทันที และถ้า input สะอาดจริง มันให้หลักฐานเชิงโครงสร้างที่ Claude/CV ไม่มี
+
+### D. Focused binary Claude calls เฉพาะ high-risk
+
+ยังไม่ตัดทิ้ง แต่ควรใช้เป็น checker ไม่ใช่ decider:
+
+```text
+ถ้า Claude=4 แต่ CV=1/2 และ risk high:
+  ยิง focused prompt: "ดูเฉพาะก้นกล่อง มี diagonal crash-lock จริงไหม"
+```
+
+ข้อดี: ไม่ต้อง train
+ข้อเสีย: ยังเป็น Claude ตัวเดิม อาจ bias ได้ และเพิ่ม API cost/latency
+
+### E. Fine-tune vision / train classifier เฉพาะ dieline
+
+นี่คือทางไป 80-90% จริง แต่ต้องมี gold data สะอาดและ balance โดยเฉพาะ 1/2/4/11
+
+ผมจะยังไม่เริ่ม fine-tune จนกว่าจะมี:
+
+- gold set 100+ ที่ expert confirm
+- feedback loop `final_user_template`
+- per-class distribution ที่พอ balance
+- baseline risk-ranking/geometry แล้ววัดว่ายังไม่พอ
+
+---
+
+## ข้อเสนอ architecture หลังผล Geometry
+
+ผมจะปรับ final architecture เป็น:
+
+```text
+Uploaded image/PDF
+  → Claude core extraction
+  → CV/CLIP risk ranking
+  → detect clean dieline geometry
+      - clean: run geometry, add strong structural evidence
+      - unsafe/unavailable: skip geometry, do not penalize
+  → triage output:
+      risk_level
+      risk_axis
+      focus_message
+      nearest_examples
+      geometry_status/features (ถ้ามี)
+```
+
+ตัวอย่าง output:
+
+```json
+{
+  "risk_level": "high",
+  "risk_axis": "tuck_family",
+  "claude_template": 4,
+  "cv_template": 1,
+  "neighbor_purity": "4/5",
+  "geometry_status": "unsafe",
+  "focus_message": "Claude เลือก auto-bottom แต่ CV เห็นว่าคล้าย reverse tuck; geometry ใช้ไม่ได้เพราะไฟล์มี artwork ปน กรุณาตรวจก้นกล่องว่ามีเส้นทแยง crash-lock จริงหรือไม่"
+}
+```
+
+ถ้าเป็น SVG/clean dieline:
+
+```json
+{
+  "risk_level": "high",
+  "risk_axis": "tuck_family",
+  "claude_template": 4,
+  "cv_template": 1,
+  "geometry_status": "clean",
+  "geometry_template": 1,
+  "geometry_features": {
+    "diagonal_bottom_lines": 0
+  },
+  "focus_message": "ไฟล์ไดไลน์เส้นล้วนไม่พบเส้นทแยงก้นกล่อง จึงน่าจะไม่ใช่ auto-bottom; ตรวจ Template 1/2 ก่อนใช้ราคา"
+}
+```
+
+---
+
+## Verdict
+
+ผมเห็นด้วยกับ Claude:
+
+```text
+geometry = process fix ถ้ามี die-line layer สะอาด
+geometry = unsafe ถ้าเป็น artwork PDF/raster จริงทั่วไป
+```
+
+แต่ผมจะไม่ drop geometry ทั้งหมด เพราะมันเป็นสัญญาณที่ “ถูกชนิด” สำหรับ tuck-family มากกว่า CLIP ถ้า input สะอาด
+
+ข้อสรุปสุดท้าย:
+
+```text
+Default path: Claude + CV risk ranking
+Optional high-confidence path: clean dieline layer → geometry classifier
+Future path: fine-tune เฉพาะเมื่อมี gold/feedback data พอ
+```
+
+ดังนั้น solution ที่ practical ที่สุดตอนนี้คือ:
+
+1. ship/prototype risk-ranking ก่อน
+2. เพิ่ม optional upload/process สำหรับ “dieline layer only”
+3. ทำ geometry แบบ gated เฉพาะ clean input
+4. เก็บ feedback เพื่อไป fine-tune ถ้าต้องการ 80-90% จริง
