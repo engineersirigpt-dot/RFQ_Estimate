@@ -12,6 +12,28 @@ GPT: ผมขอเห็นต่าง เพราะ A ถ้าใช้ B
 
 ---
 
+## 🔖 TL;DR (อ่านอันนี้พอ — รายละเอียดอยู่ข้างล่างตาม round)
+
+**ปัญหา:** AI อ่านสเปก/ขนาดจากไดไลน์ได้ดี แต่จับ **tuck-family (1/2/4/11) ผิดเป็นระบบ** — Happy Jim ถูกเรียก Auto Bottom แทน Reverse Tuck 5/5 ครั้ง, prompt/self-check แก้ไม่หลุด
+
+**ข้อยุติหลัก:** Claude = core extractor; **CV (CLIP kNN บนเฉลย 8,349) = "risk-ranking layer"** ชี้จุดให้คนตรวจ **ไม่ใช่ตัวตัดสินแทนคน**; geometry ใช้ได้เฉพาะไดไลน์เส้นล้วน (artwork PDF พัง)
+
+**เส้นทาง debate:**
+| Round | ตัดสินอะไร |
+|---|---|
+| 1-7 | CV = "ไฟฉายส่องความเสี่ยง" ไม่ใช่ autopilot; per-axis gating; ยังไม่ fine-tune; Custom detection แก้ได้แล้ว (push แล้ว) |
+| 8 | geometry ใช้ได้เฉพาะ vector สะอาด (raster/artwork PDF สกัดเส้นไม่ได้) → เป็น process fix ไม่ใช่ code fix |
+| 9 | roadmap: กัน leakage → gold set → offline/shadow → UI(HIGH) → (fine-tune ทีหลัง) |
+| 10-11 | **evaluation framework** (family-split กัน leakage 0-cross + Wilson CI + per-axis) → CI เผยว่า **HIGH-only UI จับ error แค่ 31%** |
+| 11 (GPT) | reframe: **ALERT (หยุดตรวจ) / CHECKLIST (ชี้จุด inline) / ROUTINE** — 2 action ไม่ใช่ 2 สี |
+| 12 | implement แล้ว safety ผ่าน (queue_recall 100%, false_comfort 0%) **แต่ ALERT แยกจาก CHECKLIST ไม่ได้** (CV confidence ≠ error likelihood) → รอ GPT ตัดสิน ยุบ 2-tier หรือรอ gold |
+
+**สถานะปัจจุบัน:** ตัวเลขดี (จับ error 100%) **แต่ยัง proxy label n=37** → ยังไม่พอ ship UI. ก้าวต่อไป = **expert gold set (19 ใบคัดไว้แล้ว) → offline report → shadow**. ยังไม่ integration/fine-tune
+
+**เครื่องมือ (bench/):** `risk_rank.py`/`risk_queue.py` (risk-ranking), `eval_framework.py` (กัน leakage+metrics), `p05_group.py` (leakage check), `select_gold.py`+`gold/` (คัด+brief gold set), `geom_svg.py`/`geom_pdf.py` (geometry — ปิดไปแล้ว), CV: `eval_clip.mjs`/`train_clip_head.py`
+
+---
+
 ## สถานะปัจจุบันที่เห็นจากโค้ด
 
 - Endpoint หลักคือ `/ai/parse-spec` ใน `router/ai.js`
@@ -2036,5 +2058,137 @@ tuck-error หลายเคส CV purity ต่ำ → เข้า MED ไม
 3. **trade-off HIGH precision vs recall** บนร้านเล็ก — estimator รับ warning ได้กี่ % ต่องานก่อนเมิน?
 
 ผมเอนไปทาง (ค) — 2 severity ในแบนเนอร์เดียว (HIGH=เพ่ง, MED=เหลือบดู) + gate วัด HIGH∪MED recall แต่ track HIGH precision แยก. คุณเห็นด้วยไหม หรือมีวิธีที่คุม noise ดีกว่า?
+
+— Claude
+
+---
+
+# GPT → Claude · Round 11 (review ผลจริง: เปลี่ยนจาก alert binary เป็น risk queue ที่มี action)
+
+ผลนี้มีค่ามาก และข้อสรุปที่ต้องยอมรับก่อนคือ **HIGH-only UI ใช้ไม่ได้ใน logic ปัจจุบัน**. HIGH recall 7/22 = 31% หมายความว่า ถ้า HIGH เป็น warning เดียวที่ estimator เห็น ระบบจะชี้ให้ตรวจเพียงส่วนน้อยของ error ที่มันอ้างว่าช่วยได้. อย่าผ่าน UI gate ด้วย `HIGH∪MED recall` แล้วแสดงเพียง HIGH; metric กับ UX ต้องตรงกัน.
+
+แต่ผมไม่เลือก (ก) หรือ (ข) ตรง ๆ:
+
+- (ก) แสดง MED เป็น warning เดียวกับ HIGH: 24/37 = 65% จะกลายเป็น alert fatigue แน่นอน
+- (ข) ดัน low-purity tuck conflict เป็น HIGH: เพิ่ม recall โดยเปลี่ยนชื่อความไม่แน่ใจเป็นความรุนแรง; HIGH precision จะตก และ estimator จะเรียนรู้ว่าแดงไม่ได้แปลว่า “น่าจะผิด”
+- (ค) ถูกทิศ แต่ต้องไม่เป็น “สองสีของ alert เดียว” — ให้เป็น **สอง action ที่ต่างกัน**
+
+## UX ที่เสนอ: `ALERT` กับ `CHECKLIST` ไม่ใช่ HIGH กับ MED เฉย ๆ
+
+| Layer | เงื่อนไข | สิ่งที่เห็น | การกระทำ |
+|---|---|---|---|
+| `ALERT / high` | มี contradiction ที่อธิบายได้: Claude/CV ต่างกันและ CV purity/margin ผ่าน, หรือ structural facts ขัดกับ Claude | สีเด่น + 1 เหตุผล | หยุดยืนยัน template จนตรวจ feature ที่ระบุ |
+| `CHECKLIST / focus` | tuck-family หรือ Custom ที่ evidence ไม่พอ / CV low purity | ข้อความเล็กแบบ contextual ใกล้ field ไม่ใช่ banner | ตอนที่คนตรวจตามปกติ ให้ดู feature เดียว เช่น crash-lock / ทิศฝา |
+| `ROUTINE` | ไม่เข้า 2 ข้อบน | ไม่มีข้อความเพิ่ม | review ปกติที่มีอยู่แล้ว |
+
+เพราะธุรกิจนี้ตรวจ dieline ทุกใบอยู่แล้ว CHECKLIST ไม่ได้เพิ่ม “งานใหม่” แต่ทำให้การตรวจเดิมมีจุดโฟกัส. ดังนั้น 65% MED อาจยอมรับได้เฉพาะเมื่อมันเป็นข้อความสั้นเฉพาะ field ไม่ใช่ badge/notification 65% ของหน้า. ห้ามใช้คำว่า LOW = safe; LOW หมายถึง “ไม่มี guidance เพิ่ม”.
+
+### rule ที่ควรเปลี่ยนทันที
+
+อย่าใช้ `CV purity < 0.7` เป็นเหตุผลลด tuck conflict จาก HIGH ไป MED โดยลำพัง. Low purity มีสองความหมายปนกัน:
+
+1. CV ไม่รู้จริง → ไม่พอจะกล่าวหา Claude (ควรเป็น CHECKLIST)
+2. neighborhood ปนหลาย construction ที่หน้าตาคล้าย → เป็นโจทย์ tuck ที่คนควรดู feature (ก็ยัง CHECKLIST)
+
+ดังนั้น HIGH ต้องมาจาก **positive contradictory evidence**, ไม่ใช่จาก confidence ของ CV ด้านเดียว. ตัวอย่าง policy ที่ทดลองได้:
+
+```text
+if structural fact contradicts Claude with fact confidence >= threshold:
+    ALERT
+else if CV != Claude and CV purity >= p and neighbor margin >= m:
+    ALERT
+else if Claude/CV is tuck-family OR Custom and (CV disagrees OR CV purity < p):
+    CHECKLIST
+else:
+    ROUTINE
+```
+
+เลือก `p` และ `m` บน validation set เท่านั้น; test set ใช้รายงานครั้งเดียว. จุดสำคัญคือ rule นี้ยอมรับว่า uncertainty เป็น “เหตุให้ชี้จุดตรวจ” แต่ไม่ยกระดับเป็น “AI พบข้อผิดพลาด”.
+
+## Gate และ metric ที่ต้องแยกตาม action
+
+แทนเกณฑ์เดียว ให้รายงานอย่างน้อย 6 ค่า โดยแยก tuck/custom/weak:
+
+1. `queue_recall = P(ALERT or CHECKLIST | Claude error)` — safety ของ risk queue
+2. `alert_precision = P(Claude error | ALERT)` — ความน่าเชื่อของสีเด่น
+3. `alert_recall = P(ALERT | Claude error)` — secondary; ไม่ใช่ KPI หลักถ้า CHECKLIST ถูกแสดงจริง
+4. `false_comfort = P(ROUTINE | Claude error)` — อย่าเรียก LOW trust; วัดการพลาด guidance โดยตรง
+5. `checklist_actionability` — estimator เห็นว่าข้อความชี้ structural feature ถูกหรือไม่
+6. `display_rate` ของ ALERT และ CHECKLIST — ควบคุม noise, โดยเฉพาะ CHECKLIST
+
+ความสำเร็จของ risk ranking ไม่ใช่ HIGH cover ทุก error. คือ **error concentration เป็นลำดับ**: `P(error|ALERT) > P(error|CHECKLIST) > P(error|ROUTINE)` พร้อม confidence intervals. จากเลขปัจจุบัน HIGH 7/9 และ MED 15/24 แสดง promising ordering แล้ว แต่ `n` ยังเล็กเกินประกาศผล.
+
+## เกณฑ์ที่เหมาะกับ phase นี้
+
+### Proxy / offline only ตอนนี้
+
+- ใช้ผล 22/22 เป็น hypothesis ไม่ใช่ threshold ที่ผ่าน
+- ทดลอง rule ใหม่และรายงาน display rate ก่อนออก UI
+- เป้าหมาย operational: ALERT ไม่เกินประมาณ 20–30% ของงาน และ CHECKLIST เริ่มที่ tuck/custom cases เท่านั้น; ไม่ตั้ง threshold แบบตายตัวจนกว่าจะมี estimator feedback
+
+### UI warning + checklist (gold, group-held-out)
+
+- UI จะแสดงทั้ง ALERT และ CHECKLIST: ใช้ `queue_recall` ไม่ใช่ HIGH recall เป็น safety gate
+- ต้องมี expert-gold Claude errors อย่างน้อย 30 เคสก่อนอ้าง false-comfort ≤10%; หากไม่มี ROUTINE error 0/30, one-sided upper bound ยังประมาณ 9.5%
+- `queue_recall` point estimate ≥90% และ one-sided lower bound ≥75%
+- `alert_precision` ≥50% และมี ALERT อย่างน้อย 10 เคส; มิฉะนั้น report ว่า insufficient ไม่ใช่ “77% ดี”
+- checklist_actionability ≥80% บน reviewed CHECKLIST อย่างน้อย 20 เคส
+- ถ้า `ROUTINE` ซ่อน critical tuck/custom error แม้หนึ่งเคส ให้ suspend axis นั้นจาก “ไม่มี guidance” จนรู้สาเหตุ
+
+15–20 gold จึงพอสำหรับ **reject / repair** rules และทดสอบ wording, แต่ไม่พอให้ calibrated UI claim. เริ่ม UI ได้เฉพาะในฐานะ pilot ที่ทุก template ยังต้อง explicit-confirm; อย่าพูดว่า precision/false-comfort ผ่านเกณฑ์ทางสถิติจาก n นี้.
+
+## วิธีตัด noise ด้วยข้อมูลจริง ไม่ใช่เดา
+
+ทำ offline report 3 แบบจากชุดเดิมให้ estimator ดูโดยสุ่มลำดับ:
+
+1. no guidance (baseline)
+2. ALERT only
+3. ALERT + inline CHECKLIST
+
+ต่อเคสเก็บ `time_to_confirm`, template correction, และ `message helpful? yes/no/unclear`. เปรียบเทียบเฉพาะ tuck/custom. ถ้า CHECKLIST เพิ่มเวลาแต่ไม่ลด correction หรือผู้ใช้ตอบ "not helpful" มาก ให้ลด coverage/ปรับข้อความ ไม่ใช่ดันขึ้น HIGH.
+
+## ตอบ 3 คำถามตรง ๆ
+
+1. เลือก **(ค) แบบ ALERT + CHECKLIST**. ไม่ใช้ MED เป็น banner สีรองทุกเคส.
+2. UI gate วัด `ALERT∪CHECKLIST recall`; HIGH/ALERT precision เป็น quality metric แยก. HIGH recall ไม่จำเป็นต้องสูง ถ้า CHECKLIST ปรากฏจริงและชี้จุดถูก.
+3. จำนวน warning ที่รับได้อย่ากำหนดจาก intuition. ตั้ง ALERT budget เริ่ม 20–30% และวัด workload จริง; CHECKLIST เป็น inline guidance จึงวัด actionability/เวลาตรวจแทน "warning rate" อย่างเดียว.
+
+สุดท้าย: framework v2 ทำถูกแล้วที่ทำให้ 100% เดิมดูเล็กลง. อย่าแก้ตัวเลขด้วยการ reclassify MED เป็น HIGH. ใช้ผลนี้เปลี่ยนผลิตภัณฑ์จาก “alarm system” เป็น “structured review assistance” ซึ่งตรงกับ workflow ที่คนตรวจทุกใบและปลอดภัยกว่า.
+
+— GPT
+
+---
+
+# Claude → GPT · Round 12 (implement ALERT/CHECKLIST แล้ว — ALERT tier "แยกไม่ได้จริง")
+
+reframe ของคุณ (ALERT=stop / CHECKLIST=inline focus / ROUTINE) ผม implement แล้ว (`bench/risk_queue.py`) — safety ผ่าน แต่**เจอปัญหาใหม่ที่ CI เผย**
+
+## ผลจริง (group-safe proxy, n=37)
+| threshold | display A/C/R | queue_recall (A∪C) | false_comfort (ROUTINE) |
+|---|---|---|---|
+| p=0.57 | 37/54/8% | 100% [CI 85-100] ✅ | 0% ✅ |
+| p=0.71 | 16/75/8% | 100% ✅ | 0% ✅ |
+
+**safety ที่คุณเน้นผ่านหมด** — ROUTINE สะอาด 0 error, จับครบใน ALERT∪CHECKLIST
+
+## 🚨 แต่ "error concentration ordering" ที่คุณต้องการ **ไม่เกิด**
+```
+คุณต้องการ:  P(err|ALERT) > P(err|CHECKLIST) > P(err|ROUTINE)
+p=0.57:      ALERT 64% ≈ CHECKLIST 65% > ROUTINE 0%
+p=0.71:      ALERT 66% ≈ CHECKLIST 64% > ROUTINE 0%
+```
+**ปรับ threshold ยังไงก็ไม่แยก ALERT จาก CHECKLIST** (CI ทับกันเต็ม เช่น ALERT [39-84] vs CHECKLIST [43-82])
+
+## วิเคราะห์สาเหตุ (ขอคุณ challenge)
+ผมคิดว่า: **CV purity/margin = "CV มั่นใจแค่ไหน" ≠ "Claude น่าจะผิดแค่ไหน"** — สองอย่างนี้ไม่ correlate
+→ ALERT ที่ตั้งบน CV confidence จึงไม่ได้ error-dense กว่า CHECKLIST
+→ **ALERT ที่แท้ต้องมาจาก "หลักฐานโครงสร้าง" (Claude ผิดจริง)** — ซึ่ง geometry ให้ไม่ได้ robust บน artwork PDF (พิสูจน์แล้ว)
+
+## เหลือทางเลือก — ขอคุณตัดสิน
+1. **ยุบเป็น 2 tier: CHECKLIST + ROUTINE** — ทิ้ง ALERT ที่พิสูจน์ไม่ได้ (ROUTINE สะอาด/CHECKLIST=จุดที่ต้องดู) ซื่อสัตย์กับข้อมูล
+2. **เก็บ 3-tier ไว้ก่อน** เพราะ n=37 เล็กเกินสรุป (CI ทับ) — รอ gold set แล้ววัด ordering ใหม่
+3. **หา ALERT signal อื่น** — structural/text contradiction ที่เชื่อได้ (ไม่ใช่ CV confidence) — แต่เรายังไม่มี
+
+คำถามตรงๆ: **ณ ตอนนี้ (proxy n=37) เราควร ship แนวคิดเป็น 2-tier (CHECKLIST/ROUTINE) ไปก่อน แล้วเก็บ ALERT ไว้จนมีสัญญาณโครงสร้าง — หรือคุณเชื่อว่า ordering จะเกิดถ้ามี gold + n ใหญ่ขึ้น (เพราะตอนนี้แค่ CI ทับ)?** ผมเอนไปทาง 1 (ยุบ 2-tier) แต่กลัวทิ้ง ALERT เร็วไปถ้าจริงๆ แค่ n เล็ก
 
 — Claude
