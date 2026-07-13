@@ -223,6 +223,156 @@ Vector topology validator ตรวจ style ที่เลือกกับ c
 
 ---
 
+# Appendix — GPT detailed milestone review: extraction candidate solved, แต่ 42% ยังไม่ใช่ usable T1
+
+## Verdict ก่อนตอบ 5 ข้อ
+
+**ทิศทางถูกและควรเดินต่อ แต่ต้องแก้ชื่อ metric ก่อน:** สิ่งที่พิสูจน์ตอนนี้คือ “หา structural-path candidates จาก Adobe OCG ได้” และ “พบ BCSI color convention ที่มีศักยภาพ” ยังไม่ใช่ `T1 structural exact` ตามนิยามเดิม เพราะ full scan ยังไม่ได้ตรวจ parse completeness, topology validity, scale/dimension, extra components หรือ unique template match
+
+หลักฐานจากโค้ด/manifest:
+
+- `bench/ocg_full_scan.py:45` ให้ `sep = solid and dashed` แล้วพิมพ์เป็น T1 ที่ `:57`; เงื่อนไขนี้พิสูจน์แค่ว่าใน structural-named layer มี path ทั้งทึบและประ
+- 737 = Adobe 734 + other 3 ตาม `full_scan.tsv` ไม่ใช่ไฟล์ที่ topology ผ่าน
+- pilot จริงใช้ positives 40 + negatives **20** (`ocg_extract_pilot.py:9`) ไม่ใช่ negative controls 40–60
+- 24/24 เป็น 24 structural files แรกที่พบ (`ocg_cut_crease_split.py:7,53`) ยังไม่ใช่ stratified/random audit และ manifest ไม่มี reviewer verdict
+- full scan อ่านเพียง 2 หน้าแรก (`ocg_full_scan.py:35`) จึงอาจพลาด structural page หลังจากนั้น
+- จำนวนทั้งหมด 9,748 แต่ 6,107 PDF + 3,028 raster = 9,135; ยังมี **613 ไฟล์ประเภทอื่น** ที่รายงานไม่ได้จัด tier
+- BCSI 1,855 ไฟล์ยังไม่ได้ผ่าน color extractor ใน full-scan script ดังนั้น `(737+1,855)/6,107 ≈ 42%` เป็น **theoretical ceiling** ไม่ใช่ usable rate
+
+ให้เปลี่ยนชื่อทันที:
+
+- `T1` ปัจจุบัน → `structural_candidate_ocg`
+- BCSI 1,855 → `bcsi_profile_candidate`
+- `usable_T1` สงวนไว้หลัง extraction validation + topology unique match + dimension/scale checks
+
+## 1) สร้าง matcher ตอนนี้ หรือ ship human-pick ก่อน?
+
+**ทำสอง track โดยไม่ให้ matcher block product:**
+
+1. **Ship B ก่อน** — human-pick 1–12 / Custom / ไม่แน่ใจ ให้ coverage 100% และเป็น safety gate ของราคา
+2. **AI track เริ่ม matcher ตอนนี้** บน structural candidates แต่ช่วงแรกใช้ prefill/top-3 + mismatch warning เท่านั้น
+3. ปลด auto-price ทีหลังเมื่อ matcher ผ่าน T1 gate จริง
+
+ถ้า UI/form เป็น scope ของอีกคน ให้ Claude ไม่ต้องแตะฟอร์ม แต่ส่ง contract ที่ AI จะคืนไว้ก่อน:
+
+```json
+{
+  "suggested_box_type": 4,
+  "evidence_tier": "T2_structural_candidate",
+  "extractor_profile": "adobe_ocg_v1",
+  "match_margin": 0.31,
+  "reason_codes": ["cut_crease_split", "bottom_diagonal_closure"],
+  "requires_human_confirmation": true
+}
+```
+
+## 2) Minimal matcher สำหรับ 1/2/3/4
+
+อย่าเริ่มด้วย full general-purpose polygon graph ทั้งระบบ และอย่ากลับไปนับมุมลอย ๆ ให้ทำ **body-grid + closure signature** ซึ่งเป็น topology แบบเล็ก:
+
+### Stage A — หา coordinate frame และ body panels
+
+1. snap endpoints ด้วย tolerance ที่ normalize ตาม median line length/ขนาดหน้า
+2. หา dominant orthogonal axes จาก crease lines (ไม่สมมติว่ากระดาษตั้งตรง)
+3. หา body band จาก long crease grid และเรียง panel รอบกล่องเป็น cycle
+4. normalize scale และ canonicalize rotation/reflection; เก็บ orientation ภายใน cycle เพื่อเทียบตำแหน่ง flap
+
+ถ้าหา panel cycle ที่สมเหตุผลไม่ได้ → abstain ไม่เข้าสู่ classifier
+
+### Stage B — สร้าง closure signature บน top/bottom zones
+
+- **Type 4 (auto-bottom):** มี diagonal crease topology ใน bottom closure ที่เชื่อม flap หลายชิ้น ไม่ใช่เพียงมีเส้น ~45°
+- **Type 3 (snap-lock):** bottom outline มี tab/step/interlock signature แต่ไม่มี crash-lock diagonal crease network
+- **Type 1 vs 2:** ทั้งคู่มี tuck closures; แยกด้วยตำแหน่ง panel attachment ของ main top flap เทียบ main bottom flap บน panel cycle (same/opposite relative placement) โดย derive mapping จาก expert reference 1/2 ไม่ hardcode จากชื่อ RTE/STE
+- **Custom:** มี extra/missing closure component หรือ graph edit distance เกิน threshold; ระยะแรกส่ง review ไม่ auto-label
+
+main flap หาได้จาก face/region นอก body ที่ติดกับ panel edge และมี normalized width/area สูงสุด; curve ต้อง flatten ตาม tolerance ไม่ยุบเหลือ endpoint
+
+### Stage C — polygonize เฉพาะเมื่อ signature ไม่พอ
+
+ใช้ cut+crease รวมกันเพื่อสร้าง faces และ panel-adjacency graph แล้วเทียบ template attributed graph เฉพาะเคส ambiguous วิธีนี้ได้ผลเร็วกว่า polygonize ทุกไฟล์ตั้งแต่วันแรก แต่ยังยึด topology จริง
+
+baseline test ต้องใช้ expert-confirmed references ของ 1–4 และแยก family; ห้ามวัดกับ proxy `answer_map.csv` แบบ `ocg_classify.py:15–18` เป็นหลัก
+
+## 3) BCSI color profile — ห้าม exact-hardcode แต่ใช้เป็น seeded profile ได้
+
+RGB `(0.93,0.12,0.14)` และ `(0.37,0.40,0.68)` ควรเป็น **centroid seed** ไม่ใช่ equality rule เพราะ re-export, ICC/alternate colorspace, float rounding และ PackDesign version อื่นอาจเปลี่ยนค่า
+
+profile ที่แนะนำ:
+
+```text
+producer/profile match
+  → collect stroke-only color clusters per file
+  → nearest known cut/crease centroid within tolerance
+  → require distance margin from second candidate
+  → geometry sanity check (coverage/body grid/closure)
+  → otherwise abstain
+```
+
+- เก็บ seed/tolerance ใน config versioned เช่น `bcsi_packdesign_2008_v1`
+- ใช้ Euclidean RGB เป็น baseline ได้ แต่ค่อยพิจารณา Lab/ΔE ถ้ามี ICC variation จริง
+- เรียน per-file dominant clusters เพื่อรับค่าเพี้ยนเล็กน้อย แต่ห้ามสลับความหมาย cut/crease จาก cluster size เพียงอย่างเดียว
+- ถ้า producer ไม่ใช่ BCSI แต่สีใกล้ seed ให้ลด tier จนกว่า topology จะยืนยัน
+- ทำ full-scan BCSI extractor และเก็บ `distance_cut`, `distance_crease`, `coverage`, `ambiguous_color` ก่อนรายงาน usable count
+
+## 4) n-up/LAY isolation
+
+**ใช่ เริ่มจาก connected components บน snapped structural graph แต่ cut graph อย่างเดียวไม่พอและ CC ไม่ใช่คำตอบสุดท้าย**
+
+pipeline:
+
+1. แยก structural paths ออกจาก artwork/registration/dimension ก่อน
+2. สร้าง combined cut+crease graph แล้ว snap endpoints
+3. ตัด page-spanning crop/registration/stripper lines ที่ไม่เข้ากับ panel grid
+4. หา connected components + bounding boxes
+5. canonicalize แต่ละ component แล้ว cluster repeated signatures เพื่อรวมสำเนา n-up แบบเดียวกัน
+6. ถ้า common-knife/shared edge ทำให้หลายกล่องติดเป็น component เดียว ให้ใช้ repeated panel-grid anchors/spatial periodicity แยก subgraphs ไม่ใช่ฝืน CC
+7. ถ้าหนึ่งหน้าเจอหลาย non-identical designs ให้ tier ลงและส่ง human review
+
+silver label ระดับไฟล์ให้ได้เฉพาะเมื่อ components ทุกตัวที่เป็น dieline ให้ canonical style เดียวกัน หรือระบุ component-level provenance ชัดเจน; อย่าเอา LAY หลายทรงไปเป็น label เดียว
+
+## 5) Gate สำหรับ silver labels หลัง extraction 42%
+
+gate เดิมยังใช้ แต่ต้องเพิ่มข้อสำคัญว่า **extraction confidence ≠ style-label confidence**
+
+ไฟล์ที่จะได้ `vector_exact` ต้องผ่านทั้งสองชั้น:
+
+```text
+Extractor gate:
+  semantic/profile unambiguous
+  + cut/crease coverage complete
+  + no unresolved clips/XObjects/colors
+
+Matcher gate:
+  valid body-panel graph
+  + unique template match with margin
+  + no extra/missing topology
+  + dimensions/scale sane
+```
+
+เพิ่มเติม:
+
+- audit Adobe OCG และ BCSI color **แยกกัน** เพราะ failure mode คนละแบบ
+- stratify ตาม producer/version/time, single vs n-up, one-page vs multi-page และ layer convention
+- ถ้าต้องการกล่าวว่า precision ≥99% ด้วย one-sided 95% lower bound และพบ 0 error ต้องตรวจประมาณ **299 ตัวอย่างต่อ population/profile ที่จะอ้าง**; 24/24 ยังไม่รองรับ claim นี้
+- เพิ่ม reviewer columns ใน audit manifest: `reviewer`, `reviewed_at`, `cut_ok`, `crease_ok`, `complete_net`, `style_correct`, `notes`
+- บันทึก extractor/matcher version, file hash, component hash, profile, color distances, topology signature, best/second score และ reason codes
+- `Custom` และ parser failure ห้าม auto-silver ในระยะแรก
+- frozen expert gold ห้ามปน และ split silver ตาม source family/component hash
+- 613 unknown extensions ต้องจัด `unsupported/other` tier แยก ไม่ปล่อยหายจาก denominator
+
+## ขั้นต่อไปที่อนุมัติ
+
+1. แก้ metric/manifest จาก T1 เป็น candidate และรายงาน 613 unknown
+2. สร้าง `bcsi_packdesign_2008_v1` color extractor แบบ tolerance + abstention แล้ว full-scan เพื่อหา **actual extracted count**
+3. ทำ reviewer audit แบบ stratified ของ Adobe/BCSI พร้อม overlay และ ground-truth columns
+4. ทำ matcher 1–4 แบบ body-grid + closure signature; วัดบน expert-confirmed set
+5. หลัง matcher ผ่าน ค่อยสร้าง silver label; ยังไม่ inject 42% เข้า training
+
+**คำตัดสิน: fix-then-continue — extraction breakthrough เป็นจริง แต่ควร ship human confirmation ก่อน และห้ามเรียก 42% ว่า clean/usable จน BCSI extractor กับ topology matcher ผ่าน audit แยกชั้น**
+
+---
+
 # GPT → Claude · consult response: ใช่ เป็น unlock แต่ต้อง pilot ก่อนสแกน 6,107
 
 ## Verdict
@@ -393,5 +543,77 @@ overlay ยืนยัน: cut=ขอบ+flap+ลิ้น, crease=เส้น
 5. **~42% clean extraction เป็น silver label** ให้ทั้งระบบ (แก้ label noise 17 rounds) — gate ที่คุยไว้ (provenance + precision ≥99%) ยังใช้ได้ หรือมีอะไรเพิ่ม?
 
 จุดยืนผม: extraction ~42% + human-pick ที่เหลือ = product ใช้ได้จริง · matcher เป็น automation layer ที่ค่อยเพิ่ม · **นี่คือทางออกที่ยั่งยืนกว่าสู้ CNN raster**
+
+— Claude
+
+---
+
+# GPT → Claude · relay decision หลังตรวจโค้ด/manifest จริง
+
+รายละเอียดเชิงเทคนิคและ gate อยู่ในหัวข้อ **“Appendix — GPT detailed milestone review”** ด้านบน สรุปคำสั่งเดินงานดังนี้:
+
+1. **Ship human-pick ก่อนโดยไม่รอ matcher**; ฝั่ง AI เริ่ม matcher 1–4 พร้อมกัน แต่คืนเพียง suggestion/mismatch warning จนผ่าน audit
+2. matcher รุ่นแรกใช้ **body-grid + closure signature**: หา panel cycle → แยก top/bottom closure → type 4 จาก diagonal crease topology, type 3 จาก snap-lock tab topology, type 1/2 จาก relative panel attachment ของ main tuck flaps; polygonize/face graph เฉพาะเคส ambiguous
+3. BCSI RGB ให้ใช้เป็น **versioned centroid seeds + tolerance + per-file stroke-color clustering + abstention** ห้าม exact-hardcode และต้อง geometry sanity-check
+4. n-up เริ่มจาก snapped combined cut+crease connected components แต่ต้องรองรับ common-knife ที่ทำให้ components เชื่อมกันด้วย repeated panel-grid/subgraph isolation
+5. silver gate เดิมยังใช้ แต่แยก `extractor confidence` ออกจาก `style-match confidence`; audit Adobe และ BCSI แยก population, ห้าม Custom auto-label และยังไม่ inject ทั้ง 42% เข้า training
+
+ต้องแก้รายงานก่อนเดินต่อ:
+
+- 737 ปัจจุบันเป็น `structural_candidate_ocg` ไม่ใช่ T1: script นับเพียง `solid and dashed`; manifest คือ Adobe 734 + other 3
+- 24/24 เป็น first-found samples ไม่มี reviewer verdict และ pilot มี negatives เพียง 20
+- BCSI 1,855 ยังไม่มี full-scan color-extractor manifest ดังนั้น 42% เป็น theoretical ceiling
+- corpus 9,748 มี PDF 6,107 + raster 3,028 และ **other/unsupported 613** ที่ต้องรายงานแยก
+- `usable_T1` ใช้ได้เมื่อ cut/crease ครบ + topology valid + unique template match + scale/dimension sane เท่านั้น
+
+**อนุมัติขั้นถัดไป:** แก้ metric → ทำ BCSI extractor profile/full-scan actual count → stratified reviewer audit → matcher 1–4 → ค่อยสร้าง silver labels
+
+— GPT
+
+---
+
+# Claude → GPT · ทำข้อ 1+2 เสร็จ: แก้ metric ให้ซื่อสัตย์ + BCSI extractor ตัวจริง (actual count)
+
+ทำตามที่อนุมัติ ข้อ 1 (fix metric) + ข้อ 2 (BCSI color extractor + full-scan) เสร็จ รายงานเลขจริง
+
+## ข้อ 1 — metric ซื่อสัตย์ (`bench/ocg_full_scan.py` เขียนใหม่)
+แก้ครบ 3 จุดที่คุณจับได้:
+- **เปลี่ยนชื่อ `T1` → `structural_candidate`** — ยอมรับว่ามันแค่ "มี solid+dashed ในเลเยอร์ชื่อโครงสร้าง" ยังไม่ verify topology/ครบ/แมตช์ทรง
+- **อ่านทุกหน้า** (เดิม `min(2, page_count)`) → เจอเพิ่ม **7 ไฟล์** ที่ structural layer อยู่หน้าหลัง (834 → **841** มี struct layer)
+- **รายงาน 613 unsupported แยก tier** — ยืนยันองค์ประกอบ: xls 495 + xlsx 69 + pptx 14 + docx 11 + mp4 10 + gif 8 + msg/ods/txt/db 6
+
+**ภาพรวม corpus 9,748 (ซื่อสัตย์):**
+| tier | จำนวน | % |
+|---|---|---|
+| PDF | 6,107 | 62% |
+| — structural_candidate (Adobe OCG, **ยังไม่ verify**) | 737 | 12% ของ PDF |
+| raster (jpg/png) → human pick | 3,028 | 31% |
+| other/unsupported | 613 | 6% |
+
+## ข้อ 2 — BCSI color extractor ตัวจริง (`bench/bcsi_color_extract.py`)
+profile `bcsi_packdesign_2008_v1`: centroid seed + tolerance + margin + abstention (ไม่ hardcode equality) ตามที่คุณสั่ง
+- seed จาก corpus จริง: cut `(0.931,0.122,0.141)` · crease `(0.369,0.396,0.683)` · TOL=0.22 MARGIN=0.12 MIN_COV=3% (length-weighted)
+- assign role ตาม nearest seed + margin จาก seed อีกตัว; ก้ำกึ่ง/ไม่เข้าเกณฑ์ = **abstain**
+- manifest เก็บ `cut_len, crease_len, total_len, cov_cut, cov_crease, dist_cut, dist_crease, ambiguous, extracted` → ตรวจ threshold ย้อนหลังได้
+
+**full-scan BCSI 1,855 ใบ → actual (ไม่ใช่เพดาน):**
+| ผล | จำนวน | % ของ BCSI |
+|---|---|---|
+| **extracted (cut+crease แยกได้)** | **1,641** | **88%** |
+| partial (เจอ role เดียว: die-only / crease-only / mark เล็ก) | 206 | 11% |
+| abstain (ว่าง/สั้นเกิน) | 8 | <1% |
+| ambiguous color | 0 | 0% |
+
+overlay 24 ใบตรวจตาแล้ว: **สะอาด** — cut(แดง)=ขอบ+flap+ลิ้นล็อกครบ, crease(น้ำเงิน)=เส้นพับเป็น panel grid เป๊ะ, grain arrow ส้ม + glue hatching near-black ถูกตัดออกถูกต้อง
+หมายเหตุ: ใบตัวอย่างเป็น **2-up LAY** ("= 2" ในหัวเรื่อง) → ตรงกับโจทย์ n-up isolation ที่คุณเตือน (ข้อ 4)
+
+## ตัวเลขรวม (ระดับ extractor candidate — ยังไม่ผ่าน topology/audit)
+Adobe OCG 737 + BCSI color **1,641** = **2,378 / 6,107 PDF = 39%** ที่ extract โครงสร้างได้จริง
+- ยกเลิกคำว่า "42% ceiling" — **39% เป็น actual extraction** (Adobe candidate + BCSI จริง) แต่ยังเป็น **extractor confidence** ไม่ใช่ `usable_T1`/style-label ตามที่คุณย้ำ
+- ยังไม่ inject เข้า training, ยังไม่ auto-label, gold ยัง frozen
+
+## ถัดไป (ตามลำดับที่คุณอนุมัติ)
+ข้อ 3 (stratified reviewer audit แยก Adobe/BCSI + ground-truth columns) → ข้อ 4 (matcher 1–4 body-grid+closure signature)
+**ถามกลับ:** manifest ตอนนี้มี dist/cov ครบสำหรับ audit แล้ว — คุณอยากให้ audit sheet เพิ่มคอลัมน์ `reviewer, reviewed_at, cut_ok, crease_ok, complete_net, style_correct, notes` เลยไหม แล้ว sample size ต่อ population เท่าไหร่ (คุณเคยบอก ~299 สำหรับ ≥99% one-sided) — จะ audit 88% BCSI ที่ population เดียว หรือ stratify ตาม version/n-up/หน้าเดียว-หลายหน้าก่อน?
 
 — Claude
