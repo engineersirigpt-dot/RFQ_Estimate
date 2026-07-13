@@ -1,43 +1,22 @@
 num	file	family_group_id	proxy	proxy_name	gpt_is_custom	gpt_custom_reasons	gpt_base_status	gpt_base_construction	gpt_base_candidates	is_false_negative	base_conflict	needs_expert	gpt_evidence
-2	150922_054441-561341.pdf	fam_38dc6a999ec7	4	AutoBottom	yes	window|nonstandard_structure	nonstandard			Y		Y	มีช่อง die-cut รูปโค้งหลายตำแหน่งสำหรับโชว์/ยึดสินค้า และโครงแบบ blister/display ไม่เข้า 1–11
-3	230822_093835-656386.pdf	fam_87eea19f171a	3	SnapLock	yes	window|hang_tab	standard	4		Y	Y	Y	เห็นช่องหน้าต่างวงกลม/วงรีหลายช่องและช่องหิ้วรี; ก้นมี flap พร้อมรอยพับทแยงแบบ crash-lock ขณะที่ด้านบนเป็น tuck
-4	091122_025014-179016.pdf	fam_6358352cfa6b	3	SnapLock	yes	rsc|nonstandard_structure	nonstandard			Y		Y	เป็นกล่องลูกฟูกผนังสี่ด้านกับ flap ปิดกว้างและก้น interlock พิเศษ ไม่มีรูปแบบฝาเสียบมาตรฐาน 1–11
-5	091122_024323-424731.pdf	fam_a2207c5a89fa	3	SnapLock	yes	rsc|nonstandard_structure	nonstandard			Y		Y	ภาพเดียวกับ #4 แบบ crop; โครงลูกฟูกและ flap ปิด/ก้นพิเศษไม่เข้า template มาตรฐาน
-6	270622_084916.pdf	fam_2f697fdc4be9	4	AutoBottom	yes	window|nonstandard_structure	nonstandard			Y		Y	multipack มีช่อง/รอยเจาะภายในและชุด flap เชื่อมหลายส่วน โครงหนึ่งตัวไม่เข้า 1–11 ชัดเจน
-7	141222_085728-923453.pdf	fam_19ff36ea0c8a	3	SnapLock	yes	curved_edge|nonstandard_structure	nonstandard			Y		Y	display box มีแนวฉีก/พับโค้งยาวตลอดตัวและ flap เปิดโชว์สินค้า เป็นโครง display นอกชุดมาตรฐาน
-9	160722_055618.pdf	fam_c0bc4e57e745	1	RTE	no		ambiguous		1|2			Y	เป็น tuck carton สี่ panel ฝาบน-ล่างธรรมดา ไม่มี crash-lock แต่ LAY เล็กเกินชี้ทิศฝาบนเทียบฝาล่างว่า same/opposite
-10	310323_080718-958622.pdf	fam_13a419db7a93	2	STE	no		ambiguous		1|2			Y	กล่อง tuck สี่ panel ไม่มีเส้นทแยงหรือ feature พิเศษ แต่ทิศของฝาบนและล่างจากการวางสลับใน LAY ยังไม่ชัด
-11	310323_080753-756452.pdf	fam_b08ce7bfea6e	2	STE	no		ambiguous		1|2			Y	ภาพซ้ำ #10; เป็น tuck มาตรฐานแต่หลักฐานทิศฝาไม่พอแยก Reverse/Straight
-16	301122_061838-256827.pdf	fam_3f87b26d5c51	4	AutoBottom	yes	curved_edge|nonstandard_structure	nonstandard			Y		Y	inner-project ประกอบด้วยส่วนยาวสองชุดเชื่อมกัน มีขอบเว้า/ช่องล็อกและ flap เฉพาะ ไม่เข้า 1–11
-17	F009878 CARGURU LEATHER WAX Lay_120522_151508.pdf	fam_233685e08a64	1	RTE	no		ambiguous		1|2			Y	กล่องสี่ panel ฝาเสียบปกติทั้งสองด้าน ไม่มี crash-lock/ช่องเจาะ แต่ทิศฝาจาก LAY ยังแยก 1 กับ 2 ไม่ชัด
-18	201222_014703-954447.pdf	fam_e15e9c85008a	3	SnapLock	yes	nonstandard_structure	nonstandard			Y		Y	wet-food pack มี flap รูปทรงเฉพาะและชุดล็อกบน-ล่างไม่ตรงกับ tuck/snap/auto/seal มาตรฐาน
-19	211122_075133-448365.pdf	fam_b40ec61ba4f0	4	AutoBottom	yes	window|curved_edge|nonstandard_structure	nonstandard			Y		Y	inner-project มีช่อง/รอยเจาะยาวภายใน ขอบเว้า และ flap interlock เฉพาะ โครงไม่เข้า 1–11
-20	060223_060718-184328.pdf	fam_a8cade80cb92	2	STE	yes	nonstandard_structure	nonstandard			Y		Y	blank หนึ่งตัวเป็นรูปกากบาทมี flap รอบแผงกลางและไม่มี body strip/closure แบบ template 1–11
-23	170822_061048-301066.pdf	fam_7427063ba2f0	11	SealEnd	yes	>4_panels|nonstandard_structure	nonstandard			Y		Y	inner box เป็นแถบยาวมี body panel ต่อเนื่องมากกว่า 4 และ flap สลับหลายด้าน ไม่ใช่ sleeve/tuck มาตรฐาน
-25	210722_081430.pdf	fam_8dd06e3fa639	1	RTE	no		ambiguous		1|2			Y	เป็นกล่อง tuck สี่ panel ไม่มีเส้นทแยงหรือ feature Custom แต่ LAY ไม่ชัดพอแยกทิศฝาบน-ล่าง
-26	110123_032136-181066.pdf	fam_9d669e59766c	4	AutoBottom	yes	curved_edge|nonstandard_structure	nonstandard			Y		Y	inner box มี flap กลางยาวพร้อมปลายเว้า/โค้งและแนวพับเฉพาะ โครงไม่เข้า closure 1–11
-27	241022_060812-391882.pdf	fam_7ba7acb74dfc	3	SnapLock	yes	window|curved_edge|nonstandard_structure	nonstandard			Y		Y	มีช่องเจาะยาวหลายช่องและขอบโค้งบน flap ภายใน เป็นโครง inner-project พิเศษ
-30	180822_083917-704199.pdf	fam_7e5a8888e2cb	3	SnapLock	unknown		ambiguous		9|11			Y	เห็นแถบ body และ flap ปลายหลายชิ้น แต่ภาพ LAY ไม่ชัดว่าเป็น sleeve เปิดปลายหรือ seal-end; ไม่พบ feature Custom ที่ยืนยันได้
-31	241022_032012-573176.pdf	fam_c9bdf76c25c0	1	RTE	no		ambiguous		1|2			Y	body สี่ panel กับ tuck flap ธรรมดา ไม่มี crash-lock/feature พิเศษ แต่ทิศบน-ล่างยังไม่ชัด
-33	F009879 HORSEY CAR CARE Lay_120522_145851.pdf	fam_85e1b11ea1e0	1	RTE	no		ambiguous		1|2			Y	กล่องสี่ panel มีฝาเสียบธรรมดาทั้งบนล่าง ไม่เห็น diagonal crash-lock แต่ทิศฝาจาก LAY ไม่พอแยก 1/2
-34	151122_025435-361245.pdf	fam_64c362f4cd33	4	AutoBottom	yes	curved_edge|nonstandard_structure	nonstandard			Y		Y	inner-project มี flap เว้า/โค้งและแนวล็อก/พับเฉพาะหลายส่วน ไม่เข้าทรงมาตรฐาน
-35	060922_014701-353593.pdf	fam_7d3c85d4a590	3	SnapLock	yes	nonstandard_structure	nonstandard			Y		Y	closure บนและล่างเป็นชุดร่อง/เดือยเฉพาะของ inner pack ไม่ตรง tuck/snap/auto/seal
-36	150822_034940-957151.pdf	fam_53ac797c9137	3	SnapLock	yes	nonstandard_structure	nonstandard			Y		Y	display box เป็นโครงหลายแผงพับกลับและ flap เปิดโชว์สินค้า ไม่เข้า 1–11
-37	200123_013001-447160.pdf	fam_86e10036ab28	4	AutoBottom	yes	nonstandard_structure	nonstandard			Y		Y	display box มีแนวพับทแยงบน body และ flap interlock เฉพาะ ไม่ใช่ tray/tuck มาตรฐาน
-38	191022_015853-685343.pdf	fam_67da7ba37fb9	3	SnapLock	yes	curved_edge|nonstandard_structure	nonstandard			Y		Y	inner curry pack มีแถบขอบหยัก/คลื่นและเดือยล็อกหลายตำแหน่ง โครงไม่เข้า 1–11
-40	280922_092150-274485.pdf	fam_593f0ce1a6ca	3	SnapLock	yes	curved_edge	standard	4		Y	Y	Y	มีรอยเว้าครึ่งวงกลม/ขอบพิเศษบน flap; โครงพื้นฐานยังเห็น tuck top กับก้นรอยพับทแยงแบบ auto-bottom
-41	280922_092041-551853.pdf	fam_cf6251ba2cc3	3	SnapLock	yes	curved_edge	standard	4		Y	Y	Y	ภาพ crop ของโครงเดียวกับ #40 มีรอยเว้าครึ่งวงกลมและก้น crash-lock
-42	280922_091923-712911.pdf	fam_88867530684a	3	SnapLock	yes	curved_edge	standard	4		Y	Y	Y	ภาพซ้ำ #40; ขอบเว้าพิเศษทำให้เป็น Custom ขณะที่ base เป็น auto-bottom
-43	260922_095550-592517.pdf	fam_855cc92203ff	3	SnapLock	yes	nonstandard_structure	nonstandard			Y		Y	display box มียอดเปิด/ร่องกว้างและ flap ล็อกก้นเฉพาะ ไม่เข้ากล่องมาตรฐาน 1–11
-44	260922_095302-336922.pdf	fam_78e8c40d439d	3	SnapLock	yes	nonstandard_structure	nonstandard			Y		Y	ภาพซ้ำ #43; closure แบบ display พร้อมร่องเปิดและชุดก้นพิเศษ
-45	260922_094556-424311.pdf	fam_d27f4dbf8966	3	SnapLock	yes	curved_edge|nonstandard_structure	nonstandard			Y		Y	กล่องมีเดือย/ร่องเว้าและ flap หลายรูปทรงสลับกัน ไม่เข้า base 1–11
-46	260922_094503-887960.pdf	fam_b15f09ece72c	3	SnapLock	yes	curved_edge|nonstandard_structure	nonstandard			Y		Y	ภาพซ้ำ #45; เห็นร่องเว้าและ closure interlock เฉพาะ
-47	260922_093616-452719.pdf	fam_16d3e96b2fcb	3	SnapLock	yes	curved_edge|nonstandard_structure	nonstandard			Y		Y	ภาพ crop ของ #45/#46 ยังเห็นขอบเว้าและ flap พิเศษ ไม่เข้า 1–11
-49	260822_043455-703961.PDF	fam_588bacc64ae4	4	AutoBottom	yes	window	standard	4		Y		Y	มีช่องหน้าต่างสี่เหลี่ยมขนาดใหญ่บน body; ก้นพื้นฐานมีเส้นทแยง crash-lock และด้านบนเป็น tuck
-50	211122_042836-986336.pdf	fam_4ae67758b9a6	3	SnapLock	yes	curved_edge|nonstandard_structure	nonstandard			Y		Y	กล่องมีร่องเว้าหลายตำแหน่งและ flap ปิดขนาดใหญ่/รูปทรงเฉพาะ ไม่เข้า 1–11
-52	081122_081806-521069.pdf	fam_38a794f19639	3	SnapLock	yes	window|curved_edge|nonstandard_structure	nonstandard			Y		Y	มีหน้าต่างสี่เหลี่ยมมุมมนขนาดใหญ่และ flap เว้า/ล็อกเฉพาะ โครงไม่เข้า base 1–11 ชัด
-54	120123_075859-967269.PDF	fam_2fceac78204d	2	STE	yes	nonstandard_structure	nonstandard			Y		Y	body มีเส้นพับทแยงยาวสร้างทรงเปลี่ยนรูปและ closure ไม่ตรง template 1–11
-55	151122_023840-166677.pdf	fam_2f2d7f05ab94	4	AutoBottom	yes	curved_edge|nonstandard_structure	nonstandard			Y		Y	inner-project มีแนวเว้า/หยักกลาง body และรอยพับทแยงหลายส่วน เป็นโครงเฉพาะ
-58	160822_070830-555060.pdf	fam_1e4960d52bc8	11	SealEnd	yes	>4_panels|nonstandard_structure	nonstandard			Y		Y	inner box เป็นแถบยาวแบ่ง body panel ต่อเนื่องเกิน 4 พร้อม flap รอบหลายช่วง ไม่เข้า sleeve/tuck มาตรฐาน
-59	F009801 CHEESE STICK Lay_270422_160654.pdf	fam_adbf0fa0d640	1	RTE	no		ambiguous		1|2			Y	กล่องสี่ panel ฝาเสียบธรรมดาบนและล่าง ไม่มี crash-lock/feature พิเศษ แต่ทิศฝาจาก LAY ไม่ชัด
-60	F009799 PIZZA (HAWAIIAN) 135 G lay_270422_151243.pdf	fam_c9103c9eadb2	1	RTE	no		ambiguous		1|2			Y	กล่องสี่ panel มี tuck flap ปกติทั้งสองด้าน ไม่มีเส้นทแยงหรือ Custom feature แต่ยังแยก Reverse/Straight จากภาพไม่ได้
+2	150922_054441-561341.pdf	fam_38dc6a999ec7	4	AutoBottom	yes	window|nonstandard_structure	nonstandard			Y		Y	โครง blister/display มีช่องเจาะและชุดปีกไม่ตรงแม่แบบ 1–11
+3	230822_093835-656386.pdf	fam_87eea19f171a	3	SnapLock	yes	window|hang_tab	standard	4		Y	Y	Y	ฐานเป็น tuck-top auto-bottom แต่มีหน้าต่างและรูหิ้วเพิ่ม
+6	270622_084916.pdf	fam_2f697fdc4be9	4	AutoBottom	yes	window|nonstandard_structure	nonstandard			Y		Y	multipack มีช่องจับ/ช่องยึดและชุดแผงเฉพาะงาน ไม่เข้าแม่แบบ 1–11
+7	141222_085728-923453.pdf	fam_19ff36ea0c8a	3	SnapLock	yes	curved_edge|nonstandard_structure	nonstandard			Y		Y	display box มีฐานเอียงและแนวผนังเฉพาะ ไม่ใช่ก้นมาตรฐาน
+16	301122_061838-256827.pdf	fam_3f87b26d5c51	4	AutoBottom	yes	extra_feature|nonstandard_structure	nonstandard			Y		Y	โครง inner-project มีแผงต่อเนื่องและรอยเว้าเพิ่ม ไม่ตรงแม่แบบมาตรฐาน
+19	211122_075133-448365.pdf	fam_b40ec61ba4f0	4	AutoBottom	yes	extra_feature|curved_edge|nonstandard_structure	nonstandard			Y		Y	มีแผงล็อกยาว รอยเว้า และแนวพับเฉพาะงาน inner-project
+23	170822_061048-301066.pdf	fam_7427063ba2f0	11	SealEnd	yes	nonstandard_structure	nonstandard			Y		Y	โครงกางเป็นชุดแผงต่อเนื่องซึ่งยังจับคู่กับแม่แบบถาด 5–7 ไม่ได้อย่างน่าเชื่อถือ จึงตี Custom ก่อน
+25	210722_081430.pdf	fam_8dd06e3fa639	1	RTE	yes	extra_feature	ambiguous		1|2	Y		Y	เห็น tuck-end แต่ตำแหน่งฝาบน–ล่างในภาพ LAY ยังแยก RTE/STE ไม่มั่นใจ ตามกติกาให้ Custom ก่อน
+27	241022_060812-391882.pdf	fam_7ba7acb74dfc	3	SnapLock	yes	window|extra_feature	standard	4		Y	Y	Y	ฐานเป็น auto-bottom แต่มีช่องเจาะ/แผงล็อกภายในเพิ่มจากแม่แบบ
+36	150822_034940-957151.pdf	fam_53ac797c9137	3	SnapLock	yes	nonstandard_structure	nonstandard			Y		Y	display box มีผนังลาดและฐานเฉพาะ ไม่เข้า 1–11
+37	200123_013001-447160.pdf	fam_86e10036ab28	4	AutoBottom	yes	nonstandard_structure	nonstandard			Y		Y	display box มีชุดแผงยก/เอียงเฉพาะงาน ไม่ตรงแม่แบบมาตรฐาน
+38	191022_015853-685343.pdf	fam_67da7ba37fb9	3	SnapLock	yes	extra_feature|nonstandard_structure	nonstandard			Y		Y	inner curry มีชุดล็อกและแผงซ้อนหลายชั้นเกินแม่แบบถาดมาตรฐาน
+40	280922_092150-274485.pdf	fam_593f0ce1a6ca	3	SnapLock	yes	curved_edge|extra_feature	standard	4		Y	Y	Y	ฐานเป็น auto-bottom แต่มีรอยเว้าครึ่งวงกลม/แง่งเปิดเพิ่ม
+41	280922_092041-551853.pdf	fam_cf6251ba2cc3	3	SnapLock	yes	curved_edge|extra_feature	standard	4		Y	Y	Y	ภาพซ้ำกลุ่ม #40; มีรอยเว้าเพิ่มจาก auto-bottom มาตรฐาน
+42	280922_091923-712911.pdf	fam_88867530684a	3	SnapLock	yes	curved_edge|extra_feature	standard	4		Y	Y	Y	ภาพซ้ำกลุ่ม #40; base ยังเป็นแบบ 4 แต่มี feature เพิ่ม
+43	260922_095550-592517.pdf	fam_855cc92203ff	3	SnapLock	yes	extra_feature|nonstandard_structure	nonstandard			Y		Y	display box มีขอบหลังยกสูงและลำดับปีกบนเฉพาะงาน
+44	260922_095302-336922.pdf	fam_78e8c40d439d	3	SnapLock	yes	extra_feature|nonstandard_structure	nonstandard			Y		Y	ภาพซ้ำ #43; ส่วนยกสูงบนขอบทำให้ไม่ใช่แม่แบบ 1–11
+49	260822_043455-703961.PDF	fam_588bacc64ae4	4	AutoBottom	yes	window	standard	4		Y		Y	ฐานเป็น auto-bottom แต่มีช่องหน้าต่างสี่เหลี่ยมใน body panel
+50	211122_042836-986336.pdf	fam_4ae67758b9a6	3	SnapLock	yes	extra_feature|nonstandard_structure	nonstandard			Y		Y	มีชุดแง่งและรอยเว้าหลายตำแหน่งซึ่งไม่ตรงกลไกมาตรฐานตัวใด
+52	081122_081806-521069.pdf	fam_38a794f19639	3	SnapLock	yes	window|extra_feature|nonstandard_structure	nonstandard			Y		Y	มีช่องหิ้วสี่เหลี่ยมและแง่งล็อกเพิ่มหลายตำแหน่ง
+55	151122_023840-166677.pdf	fam_2f2d7f05ab94	4	AutoBottom	yes	extra_feature|nonstandard_structure	nonstandard			Y		Y	มีแนวฉีก/แนวล็อกคดและแผงภายในเพิ่มจากแม่แบบมาตรฐาน

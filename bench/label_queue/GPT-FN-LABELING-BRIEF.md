@@ -6,6 +6,11 @@
 ผมแนบ **ไดไลน์หลายรูป (เลข #1 เป็นต้นไป ตามลำดับที่แนบ)** — แต่ละรูปตอบ **2 ชั้น**: (ก) เป็น Custom ไหม (ข) โครงสร้างพื้นฐานคือทรงอะไร/อ่านได้ไหม
 
 ## กฎ Custom (business rule) — is_custom = yes เมื่อมีฟีเจอร์พิเศษ ≥1 ข้อ
+- เทียบกับแม่แบบ 1–11 แบบ **rotation/reflection invariant**: หมุน กลับหัว หรือสะท้อนซ้าย–ขวาแล้ว topology เดิม ยังเป็นทรงเดิม
+- ตำแหน่งและลำดับของฝาเสียบ/ปีกเป็นตัวแยกคลาส โดยเฉพาะ 1 กับ 2; ห้ามยุบเพราะ silhouette คล้ายกัน
+- ปีกหรือแง่งที่เป็นกลไกมาตรฐานของทรงนั้น (เช่น snap-lock/auto-bottom) ไม่ใช่ Custom
+- ถ้ามีชิ้นส่วน แง่ง รอยเว้า หรือกลไกเพิ่มจากแม่แบบมาตรฐานแม้เพียงเล็กน้อย ให้ `is_custom=yes` (`extra_feature`)
+- ถ้าชิ้นส่วนถูกสลับตำแหน่งจนยืนยัน 1–11 ไม่ได้ ให้ตี Custom ไว้ก่อนและเก็บ base เป็น `ambiguous`
 - หน้าต่าง die-cut / ช่องเจาะโชว์สินค้า (window)
 - ขอบโค้ง/หยัก/เว้า (curved_edge)
 - หูหิ้ว/รูแขวน (hang_tab)
@@ -29,7 +34,7 @@
 {
   "num": 1,
   "is_custom": "yes | no | unknown",
-  "custom_reasons": ["window", "hang_tab", "curved_edge", "rsc", ">4_panels", "nonstandard_structure"],
+  "custom_reasons": ["window", "hang_tab", "curved_edge", "extra_feature", "rsc", ">4_panels", "nonstandard_structure"],
   "base_status": "standard | nonstandard | ambiguous | unobservable",
   "base_construction": 4,
   "base_candidates": [4, 8],

@@ -1,0 +1,605 @@
+[
+  {
+    "num": 1,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 3,
+    "base_candidates": [],
+    "evidence": "ก้นเป็นชุด snap-lock มาตรฐาน; การวางหลายตัวบนแผ่นไม่เปลี่ยนโครงสร้าง"
+  },
+  {
+    "num": 2,
+    "is_custom": "yes",
+    "custom_reasons": [
+      "window",
+      "nonstandard_structure"
+    ],
+    "base_status": "nonstandard",
+    "base_construction": null,
+    "base_candidates": [],
+    "evidence": "โครง blister/display มีช่องเจาะและชุดปีกไม่ตรงแม่แบบ 1–11"
+  },
+  {
+    "num": 3,
+    "is_custom": "yes",
+    "custom_reasons": [
+      "window",
+      "hang_tab"
+    ],
+    "base_status": "standard",
+    "base_construction": 4,
+    "base_candidates": [],
+    "evidence": "ฐานเป็น tuck-top auto-bottom แต่มีหน้าต่างและรูหิ้วเพิ่ม"
+  },
+  {
+    "num": 4,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 4,
+    "base_candidates": [],
+    "evidence": "กล่องลูกฟูกนี้มีก้น crash-lock ทแยงและฝาบนเสียบครบตามแบบ 4"
+  },
+  {
+    "num": 5,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 4,
+    "base_candidates": [],
+    "evidence": "ภาพเดียวกับ #4; ปีกก้นเป็นกลไก auto-bottom มาตรฐาน ไม่ใช่ส่วนเพิ่ม"
+  },
+  {
+    "num": 6,
+    "is_custom": "yes",
+    "custom_reasons": [
+      "window",
+      "nonstandard_structure"
+    ],
+    "base_status": "nonstandard",
+    "base_construction": null,
+    "base_candidates": [],
+    "evidence": "multipack มีช่องจับ/ช่องยึดและชุดแผงเฉพาะงาน ไม่เข้าแม่แบบ 1–11"
+  },
+  {
+    "num": 7,
+    "is_custom": "yes",
+    "custom_reasons": [
+      "curved_edge",
+      "nonstandard_structure"
+    ],
+    "base_status": "nonstandard",
+    "base_construction": null,
+    "base_candidates": [],
+    "evidence": "display box มีฐานเอียงและแนวผนังเฉพาะ ไม่ใช่ก้นมาตรฐาน"
+  },
+  {
+    "num": 8,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 4,
+    "base_candidates": [],
+    "evidence": "ต่อหนึ่งตัวเห็นฝาบนเสียบและก้นทแยงติดกาวแบบ auto-bottom"
+  },
+  {
+    "num": 9,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 2,
+    "base_candidates": [],
+    "evidence": "ฝาเสียบบนและล่างอยู่ทิศเดียวกันหลังแยกหนึ่งตัวจาก LAY"
+  },
+  {
+    "num": 10,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 2,
+    "base_candidates": [],
+    "evidence": "ฝาเสียบบน–ล่างอยู่บนแนวเดียวกัน เป็น Straight Tuck End"
+  },
+  {
+    "num": 11,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 2,
+    "base_candidates": [],
+    "evidence": "ภาพซ้ำ #10; การหมุนหรือสลับตำแหน่งบนแผ่นไม่เปลี่ยนเป็นคลาสอื่น"
+  },
+  {
+    "num": 12,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 3,
+    "base_candidates": [],
+    "evidence": "ฝาบนเสียบและก้นเป็นปีก snap-lock ไม่มีเส้นทแยงติดกาว"
+  },
+  {
+    "num": 13,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 3,
+    "base_candidates": [],
+    "evidence": "ภาพซ้ำ #12; ก้นเป็น snap-lock มาตรฐาน"
+  },
+  {
+    "num": 14,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 4,
+    "base_candidates": [],
+    "evidence": "ก้นมีเส้นทแยงและพื้นที่ติดกาวแบบ crash-lock พร้อมฝาบนเสียบ"
+  },
+  {
+    "num": 15,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 4,
+    "base_candidates": [],
+    "evidence": "ต่อหนึ่งตัวเป็น tuck-top auto-bottom; รูปซับซ้อนเกิดจากการจัด LAY"
+  },
+  {
+    "num": 16,
+    "is_custom": "yes",
+    "custom_reasons": [
+      "extra_feature",
+      "nonstandard_structure"
+    ],
+    "base_status": "nonstandard",
+    "base_construction": null,
+    "base_candidates": [],
+    "evidence": "โครง inner-project มีแผงต่อเนื่องและรอยเว้าเพิ่ม ไม่ตรงแม่แบบมาตรฐาน"
+  },
+  {
+    "num": 17,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 1,
+    "base_candidates": [],
+    "evidence": "ฝาเสียบบนและล่างอยู่คนละทิศเมื่อไล่ตามสี่ body panels"
+  },
+  {
+    "num": 18,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 4,
+    "base_candidates": [],
+    "evidence": "ก้น wet-food เป็น crash-lock ทแยงมาตรฐานของแบบ 4"
+  },
+  {
+    "num": 19,
+    "is_custom": "yes",
+    "custom_reasons": [
+      "extra_feature",
+      "curved_edge",
+      "nonstandard_structure"
+    ],
+    "base_status": "nonstandard",
+    "base_construction": null,
+    "base_candidates": [],
+    "evidence": "มีแผงล็อกยาว รอยเว้า และแนวพับเฉพาะงาน inner-project"
+  },
+  {
+    "num": 20,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 2,
+    "base_candidates": [],
+    "evidence": "แยกหนึ่งตัวจาก LAY แล้วเป็น STE ธรรมดา; รูปกากบาทมาจากการหมุนจัดวาง"
+  },
+  {
+    "num": 21,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 3,
+    "base_candidates": [],
+    "evidence": "ก้นเป็นชุดปีก snap-lock โดยไม่เห็นเส้นทแยงติดกาว"
+  },
+  {
+    "num": 22,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 4,
+    "base_candidates": [],
+    "evidence": "แต่ละตัวมีฝาบนเสียบและก้น auto-bottom ทแยงครบ"
+  },
+  {
+    "num": 23,
+    "is_custom": "yes",
+    "custom_reasons": [
+      "nonstandard_structure"
+    ],
+    "base_status": "nonstandard",
+    "base_construction": null,
+    "base_candidates": [],
+    "evidence": "โครงกางเป็นชุดแผงต่อเนื่องซึ่งยังจับคู่กับแม่แบบถาด 5–7 ไม่ได้อย่างน่าเชื่อถือ จึงตี Custom ก่อน"
+  },
+  {
+    "num": 24,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 4,
+    "base_candidates": [],
+    "evidence": "ก้นเป็นชุด crash-lock มาตรฐาน; การกลับหัวของตัวล่างไม่เปลี่ยนคลาส"
+  },
+  {
+    "num": 25,
+    "is_custom": "yes",
+    "custom_reasons": [
+      "extra_feature"
+    ],
+    "base_status": "ambiguous",
+    "base_construction": null,
+    "base_candidates": [
+      1,
+      2
+    ],
+    "evidence": "เห็น tuck-end แต่ตำแหน่งฝาบน–ล่างในภาพ LAY ยังแยก RTE/STE ไม่มั่นใจ ตามกติกาให้ Custom ก่อน"
+  },
+  {
+    "num": 26,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 4,
+    "base_candidates": [],
+    "evidence": "เส้นทแยงที่ก้นเป็นกลไก auto-bottom มาตรฐาน ไม่ใช่ขอบพิเศษ"
+  },
+  {
+    "num": 27,
+    "is_custom": "yes",
+    "custom_reasons": [
+      "window",
+      "extra_feature"
+    ],
+    "base_status": "standard",
+    "base_construction": 4,
+    "base_candidates": [],
+    "evidence": "ฐานเป็น auto-bottom แต่มีช่องเจาะ/แผงล็อกภายในเพิ่มจากแม่แบบ"
+  },
+  {
+    "num": 28,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 4,
+    "base_candidates": [],
+    "evidence": "ก้น crash-lock ทแยงและฝาบนเสียบตรงแบบ 4"
+  },
+  {
+    "num": 29,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 4,
+    "base_candidates": [],
+    "evidence": "รูปกลับด้านจากบางตัวใน LAY แต่ topology ของ auto-bottom เหมือนเดิม"
+  },
+  {
+    "num": 30,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 11,
+    "base_candidates": [],
+    "evidence": "ปลายกล่องเป็นชุดปีกติดกาวแบบ Seal End ไม่ใช่ฝาเสียบ"
+  },
+  {
+    "num": 31,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 2,
+    "base_candidates": [],
+    "evidence": "ฝาเสียบบน–ล่างอยู่ทางเดียวกัน เป็น STE หลังแยกหนึ่งตัว"
+  },
+  {
+    "num": 32,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 4,
+    "base_candidates": [],
+    "evidence": "ก้นทแยงติดกาวและฝาบนเสียบเป็น auto-bottom มาตรฐาน"
+  },
+  {
+    "num": 33,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 1,
+    "base_candidates": [],
+    "evidence": "ฝาเสียบบน–ล่างอยู่คนละทิศเมื่อไล่ตาม body panels เป็น RTE"
+  },
+  {
+    "num": 34,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 4,
+    "base_candidates": [],
+    "evidence": "ปีกโค้งที่เห็นเป็นส่วนของกลไก auto-bottom มาตรฐาน ไม่ใช่ feature เพิ่ม"
+  },
+  {
+    "num": 35,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 3,
+    "base_candidates": [],
+    "evidence": "ฝาบนเสียบและก้น snap-lock ไม่มีเส้นทแยงติดกาว"
+  },
+  {
+    "num": 36,
+    "is_custom": "yes",
+    "custom_reasons": [
+      "nonstandard_structure"
+    ],
+    "base_status": "nonstandard",
+    "base_construction": null,
+    "base_candidates": [],
+    "evidence": "display box มีผนังลาดและฐานเฉพาะ ไม่เข้า 1–11"
+  },
+  {
+    "num": 37,
+    "is_custom": "yes",
+    "custom_reasons": [
+      "nonstandard_structure"
+    ],
+    "base_status": "nonstandard",
+    "base_construction": null,
+    "base_candidates": [],
+    "evidence": "display box มีชุดแผงยก/เอียงเฉพาะงาน ไม่ตรงแม่แบบมาตรฐาน"
+  },
+  {
+    "num": 38,
+    "is_custom": "yes",
+    "custom_reasons": [
+      "extra_feature",
+      "nonstandard_structure"
+    ],
+    "base_status": "nonstandard",
+    "base_construction": null,
+    "base_candidates": [],
+    "evidence": "inner curry มีชุดล็อกและแผงซ้อนหลายชั้นเกินแม่แบบถาดมาตรฐาน"
+  },
+  {
+    "num": 39,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 11,
+    "base_candidates": [],
+    "evidence": "ปลายทั้งสองใช้แผงติดกาว เป็น Seal End มาตรฐาน"
+  },
+  {
+    "num": 40,
+    "is_custom": "yes",
+    "custom_reasons": [
+      "curved_edge",
+      "extra_feature"
+    ],
+    "base_status": "standard",
+    "base_construction": 4,
+    "base_candidates": [],
+    "evidence": "ฐานเป็น auto-bottom แต่มีรอยเว้าครึ่งวงกลม/แง่งเปิดเพิ่ม"
+  },
+  {
+    "num": 41,
+    "is_custom": "yes",
+    "custom_reasons": [
+      "curved_edge",
+      "extra_feature"
+    ],
+    "base_status": "standard",
+    "base_construction": 4,
+    "base_candidates": [],
+    "evidence": "ภาพซ้ำกลุ่ม #40; มีรอยเว้าเพิ่มจาก auto-bottom มาตรฐาน"
+  },
+  {
+    "num": 42,
+    "is_custom": "yes",
+    "custom_reasons": [
+      "curved_edge",
+      "extra_feature"
+    ],
+    "base_status": "standard",
+    "base_construction": 4,
+    "base_candidates": [],
+    "evidence": "ภาพซ้ำกลุ่ม #40; base ยังเป็นแบบ 4 แต่มี feature เพิ่ม"
+  },
+  {
+    "num": 43,
+    "is_custom": "yes",
+    "custom_reasons": [
+      "extra_feature",
+      "nonstandard_structure"
+    ],
+    "base_status": "nonstandard",
+    "base_construction": null,
+    "base_candidates": [],
+    "evidence": "display box มีขอบหลังยกสูงและลำดับปีกบนเฉพาะงาน"
+  },
+  {
+    "num": 44,
+    "is_custom": "yes",
+    "custom_reasons": [
+      "extra_feature",
+      "nonstandard_structure"
+    ],
+    "base_status": "nonstandard",
+    "base_construction": null,
+    "base_candidates": [],
+    "evidence": "ภาพซ้ำ #43; ส่วนยกสูงบนขอบทำให้ไม่ใช่แม่แบบ 1–11"
+  },
+  {
+    "num": 45,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 4,
+    "base_candidates": [],
+    "evidence": "ก้นซับซ้อนเป็นชุด auto-bottom มาตรฐาน; รอยบากเป็นส่วนล็อกของกลไก"
+  },
+  {
+    "num": 46,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 4,
+    "base_candidates": [],
+    "evidence": "ภาพซ้ำ #45; ไม่มี feature แยกจากกลไก auto-bottom"
+  },
+  {
+    "num": 47,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 4,
+    "base_candidates": [],
+    "evidence": "ภาพซ้ำ #45; การจัดวาง/กลับด้านไม่เปลี่ยน topology"
+  },
+  {
+    "num": 48,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 4,
+    "base_candidates": [],
+    "evidence": "ฝาบนเสียบและก้น crash-lock ทแยงตรงแบบ 4"
+  },
+  {
+    "num": 49,
+    "is_custom": "yes",
+    "custom_reasons": [
+      "window"
+    ],
+    "base_status": "standard",
+    "base_construction": 4,
+    "base_candidates": [],
+    "evidence": "ฐานเป็น auto-bottom แต่มีช่องหน้าต่างสี่เหลี่ยมใน body panel"
+  },
+  {
+    "num": 50,
+    "is_custom": "yes",
+    "custom_reasons": [
+      "extra_feature",
+      "nonstandard_structure"
+    ],
+    "base_status": "nonstandard",
+    "base_construction": null,
+    "base_candidates": [],
+    "evidence": "มีชุดแง่งและรอยเว้าหลายตำแหน่งซึ่งไม่ตรงกลไกมาตรฐานตัวใด"
+  },
+  {
+    "num": 51,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 4,
+    "base_candidates": [],
+    "evidence": "ก้นทแยงติดกาวและฝาบนเสียบตรงแบบ auto-bottom"
+  },
+  {
+    "num": 52,
+    "is_custom": "yes",
+    "custom_reasons": [
+      "window",
+      "extra_feature",
+      "nonstandard_structure"
+    ],
+    "base_status": "nonstandard",
+    "base_construction": null,
+    "base_candidates": [],
+    "evidence": "มีช่องหิ้วสี่เหลี่ยมและแง่งล็อกเพิ่มหลายตำแหน่ง"
+  },
+  {
+    "num": 53,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 4,
+    "base_candidates": [],
+    "evidence": "ต่อหนึ่งตัวเป็น tuck-top auto-bottom; ขอบที่ชนกันเกิดจากการทำ LAY"
+  },
+  {
+    "num": 54,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 4,
+    "base_candidates": [],
+    "evidence": "ภาพเดี่ยวเห็นเส้นทแยง crash-lock ชัด เป็นแบบ 4 ไม่ใช่ Custom"
+  },
+  {
+    "num": 55,
+    "is_custom": "yes",
+    "custom_reasons": [
+      "extra_feature",
+      "nonstandard_structure"
+    ],
+    "base_status": "nonstandard",
+    "base_construction": null,
+    "base_candidates": [],
+    "evidence": "มีแนวฉีก/แนวล็อกคดและแผงภายในเพิ่มจากแม่แบบมาตรฐาน"
+  },
+  {
+    "num": 56,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 3,
+    "base_candidates": [],
+    "evidence": "ก้นเป็นชุดปีก snap-lock ไม่มีแนวทแยงติดกาว"
+  },
+  {
+    "num": 57,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 3,
+    "base_candidates": [],
+    "evidence": "ก้นเป็น snap-lock มาตรฐาน; ตัวที่กลับหัวใน LAY ยังเป็นคลาสเดิม"
+  },
+  {
+    "num": 58,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 5,
+    "base_candidates": [],
+    "evidence": "กางเป็นถาดเปิดบน มีฐานและผนังพับรอบตามแบบ Tray"
+  },
+  {
+    "num": 59,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 5,
+    "base_candidates": [],
+    "evidence": "แยกหนึ่งตัวแล้วเป็นถาดเปิดบน; ปีกข้างใช้ประกอบผนังถาด"
+  },
+  {
+    "num": 60,
+    "is_custom": "no",
+    "custom_reasons": [],
+    "base_status": "standard",
+    "base_construction": 5,
+    "base_candidates": [],
+    "evidence": "โครงเหมือนถาดพิซซ่าเปิดบน เป็น Tray มาตรฐาน"
+  }
+]
