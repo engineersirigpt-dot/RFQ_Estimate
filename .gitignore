@@ -44,3 +44,6 @@ bench/dieline_index.csv
 /bench/finetune_data/
 /bench/gold/img/
 /bench/gold/img2/
+
+# FN-mining derived images
+bench/label_queue/*_img/
