@@ -1,13 +1,13 @@
 num	file	family_group_id	proxy	proxy_name	gpt_is_custom	gpt_custom_reasons	gpt_base_status	gpt_base_construction	gpt_base_candidates	is_false_negative	base_conflict	needs_expert	gpt_evidence
-1	021222_085126-231692.pdf	fam_fba43b89cf3d	4	AutoBottom	no		standard	3			Y		ก้นเป็นชุด snap-lock มาตรฐาน; การวางหลายตัวบนแผ่นไม่เปลี่ยนโครงสร้าง
+1	021222_085126-231692.pdf	fam_fba43b89cf3d	4	AutoBottom	no		standard	3			Y	Y	ก้นเป็นชุด snap-lock มาตรฐาน; การวางหลายตัวบนแผ่นไม่เปลี่ยนโครงสร้าง
 2	150922_054441-561341.pdf	fam_38dc6a999ec7	4	AutoBottom	yes	window|nonstandard_structure	nonstandard			Y		Y	โครง blister/display มีช่องเจาะและชุดปีกไม่ตรงแม่แบบ 1–11
 3	230822_093835-656386.pdf	fam_87eea19f171a	3	SnapLock	yes	window|hang_tab	standard	4		Y	Y	Y	ฐานเป็น tuck-top auto-bottom แต่มีหน้าต่างและรูหิ้วเพิ่ม
-4	091122_025014-179016.pdf	fam_6358352cfa6b	3	SnapLock	no		standard	4			Y		กล่องลูกฟูกนี้มีก้น crash-lock ทแยงและฝาบนเสียบครบตามแบบ 4
-5	091122_024323-424731.pdf	fam_a2207c5a89fa	3	SnapLock	no		standard	4			Y		ภาพเดียวกับ #4; ปีกก้นเป็นกลไก auto-bottom มาตรฐาน ไม่ใช่ส่วนเพิ่ม
+4	091122_025014-179016.pdf	fam_6358352cfa6b	3	SnapLock	no		standard	4			Y	Y	กล่องลูกฟูกนี้มีก้น crash-lock ทแยงและฝาบนเสียบครบตามแบบ 4
+5	091122_024323-424731.pdf	fam_a2207c5a89fa	3	SnapLock	no		standard	4			Y	Y	ภาพเดียวกับ #4; ปีกก้นเป็นกลไก auto-bottom มาตรฐาน ไม่ใช่ส่วนเพิ่ม
 6	270622_084916.pdf	fam_2f697fdc4be9	4	AutoBottom	yes	window|nonstandard_structure	nonstandard			Y		Y	multipack มีช่องจับ/ช่องยึดและชุดแผงเฉพาะงาน ไม่เข้าแม่แบบ 1–11
 7	141222_085728-923453.pdf	fam_19ff36ea0c8a	3	SnapLock	yes	curved_edge|nonstandard_structure	nonstandard			Y		Y	display box มีฐานเอียงและแนวผนังเฉพาะ ไม่ใช่ก้นมาตรฐาน
 8	F008962 องค์การเภสัชกรรม JE21110604 34215270 Lay 1_180422_103112.pdf	fam_5bef774c2d1f	4	AutoBottom	no		standard	4					ต่อหนึ่งตัวเห็นฝาบนเสียบและก้นทแยงติดกาวแบบ auto-bottom
-9	160722_055618.pdf	fam_c0bc4e57e745	1	RTE	no		standard	2			Y		ฝาเสียบบนและล่างอยู่ทิศเดียวกันหลังแยกหนึ่งตัวจาก LAY
+9	160722_055618.pdf	fam_c0bc4e57e745	1	RTE	no		standard	2			Y	Y	ฝาเสียบบนและล่างอยู่ทิศเดียวกันหลังแยกหนึ่งตัวจาก LAY
 10	310323_080718-958622.pdf	fam_13a419db7a93	2	STE	no		standard	2					ฝาเสียบบน–ล่างอยู่บนแนวเดียวกัน เป็น Straight Tuck End
 11	310323_080753-756452.pdf	fam_b08ce7bfea6e	2	STE	no		standard	2					ภาพซ้ำ #10; การหมุนหรือสลับตำแหน่งบนแผ่นไม่เปลี่ยนเป็นคลาสอื่น
 12	050922_070151-796515.pdf	fam_2c34293f06c6	3	SnapLock	no		standard	3					ฝาบนเสียบและก้นเป็นปีก snap-lock ไม่มีเส้นทแยงติดกาว
@@ -16,7 +16,7 @@ num	file	family_group_id	proxy	proxy_name	gpt_is_custom	gpt_custom_reasons	gpt_b
 15	270722_094631.pdf	fam_01f415344e0f	4	AutoBottom	no		standard	4					ต่อหนึ่งตัวเป็น tuck-top auto-bottom; รูปซับซ้อนเกิดจากการจัด LAY
 16	301122_061838-256827.pdf	fam_3f87b26d5c51	4	AutoBottom	yes	extra_feature|nonstandard_structure	nonstandard			Y		Y	โครง inner-project มีแผงต่อเนื่องและรอยเว้าเพิ่ม ไม่ตรงแม่แบบมาตรฐาน
 17	F009878 CARGURU LEATHER WAX Lay_120522_151508.pdf	fam_233685e08a64	1	RTE	no		standard	1					ฝาเสียบบนและล่างอยู่คนละทิศเมื่อไล่ตามสี่ body panels
-18	201222_014703-954447.pdf	fam_e15e9c85008a	3	SnapLock	no		standard	4			Y		ก้น wet-food เป็น crash-lock ทแยงมาตรฐานของแบบ 4
+18	201222_014703-954447.pdf	fam_e15e9c85008a	3	SnapLock	no		standard	4			Y	Y	ก้น wet-food เป็น crash-lock ทแยงมาตรฐานของแบบ 4
 19	211122_075133-448365.pdf	fam_b40ec61ba4f0	4	AutoBottom	yes	extra_feature|curved_edge|nonstandard_structure	nonstandard			Y		Y	มีแผงล็อกยาว รอยเว้า และแนวพับเฉพาะงาน inner-project
 20	060223_060718-184328.pdf	fam_a8cade80cb92	2	STE	no		standard	2					แยกหนึ่งตัวจาก LAY แล้วเป็น STE ธรรมดา; รูปกากบาทมาจากการหมุนจัดวาง
 21	251122_070320-962528.pdf	fam_63d476aca2ab	3	SnapLock	no		standard	3					ก้นเป็นชุดปีก snap-lock โดยไม่เห็นเส้นทแยงติดกาว
@@ -28,34 +28,34 @@ num	file	family_group_id	proxy	proxy_name	gpt_is_custom	gpt_custom_reasons	gpt_b
 27	241022_060812-391882.pdf	fam_7ba7acb74dfc	3	SnapLock	yes	window|extra_feature	standard	4		Y	Y	Y	ฐานเป็น auto-bottom แต่มีช่องเจาะ/แผงล็อกภายในเพิ่มจากแม่แบบ
 28	300123_003648-343230.pdf	fam_361ad3e75752	4	AutoBottom	no		standard	4					ก้น crash-lock ทแยงและฝาบนเสียบตรงแบบ 4
 29	271022_013939-142887.pdf	fam_4b1a012c3833	4	AutoBottom	no		standard	4					รูปกลับด้านจากบางตัวใน LAY แต่ topology ของ auto-bottom เหมือนเดิม
-30	180822_083917-704199.pdf	fam_7e5a8888e2cb	3	SnapLock	no		standard	11			Y		ปลายกล่องเป็นชุดปีกติดกาวแบบ Seal End ไม่ใช่ฝาเสียบ
-31	241022_032012-573176.pdf	fam_c9bdf76c25c0	1	RTE	no		standard	2			Y		ฝาเสียบบน–ล่างอยู่ทางเดียวกัน เป็น STE หลังแยกหนึ่งตัว
-32	251122_071354-423736.pdf	fam_bde8a210ac38	3	SnapLock	no		standard	4			Y		ก้นทแยงติดกาวและฝาบนเสียบเป็น auto-bottom มาตรฐาน
+30	180822_083917-704199.pdf	fam_7e5a8888e2cb	3	SnapLock	no		standard	11			Y	Y	ปลายกล่องเป็นชุดปีกติดกาวแบบ Seal End ไม่ใช่ฝาเสียบ
+31	241022_032012-573176.pdf	fam_c9bdf76c25c0	1	RTE	no		standard	2			Y	Y	ฝาเสียบบน–ล่างอยู่ทางเดียวกัน เป็น STE หลังแยกหนึ่งตัว
+32	251122_071354-423736.pdf	fam_bde8a210ac38	3	SnapLock	no		standard	4			Y	Y	ก้นทแยงติดกาวและฝาบนเสียบเป็น auto-bottom มาตรฐาน
 33	F009879 HORSEY CAR CARE Lay_120522_145851.pdf	fam_85e1b11ea1e0	1	RTE	no		standard	1					ฝาเสียบบน–ล่างอยู่คนละทิศเมื่อไล่ตาม body panels เป็น RTE
 34	151122_025435-361245.pdf	fam_64c362f4cd33	4	AutoBottom	no		standard	4					ปีกโค้งที่เห็นเป็นส่วนของกลไก auto-bottom มาตรฐาน ไม่ใช่ feature เพิ่ม
 35	060922_014701-353593.pdf	fam_7d3c85d4a590	3	SnapLock	no		standard	3					ฝาบนเสียบและก้น snap-lock ไม่มีเส้นทแยงติดกาว
 36	150822_034940-957151.pdf	fam_53ac797c9137	3	SnapLock	yes	nonstandard_structure	nonstandard			Y		Y	display box มีผนังลาดและฐานเฉพาะ ไม่เข้า 1–11
 37	200123_013001-447160.pdf	fam_86e10036ab28	4	AutoBottom	yes	nonstandard_structure	nonstandard			Y		Y	display box มีชุดแผงยก/เอียงเฉพาะงาน ไม่ตรงแม่แบบมาตรฐาน
 38	191022_015853-685343.pdf	fam_67da7ba37fb9	3	SnapLock	yes	extra_feature|nonstandard_structure	nonstandard			Y		Y	inner curry มีชุดล็อกและแผงซ้อนหลายชั้นเกินแม่แบบถาดมาตรฐาน
-39	231122_025009-495421.pdf	fam_b7c4fd183ef9	1	RTE	no		standard	11			Y		ปลายทั้งสองใช้แผงติดกาว เป็น Seal End มาตรฐาน
+39	231122_025009-495421.pdf	fam_b7c4fd183ef9	1	RTE	no		standard	11			Y	Y	ปลายทั้งสองใช้แผงติดกาว เป็น Seal End มาตรฐาน
 40	280922_092150-274485.pdf	fam_593f0ce1a6ca	3	SnapLock	yes	curved_edge|extra_feature	standard	4		Y	Y	Y	ฐานเป็น auto-bottom แต่มีรอยเว้าครึ่งวงกลม/แง่งเปิดเพิ่ม
 41	280922_092041-551853.pdf	fam_cf6251ba2cc3	3	SnapLock	yes	curved_edge|extra_feature	standard	4		Y	Y	Y	ภาพซ้ำกลุ่ม #40; มีรอยเว้าเพิ่มจาก auto-bottom มาตรฐาน
 42	280922_091923-712911.pdf	fam_88867530684a	3	SnapLock	yes	curved_edge|extra_feature	standard	4		Y	Y	Y	ภาพซ้ำกลุ่ม #40; base ยังเป็นแบบ 4 แต่มี feature เพิ่ม
 43	260922_095550-592517.pdf	fam_855cc92203ff	3	SnapLock	yes	extra_feature|nonstandard_structure	nonstandard			Y		Y	display box มีขอบหลังยกสูงและลำดับปีกบนเฉพาะงาน
 44	260922_095302-336922.pdf	fam_78e8c40d439d	3	SnapLock	yes	extra_feature|nonstandard_structure	nonstandard			Y		Y	ภาพซ้ำ #43; ส่วนยกสูงบนขอบทำให้ไม่ใช่แม่แบบ 1–11
-45	260922_094556-424311.pdf	fam_d27f4dbf8966	3	SnapLock	no		standard	4			Y		ก้นซับซ้อนเป็นชุด auto-bottom มาตรฐาน; รอยบากเป็นส่วนล็อกของกลไก
-46	260922_094503-887960.pdf	fam_b15f09ece72c	3	SnapLock	no		standard	4			Y		ภาพซ้ำ #45; ไม่มี feature แยกจากกลไก auto-bottom
-47	260922_093616-452719.pdf	fam_16d3e96b2fcb	3	SnapLock	no		standard	4			Y		ภาพซ้ำ #45; การจัดวาง/กลับด้านไม่เปลี่ยน topology
-48	LAY F009728 กล่องรังนกโบกิ_120422_120345.pdf	fam_56e8410d8df1	3	SnapLock	no		standard	4			Y		ฝาบนเสียบและก้น crash-lock ทแยงตรงแบบ 4
+45	260922_094556-424311.pdf	fam_d27f4dbf8966	3	SnapLock	no		standard	4			Y	Y	ก้นซับซ้อนเป็นชุด auto-bottom มาตรฐาน; รอยบากเป็นส่วนล็อกของกลไก
+46	260922_094503-887960.pdf	fam_b15f09ece72c	3	SnapLock	no		standard	4			Y	Y	ภาพซ้ำ #45; ไม่มี feature แยกจากกลไก auto-bottom
+47	260922_093616-452719.pdf	fam_16d3e96b2fcb	3	SnapLock	no		standard	4			Y	Y	ภาพซ้ำ #45; การจัดวาง/กลับด้านไม่เปลี่ยน topology
+48	LAY F009728 กล่องรังนกโบกิ_120422_120345.pdf	fam_56e8410d8df1	3	SnapLock	no		standard	4			Y	Y	ฝาบนเสียบและก้น crash-lock ทแยงตรงแบบ 4
 49	260822_043455-703961.PDF	fam_588bacc64ae4	4	AutoBottom	yes	window	standard	4		Y		Y	ฐานเป็น auto-bottom แต่มีช่องหน้าต่างสี่เหลี่ยมใน body panel
 50	211122_042836-986336.pdf	fam_4ae67758b9a6	3	SnapLock	yes	extra_feature|nonstandard_structure	nonstandard			Y		Y	มีชุดแง่งและรอยเว้าหลายตำแหน่งซึ่งไม่ตรงกลไกมาตรฐานตัวใด
 51	270722_093052.pdf	fam_c2db429e219b	4	AutoBottom	no		standard	4					ก้นทแยงติดกาวและฝาบนเสียบตรงแบบ auto-bottom
 52	081122_081806-521069.pdf	fam_38a794f19639	3	SnapLock	yes	window|extra_feature|nonstandard_structure	nonstandard			Y		Y	มีช่องหิ้วสี่เหลี่ยมและแง่งล็อกเพิ่มหลายตำแหน่ง
 53	260123_021625-818760.pdf	fam_a4544a2e6ac0	4	AutoBottom	no		standard	4					ต่อหนึ่งตัวเป็น tuck-top auto-bottom; ขอบที่ชนกันเกิดจากการทำ LAY
-54	120123_075859-967269.PDF	fam_2fceac78204d	2	STE	no		standard	4			Y		ภาพเดี่ยวเห็นเส้นทแยง crash-lock ชัด เป็นแบบ 4 ไม่ใช่ Custom
+54	120123_075859-967269.PDF	fam_2fceac78204d	2	STE	no		standard	4			Y	Y	ภาพเดี่ยวเห็นเส้นทแยง crash-lock ชัด เป็นแบบ 4 ไม่ใช่ Custom
 55	151122_023840-166677.pdf	fam_2f2d7f05ab94	4	AutoBottom	yes	extra_feature|nonstandard_structure	nonstandard			Y		Y	มีแนวฉีก/แนวล็อกคดและแผงภายในเพิ่มจากแม่แบบมาตรฐาน
-56	231222_012302-509020.pdf	fam_8179a1801a50	4	AutoBottom	no		standard	3			Y		ก้นเป็นชุดปีก snap-lock ไม่มีแนวทแยงติดกาว
+56	231222_012302-509020.pdf	fam_8179a1801a50	4	AutoBottom	no		standard	3			Y	Y	ก้นเป็นชุดปีก snap-lock ไม่มีแนวทแยงติดกาว
 57	250822_063324-643419.pdf	fam_f9f6e822b223	3	SnapLock	no		standard	3					ก้นเป็น snap-lock มาตรฐาน; ตัวที่กลับหัวใน LAY ยังเป็นคลาสเดิม
-58	160822_070830-555060.pdf	fam_1e4960d52bc8	11	SealEnd	no		standard	5			Y		กางเป็นถาดเปิดบน มีฐานและผนังพับรอบตามแบบ Tray
-59	F009801 CHEESE STICK Lay_270422_160654.pdf	fam_adbf0fa0d640	1	RTE	no		standard	5			Y		แยกหนึ่งตัวแล้วเป็นถาดเปิดบน; ปีกข้างใช้ประกอบผนังถาด
-60	F009799 PIZZA (HAWAIIAN) 135 G lay_270422_151243.pdf	fam_c9103c9eadb2	1	RTE	no		standard	5			Y		โครงเหมือนถาดพิซซ่าเปิดบน เป็น Tray มาตรฐาน
+58	160822_070830-555060.pdf	fam_1e4960d52bc8	11	SealEnd	no		standard	5			Y	Y	กางเป็นถาดเปิดบน มีฐานและผนังพับรอบตามแบบ Tray
+59	F009801 CHEESE STICK Lay_270422_160654.pdf	fam_adbf0fa0d640	1	RTE	no		standard	5			Y	Y	แยกหนึ่งตัวแล้วเป็นถาดเปิดบน; ปีกข้างใช้ประกอบผนังถาด
+60	F009799 PIZZA (HAWAIIAN) 135 G lay_270422_151243.pdf	fam_c9103c9eadb2	1	RTE	no		standard	5			Y	Y	โครงเหมือนถาดพิซซ่าเปิดบน เป็น Tray มาตรฐาน

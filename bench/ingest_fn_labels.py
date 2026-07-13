@@ -24,8 +24,8 @@ for g in sorted(gpt,key=lambda x:x['num']):
     cands='|'.join(str(x) for x in (g.get('base_candidates') or []))
     # flags
     is_fn = (isc=='yes' and px in STD)                       # proxy=std แต่ GPT=custom → false-negative
-    base_conflict = (bs=='standard' and bc is not None and str(bc)!=px)  # base ไม่ตรง proxy
-    needs_expert = is_fn or bs in ('ambiguous','nonstandard') or isc=='unknown'
+    base_conflict = (bs=='standard' and bc is not None and str(bc)!=px)  # base ไม่ตรง proxy (std→std)
+    needs_expert = is_fn or base_conflict or bs in ('ambiguous','nonstandard') or isc=='unknown'
     if is_fn: fn+=1
     if bs in ('ambiguous','nonstandard'): conflict_amb+=1
     if isc=='no' and bs=='standard' and str(bc)==px: agree_std+=1
@@ -37,8 +37,13 @@ HDR=['num','file','family_group_id','proxy','proxy_name','gpt_is_custom','gpt_cu
      'gpt_base_status','gpt_base_construction','gpt_base_candidates','is_false_negative',
      'base_conflict','needs_expert','gpt_evidence']
 csv.writer(open(OUT+'/nn_gold_labeled.tsv','w',newline='',encoding='utf-8'),delimiter='\t').writerows([HDR]+rows)
-short=[r for r in rows if r[12]=='Y']
+# แยก 2 shortlist ตาม GPT: custom-FN (ตี custom ผิด) vs base-conflict (ทรง std→std ผิด) — อย่าปนกัน
+short=[r for r in rows if r[12]=='Y']                        # needs_expert รวม (customFN + base_conflict + amb)
+short_fn=[r for r in rows if r[10]=='Y' or (r[5] in ('yes','unknown')) or r[7] in ('ambiguous','nonstandard')]
+short_base=[r for r in rows if r[11]=='Y' and r[10]!='Y']   # base ผิด แต่ไม่ใช่ custom-FN
 csv.writer(open(OUT+'/expert_shortlist.tsv','w',newline='',encoding='utf-8'),delimiter='\t').writerows([HDR]+short)
+csv.writer(open(OUT+'/shortlist_customFN.tsv','w',newline='',encoding='utf-8'),delimiter='\t').writerows([HDR]+short_fn)
+csv.writer(open(OUT+'/shortlist_baseconflict.tsv','w',newline='',encoding='utf-8'),delimiter='\t').writerows([HDR]+short_base)
 
 # ---------- report ----------
 isc_c=collections.Counter(r[5] for r in rows); bs_c=collections.Counter(r[7] for r in rows)
@@ -49,5 +54,7 @@ print(f'  base_status: {dict(bs_c)}')
 print(f'  🎯 false-negative (proxy=std แต่ GPT=custom): {fn}/{len(rows)} = {100*fn//len(rows)}%')
 print(f'     proxy เดิมของ FN พวกนี้: {dict(px_of_custom)}')
 print(f'  agree-standard (GPT ยืนยันตรง proxy): {agree_std}')
-print(f'  → expert_shortlist: {len(short)} ใบ (FN {fn} + ambiguous/nonstandard {conflict_amb} + unknown)')
-print(f'  ไฟล์: {OUT}/nn_gold_labeled.tsv + {OUT}/expert_shortlist.tsv')
+base_conf=sum(1 for r in rows if r[11]=='Y')
+print(f'  base-conflict (ทรง std→std ผิด แยกจาก custom): {base_conf} ใบ')
+print(f'  → shortlist_customFN: {len(short_fn)} | shortlist_baseconflict: {len(short_base)} | รวม needs_expert: {len(short)}')
+print(f'  ไฟล์: {OUT}/nn_gold_labeled.tsv + shortlist_customFN.tsv + shortlist_baseconflict.tsv')

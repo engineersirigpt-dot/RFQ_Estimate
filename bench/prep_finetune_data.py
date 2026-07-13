@@ -5,8 +5,8 @@
 # python bench/prep_finetune_data.py [cap=500]
 import os, re, sys, csv, io, zipfile, collections, hashlib
 import fitz
-try: from PIL import Image
-except ImportError: os.system(sys.executable+' -m pip install pillow -q'); from PIL import Image
+try: from PIL import Image, ImageChops
+except ImportError: os.system(sys.executable+' -m pip install pillow -q'); from PIL import Image, ImageChops
 
 CAP=int(sys.argv[1]) if len(sys.argv)>1 else 500
 SRC='test/uploads'; OUT='bench/finetune_data'; PX=384
@@ -71,17 +71,33 @@ print(f'family graph: {len(pool)} ไฟล์ → {len(set(fam(f) for f in pool
       f'exact-sha dup groups {dup_groups} (merge เพิ่ม {sha_merges}) | holdout families {len(gold_fams)} '
       f'| ⚠️ near-dup ยังไม่จับ (ต้อง pHash)')
 
+def trim(im):
+    # crop กรอบเนื้อ dieline (ตัด whitespace) → feature เล็ก (window/notch) ได้ pixel มากขึ้น (GPT Round 16)
+    bg=Image.new('RGB',im.size,(255,255,255)); bb=ImageChops.difference(im,bg).getbbox()
+    if bb:
+        w,h=im.size; mx=max(2,int((bb[2]-bb[0])*0.03)); my=max(2,int((bb[3]-bb[1])*0.03))
+        im=im.crop((max(0,bb[0]-mx),max(0,bb[1]-my),min(w,bb[2]+mx),min(h,bb[3]+my)))
+    return im
 def render(path):
     if path.lower().endswith('.pdf'):
         d=fitz.open(path); pix=d[0].get_pixmap(matrix=fitz.Matrix(2,2)); im=Image.open(io.BytesIO(pix.tobytes('png'))); d.close()
     else: im=Image.open(path)
-    im=im.convert('RGB'); im.thumbnail((PX,PX)); bg=Image.new('RGB',(PX,PX),(255,255,255))
+    im=trim(im.convert('RGB'))                         # crop bbox ก่อน แล้ว preserve-aspect + pad ขาว
+    im.thumbnail((PX,PX)); bg=Image.new('RGB',(PX,PX),(255,255,255))
     bg.paste(im,((PX-im.width)//2,(PX-im.height)//2)); return bg
 
-# ---------- train (proxy, ตัด holdout family + non-dieline ตามชื่อ) ----------
-byT=collections.defaultdict(list)
+# ---------- ตรวจ mixed-label families (family เดียวมีหลาย proxy label = grouping/label ขัด) ตัดทิ้ง (GPT Round 16) ----------
+famlabels=collections.defaultdict(set)
 for f,(t,j) in meta.items():
     if fam(f) in gold_fams or JUNK.search(f): continue
+    famlabels[fam(f)].add(t)
+mixed_fams={g for g,s in famlabels.items() if len(s)>1}
+print(f'mixed-label families ตัดทิ้ง: {len(mixed_fams)} ({sum(1 for f in meta if fam(f) in mixed_fams)} ไฟล์)')
+
+# ---------- train (proxy, ตัด holdout family + non-dieline + mixed-label family) ----------
+byT=collections.defaultdict(list)
+for f,(t,j) in meta.items():
+    if fam(f) in gold_fams or JUNK.search(f) or fam(f) in mixed_fams: continue
     byT[t].append(f)
 rows=[]; per=collections.Counter(); ok=0
 for t in sorted(byT):
