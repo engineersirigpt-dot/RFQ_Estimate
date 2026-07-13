@@ -47,3 +47,5 @@ bench/dieline_index.csv
 
 # FN-mining derived images
 bench/label_queue/*_img/
+
+bench/ocg_pilot/overlay/

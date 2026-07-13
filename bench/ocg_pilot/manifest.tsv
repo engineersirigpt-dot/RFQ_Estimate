@@ -1,0 +1,61 @@
+tag	file	producer	n_cut	n_crease	n_die	cut+crease_แยก	layer_names
+NEG	010223_002840-955771.pdf	PackDesign 2008 by BCSI 	0	0	0		Layer 1|Layer 2
+NEG	010223_002853-335897.PDF	PackDesign 2008 by BCSI 	0	0	0		Layer 1
+POS	010223_013414-363949.pdf	Adobe PDF library 17.00	134	0	0		AW|Die-Cut|Dimension
+NEG	010223_021037-143435.pdf	PDFCreator Free 3.5.1	0	0	0		
+POS	010223_021059-233347.pdf	Adobe PDF library 16.07	249	0	0		AW|Die-Cut|EMBOSS|K SILVER
+NEG	010223_023416-513747.PDF	PackDesign 2008 by BCSI 	0	0	0		Layer 1
+NEG	010223_023418-893126.pdf	PackDesign 2008 by BCSI 	0	0	0		Layer 1|Layer 2
+NEG	010223_023715-466591.pdf	cairo 1.17.4 (https://ca	0	0	0		
+NEG	010223_032739-453742.pdf	iLovePDF	0	0	0		
+NEG	010223_032754-879844.pdf	cairo 1.17.4 (https://ca	0	0	0		
+NEG	010223_054056-194665.pdf	PDFCreator Free 3.5.1	0	0	0		
+NEG	010223_055208-106847.pdf	Adobe PDF library 16.00	0	0	0		Layer 1|Layer 2|Layer 3
+NEG	010223_055221-137420.PDF	Adobe PDF library 16.00	0	0	0		Layer 1|Layer 2|Layer 3
+POS	010223_055342-232176.pdf	Adobe PDF library 16.00	0	0	1222		Die Line 9|paper
+NEG	010223_061138-476144.pdf	Adobe PDF library 16.00	0	0	0		Layer 1|Layer 2|Layer 3
+NEG	010223_061142-709690.PDF	Adobe PDF library 16.00	0	0	0		Layer 1|Layer 2|Layer 3
+POS	010223_061146-693661.pdf	Adobe PDF library 16.00	0	0	727		Die Line 9|paper
+NEG	010223_063203-775647.pdf	Adobe PDF library 16.00	0	0	0		Layer 1|Layer 2
+NEG	010223_063207-677499.PDF	PackDesign 2008 by BCSI 	0	0	0		
+POS	010223_063211-261727.pdf	Adobe PDF library 16.00	0	0	511		Die Line 9|paper
+NEG	010223_064522-702035.pdf	cairo 1.15.12 (http://ca	0	0	0		
+NEG	010223_070422-119157.pdf	cairo 1.17.4 (https://ca	0	0	0		
+NEG	010223_071246-142440.pdf	cairo 1.17.4 (https://ca	0	0	0		
+NEG	010223_071329-889669.pdf	cairo 1.17.4 (https://ca	0	0	0		
+NEG	010223_071951-767593.pdf	Adobe PDF library 17.00	0	0	0		
+POS	010223_072616-469890.pdf	Adobe PDF library 16.07	0	0	113		Layer 4|aw form|dieline
+POS	010323_050555-128863.pdf	Adobe PDF library 17.00	0	0	46		Die Line 9|paper
+POS	010323_060935-258718.pdf	Adobe PDF library 15.00	1677	0	0		ART|BG|DIECUT|Foil
+POS	010623_035227-144934.pdf	Adobe PDF library 9.90	170	0	0		dicut|master
+POS	010623_035239-865943.pdf	Adobe PDF library 9.90	170	0	0		dicut|master
+POS	010623_040242-409977.pdf	Adobe PDF library 16.07	568	0	0		Diecut
+POS	010623_042842-681862.pdf	Adobe PDF library 17.00	0	0	74		Die Line 9|paper
+POS	010623_063619-854417.pdf	Adobe PDF library 17.00	0	0	74		Die Line 9|paper
+POS	010623_063821-107331.pdf	Adobe PDF library 17.00	0	0	80		Die Line 9|paper
+POS	010623_072435-686211.pdf	Adobe PDF library 16.07	154	0	0		Art|Diecut|Dimension|Spot UV
+POS	010922_071406-205743.pdf	Adobe PDF library 16.07	289	0	0		Diecut
+POS	010922_071413-461220.pdf	Adobe PDF library 16.07	447	0	0		Diecut
+POS	010922_100102-217423.pdf	Adobe PDF library 16.07	176	0	0		BG|Diecut|Dimension|Emboss|Layer 8
+POS	011022_042323-391636.pdf	Adobe PDF library 16.00	0	0	304		Die Line 9|paper
+POS	011222_012342-943698.pdf	Adobe PDF library 16.00	0	0	802		Die Line 9|paper
+POS	011222_013017-545727.pdf	Adobe PDF library 16.07	58	0	0		Diecut|Dimension|Layer 6
+POS	011222_013020-208291.pdf	Adobe PDF library 16.07	58	0	0		Diecut|Dimension|Layer 7
+POS	011222_013024-525427.pdf	Adobe PDF library 16.07	58	0	0		Diecut|Dimension|Layer 7
+POS	011222_030650-496115.pdf	Adobe PDF library 10.01	32	0	0		02 font OK|Artwork|BG FROM AG|Detail|Die cut
+POS	020223_031132-169611.pdf	Adobe PDF library 17.00	45	0	0		AW|Die-Cut|Dimension
+POS	020323_002408-534130.pdf	Adobe PDF library 15.00	28	0	0		Art|BG|Die cut
+POS	020323_003327-516114.pdf	Adobe PDF library 16.07	189	0	0		BG|Layer 1|diecut|dimention
+POS	020323_003331-385566.pdf	Adobe PDF library 16.07	189	0	0		BG|aw|diecut|dimention
+POS	020323_055559-387575.pdf	Adobe PDF library 17.00	0	0	872		Die Line 9|paper
+POS	020523_025245-622122.pdf	Adobe PDF library 17.00	0	0	640		Die Line 9|paper
+POS	020623_074041-756297.pdf	Adobe PDF library 17.00	0	0	1012		Die Line 9|paper
+POS	020822_100903.pdf	Adobe PDF library 15.00	27	0	0		Dicut|Dinension|K|Layer 5|mark
+POS	021122_042125-473229.pdf	Adobe PDF library 16.00	0	0	1618		Die Line 9|paper
+POS	021122_082716-868857.pdf	Adobe PDF library 16.00	0	0	853		Die Line 9|paper
+POS	021122_084009-929310.pdf	Adobe PDF library 16.00	0	0	1222		Die Line 9|paper
+POS	021122_091421-986939.pdf	Adobe PDF library 15.00	30	0	0		Art|Diecut|Dimension
+POS	021122_100850-733868.pdf	Adobe PDF library 16.00	0	0	420		Die Line 9|paper
+POS	021222_030039-942976.pdf	Adobe PDF library 16.00	0	0	970		Die Line 9|paper
+POS	021222_031046-265712.pdf	Adobe PDF library 16.00	0	0	230		Die Line 9|paper
+POS	021222_033109-833633.pdf	Adobe PDF library 16.00	0	0	70		Die Line 9|paper
