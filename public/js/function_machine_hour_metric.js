@@ -510,7 +510,7 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 		// ────────────────────────────────────────────────────────────────────
 		// ⚙️ ข้อมูลจริงจากตารางเครื่องของพี่ (17 มิ.ย.) — แก้จุดเดียว หรือ set
 		//    window.MACHINE_HOUR_CONFIG จากภายนอกก็ได้ (ไม่ต้องแตะไฟล์)
-		//  • speed         = ความเร็วเครื่องพิมพ์ default (แผ่น/ชม.) — เครื่อง Sheet ส่วนใหญ่ 10,000
+		//  • speed         = ความเร็วเครื่องพิมพ์ (แผ่น/ชม.) — ✅ ยืนยันจริง = 6,000 ทุกเครื่อง Sheet
 		//  • setupHours    = เวลาsetup/make_ready (ชม.) เฉลี่ย ~1 ชม. (พี่บอก "เฉลี่ยๆเอา")
 		//  • target        = เป้าหมายกำไร/ชม. (บาท) — ⚠️ ยัง MOCKUP รอพี่ให้ตัวเลขจริง
 		//  • processSpeeds = ความเร็วต่อ process (ชิ้น/แผ่น ต่อ ชม.) จากตารางพี่
@@ -521,11 +521,12 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 				// Sheet (เครื่องพิมพ์)
 				// ⚠️ id 3407: default.js (calc/เพื่อน) เรียก "L440" (พิมพ์ย่อ) แต่ชื่อจริง = "LS440" (ตารางพี่)
 				//    metric จับคู่ด้วย machine_id แล้วโชว์ "LS440" → ไม่ต้องแก้ default.js ของเพื่อน
-				[3403, 'CD440A', 'Sheet', 10000, 1.0], [3407, 'LS440', 'Sheet', 10000, 0.0], [3408, 'LS244', 'Sheet', 10000, 1.0],
-				[3422, 'L444SP', 'Sheet', 10000, 1.0], [3423, 'L444APC', 'Sheet', 10000, 1.0], [3505, 'L540APC', 'Sheet', 10000, 1.0],
-				[3506, 'LS540APC', 'Sheet', 10000, 1.0], [3507, 'LS1029', 'Sheet', 10000, 1.0], [3601, 'L640', 'Sheet', 10000, 1.0],
-				[3604, 'L640APC-B', 'Sheet', 5000, 1.0], [3605, 'GL640 UV', 'Sheet', 10000, 0.5], [3606, 'GL844 + C(IR)', 'Sheet', 9000, 0.5],
-				[3607, 'L640C', 'Sheet', 10000, 1.0],
+				// ✅ ความเร็วเครื่องพิมพ์จริงจากทีม (ยืนยัน) = 6,000 แผ่น/ชม. ทุกเครื่อง Sheet (setup รายเครื่องคงไว้)
+				[3403, 'CD440A', 'Sheet', 6000, 1.0], [3407, 'LS440', 'Sheet', 6000, 0.0], [3408, 'LS244', 'Sheet', 6000, 1.0],
+				[3422, 'L444SP', 'Sheet', 6000, 1.0], [3423, 'L444APC', 'Sheet', 6000, 1.0], [3505, 'L540APC', 'Sheet', 6000, 1.0],
+				[3506, 'LS540APC', 'Sheet', 6000, 1.0], [3507, 'LS1029', 'Sheet', 6000, 1.0], [3601, 'L640', 'Sheet', 6000, 1.0],
+				[3604, 'L640APC-B', 'Sheet', 6000, 1.0], [3605, 'GL640 UV', 'Sheet', 6000, 0.5], [3606, 'GL844 + C(IR)', 'Sheet', 6000, 0.5],
+				[3607, 'L640C', 'Sheet', 6000, 1.0],
 				// Die-cut
 				[5243, 'Crank Press', 'Die-cut', 0, 0.0], [5420, 'SANWA', 'Die-cut', 2500, 1.0], [5425, 'D 2 Manual', 'Die-cut', 400, 1.0],
 				[5426, 'D 3 Manual', 'Die-cut', 400, 0.0], [5429, 'D 5 Manual', 'Die-cut', 400, 1.0], [5501, 'YOKO auto ไดคัท-ขาด', 'Die-cut', 2500, 1.0],
@@ -586,7 +587,7 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 			}
 
 			const CFG = {
-				defaultSpeed: Number(override.speed) > 0 ? Number(override.speed) : 10000,
+				defaultSpeed: Number(override.speed) > 0 ? Number(override.speed) : 6000, // ✅ เครื่องพิมพ์นอกตาราง (Jet Press/Konica) ใช้ 6,000 เท่ากัน
 				setupHours: SETUP,
 				target: Number(override.target) > 0 ? Number(override.target) : null, // ไม่มีเป้าปลอม — เฮียกรอกเองในช่อง (รอเลขจริง)
 				machineByName: Object.assign({}, machineByName, override.machineByName || {}),
@@ -604,7 +605,7 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 			// เตือนถ้าเครื่องพิมพ์ของงานนี้ไม่มีในตาราง (เช่น Jet Press/Konica) → ใช้ความเร็ว fallback
 			const note = metric.allRealSpeed
 				? `<span style="font-size:11px;color:#15803d;font-weight:normal">— ✅ ความเร็วจริงจากพี่ + setup ${CFG.setupHours} ชม. <span style="color:#d97706">(เป้ากำไร/ชม. ยังสมมติ)</span></span>`
-				: `<span style="font-size:11px;color:#dc2626;font-weight:normal">— ⚠️ เครื่องพิมพ์งานนี้ (${metric.machine}) ยังไม่มีความเร็วจริงในตาราง → ใช้ค่า fallback ${CFG.defaultSpeed.toLocaleString()} (รอความเร็วจริงจากพี่)</span>`
+				: `<span style="font-size:11px;color:#d97706;font-weight:normal">— ℹ️ เครื่องพิมพ์งานนี้ (${metric.machine}) ไม่อยู่ในตารางออฟเซ็ต → ใช้ความเร็วมาตรฐาน ${CFG.defaultSpeed.toLocaleString()} แผ่น/ชม. (ถ้า Jet Press/Konica ความเร็วต่างค่อยแยกทีหลัง)</span>`
 			const c0 = (est.mainData.component1 || [])[0] || {}
 				const coatingType = detectCoatingType(c0) // OPP/UV/WATER → เลือกเครื่องเคลือบให้ตรงชนิด
 				// เครื่องพิมพ์งานนี้: จับด้วย id ก่อน (กันชื่อเพี้ยน) แล้วค่อยชื่อ
