@@ -1,0 +1,235 @@
+file	family_group_id	bucket	proxy	proxy_name	knn_pred	knn12_frac	max_gold_sim	why_selected	is_custom	custom_reasons	base_status	base_construction	base_candidates	evidence	reviewed_by
+021222_085126-231692.pdf	fam_fba43b89cf3d	nn_gold	4	AutoBottom	4	0.00	0.935	ใกล้ gold custom (sim 0.94) แต่ proxy=AutoBottom							
+150922_054441-561341.pdf	fam_38dc6a999ec7	nn_gold	4	AutoBottom	4	0.10	0.932	ใกล้ gold custom (sim 0.93) แต่ proxy=AutoBottom							
+230822_093835-656386.pdf	fam_87eea19f171a	nn_gold	3	SnapLock	3	0.10	0.930	ใกล้ gold custom (sim 0.93) แต่ proxy=SnapLock							
+091122_025014-179016.pdf	fam_6358352cfa6b	nn_gold	3	SnapLock	3	0.00	0.927	ใกล้ gold custom (sim 0.93) แต่ proxy=SnapLock							
+091122_024323-424731.pdf	fam_a2207c5a89fa	nn_gold	3	SnapLock	3	0.00	0.927	ใกล้ gold custom (sim 0.93) แต่ proxy=SnapLock							
+270622_084916.pdf	fam_2f697fdc4be9	nn_gold	4	AutoBottom	4	0.10	0.927	ใกล้ gold custom (sim 0.93) แต่ proxy=AutoBottom							
+141222_085728-923453.pdf	fam_19ff36ea0c8a	nn_gold	3	SnapLock	4	0.00	0.926	ใกล้ gold custom (sim 0.93) แต่ proxy=SnapLock							
+F008962 องค์การเภสัชกรรม JE21110604 34215270 Lay 1_180422_103112.pdf	fam_5bef774c2d1f	nn_gold	4	AutoBottom	1	0.20	0.925	ใกล้ gold custom (sim 0.93) แต่ proxy=AutoBottom							
+160722_055618.pdf	fam_c0bc4e57e745	nn_gold	1	RTE	1	0.00	0.925	ใกล้ gold custom (sim 0.93) แต่ proxy=RTE							
+310323_080718-958622.pdf	fam_13a419db7a93	nn_gold	2	STE	4	0.00	0.925	ใกล้ gold custom (sim 0.92) แต่ proxy=STE							
+310323_080753-756452.pdf	fam_b08ce7bfea6e	nn_gold	2	STE	4	0.00	0.925	ใกล้ gold custom (sim 0.92) แต่ proxy=STE							
+050922_070151-796515.pdf	fam_2c34293f06c6	nn_gold	3	SnapLock	1	0.00	0.925	ใกล้ gold custom (sim 0.92) แต่ proxy=SnapLock							
+050922_071013-903783.pdf	fam_ed6c9692e04b	nn_gold	3	SnapLock	1	0.00	0.925	ใกล้ gold custom (sim 0.92) แต่ proxy=SnapLock							
+120123_033013-659392.pdf	fam_7de0c8798b05	nn_gold	4	AutoBottom	3	0.00	0.925	ใกล้ gold custom (sim 0.92) แต่ proxy=AutoBottom							
+270722_094631.pdf	fam_01f415344e0f	nn_gold	4	AutoBottom	4	0.00	0.925	ใกล้ gold custom (sim 0.92) แต่ proxy=AutoBottom							
+301122_061838-256827.pdf	fam_3f87b26d5c51	nn_gold	4	AutoBottom	4	0.00	0.924	ใกล้ gold custom (sim 0.92) แต่ proxy=AutoBottom							
+F009878 CARGURU LEATHER WAX Lay_120522_151508.pdf	fam_233685e08a64	nn_gold	1	RTE	1	0.00	0.923	ใกล้ gold custom (sim 0.92) แต่ proxy=RTE							
+201222_014703-954447.pdf	fam_e15e9c85008a	nn_gold	3	SnapLock	4	0.00	0.923	ใกล้ gold custom (sim 0.92) แต่ proxy=SnapLock							
+211122_075133-448365.pdf	fam_b40ec61ba4f0	nn_gold	4	AutoBottom	4	0.00	0.922	ใกล้ gold custom (sim 0.92) แต่ proxy=AutoBottom							
+060223_060718-184328.pdf	fam_a8cade80cb92	nn_gold	2	STE	3	0.00	0.922	ใกล้ gold custom (sim 0.92) แต่ proxy=STE							
+251122_070320-962528.pdf	fam_63d476aca2ab	nn_gold	3	SnapLock	3	0.00	0.921	ใกล้ gold custom (sim 0.92) แต่ proxy=SnapLock							
+060822_025740-464280.pdf	fam_ad5e052f3e33	nn_gold	4	AutoBottom	4	0.00	0.921	ใกล้ gold custom (sim 0.92) แต่ proxy=AutoBottom							
+170822_061048-301066.pdf	fam_7427063ba2f0	nn_gold	11	SealEnd	1	0.00	0.920	ใกล้ gold custom (sim 0.92) แต่ proxy=SealEnd							
+141222_021301-748792.pdf	fam_8716ccd6e700	nn_gold	4	AutoBottom	1	0.00	0.920	ใกล้ gold custom (sim 0.92) แต่ proxy=AutoBottom							
+210722_081430.pdf	fam_8dd06e3fa639	nn_gold	1	RTE	4	0.00	0.920	ใกล้ gold custom (sim 0.92) แต่ proxy=RTE							
+110123_032136-181066.pdf	fam_9d669e59766c	nn_gold	4	AutoBottom	3	0.00	0.920	ใกล้ gold custom (sim 0.92) แต่ proxy=AutoBottom							
+241022_060812-391882.pdf	fam_7ba7acb74dfc	nn_gold	3	SnapLock	4	0.00	0.919	ใกล้ gold custom (sim 0.92) แต่ proxy=SnapLock							
+300123_003648-343230.pdf	fam_361ad3e75752	nn_gold	4	AutoBottom	4	0.10	0.919	ใกล้ gold custom (sim 0.92) แต่ proxy=AutoBottom							
+271022_013939-142887.pdf	fam_4b1a012c3833	nn_gold	4	AutoBottom	4	0.00	0.919	ใกล้ gold custom (sim 0.92) แต่ proxy=AutoBottom							
+180822_083917-704199.pdf	fam_7e5a8888e2cb	nn_gold	3	SnapLock	4	0.00	0.919	ใกล้ gold custom (sim 0.92) แต่ proxy=SnapLock							
+241022_032012-573176.pdf	fam_c9bdf76c25c0	nn_gold	1	RTE	1	0.00	0.918	ใกล้ gold custom (sim 0.92) แต่ proxy=RTE							
+251122_071354-423736.pdf	fam_bde8a210ac38	nn_gold	3	SnapLock	3	0.10	0.918	ใกล้ gold custom (sim 0.92) แต่ proxy=SnapLock							
+F009879 HORSEY CAR CARE Lay_120522_145851.pdf	fam_85e1b11ea1e0	nn_gold	1	RTE	1	0.20	0.918	ใกล้ gold custom (sim 0.92) แต่ proxy=RTE							
+151122_025435-361245.pdf	fam_64c362f4cd33	nn_gold	4	AutoBottom	4	0.00	0.917	ใกล้ gold custom (sim 0.92) แต่ proxy=AutoBottom							
+060922_014701-353593.pdf	fam_7d3c85d4a590	nn_gold	3	SnapLock	1	0.00	0.917	ใกล้ gold custom (sim 0.92) แต่ proxy=SnapLock							
+150822_034940-957151.pdf	fam_53ac797c9137	nn_gold	3	SnapLock	4	0.00	0.917	ใกล้ gold custom (sim 0.92) แต่ proxy=SnapLock							
+200123_013001-447160.pdf	fam_86e10036ab28	nn_gold	4	AutoBottom	3	0.00	0.917	ใกล้ gold custom (sim 0.92) แต่ proxy=AutoBottom							
+191022_015853-685343.pdf	fam_67da7ba37fb9	nn_gold	3	SnapLock	1	0.00	0.917	ใกล้ gold custom (sim 0.92) แต่ proxy=SnapLock							
+231122_025009-495421.pdf	fam_b7c4fd183ef9	nn_gold	1	RTE	1	0.00	0.916	ใกล้ gold custom (sim 0.92) แต่ proxy=RTE							
+280922_092150-274485.pdf	fam_593f0ce1a6ca	nn_gold	3	SnapLock	4	0.00	0.916	ใกล้ gold custom (sim 0.92) แต่ proxy=SnapLock							
+280922_092041-551853.pdf	fam_cf6251ba2cc3	nn_gold	3	SnapLock	4	0.00	0.916	ใกล้ gold custom (sim 0.92) แต่ proxy=SnapLock							
+280922_091923-712911.pdf	fam_88867530684a	nn_gold	3	SnapLock	4	0.00	0.916	ใกล้ gold custom (sim 0.92) แต่ proxy=SnapLock							
+260922_095550-592517.pdf	fam_855cc92203ff	nn_gold	3	SnapLock	3	0.00	0.916	ใกล้ gold custom (sim 0.92) แต่ proxy=SnapLock							
+260922_095302-336922.pdf	fam_78e8c40d439d	nn_gold	3	SnapLock	3	0.00	0.916	ใกล้ gold custom (sim 0.92) แต่ proxy=SnapLock							
+260922_094556-424311.pdf	fam_d27f4dbf8966	nn_gold	3	SnapLock	3	0.00	0.916	ใกล้ gold custom (sim 0.92) แต่ proxy=SnapLock							
+260922_094503-887960.pdf	fam_b15f09ece72c	nn_gold	3	SnapLock	3	0.00	0.916	ใกล้ gold custom (sim 0.92) แต่ proxy=SnapLock							
+260922_093616-452719.pdf	fam_16d3e96b2fcb	nn_gold	3	SnapLock	3	0.00	0.916	ใกล้ gold custom (sim 0.92) แต่ proxy=SnapLock							
+LAY F009728 กล่องรังนกโบกิ_120422_120345.pdf	fam_56e8410d8df1	nn_gold	3	SnapLock	3	0.10	0.916	ใกล้ gold custom (sim 0.92) แต่ proxy=SnapLock							
+260822_043455-703961.PDF	fam_588bacc64ae4	nn_gold	4	AutoBottom	1	0.10	0.916	ใกล้ gold custom (sim 0.92) แต่ proxy=AutoBottom							
+211122_042836-986336.pdf	fam_4ae67758b9a6	nn_gold	3	SnapLock	3	0.00	0.916	ใกล้ gold custom (sim 0.92) แต่ proxy=SnapLock							
+270722_093052.pdf	fam_c2db429e219b	nn_gold	4	AutoBottom	4	0.00	0.915	ใกล้ gold custom (sim 0.92) แต่ proxy=AutoBottom							
+081122_081806-521069.pdf	fam_38a794f19639	nn_gold	3	SnapLock	3	0.00	0.915	ใกล้ gold custom (sim 0.92) แต่ proxy=SnapLock							
+260123_021625-818760.pdf	fam_a4544a2e6ac0	nn_gold	4	AutoBottom	4	0.10	0.915	ใกล้ gold custom (sim 0.92) แต่ proxy=AutoBottom							
+120123_075859-967269.PDF	fam_2fceac78204d	nn_gold	2	STE	1	0.10	0.915	ใกล้ gold custom (sim 0.92) แต่ proxy=STE							
+151122_023840-166677.pdf	fam_2f2d7f05ab94	nn_gold	4	AutoBottom	4	0.00	0.915	ใกล้ gold custom (sim 0.91) แต่ proxy=AutoBottom							
+231222_012302-509020.pdf	fam_8179a1801a50	nn_gold	4	AutoBottom	4	0.00	0.915	ใกล้ gold custom (sim 0.91) แต่ proxy=AutoBottom							
+250822_063324-643419.pdf	fam_f9f6e822b223	nn_gold	3	SnapLock	1	0.00	0.914	ใกล้ gold custom (sim 0.91) แต่ proxy=SnapLock							
+160822_070830-555060.pdf	fam_1e4960d52bc8	nn_gold	11	SealEnd	2	0.00	0.913	ใกล้ gold custom (sim 0.91) แต่ proxy=SealEnd							
+F009801 CHEESE STICK Lay_270422_160654.pdf	fam_adbf0fa0d640	nn_gold	1	RTE	1	0.00	0.913	ใกล้ gold custom (sim 0.91) แต่ proxy=RTE							
+F009799 PIZZA (HAWAIIAN) 135 G lay_270422_151243.pdf	fam_c9103c9eadb2	nn_gold	1	RTE	1	0.00	0.913	ใกล้ gold custom (sim 0.91) แต่ proxy=RTE							
+010622_012039.pdf	fam_9e6c6a2a58bf	model_custom	3	SnapLock	12	0.90	0.748	CLIP-kNN ทาย Custom (90% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+E22050025_230522_165203.pdf	fam_1b659152017c	model_custom	3	SnapLock	12	0.90	0.671	CLIP-kNN ทาย Custom (90% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+E22040024_110422_142623.pdf	fam_32aa56bd2f84	model_custom	3	SnapLock	12	0.90	0.675	CLIP-kNN ทาย Custom (90% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+230622_072834.pdf	fam_6356c00c4a0a	model_custom	2	STE	12	0.80	0.717	CLIP-kNN ทาย Custom (80% ของ 10 เพื่อนบ้าน=12) แต่ proxy=STE							
+170622_064549.pdf	fam_5d467998c1e5	model_custom	2	STE	12	0.80	0.672	CLIP-kNN ทาย Custom (80% ของ 10 เพื่อนบ้าน=12) แต่ proxy=STE							
+270722_094447.pdf	fam_01e8a8cc87f5	model_custom	4	AutoBottom	12	0.80	0.769	CLIP-kNN ทาย Custom (80% ของ 10 เพื่อนบ้าน=12) แต่ proxy=AutoBottom							
+130922_021710-426978.pdf	fam_87821c89b2f7	model_custom	11	SealEnd	12	0.80	0.741	CLIP-kNN ทาย Custom (80% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SealEnd							
+050722_025821.pdf	fam_32432d3931be	model_custom	1	RTE	12	0.80	0.742	CLIP-kNN ทาย Custom (80% ของ 10 เพื่อนบ้าน=12) แต่ proxy=RTE							
+111022_084954-206491.pdf	fam_2557bf3f2777	model_custom	2	STE	12	0.80	0.755	CLIP-kNN ทาย Custom (80% ของ 10 เพื่อนบ้าน=12) แต่ proxy=STE							
+22200399 สินค้าใหม่ Lot.แรก_ศิริวัฒนา_090422_154103.pdf	fam_ed6a44f90881	model_custom	1	RTE	12	0.70	0.606	CLIP-kNN ทาย Custom (70% ของ 10 เพื่อนบ้าน=12) แต่ proxy=RTE							
+280622_094337.pdf	fam_10a0f5443595	model_custom	2	STE	12	0.70	0.733	CLIP-kNN ทาย Custom (70% ของ 10 เพื่อนบ้าน=12) แต่ proxy=STE							
+342201305 ศิริวัฒนา_250522_150308.jpg	fam_faa1adf346d8	model_custom	3	SnapLock	12	0.70	0.623	CLIP-kNN ทาย Custom (70% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+AW_DisplayBox_สเปรย์กันยุง_compressed_060522_140410.pdf	fam_8995124d961a	model_custom	3	SnapLock	12	0.70	0.819	CLIP-kNN ทาย Custom (70% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+280622_022251.pdf	fam_47b7e1b1236e	model_custom	3	SnapLock	12	0.70	0.627	CLIP-kNN ทาย Custom (70% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+140622_032701.pdf	fam_38371cdeb550	model_custom	4	AutoBottom	12	0.70	0.675	CLIP-kNN ทาย Custom (70% ของ 10 เพื่อนบ้าน=12) แต่ proxy=AutoBottom							
+030622_032415.pdf	fam_4edc2b12138d	model_custom	4	AutoBottom	12	0.70	0.671	CLIP-kNN ทาย Custom (70% ของ 10 เพื่อนบ้าน=12) แต่ proxy=AutoBottom							
+JE2203-0244 ลานนาเกษตร_Rep Inner Box LTSP (BAN,STW) Rev14_270422_145605.pdf	fam_acc38c9ff8a9	model_custom	11	SealEnd	12	0.70	0.737	CLIP-kNN ทาย Custom (70% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SealEnd							
+300622_022456.pdf	fam_f511b3c3faae	model_custom	11	SealEnd	12	0.70	0.719	CLIP-kNN ทาย Custom (70% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SealEnd							
+160722_054655.jpg	fam_d4bdcb9986c0	model_custom	1	RTE	12	0.70	0.464	CLIP-kNN ทาย Custom (70% ของ 10 เพื่อนบ้าน=12) แต่ proxy=RTE							
+230622_043022.pdf	fam_453d354d7387	model_custom	3	SnapLock	12	0.70	0.744	CLIP-kNN ทาย Custom (70% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+220722_070011.pdf	fam_246641e88612	model_custom	3	SnapLock	12	0.70	0.684	CLIP-kNN ทาย Custom (70% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+031022_060047-978110.pdf	fam_51f9af53ee10	model_custom	3	SnapLock	12	0.70	0.564	CLIP-kNN ทาย Custom (70% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+170223_014347-169099.jpg	fam_dec814e32f0f	model_custom	3	SnapLock	12	0.70	0.697	CLIP-kNN ทาย Custom (70% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+E22040067_180422_153016.pdf	fam_b853fac59b1c	model_custom	2	STE	12	0.60	0.738	CLIP-kNN ทาย Custom (60% ของ 10 เพื่อนบ้าน=12) แต่ proxy=STE							
+191122_093912-921233.jpg	fam_effbdf893526	model_custom	11	SealEnd	12	0.60	0.675	CLIP-kNN ทาย Custom (60% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SealEnd							
+JE2203-0467 โชติวัฒน์_Rep กล่อง Reveal 12x70g (2TT)New ,350x569mm_110422_133942.pdf	fam_85d8bdc08fa0	model_custom	3	SnapLock	12	0.60	0.773	CLIP-kNN ทาย Custom (60% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+251022_072334-827799.pdf	fam_9655571f000b	model_custom	1	RTE	12	0.60	0.692	CLIP-kNN ทาย Custom (60% ของ 10 เพื่อนบ้าน=12) แต่ proxy=RTE							
+300922_022248-228957.pdf	fam_1625bab6e285	model_custom	1	RTE	12	0.60	0.696	CLIP-kNN ทาย Custom (60% ของ 10 เพื่อนบ้าน=12) แต่ proxy=RTE							
+251022_071950-258353.pdf	fam_07f7ad408478	model_custom	1	RTE	12	0.60	0.692	CLIP-kNN ทาย Custom (60% ของ 10 เพื่อนบ้าน=12) แต่ proxy=RTE							
+140323_041611-846666.pdf	fam_d5cd5b5e4d74	model_custom	2	STE	12	0.60	0.795	CLIP-kNN ทาย Custom (60% ของ 10 เพื่อนบ้าน=12) แต่ proxy=STE							
+020622_040821.pdf	fam_66385034b816	model_custom	3	SnapLock	12	0.60	0.741	CLIP-kNN ทาย Custom (60% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+150722_082820.pdf	fam_12cc18661e2e	model_custom	3	SnapLock	12	0.60	0.723	CLIP-kNN ทาย Custom (60% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+050722_084910.pdf	fam_1a383620e124	model_custom	3	SnapLock	12	0.60	0.616	CLIP-kNN ทาย Custom (60% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+260922_090050-152859.pdf	fam_b2b16abc397d	model_custom	3	SnapLock	12	0.60	0.751	CLIP-kNN ทาย Custom (60% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+171022_043253-485513.pdf	fam_c7d3f22efb09	model_custom	3	SnapLock	12	0.60	0.722	CLIP-kNN ทาย Custom (60% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+271222_062334-518754.pdf	fam_5bbe06b615c9	model_custom	3	SnapLock	12	0.60	0.743	CLIP-kNN ทาย Custom (60% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+141222_011134-407792.jpg	fam_e1013102a366	model_custom	3	SnapLock	12	0.60	0.712	CLIP-kNN ทาย Custom (60% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+240822_022949-501729.pdf	fam_f0aac8f2be01	model_custom	4	AutoBottom	12	0.60	0.734	CLIP-kNN ทาย Custom (60% ของ 10 เพื่อนบ้าน=12) แต่ proxy=AutoBottom							
+220822_070413-142677.pdf	fam_40d2e6f0f2fd	model_custom	4	AutoBottom	12	0.60	0.764	CLIP-kNN ทาย Custom (60% ของ 10 เพื่อนบ้าน=12) แต่ proxy=AutoBottom							
+010922_081613-967479.jpg	fam_1409acdbbc75	model_custom	4	AutoBottom	12	0.60	0.624	CLIP-kNN ทาย Custom (60% ของ 10 เพื่อนบ้าน=12) แต่ proxy=AutoBottom							
+051222_013015-662366.jpg	fam_5a0da066aa4b	model_custom	4	AutoBottom	12	0.60	0.568	CLIP-kNN ทาย Custom (60% ของ 10 เพื่อนบ้าน=12) แต่ proxy=AutoBottom							
+1650355462982_280422_160508.jpg	fam_2d57423c9fac	model_custom	1	RTE	12	0.50	0.683	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=RTE							
+รูปBloss triple collagen_240522_152326.jpg	fam_f33b51ee3dd4	model_custom	1	RTE	12	0.50	0.596	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=RTE							
+JE2109-0287 ควอลิตี้ คอยส์_Rep.กล่องยากันยุง Low Smoke (ควันน้อย) กลิ่นโรสเมรี่ (ky-15) size137x137x24mm_100522_140506.pdf	fam_3553aefc6fc0	model_custom	1	RTE	12	0.50	0.734	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=RTE							
+300622_072907.pdf	fam_b47da8c16460	model_custom	1	RTE	12	0.50	0.726	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=RTE							
+printed boxes sedeogra_120422_151501.pdf	fam_e95e4764dc91	model_custom	2	STE	12	0.50	0.704	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=STE							
+E22040233_170522_164835.pdf	fam_a6d427d95dd6	model_custom	2	STE	12	0.50	0.718	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=STE							
+220622_062029.jpg	fam_c37a3780c9ce	model_custom	2	STE	12	0.50	0.690	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=STE							
+090622_090501.jpg	fam_baeff6781815	model_custom	2	STE	12	0.50	0.583	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=STE							
+300822_092547-985615.jpg	fam_7f4de18bd5eb	model_custom	2	STE	12	0.50	0.633	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=STE							
+090822_082349-643271.pdf	fam_47f53fa70bc5	model_custom	2	STE	12	0.50	0.732	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=STE							
+300822_081452-669813.pdf	fam_601fa326e70e	model_custom	2	STE	12	0.50	0.732	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=STE							
+JE2203-0277 เอเชี่ยน_Rep.กล่อง Multipack Applaws CE 8x60g size100x175x101mm (2TT)_070422_143528.pdf	fam_67bd00cd58f7	model_custom	3	SnapLock	12	0.50	0.703	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+ตย งาน_270522_140504.jpg	fam_471e1694eea7	model_custom	3	SnapLock	12	0.50	0.604	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+JE2205-0617 เจี่ยฮงเยลโลพลาส_Rep.กล่อง GIFT BOX (กล่องใน)ใส่อุปกรณ์เครื่องปั๊มนมไฟฟ้า D-2(2PAGB000529)_250522_145726.pdf	fam_76997a36675a	model_custom	3	SnapLock	12	0.50	0.770	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+010722_095009.jpg	fam_d3e024a02b26	model_custom	4	AutoBottom	12	0.50	0.730	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=AutoBottom							
+E22040137_250422_115437.pdf	fam_bf27b0bc395b	model_custom	4	AutoBottom	12	0.50	0.745	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=AutoBottom							
+020622_055920.jpg	fam_a1e26184a89b	model_custom	4	AutoBottom	12	0.50	0.686	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=AutoBottom							
+JE2112-0577 ลานนาเกษตร_Rep.Inner box RPN CPET TRAY(360g)2020 size40.5x127.5x193mm_280422_101902.pdf	fam_f848940a8475	model_custom	11	SealEnd	12	0.50	0.748	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SealEnd							
+300622_023136.pdf	fam_142175c0f62f	model_custom	11	SealEnd	12	0.50	0.756	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SealEnd							
+160922_093528-189344.jpg	fam_b98b0036dc4d	model_custom	11	SealEnd	12	0.50	0.667	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SealEnd							
+191122_094025-216071.jpg	fam_97f699dc3483	model_custom	11	SealEnd	12	0.50	0.680	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SealEnd							
+E22040070_040522_142232.pdf	fam_e607ac01d59f	model_custom	2	STE	12	0.50	0.725	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=STE							
+200722_084703.jpg	fam_32236190ff22	model_custom	1	RTE	12	0.50	0.609	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=RTE							
+230722_034036.jpg	fam_f5105e540090	model_custom	1	RTE	12	0.50	0.652	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=RTE							
+311022_040345-211421.png	fam_ffeecd1466bf	model_custom	1	RTE	12	0.50	0.730	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=RTE							
+271022_040402-886151.jpg	fam_6fda487f291c	model_custom	1	RTE	12	0.50	0.607	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=RTE							
+121022_080807-681113.pdf	fam_821664a4433e	model_custom	1	RTE	12	0.50	0.713	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=RTE							
+051022_063215-965442.pdf	fam_db814796382e	model_custom	1	RTE	12	0.50	0.648	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=RTE							
+090822_065450-107331.jpg	fam_041204115162	model_custom	2	STE	12	0.50	0.571	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=STE							
+130822_074402-996883.pdf	fam_56724c13cf62	model_custom	2	STE	12	0.50	0.779	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=STE							
+130822_021604-664047.pdf	fam_5b9535d4cb05	model_custom	2	STE	12	0.50	0.770	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=STE							
+300922_072405-425837.jpg	fam_01fecb8748a0	model_custom	2	STE	12	0.50	0.720	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=STE							
+111022_092227-898882.pdf	fam_190e14cec64d	model_custom	2	STE	12	0.50	0.626	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=STE							
+111122_010417-534970.pdf	fam_09ad78a1c9b8	model_custom	2	STE	12	0.50	0.749	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=STE							
+141222_081218-802583.jpg	fam_403f290ba73e	model_custom	2	STE	12	0.50	0.643	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=STE							
+160123_080511-422932.pdf	fam_46f7a1538177	model_custom	2	STE	12	0.50	0.755	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=STE							
+030123_080833-575579.pdf	fam_64d61adc4fed	model_custom	2	STE	12	0.50	0.755	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=STE							
+100622_022716.jpg	fam_9acd2245f8c3	model_custom	3	SnapLock	12	0.50	0.632	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+290722_013528.pdf	fam_9c847c7da6c5	model_custom	3	SnapLock	12	0.50	0.732	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+230722_091710.jpg	fam_805b56e57411	model_custom	3	SnapLock	12	0.50	0.634	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+220822_035252-782851.pdf	fam_bb2ac8ce4078	model_custom	3	SnapLock	12	0.50	0.735	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+190822_112559-585332.jpg	fam_0d7d2864f902	model_custom	3	SnapLock	12	0.50	0.725	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+051022_061732-279045.pdf	fam_32e42daf3624	model_custom	3	SnapLock	12	0.50	0.794	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+091222_014701-487615.pdf	fam_d1d3c1a540bd	model_custom	3	SnapLock	12	0.50	0.721	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SnapLock							
+260123_045502-313140.pdf	fam_0809d92367d3	model_custom	4	AutoBottom	12	0.50	0.583	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=AutoBottom							
+260123_030543-328722.pdf	fam_5ebd226e6a47	model_custom	4	AutoBottom	12	0.50	0.592	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=AutoBottom							
+220822_020227-483412.jpg	fam_d4d4854f4a67	model_custom	4	AutoBottom	12	0.50	0.655	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=AutoBottom							
+220822_020351-112469.jpg	fam_095bf734f173	model_custom	4	AutoBottom	12	0.50	0.655	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=AutoBottom							
+080822_023839-579983.jpg	fam_b6202727dfda	model_custom	4	AutoBottom	12	0.50	0.515	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=AutoBottom							
+050822_100555-823158.pdf	fam_1c3492e996dd	model_custom	4	AutoBottom	12	0.50	0.857	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=AutoBottom							
+271022_095105-506717.pdf	fam_5daae575a034	model_custom	4	AutoBottom	12	0.50	0.729	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=AutoBottom							
+141022_053808-136277.pdf	fam_1fc9c10a2965	model_custom	4	AutoBottom	12	0.50	0.718	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=AutoBottom							
+011122_055402-161688.pdf	fam_ada27c16ae4d	model_custom	4	AutoBottom	12	0.50	0.765	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=AutoBottom							
+120123_025220-534467.pdf	fam_0120af0f240b	model_custom	4	AutoBottom	12	0.50	0.631	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=AutoBottom							
+140223_024226-584912.pdf	fam_1bcb11262123	model_custom	11	SealEnd	12	0.50	0.753	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SealEnd							
+130223_070110-154751.jpg	fam_3fc4044fc0a7	model_custom	11	SealEnd	12	0.50	0.690	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SealEnd							
+130223_070051-605514.jpg	fam_5b6b96a53657	model_custom	11	SealEnd	12	0.50	0.690	CLIP-kNN ทาย Custom (50% ของ 10 เพื่อนบ้าน=12) แต่ proxy=SealEnd							
+2_220422_111446.jpg	fam_97be6c26f0e0	proxy12	12	Custom	12	0.40	0.783	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+JE2202-0387 เอเชี่ยน_Rep.Tray Applaws US-A 24x70g(3TT)_180422_161141.pdf	fam_559b9ca17913	proxy12	12	Custom	4	0.20	0.757	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+120722_035616.jpg	fam_03b4df397ef0	proxy12	12	Custom	12	0.60	0.605	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+JE2202-0730 สยามGS แบตเตอร์รี่_Rep.Paper Sheet LBN3_230522_111120.pdf	fam_85b621a9436f	proxy12	12	Custom	1	0.20	0.757	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+020622_070905.jpeg	fam_f1d2c3ebf79e	proxy12	12	Custom	3	0.20	0.635	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+200722_015050.pdf	fam_75ac49bd7e7e	proxy12	12	Custom	1	0.40	0.853	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+รูปที่ 4 _060522_174959.jpg	fam_7195d07e5464	proxy12	12	Custom	12	0.50	0.678	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+line_oa_chat_220505_114353_050522_115306.jpg	fam_c6b071045bd8	proxy12	12	Custom	12	0.40	0.625	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+240622_042604.jpg	fam_e71d2e80e2b3	proxy12	12	Custom	4	0.10	0.587	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+200622_031523.pdf	fam_71cb6f2c2890	proxy12	12	Custom	12	0.40	0.741	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+E22040259_200522_094223.pdf	fam_889dcc3d5458	proxy12	12	Custom	12	0.40	0.714	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+220722_023347.pdf	fam_6de02b7ff9f1	proxy12	12	Custom	12	0.30	0.882	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+190722_064640.pdf	fam_cba438c6ad2b	proxy12	12	Custom	4	0.10	0.906	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+เพิ่มตำแหน่งปั๊มนูน 3 จุด_110522_100913.jpg	fam_847994502392	proxy12	12	Custom	12	0.30	0.778	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+JE2111-0497 สยามGS แบตเตอร์รี่_Rep.CARTON BOX LN3_MF_REM_ULTRA- เดือน 12 size180x289x191mm_210422_160649.pdf	fam_d0d47f6a9fe9	proxy12	12	Custom	12	0.80	0.766	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+JE2112-0362-2 ลอฟเทน(ไทยแลนด์)_Rep HOMELINE Aluminum Foil 35 SQFT HEAVY DUTY -Markdown  _280522_111023.pdf	fam_d3db2f281e75	proxy12	12	Custom	4	0.10	0.715	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+280622_064739.pdf	fam_7f42019bc9f6	proxy12	12	Custom	12	0.40	0.733	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+AW SAIRAMIRROR SPAY LIMITED - 650507_090522_113835.pdf	fam_543902c9ced8	proxy12	12	Custom	12	0.30	0.736	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+040622_060054.pdf	fam_ab8f06abd5d8	proxy12	12	Custom	2	0.10	0.760	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+260722_091429.jpg	fam_c0b384a60994	proxy12	12	Custom	12	0.30	0.782	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+ฐานเค้กฐาปนี_300322_110207.pdf	fam_ff8df50d258c	proxy12	12	Custom	12	0.50	0.662	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+JE2202-0737สยามGS แบตเตอร์รี่_Rep CARTON BOX MFX - 90R_REM_ULTRA-เดือน 03  size177 x 274 x 254 mm_230522_144848_230522_145653.pdf	fam_8290c31107c1	proxy12	12	Custom	12	0.50	0.743	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+กระดาษไข ARO C3-11-10003R1_230522_155646.jpg	fam_e05126c46785	proxy12	12	Custom	1	0.40	0.780	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+tray ALMO  24x140g(ก้น Autolock)_190522_091230.jpg	fam_9dacba9361f8	proxy12	12	Custom	4	0.30	0.505	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+160722_041019.jpg	fam_7fa68649ddcd	proxy12	12	Custom	12	0.50	0.805	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+180722_021634.pdf	fam_b7c10d7863ca	proxy12	12	Custom	4	0.00	0.910	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+JE2204-0093 เอเชี่ยน_Rep.Tray Applaws Multipart CE 24x70g (2TT)_170522_133952.pdf	fam_369c268958d9	proxy12	12	Custom	12	0.40	0.741	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+E22040173_230522_165658.pdf	fam_54d2033f2af9	proxy12	12	Custom	12	0.80	0.657	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+S__446439428_290322_150408.jpg	fam_8a156ad23254	proxy12	12	Custom	12	0.50	0.712	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+010622_084459.jpg	fam_0b85d04c42ef	proxy12	12	Custom	4	0.00	0.756	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+300622_091420.jpg	fam_5c7faa14a192	proxy12	12	Custom	2	0.10	0.842	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+รูปที่ 2_060522_174939.jpg	fam_4ce512c3a6c3	proxy12	12	Custom	1	0.10	0.650	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+269861740_455424679435485_6844072349253254381_n_110422_145138.jpeg	fam_540762f24f3e	proxy12	12	Custom	4	0.00	0.410	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+F009802 CABIN SNACK BOX Lay_270422_163630.pdf	fam_fc284223bbef	proxy12	12	Custom	1	0.00	0.919	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+AWColdBrew MU_060422_175729.pdf	fam_b083aa0d3de5	proxy12	12	Custom	3	0.20	0.738	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+Sushi box_030522_114409.jpg	fam_5cf6c4ad2737	proxy12	12	Custom	3	0.10	0.692	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+JE2205-0084-1 โชติวัฒน์_Cover Encore Cat Tin 16x70g Flexo_250522_170930.pdf	fam_5d6cd1f0ef6d	proxy12	12	Custom	4	0.10	0.738	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+รูปที่ 3 _060522_174948.jpg	fam_40114fa4cbd4	proxy12	12	Custom	12	0.60	0.652	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+280622_062520.pdf	fam_8104f1c6c619	proxy12	12	Custom	12	0.50	0.767	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+514725_270522_200327.jpg	fam_71bf1e134f45	proxy12	12	Custom	3	0.00	0.567	proxy=Custom (ตรวจ false-positive/ความสม่ำเสมอนิยาม)							
+010623_103801-786569.pdf	fam_d2c991530eec	random_std	2	STE	2	0.30	0.705	random proxy=STE (วัด miss-rate ไม่ bias)							
+240622_055849.jpg	fam_4849be43c0a6	random_std	3	SnapLock	12	0.40	0.613	random proxy=SnapLock (วัด miss-rate ไม่ bias)							
+241022_055714-799630.PDF	fam_501884812c95	random_std	3	SnapLock	4	0.00	0.859	random proxy=SnapLock (วัด miss-rate ไม่ bias)							
+280922_091706-943460.pdf	fam_a8980bd972d7	random_std	3	SnapLock	3	0.00	0.887	random proxy=SnapLock (วัด miss-rate ไม่ bias)							
+280823_160842-175379.jpg	fam_51fcb3518c5f	random_std	11	SealEnd	11	0.00	0.830	random proxy=SealEnd (วัด miss-rate ไม่ bias)							
+TDR Gold_270422_100341.pdf	fam_4b88b5485882	random_std	2	STE	1	0.20	0.652	random proxy=STE (วัด miss-rate ไม่ bias)							
+JE2111-0604 องค์การเภสัชกรรม_34215270 กล่องพิมพ์ CLOPIDOGREL TABLETS 75 MG 10x10 TABLETS _180422_103134.pdf	fam_663fa83e9a3c	random_std	4	AutoBottom	4	0.10	0.752	random proxy=AutoBottom (วัด miss-rate ไม่ bias)							
+200223_055641-888161.pdf	fam_805612afbb24	random_std	2	STE	1	0.00	0.901	random proxy=STE (วัด miss-rate ไม่ bias)							
+251022_102346-103155.pdf	fam_9f1782071960	random_std	1	RTE	1	0.20	0.551	random proxy=RTE (วัด miss-rate ไม่ bias)							
+081022_041849-543352.pdf	fam_b22cced16325	random_std	3	SnapLock	12	0.30	0.860	random proxy=SnapLock (วัด miss-rate ไม่ bias)							
+250722_075357.jpeg	fam_3f4c9697d5d6	random_std	1	RTE	12	0.30	0.635	random proxy=RTE (วัด miss-rate ไม่ bias)							
+201222_012332-976310.pdf	fam_411f79525f1a	random_std	4	AutoBottom	2	0.00	0.863	random proxy=AutoBottom (วัด miss-rate ไม่ bias)							
+JE2109-0276 Pattaya Food_Rep.Inner box Super cat Tuna _060522_170222.pdf	fam_ba784cbff59f	random_std	3	SnapLock	4	0.20	0.706	random proxy=SnapLock (วัด miss-rate ไม่ bias)							
+211122_025931-665097.pdf	fam_eb7829a3dd90	random_std	11	SealEnd	2	0.00	0.717	random proxy=SealEnd (วัด miss-rate ไม่ bias)							
+100323_063647-908287.pdf	fam_af0b130abbcf	random_std	2	STE	2	0.30	0.694	random proxy=STE (วัด miss-rate ไม่ bias)							
+JE2203-0852-1 เคซีจี_กล่องในแดรี่โกลด์ขนาด 76x 127 x 95 mm-  Scale price_190422_100623.pdf	fam_1cc680d9dce7	random_std	4	AutoBottom	12	0.40	0.759	random proxy=AutoBottom (วัด miss-rate ไม่ bias)							
+021222_031046-265712.pdf	fam_82792c6706da	random_std	4	AutoBottom	3	0.00	0.905	random proxy=AutoBottom (วัด miss-rate ไม่ bias)							
+021122_065823-516589.pdf	fam_cd9b8dc1ae01	random_std	1	RTE	2	0.00	0.903	random proxy=RTE (วัด miss-rate ไม่ bias)							
+messageImage_1652165848325_110522_110040.jpg	fam_c1cae8b1e23f	random_std	2	STE	3	0.20	0.815	random proxy=STE (วัด miss-rate ไม่ bias)							
+F009886 กล่องยาน้ำ 30 ML_130522_173603.PDF	fam_d5c691400824	random_std	1	RTE	1	0.00	0.901	random proxy=RTE (วัด miss-rate ไม่ bias)							
+211122_082921-301669.pdf	fam_181199f7f4b4	random_std	11	SealEnd	1	0.00	0.904	random proxy=SealEnd (วัด miss-rate ไม่ bias)							
+1649131510785_050422_135019.jpg	fam_9fbce992e718	random_std	1	RTE	1	0.00	0.747	random proxy=RTE (วัด miss-rate ไม่ bias)							
+100223_030906-614882.pdf	fam_9609f9aa723c	random_std	2	STE	2	0.10	0.684	random proxy=STE (วัด miss-rate ไม่ bias)							
+230223_120401-299528.pdf	fam_c2516df6878d	random_std	2	STE	2	0.10	0.590	random proxy=STE (วัด miss-rate ไม่ bias)							
+A3 Inner Box Glow Body Booster Serum 15 ml (PH)_090522_180503.jpg	fam_88a89c17d625	random_std	4	AutoBottom	1	0.00	0.664	random proxy=AutoBottom (วัด miss-rate ไม่ bias)							
+181122_052659-963249.jpg	fam_958ea65eb800	random_std	4	AutoBottom	3	0.10	0.888	random proxy=AutoBottom (วัด miss-rate ไม่ bias)							
+200822_034658-853212.pdf	fam_c56b2438604e	random_std	3	SnapLock	2	0.20	0.804	random proxy=SnapLock (วัด miss-rate ไม่ bias)							
+271222_091503-374880.pdf	fam_be96c7842fb3	random_std	2	STE	2	0.10	0.675	random proxy=STE (วัด miss-rate ไม่ bias)							
+JE2103-0586 องค์การเภสัชกรรม_31012744 กล่องพิมพ์ GPO-COAL TAR CREAM 15g_100522_132143.pdf	fam_a55a8d7141bd	random_std	1	RTE	4	0.00	0.740	random proxy=RTE (วัด miss-rate ไม่ bias)							
+280480771_514367207145781_7090350100581802977_n_230522_135908.jpg	fam_3e6306c4746f	random_std	1	RTE	1	0.30	0.291	random proxy=RTE (วัด miss-rate ไม่ bias)							
+210622_003933.jpg	fam_bf8324a0d7d7	random_std	2	STE	3	0.10	0.782	random proxy=STE (วัด miss-rate ไม่ bias)							
+060922_080048-276616.pdf	fam_9739866a5153	random_std	1	RTE	1	0.00	0.710	random proxy=RTE (วัด miss-rate ไม่ bias)							
+JE2111-0004-6 JET PRESS  กลาง_งานกล่องธูปตะไคร้ไล่ยุง(สมุทรปราการ)  63x20x340 mm_060522_090340.pdf	fam_771a4282f3a3	random_std	1	RTE	4	0.10	0.735	random proxy=RTE (วัด miss-rate ไม่ bias)							
+110223_022249-283169.jpg	fam_4c255daa3af3	random_std	11	SealEnd	3	0.20	0.753	random proxy=SealEnd (วัด miss-rate ไม่ bias)							
+031122_012034-163580.jpg	fam_165835d37e22	random_std	2	STE	2	0.20	0.526	random proxy=STE (วัด miss-rate ไม่ bias)							
+110822_083724-192318.jpg	fam_aa5f78eb3c99	random_std	2	STE	2	0.10	0.655	random proxy=STE (วัด miss-rate ไม่ bias)							
