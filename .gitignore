@@ -50,3 +50,5 @@ bench/label_queue/*_img/
 
 bench/ocg_pilot/overlay/
 bench/ocg_pilot/split/
+bench/ocg_pilot/*.png
+bench/ocg_pilot/bcsi_test.png
