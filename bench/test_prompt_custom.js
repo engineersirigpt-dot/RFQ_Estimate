@@ -24,10 +24,11 @@ const TEMPLATE_NAMES = {
 const OVERRIDE = `CUSTOM-FEATURE OVERRIDE — CHECK BEFORE settling on Template 1-11. A box is Template 12 (Custom) whenever its dieline has ANY structural feature the matched template 1-11 does NOT have, EVEN IF the base body/closure looks like a normal tuck/auto-bottom/sleeve box. Custom-forcing features: (a) a WINDOW cut-out (hole in a panel, often PET/OPP film window); (b) a HANG-HOLE / euro-slot / thumb-hole beyond a normal tuck notch; (c) a CARRY HANDLE that is NOT the Template-8 gable handle; (d) a CURVED / ARCHED / ROUNDED or NON-STRAIGHT body outline — the body PANEL EDGES themselves are curved (rounded FLAP corners alone do NOT count); (e) attached PARTITION / DIVIDER / INSERT panels; (f) any extra lock tab/panel/cut not in the reference. HARD RULE: a Template 1-11 must match the WHOLE construction — a reverse-tuck WITH a window is Template 12 (Custom), not 1; a tuck box with curved body outline is 12, not 4.`
 
 const GOLD = [
-  { img: 'bench/gold/img/07.png', gold: 1,  name: '1649 (tuck) [control]' },
-  { img: 'bench/gold/img/17.png', gold: 9,  name: 'Sleeve [control]' },
-  { img: 'bench/gold/img/13.png', gold: 12, name: 'GENT (curved/custom) [miss]' },
-  { img: 'bench/gold/img/19.png', gold: 12, name: 'NATUR (window/custom) [miss]' },
+  { img: 'bench/gold/img/07.png', gold: 1,  name: '1649 (tuck) [std]' },
+  { img: 'bench/gold/img/08.png', gold: 1,  name: 'Oat (tuck) [std]' },
+  { img: 'bench/gold/img/17.png', gold: 9,  name: 'Sleeve [std]' },
+  { img: 'bench/gold/img/13.png', gold: 12, name: 'GENT (curved) [custom]' },
+  { img: 'bench/gold/img/19.png', gold: 12, name: 'NATUR (window) [custom]' },
 ]
 const b64 = (p) => fs.readFileSync(p).toString('base64')
 const templates = []
