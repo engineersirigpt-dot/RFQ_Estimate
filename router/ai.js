@@ -961,11 +961,14 @@ router.post('/parse-spec', upload.array('files', 10), async (req, res) => {
 		// รันหลัง strip/validate เพื่อไม่ให้ค่าที่เติมโดนตัด.
 		parsed = inferDuplexFromDP(parsed, text)
 
-		// Image/dieline inputs: classifying box construction from a drawing is
-		// unreliable and the AI won't flag it itself, so flag box_template_id
-		// deterministically here. The form highlights it yellow → the user verifies
-		// and switches to Custom (12) when the shape is non-standard.
+		// Image/dieline inputs: classifying the box construction from a drawing is
+		// unreliable (~50% on the hard set — tuck-family confusion, raster/scanned files,
+		// genuine ambiguity). DECISION 2026-07: do NOT guess the shape from an image — FORCE
+		// Custom (12) and focus on reading the dimensions accurately. The estimator picks the
+		// real template themselves (values now persist across the template switch), which is
+		// safer than a confident wrong guess.
 		if (hasImageInput && Array.isArray(parsed.components) && parsed.components.length) {
+			parsed.components.forEach((c) => { if (c) c.box_template_id = 12 })
 			if (!Array.isArray(parsed._uncertain)) parsed._uncertain = []
 			if (!parsed._uncertain.includes('box_template_id')) parsed._uncertain.push('box_template_id')
 			// Colour count can't be verified from artwork — 4-colour process, spot
