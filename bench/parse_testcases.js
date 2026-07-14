@@ -5,6 +5,7 @@
 // node bench/parse_testcases.js [ไฟล์เคส]
 require('dotenv').config()
 const fs = require('fs')
+const XLSX = require('xlsx')
 const Anthropic = require('@anthropic-ai/sdk')
 process.env.AI_TEST = '1' // เปิด guarded test-exports ใน router/ai.js
 const ai = require('../router/ai')
@@ -46,8 +47,10 @@ async function runOne(txt) {
   const casesFile = process.argv[2] || 'bench/parse_cases.json'
   const cases = JSON.parse(fs.readFileSync(casesFile, 'utf8'))
   const md = [`# Parse Test Results`, `model: ${MODEL} · ${cases.length} cases`, '']
-  let casePass = 0, fieldPass = 0, fieldTotal = 0
+  const xrows = [['No', 'Case', 'Field', 'Expected', 'Real', 'OK']]
+  let casePass = 0, fieldPass = 0, fieldTotal = 0, caseNo = 0
   for (const c of cases) {
+    caseNo++
     let p, err = null
     try { p = await runOne(c.input) } catch (e) { err = e.message }
     const rows = []; let allOk = true
@@ -66,6 +69,7 @@ async function runOne(txt) {
     for (const [f, e, g, o] of rows) {
       console.log('  ' + f.padEnd(14) + e.padEnd(22) + String(g).padEnd(22) + o)
       md.push(`| ${f} | ${e} | ${g} | ${o} |`)
+      xrows.push([caseNo, c.name, f, e, String(g), o])
     }
     md.push('')
   }
@@ -73,5 +77,12 @@ async function runOne(txt) {
   console.log(summary)
   md.push(summary.trim())
   fs.writeFileSync('bench/parse_results.md', md.join('\n'), 'utf8')
-  console.log('รายละเอียด -> bench/parse_results.md')
+  // ── เขียน Excel ── (Detail = ราย field, Summary = แถวบนสุด)
+  const wb = XLSX.utils.book_new()
+  xrows.push([], ['สรุป', `${casePass}/${cases.length} เคสผ่านทุก field`, `${fieldPass}/${fieldTotal} field ถูก`])
+  const ws = XLSX.utils.aoa_to_sheet(xrows)
+  ws['!cols'] = [{ wch: 4 }, { wch: 32 }, { wch: 14 }, { wch: 20 }, { wch: 20 }, { wch: 4 }]
+  XLSX.utils.book_append_sheet(wb, ws, 'ExpectedVsReal')
+  XLSX.writeFile(wb, 'bench/parse_results.xlsx')
+  console.log('รายละเอียด -> bench/parse_results.md + bench/parse_results.xlsx')
 })().catch((e) => { console.error(e); process.exit(1) })
