@@ -3117,6 +3117,15 @@ function setUItoRecalcProc() {
 //? About Display Box Template and specification in each component
 function displayBoxTemplate(box_type, index) {
     const componentTemplate = '.componentTemplate[index=' + index + ']'
+    // Preserve size values across the template switch. The whole .inputType section is
+    // removed + rebuilt fresh below, which used to WIPE กว้าง/ยาว/ความสูง (and any AI-filled
+    // values) on every template change. Capture the current spec inputs now, restore at the end.
+    const _keepSpec = {}
+    $('.inputType[index=' + index + '] input.specmm, .inputType[index=' + index + '] input.specin').each(function () {
+        const cls = ($(this).attr('class') || '').split(/\s+/).find((c) => c !== 'specmm' && c !== 'specin' && c !== 'required')
+        const v = $(this).val()
+        if (cls && v !== '' && v != null) _keepSpec[cls] = v
+    })
     $('.inputType[index=' + index + ']').remove()
     var ol = box_type == 6 ? 'กรอบ' : 'OL (Overlap)'
     var tuck_flap = box_type == 8 ? 'ที่จับ' : 'ฝาเสียบ'
@@ -3238,6 +3247,15 @@ function displayBoxTemplate(box_type, index) {
         $(componentTemplate + ' .packingLayer input').inputmask({ regex: "^[0-9]{1}", placeholder: "" })
 
     }
+
+    // Restore the size values captured before the rebuild (both mm AND inch; only the fields
+    // that exist in this template + were non-empty, so a fresh template keeps its defaults).
+    // Set via .val() WITHOUT firing change — avoids the recalc. Values now persist across every
+    // template switch (fixes AI-filled / manually-entered กว้าง/ยาว/สูง disappearing on switch).
+    Object.keys(_keepSpec).forEach((cls) => {
+        const $inp = $(componentTemplate + ' input.' + cls)
+        if ($inp.length) $inp.val(_keepSpec[cls])
+    })
 
 }
 function setInputDimensionField(type, index) {

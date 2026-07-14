@@ -671,25 +671,34 @@ $(function () {
 				// reset the user saw (the hidden fields below, set without trigger, survived). Set the
 				// value directly + mirror into Open Size + Packing so it sticks; checkRequiredInput()
 				// (run after all fills) clears the pink required styling.
-				if (fw != null && $w.length) $w.val(fw)
-				if (fl != null && $l.length) $l.val(fl)
-				const $os = $iType.find('.openSizemm input')
+				// Set mm + inch TOGETHER — compute inch via mm2inch ourselves because we don't fire
+				// the .specmm change handler that normally converts (firing it recalcs/resets).
+				const toIn = (v) => (typeof mm2inch === 'function' ? mm2inch(v) : v)
+				const setPair = (mmSel, inSel, v) => {
+					if (v == null) return
+					const $mm = $iType.find(mmSel).first(); if ($mm.length) $mm.val(v)
+					const $in = $iType.find(inSel).first(); if ($in.length) $in.val(toIn(v))
+				}
+				setPair('.specmm.width', '.specin.widthin', fw)
+				setPair('.specmm.length', '.specin.lengthin', fl)
+				const $os = $iType.find('.openSizemm input'), $osin = $iType.find('.openSizein input')
 				if ($os.length >= 2) { if (fw != null) $os.eq(0).val(fw); if (fl != null) $os.eq(1).val(fl) }
+				if ($osin.length >= 2) { if (fw != null) $osin.eq(0).val(toIn(fw)); if (fl != null) $osin.eq(1).val(toIn(fl)) }
 				const $packMm = $iType.find('.packingsizemm input')
 				if ($packMm.length >= 2) {
 					if (fw != null && !$packMm.eq(0).val()) $packMm.eq(0).val(fw)
 					if (fl != null && !$packMm.eq(1).val()) $packMm.eq(1).val(fl)
 				}
-				// PRESERVE the 3D box values in the (hidden) ความสูง/ฝาเสียบ/ติดกาว/ปีกกล่อง inputs.
-				// The form only .hide()s these for Custom (never clears), so if the estimator
-				// later switches to a real 3D template the values are already there and appear.
-				// Set WITHOUT firing change (avoid Custom-layout recalc side-effects); they
-				// activate when the field becomes visible on the template switch.
-				const setHidden = (sel, v) => { const $x = $iType.find(sel).first(); if (v != null && $x.length && !$x.val()) $x.val(v) }
-				setHidden('.specmm.depth', dim && dim.height)          // ความสูง (H)
-				setHidden('.specmm.tuck', extraSpec && extraSpec.tuck_mm)
-				setHidden('.specmm.glue', extraSpec && extraSpec.glue_mm)
-				setHidden('.specmm.dust', flap_mm)
+				// PRESERVE the 3D box values in the (hidden) ความสูง/ฝาเสียบ/ติดกาว/ปีกกล่อง inputs (mm+inch)
+				// so a later switch to a real 3D template shows them (form .hide()s, never clears).
+				const setHidden = (mmSel, inSel, v) => {
+					const $x = $iType.find(mmSel).first()
+					if (v != null && $x.length && !$x.val()) { $x.val(v); const $xi = $iType.find(inSel).first(); if ($xi.length) $xi.val(toIn(v)) }
+				}
+				setHidden('.specmm.depth', '.specin.depthin', dim && dim.height)   // ความสูง (H)
+				setHidden('.specmm.tuck', '.specin.tuckin', extraSpec && extraSpec.tuck_mm)
+				setHidden('.specmm.glue', '.specin.gluein', extraSpec && extraSpec.glue_mm)
+				setHidden('.specmm.dust', '.specin.dustin', flap_mm)
 				return
 			}
 
