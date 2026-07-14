@@ -654,26 +654,36 @@ $(function () {
 			if (!$iType.length) return setTimeout(tick, 100)
 
 			if (isCustom) {
-				// Custom: the user-facing inputs are กว้าง/ยาว (.specmm.width/.length)
-				// and they hold the FLAT sheet size (= AI open_size). The form mirrors
-				// them into Open Size and runs setSize4Template12 (readyFunction ~917).
-				// So fill .specmm (the primary, required fields) and let the form
-				// cascade — matches the original dev's flow + clears the pink required
-				// fields. Don't fall back to box dims if no flat size — leave blank.
+				// Custom: user-facing inputs กว้าง/ยาว (.specmm.width/.length) hold the FLAT
+				// sheet size (= AI open_size); the form mirrors them into Open Size + runs
+				// setSize4Template12. When there is NO flat size (a text-only 3D box that fell
+				// to Custom because it has no style word/dieline), FALL BACK to the box footprint
+				// W/L so the required fields aren't left empty.
 				const ow = openSize && (openSize.width != null ? openSize.width : openSize.w)
 				const ol = openSize && (openSize.length != null ? openSize.length : openSize.l)
-				if (ow == null && ol == null) return // nothing reliable — leave blank
 				const $w = $iType.find('.specmm.width').first()
 				const $l = $iType.find('.specmm.length').first()
 				if (!$w.length && !$l.length) return setTimeout(tick, 100) // wait for fields
-				if (ow != null && $w.length) $w.val(ow).trigger('change') // → Open Size + setSize4Template12
-				if (ol != null && $l.length) $l.val(ol).trigger('change')
+				const fw = ow != null ? ow : (dim && dim.width)
+				const fl = ol != null ? ol : (dim && dim.length)
+				if (fw != null && $w.length) $w.val(fw).trigger('change') // → Open Size + setSize4Template12
+				if (fl != null && $l.length) $l.val(fl).trigger('change')
 				// Packing size: fill only if the cascade left it empty.
 				const $packMm = $iType.find('.packingsizemm input')
 				if ($packMm.length >= 2) {
-					if (ow != null && !$packMm.eq(0).val()) $packMm.eq(0).val(ow).trigger('change')
-					if (ol != null && !$packMm.eq(1).val()) $packMm.eq(1).val(ol).trigger('change')
+					if (fw != null && !$packMm.eq(0).val()) $packMm.eq(0).val(fw).trigger('change')
+					if (fl != null && !$packMm.eq(1).val()) $packMm.eq(1).val(fl).trigger('change')
 				}
+				// PRESERVE the 3D box values in the (hidden) ความสูง/ฝาเสียบ/ติดกาว/ปีกกล่อง inputs.
+				// The form only .hide()s these for Custom (never clears), so if the estimator
+				// later switches to a real 3D template the values are already there and appear.
+				// Set WITHOUT firing change (avoid Custom-layout recalc side-effects); they
+				// activate when the field becomes visible on the template switch.
+				const setHidden = (sel, v) => { const $x = $iType.find(sel).first(); if (v != null && $x.length && !$x.val()) $x.val(v) }
+				setHidden('.specmm.depth', dim && dim.height)          // ความสูง (H)
+				setHidden('.specmm.tuck', extraSpec && extraSpec.tuck_mm)
+				setHidden('.specmm.glue', extraSpec && extraSpec.glue_mm)
+				setHidden('.specmm.dust', flap_mm)
 				return
 			}
 
