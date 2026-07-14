@@ -1,0 +1,14 @@
+[
+  {
+    "name": "ตัวอย่าง — กล่องมาตรฐาน",
+    "input": "CUSTOMER: TEST BRAND\nงาน: กล่อง Inner ฝาเสียบ\nSIZE: W80 x L120 x H40 mm\nกระดาษ: อาร์ตการ์ด 350 แกรม\nพิมพ์ 4 สี\nเคลือบ OPP เงา 1 ด้าน\nจำนวน 5,000 / 10,000 ใบ",
+    "expected": {
+      "dims": [40, 80, 120],
+      "gram": 350,
+      "paper_type": "A/C",
+      "color_out": 4,
+      "print_type": "Offset",
+      "qty": 2
+    }
+  }
+]

@@ -1,0 +1,77 @@
+// Test harness: parse spec (ข้อความ) -> เทียบ expected vs real ต่อ field
+//   อ่านเคสจาก bench/parse_cases.json = [{ name, input, expected:{field:value} }]
+//   รัน AI pipeline จริง (เหมือน production: buildContent -> Anthropic -> strip -> validate)
+//   ออกตาราง field|expected|real|✓ + สรุป + เขียน bench/parse_results.md
+// node bench/parse_testcases.js [ไฟล์เคส]
+require('dotenv').config()
+const fs = require('fs')
+const Anthropic = require('@anthropic-ai/sdk')
+process.env.AI_TEST = '1' // เปิด guarded test-exports ใน router/ai.js
+const ai = require('../router/ai')
+const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, timeout: 90000, maxRetries: 3 })
+const MODEL = ai.MODEL || 'claude-sonnet-4-5'
+
+// ── field resolver: expected key -> ดึงค่าจริงจากผล parse ── (เพิ่ม field ใหม่ที่นี่)
+const c0 = (p) => (p.components || [])[0] || {}
+const R = {
+  dims:         (p) => { const d = c0(p).dimensions_mm || {}; return [d.width, d.length, d.height].filter((x) => x != null).sort((a, b) => a - b) },
+  gram:         (p) => c0(p).paper_gram ?? null,
+  paper_type:   (p) => c0(p).paper_type ?? null,
+  color_out:    (p) => c0(p).color_outside ?? null,
+  color_in:     (p) => c0(p).color_inside ?? null,
+  box_template: (p) => c0(p).box_template_id ?? null,
+  print_type:   (p) => p.print_type ?? null,
+  ink_type:     (p) => p.ink_type ?? null,
+  qty:          (p) => (p.quantities || []).length || (p.f_codes || []).length,
+  quantities:   (p) => p.quantities || [],
+  coating:      (p) => (c0(p).coatings || []).map((x) => x.type).join(', ') || null,
+  foil:         (p) => (c0(p).foilstamps || []).length,
+}
+const norm = (v) => (Array.isArray(v) ? JSON.stringify(v.slice().sort((a, b) => (a > b ? 1 : -1))) : String(v))
+const same = (exp, got) => norm(exp) === norm(got)
+
+async function runOne(txt) {
+  const content = await ai.buildContentFromUpload(txt, [])
+  const msg = await ai.createWithRetry(client, {
+    model: MODEL, max_tokens: 4000, temperature: 0,
+    system: [{ type: 'text', text: ai.SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
+    messages: [{ role: 'user', content }],
+  })
+  const reply = msg.content.filter((x) => x.type === 'text').map((x) => x.text).join('\n')
+  let p = ai.extractJson(reply); p = await ai.stripHallucinations(p, txt, []); p = ai.validateAndFix(p)
+  return p
+}
+
+;(async () => {
+  const casesFile = process.argv[2] || 'bench/parse_cases.json'
+  const cases = JSON.parse(fs.readFileSync(casesFile, 'utf8'))
+  const md = [`# Parse Test Results`, `model: ${MODEL} · ${cases.length} cases`, '']
+  let casePass = 0, fieldPass = 0, fieldTotal = 0
+  for (const c of cases) {
+    let p, err = null
+    try { p = await runOne(c.input) } catch (e) { err = e.message }
+    const rows = []; let allOk = true
+    for (const [field, exp] of Object.entries(c.expected || {})) {
+      const got = err ? '(ERROR)' : (R[field] ? R[field](p) : '(no resolver)')
+      const ok = !err && R[field] && same(exp, got)
+      fieldTotal++; if (ok) fieldPass++; else allOk = false
+      rows.push([field, JSON.stringify(exp), JSON.stringify(got), ok ? '✓' : '✗'])
+    }
+    if (allOk && !err) casePass++
+    const head = `## ${c.name} — ${err ? 'ERROR: ' + err : allOk ? 'PASS' : 'FAIL'}`
+    console.log('\n' + head)
+    console.log('  field'.padEnd(16) + 'expected'.padEnd(22) + 'real'.padEnd(22) + 'ok')
+    console.log('  ' + '-'.repeat(58))
+    md.push(head, '', '| field | expected | real | ok |', '|---|---|---|---|')
+    for (const [f, e, g, o] of rows) {
+      console.log('  ' + f.padEnd(14) + e.padEnd(22) + String(g).padEnd(22) + o)
+      md.push(`| ${f} | ${e} | ${g} | ${o} |`)
+    }
+    md.push('')
+  }
+  const summary = `\n=== สรุป: ${casePass}/${cases.length} เคสผ่าน (ทุก field) · ${fieldPass}/${fieldTotal} field ถูก ===`
+  console.log(summary)
+  md.push(summary.trim())
+  fs.writeFileSync('bench/parse_results.md', md.join('\n'), 'utf8')
+  console.log('รายละเอียด -> bench/parse_results.md')
+})().catch((e) => { console.error(e); process.exit(1) })
