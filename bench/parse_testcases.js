@@ -15,21 +15,32 @@ const MODEL = ai.MODEL || 'claude-sonnet-4-5'
 // ── field resolver: expected key -> ดึงค่าจริงจากผล parse ── (เพิ่ม field ใหม่ที่นี่)
 const c0 = (p) => (p.components || [])[0] || {}
 const R = {
-  dims:         (p) => { const d = c0(p).dimensions_mm || {}; return [d.width, d.length, d.height].filter((x) => x != null).sort((a, b) => a - b) },
-  gram:         (p) => c0(p).paper_gram ?? null,
-  paper_type:   (p) => c0(p).paper_type ?? null,
-  color_out:    (p) => c0(p).color_outside ?? null,
-  color_in:     (p) => c0(p).color_inside ?? null,
-  box_template: (p) => c0(p).box_template_id ?? null,
-  print_type:   (p) => p.print_type ?? null,
-  ink_type:     (p) => p.ink_type ?? null,
-  qty:          (p) => (p.quantities || []).length || (p.f_codes || []).length,
-  quantities:   (p) => p.quantities || [],
-  coating:      (p) => (c0(p).coatings || []).map((x) => x.type).join(', ') || null,
-  foil:         (p) => (c0(p).foilstamps || []).length,
+  dims:          (p) => { const d = c0(p).dimensions_mm || {}; return [d.width, d.length, d.height].filter((x) => x != null).sort((a, b) => a - b) },
+  gram:          (p) => c0(p).paper_gram ?? null,
+  paper_type:    (p) => c0(p).paper_type ?? null,
+  comp_type:     (p) => c0(p).type ?? null,                          // 1=ไม่ประกบ 2=ประกบลูกฟูก 3=ลูกฟูกล้วน
+  flute:         (p) => (c0(p).corrugated || {}).flute ?? null,
+  color_out:     (p) => c0(p).color_outside ?? null,
+  color_in:      (p) => c0(p).color_inside ?? null,
+  box_template:  (p) => c0(p).box_template_id ?? null,
+  print_type:    (p) => p.print_type ?? null,
+  ink_type:      (p) => p.ink_type ?? null,
+  qty:           (p) => (p.quantities || []).length || (p.f_codes || []).length,
+  quantities:    (p) => p.quantities || [],
+  coating:       (p) => (c0(p).coatings || []).map((x) => x.type).join(' | ') || null,
+  foil:          (p) => (c0(p).foilstamps || []).length,
+  emboss:        (p) => ((c0(p).embosses || []).length + (c0(p).debosses || []).length),
+  glued_spots:   (p) => c0(p).glued_spots ?? null,
+  is_multiple_f: (p) => p.is_multiple_f ?? false,
+  f_codes:       (p) => (p.f_codes || []).length,
+  reprint:       (p) => p.use_previous_plate ?? false,
+  pack_pcs:      (p) => (p.packing || {}).shrink_per_unit ?? null,   // kraftwrap N pcs/pack
 }
 const norm = (v) => (Array.isArray(v) ? JSON.stringify(v.slice().sort((a, b) => (a > b ? 1 : -1))) : String(v))
-const same = (exp, got) => norm(exp) === norm(got)
+// coating เทียบแบบ substring (real มีคำใน expected) กัน false-fail จาก '1 s' vs '1s' ฯลฯ
+const same = (field, exp, got) => (field === 'coating'
+  ? String(got).toLowerCase().includes(String(exp).toLowerCase())
+  : norm(exp) === norm(got))
 
 async function runOne(txt) {
   const content = await ai.buildContentFromUpload(txt, [])
@@ -56,7 +67,7 @@ async function runOne(txt) {
     const rows = []; let allOk = true
     for (const [field, exp] of Object.entries(c.expected || {})) {
       const got = err ? '(ERROR)' : (R[field] ? R[field](p) : '(no resolver)')
-      const ok = !err && R[field] && same(exp, got)
+      const ok = !err && R[field] && same(field, exp, got)
       fieldTotal++; if (ok) fieldPass++; else allOk = false
       rows.push([field, JSON.stringify(exp), JSON.stringify(got), ok ? '✓' : '✗'])
     }

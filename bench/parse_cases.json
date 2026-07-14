@@ -2,51 +2,51 @@
   {
     "name": "1. DISPLAY BOX Sineha (คละ 3 แบบ)",
     "input": "TITLE : DISPLAY BOX Sineha tourmaline matte foundation powder spf30 pa+++ (คละ 3 แบบ)\nSIZE (Inches) : 2.96\" x 3.55\" x 5.12\"\nSIZE (mm.) : 75 x 90 x 130\nCOMPONENT TYPE\n - Box: ไม่ประกบลูกฟูก\nPAPER\n - Box: A/C C1s 350 gsm\nPRINT\n - Sineha : 01 : 5/0 Colors\n - Sineha : 02 : 5/0 Colors\n - Sineha : 03 : 5/0 Colors\nOTHER\n - Box: coating matt OPP 1 s\nPROCESS\n - ค่าติดกาว 3 จุด\nPACKING\n - Box: kraftwrap 200 pcs/pack\nQTY 35800",
-    "expected": { "dims": [75, 90, 130], "gram": 350, "paper_type": "A/C C1s", "color_out": 5, "color_in": 0 }
+    "expected": { "dims": [75, 90, 130], "gram": 350, "paper_type": "A/C C1s", "comp_type": 1, "color_out": 5, "color_in": 0, "coating": "OPP", "glued_spots": 3, "is_multiple_f": true, "f_codes": 3, "pack_pcs": 200 }
   },
   {
     "name": "2. Curry Sauce 180g (Option 400gsm)",
     "input": "TITLE : Curry Sauce_180g (F.S.C.) - 5,000 ต่อแบบ_Option 400gsm\nSIZE (mm.) : 30 x 105 x 169\nPAPER : Duplex GBB 400 gsm\nPRINT : 6/0 Colors\nCoating : Gloss Waterbase + foil stamp สีทอง 6 จุด\nติดกาว 1 จุด\nPACKING : kraftwrap 200 pcs/pack\nQTY 15000",
-    "expected": { "dims": [30, 105, 169], "gram": 400, "paper_type": "Duplex GBB", "color_out": 6, "color_in": 0, "foil": 1 }
+    "expected": { "dims": [30, 105, 169], "gram": 400, "paper_type": "Duplex GBB", "color_out": 6, "color_in": 0, "coating": "Waterbase", "foil": 1, "glued_spots": 1, "pack_pcs": 200 }
   },
   {
     "name": "3. Box Display ChocKrush 18g (2 แบบ)",
     "input": "TITLE : Box Display ChocKrush 18g.\nSIZE : 95 x 95 x 150 mm.\nPAPER: กล่องแป้งหลังเทา 300 แกรม\nPRINT : 4/0 Colors + Gloss Waterbase Hi-Rub 1 s\nBINDING : ไดคัท + แกะ + ติดกาว 3 จุด\nPACKING : kraftwrap 150 pcs/pack\nREMARKS : ราคาดังกล่าวรวม Vat 7%\n- งานมี 2 แบบ / แบบละ 25,000 ชิ้น",
-    "expected": { "dims": [95, 95, 150], "gram": 300, "color_out": 4, "color_in": 0 }
+    "expected": { "dims": [95, 95, 150], "gram": 300, "color_out": 4, "color_in": 0, "coating": "Hi-Rub", "glued_spots": 3, "is_multiple_f": true, "f_codes": 2, "pack_pcs": 150 }
   },
   {
     "name": "4. 31012781 LEVETAM 500mg",
     "input": "TITLE : 31012781 กล่องพิมพ์ LEVETAM 500 mg. 3x10's\nSPEC. NO.: SP-ANJ2-BTA-L16/3x10 REV. NO.: 03 Eff.Date : 15/12/68\nSIZE : 5.5 x 11.7 x 2.9 cm. (+/-3%)\nPAPER : กระดาษอาร์ตการ์ด 300 แกรม\nPRINT : 4/0 สี (สีแดง P.186C, สีแดงP.199C, สีม่วงP.269C, สีเขียวP.3272C+ขัดเงา\nBINDING: ไดคัท แกะ ติดกาว 1 จุด\nPACKING: บรรจุลงกล่องลูกฟูก 600 ใบ/กล่อง (กล่องละ 12 มัด มัดละ 50 ใบ)\nqty 20800\nมีงานเผื่อเสีย +/- อยู่ที่ 10% ของรอบที่จัดส่ง",
-    "expected": { "dims": [29, 55, 117], "gram": 300, "paper_type": "A/C", "color_out": 4, "color_in": 0 }
+    "expected": { "dims": [29, 55, 117], "gram": 300, "paper_type": "A/C", "color_out": 4, "color_in": 0, "glued_spots": 1 }
   },
   {
     "name": "5. BOX ESSENCE 200 ML",
     "input": "TITLE : BOX ESSENCE 200 ML\nSIZE : 45 x 45 x 190 mm.\nPAPER A/C C1s 350 gsm\nPRINT : 2/0 Colors เคลือบ UV Drip off 1 s + ปั๊มนูน 3 จุด (มีปั๊มนูนไล่ระดับบริเวณหน้ากล่อง 1 จุด\nBINDING : ไดคัท + แกะ + ติดกาว 1 จุด\nPACKING : kraftwrap 300 pcs/pack\nREMARKS : ราคาดังกล่าวไม่รวม Vat 7 %\nqty 3000",
-    "expected": { "dims": [45, 45, 190], "gram": 350, "paper_type": "A/C C1s", "color_out": 2, "color_in": 0 }
+    "expected": { "dims": [45, 45, 190], "gram": 350, "paper_type": "A/C C1s", "color_out": 2, "color_in": 0, "coating": "UV Drip off", "emboss": 1, "glued_spots": 1, "pack_pcs": 300 }
   },
   {
     "name": "6. กล่องน๊อต Bcel (Option 1) ลูกฟูก",
     "input": "TITLE : กล่องน๊อต Bcel (Option 1) (L132xW90xH80)\n- Size : L 132 x W 90 x H 80 mm. sheet size : 280 x 465 mm.\n - DP270/CA125/ KT150_E flute\n - Printing : 4 color + Gloss Hi-rub WB\nPROCESS\n - ติดกาว 3 จุด\nPACKING\n - กล่อง: kraftwrap 50 pcs/pack\n - จัดส่ง ไทยคอนเทนเนอร์ขอนแก่น\nqty 3000",
-    "expected": { "dims": [80, 90, 132], "color_out": 4 }
+    "expected": { "dims": [80, 90, 132], "comp_type": 2, "flute": "E", "color_out": 4, "coating": "Hi-rub", "glued_spots": 3, "pack_pcs": 50 }
   },
   {
     "name": "7. Rep.Inner box VF 30 Sachets",
     "input": "TITLE : Rep.Inner box VF 30 Sachets x12g.(1TT) แก้ไขกระดาษเป็น 35x43 - J82601504\nSIZE (Inches) : 1.58\" x 5.91\" x 6.38\"\nSIZE (mm.) : 40 x 150 x 162\nCOMPONENT TYPE\n - box: ไม่ประกบลูกฟูก\nPAPER\n - box: Duplex BBB 400 gsm\nPRINT\n - F012954 : 5/0 Colors\nOTHER\n - box: coating gloss UV เว้นลิ้น 1 s\nPROCESS\n - ค่าติดกาว 1 จุด\nPACKING\n - box: kraftwrap 200 pcs/pack\nqty 26733",
-    "expected": { "dims": [40, 150, 162], "gram": 400, "color_out": 5, "color_in": 0 }
+    "expected": { "dims": [40, 150, 162], "gram": 400, "comp_type": 1, "color_out": 5, "color_in": 0, "coating": "UV เว้นลิ้น", "glued_spots": 1, "reprint": true, "pack_pcs": 200 }
   },
   {
     "name": "8. Rep.กล่อง W Cotton balls inner",
     "input": "TITLE : Rep.กล่อง W Cotton balls inner ครั้งที่ 5\nSIZE : 365 x 655 mm . Fold to 110 x 210 x 150 mm.\nPAPER : กระดาษกล่องแป้งหลังเทา 400 แกรม\nPRINT : พิมพ์ 1/0 สี + Gloss WTB 1/s\nBINDING : ไดคัท + ติดกาว\nPACKING : บรรจุ 50 ชิ้น /แพค\nREMARKS : 1. จัดส่ง กทม 1 จุด พร้อมลิมิตสี\n2. ราคาที่เสนอรวม VAT 7 % เรียบร้อยแล้ว\nqty 3000",
-    "expected": { "dims": [110, 150, 210], "gram": 400, "color_out": 1, "color_in": 0 }
+    "expected": { "dims": [110, 150, 210], "gram": 400, "color_out": 1, "color_in": 0, "coating": "Waterbase", "reprint": true, "pack_pcs": 50 }
   },
   {
     "name": "9. Z-11580 MASTERCARTON POLYPOOL (Flexo)",
     "input": "TITLE : Z-11580 MASTERCARTON POLYPOOL (TE)\nSIZE สำเร็จ : 140x180x90 mm.\nSIZE แผ่ : 348x663 mm.\nPAPER - KI150/CA125/CA125 - E Flute\nPRINT - 1/0 Colors Flexo\nPROCESS - ไดคัท แกะ ติดกาว 3 จุด (ก้น Auto Lock)\nPACKING - kraftwrap 25 pcs/pack\nqty 1000 2000 3000\n**ราคายังไม่รวมภาษีมูลค่าเพิ่ม VAT7%",
-    "expected": { "dims": [90, 140, 180], "print_type": "Flexo", "color_out": 1, "color_in": 0, "quantities": [1000, 2000, 3000] }
+    "expected": { "dims": [90, 140, 180], "comp_type": 3, "flute": "E", "print_type": "Flexo", "color_out": 1, "color_in": 0, "glued_spots": 3, "quantities": [1000, 2000, 3000], "pack_pcs": 25 }
   },
   {
     "name": "10. กล่อง BX-100-1 Nara Clay (12 แบบ)",
     "input": "TITLE : กล่อง BX-100-1 Nara Modelling Clay\nSIZE (mm.) : 246 x 126 Fold to 13 x 45 x 220\nPAPER : A/C C1s 300 gsm\nPRINT : 5/0 Colors(CMYK + PMS)\nCOATIN : Gloss UV Anti-static & tapetest 1 s (เว้นตำแหน่งติดกาว)\nPROCESS : ไดคัท + ติดลิ้นกาว 1 จุด\nPACKING : kraftwrap 300 pcs/pack\nRemark\n- งานมีทั้งหมด 12 แบบ(ต่างกันที่แถบสี และ ข้อความ)\n- ราคาที่เสนอเป็นราคาต่อแบบ ยังไม่รวมค่า Plate\n- ค่า Plate 1,000 บาทต่อสี\n- ทั้งหมด 16 เพลท(CMYK + 12 สี) เป็นเงิน 16,000 บาท\nqty 3000 5000 7000 10000 20000",
-    "expected": { "dims": [13, 45, 220], "gram": 300, "paper_type": "A/C C1s", "color_out": 5, "color_in": 0, "quantities": [3000, 5000, 7000, 10000, 20000] }
+    "expected": { "dims": [13, 45, 220], "gram": 300, "paper_type": "A/C C1s", "color_out": 5, "color_in": 0, "coating": "Anti-static", "glued_spots": 1, "is_multiple_f": true, "f_codes": 12, "quantities": [3000, 5000, 7000, 10000, 20000], "pack_pcs": 300 }
   }
 ]
