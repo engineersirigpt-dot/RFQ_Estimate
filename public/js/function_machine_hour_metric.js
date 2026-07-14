@@ -542,10 +542,10 @@ if (typeof document !== 'undefined' && typeof jQuery !== 'undefined') {
 				[5426, 'D 3 Manual', 'Die-cut', 400, 0.0], [5429, 'D 5 Manual', 'Die-cut', 400, 1.0], [5501, 'YOKO auto ไดคัท-ขาด', 'Die-cut', 2500, 1.0],
 				[5502, 'YOKO ไดคัท+K auto', 'Die-cut', 2000, 1.5], [5511, 'ปั้มมือ-1', 'Die-cut', 400, 1.5], [5519, 'Yoco Diecut JY-106E', 'Die-cut', 3000, 1.0],
 				[5525, 'ASAHI API300', 'Die-cut', 2000, 1.0], [5542, 'SHIHENG', 'Die-cut', 2500, 1.0],
-				// UV
-				[5941, 'UV Steinemann', 'UV', 2500, 1.0], [5942, 'UV TYMI', 'UV', 1800, 1.0],
-				// OPP
-				[5924, 'OPP wanchay', 'OPP', 1300, 1.0], [5931, 'OPP Yelee', 'OPP', 1300, 1.0],
+				// UV — ✅ Steinemann Topspot 102 spec จริง = 8,000 แผ่น/ชม. (TYMI ยังประมาณ)
+				[5941, 'UV Steinemann', 'UV', 8000, 1.0], [5942, 'UV TYMI', 'UV', 1800, 1.0],
+				// OPP — ◐ Yll Lee SYL-3AWW spec 10–60 ม./นาที → ~2,500 แผ่น/ชม. (แปลง @ ~35 ม./นาที, แผ่น ~0.8 ม.)
+				[5924, 'OPP wanchay', 'OPP', 2500, 1.0], [5931, 'OPP Yelee', 'OPP', 2500, 1.0],
 				// Hot Stamp (ปั๊มทอง)
 				[5901, 'LCK', 'Hot Stamp', 300, 0.0], [5903, 'Hot Stamp Manual 1', 'Hot Stamp', 500, 0.0],
 				[5904, 'Hot Stamp manaul 2', 'Hot Stamp', 600, 0.0], [5905, 'Hot Stamp manaul 3', 'Hot Stamp', 600, 0.0],
