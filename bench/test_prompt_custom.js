@@ -21,16 +21,16 @@ const TEMPLATE_NAMES = {
   11:'Seal End — tuck-look but flaps SEALED with glue (asymmetric flaps), tamper-evident',
   12:'Custom — any shape not matching 1-11: flat die-cut, irregular, hexagonal, box+extra-feature',
 }
-const OVERRIDE = `CUSTOM-FEATURE OVERRIDE — CHECK BEFORE settling on Template 1-11. A box is Template 12 (Custom) whenever its dieline has ANY structural feature the matched template 1-11 does NOT have, EVEN IF the base body/closure looks like a normal tuck/auto-bottom/sleeve box. Custom-forcing features: (a) a WINDOW cut-out (hole in a panel, often PET/OPP film window); (b) a HANG-HOLE / euro-slot / thumb-hole beyond a normal tuck notch; (c) a CARRY HANDLE that is NOT the Template-8 gable handle; (d) a CURVED / ARCHED / ROUNDED or NON-STRAIGHT body outline — the body PANEL EDGES themselves are curved (rounded FLAP corners alone do NOT count); (e) attached PARTITION / DIVIDER / INSERT panels; (f) any extra lock tab/panel/cut not in the reference. HARD RULE: a Template 1-11 must match the WHOLE construction — a reverse-tuck WITH a window is Template 12 (Custom), not 1; a tuck box with curved body outline is 12, not 4.`
+const OVERRIDE = `CUSTOM-FEATURE OVERRIDE — CHECK BEFORE settling on Template 1-11. A box is Template 12 (Custom) whenever its dieline has ANY structural feature the matched template 1-11 does NOT have, EVEN IF the base body/closure looks like a normal tuck/auto-bottom/sleeve box. Custom-forcing features: (a) a WINDOW cut-out — a hole in a MAIN BODY panel to VIEW THE PRODUCT (often PET/OPP film window); (b) a CARRY HANDLE that is NOT the Template-8 gable handle; (c) a CURVED / ARCHED / ROUNDED / NON-STRAIGHT body outline — the body PANEL EDGES themselves are curved (rounded FLAP corners alone do NOT count); (d) attached PARTITION / DIVIDER / INSERT panels; (e) any extra lock tab/panel/cut not in the reference. *** NOT custom-forcing — IGNORE these and classify by the MAIN BODY + BOTTOM, keeping the base template: a HANG-HOLE / EURO-SLOT / rounded header tab for RETAIL HANGING (small extra tab above the body with a hole — very common on RTE), a thumb-notch, rounded flap corners, the standard side glue tab. A tuck box WITH a hang-tab header is STILL Template 1/2/3/4, NOT Custom. *** HARD RULE: a reverse-tuck WITH a product window is Template 12; a tuck box with a curved body outline is 12; but a plain tuck box with only a hang-tab is Template 1.`
 
 const GOLD = [
-  { img: 'bench/gold/img/07.png', gold: 1,  name: '1649 (tuck) [std]' },
-  { img: 'bench/gold/img/08.png', gold: 1,  name: 'Oat (tuck) [std]' },
-  { img: 'bench/gold/img/17.png', gold: 9,  name: 'Sleeve [std]' },
-  { img: 'bench/gold/img/13.png', gold: 12, name: 'GENT (curved) [custom]' },
+  { img: 'test/uploads/รูปBloss Jeli_240522_145319.jpg', gold: 1, name: 'bloss (hang-tab) [std]' },
   { img: 'bench/gold/img/19.png', gold: 12, name: 'NATUR (window) [custom]' },
+  { img: 'bench/gold/img/13.png', gold: 12, name: 'GENT (curved) [custom]' },
+  { img: 'test/uploads/F004695 INSERT APPLAWS 12X70G R-1_110522_172106.jpg', gold: 12, name: 'Applaws INSERT [custom]' },
 ]
 const b64 = (p) => fs.readFileSync(p).toString('base64')
+const mtype = (p) => (p.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg')
 const templates = []
 for (let i = 1; i <= 12; i++) if (fs.existsSync(`public/img/${i}.jpg`)) templates.push({ id: i, b64: b64(`public/img/${i}.jpg`) })
 
@@ -41,7 +41,7 @@ async function classify(dielinePath, useOverride) {
     content.push({ type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: t.b64 } })
   }
   content.push({ type: 'text', text: '\nNow classify THIS uploaded dieline by CONSTRUCTION (panel layout, flap directions, bottom lock, tray corners). Mirror / glue-tab side does NOT change the template.' })
-  content.push({ type: 'image', source: { type: 'base64', media_type: 'image/png', data: b64(dielinePath) } })
+  content.push({ type: 'image', source: { type: 'base64', media_type: mtype(dielinePath), data: b64(dielinePath) } })
   let rules = 'Pick the best-matching template 1-12. Template 12 = Custom.'
   if (useOverride) rules += '\n\n' + OVERRIDE
   content.push({ type: 'text', text: rules + '\n\nReturn ONLY JSON: {"box_template_id": <1-12 integer>, "reason": "<short>"}' })
