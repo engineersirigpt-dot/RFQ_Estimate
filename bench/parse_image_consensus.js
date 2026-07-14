@@ -29,11 +29,15 @@ async function runOneImage(imgPath) {
 const val = (p, f) => (R[f] ? R[f](p) : null)
 const TPL = { 1: 'RTE', 2: 'STE', 3: 'TTSLB', 4: 'TTAB', 5: 'Tray', 6: 'FrameTray', 7: 'Bento', 8: 'Gable', 9: 'Sleeve', 10: 'Pillow', 11: 'SealEnd', 12: 'Custom' }
 const consensusOf = (vals) => { const c = {}; vals.forEach((v) => { const k = norm(v); c[k] = (c[k] || 0) + 1 }); const best = Object.entries(c).sort((a, b) => b[1] - a[1])[0][0]; return { pick: vals.find((v) => norm(v) === best), votes: Object.entries(c).map(([k, n]) => `${k}×${n}`).join(' '), stable: Object.keys(c).length === 1 } }
+// "โชว์ทุกช่อง" — dump ทุก field ที่ AI กรอกได้ (มีค่า=ค่า, ไม่มี= -)
+const ALLF = ['box_template', 'dims', 'comp_type', 'flute', 'gram', 'paper_type', 'color_out', 'color_in', 'print_type', 'ink_type', 'coating', 'foil', 'emboss', 'glued_spots', 'quantities', 'is_multiple_f', 'f_codes', 'reprint', 'pack_pcs']
+const dash = (v) => (v == null || v === '' || v === false || (Array.isArray(v) && !v.length)) ? '-' : (Array.isArray(v) ? JSON.stringify(v) : String(v))
+const fullOut = (runs) => ALLF.map((f) => `${f} = ${dash(consensusOf(runs.map((p) => (R[f] ? R[f](p) : null))).pick)}`).join('\n')
 
 ;(async () => {
   const cases = JSON.parse(fs.readFileSync(process.argv[2] || 'bench/parse_image_cases.json', 'utf8'))
   const xrows = [['No', 'Case', 'Field', 'Expected', 'Consensus', 'Votes', 'Stable', 'OK']]
-  const byCase = [['No', 'รูป (image)', 'Case', 'ทรงที่ AI เลือก', 'Expected', 'Real (AI)', 'ผล', 'ที่ไม่ตรง', '_imgpath']]
+  const byCase = [['No', 'รูป (image)', 'Case', 'ทรงที่ AI เลือก', 'Expected (เช็ค)', 'AI กรอก (ทุกช่อง)', 'ผล', 'ที่ไม่ตรง', '_imgpath']]
   let casePass = 0, fieldPass = 0, fieldTotal = 0, flaky = 0, totalRuns = 0, no = 0
   for (const c of cases) {
     no++
@@ -62,7 +66,7 @@ const consensusOf = (vals) => { const c = {}; vals.forEach((v) => { const k = no
     const tpl = consensusOf(runs.map((p) => R.box_template(p)))
     const tplStr = `${tpl.pick} ${TPL[tpl.pick] || ''}${tpl.stable ? '' : ' ⚠(' + tpl.votes + ')'}`
     const expStr = rows.map((r) => `${r[0]} = ${r[1]}`).join('\n')
-    const realStr = rows.map((r) => `${r[0]} = ${r[2]}${String(r[4]).includes('แกว่ง') ? ' ⚠' : ''}`).join('\n')
+    const realStr = fullOut(runs)   // โชว์ทุกช่องที่ AI อ่านจากรูปได้
     const mismatch = rows.filter((r) => r[5] === '✗').map((r) => `${r[0]}: ${r[1]} ≠ ${r[2]}`).join('\n') || '-'
     byCase.push([no, '', c.name, tplStr, expStr, realStr, tag, mismatch, c.image])   // col2 ว่างไว้ให้ polish ฝังรูป
     console.log(`\n## ${no}. ${c.name} — ${tag} (${runs.length} รอบ) · ทรง=${tplStr}`)

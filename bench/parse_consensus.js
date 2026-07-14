@@ -9,11 +9,16 @@ const { runOne, R, norm, same } = require('./parse_testcases')
 const val = (p, f) => (R[f] ? R[f](p) : null)
 const TPL = { 1: 'RTE', 2: 'STE', 3: 'TTSLB', 4: 'TTAB', 5: 'Tray', 6: 'FrameTray', 7: 'Bento', 8: 'Gable', 9: 'Sleeve', 10: 'Pillow', 11: 'SealEnd', 12: 'Custom' }
 const tplOf = (runs) => { const v = runs.map((p) => R.box_template(p)); const c = {}; v.forEach((x) => { const k = norm(x); c[k] = (c[k] || 0) + 1 }); const b = Object.entries(c).sort((a, z) => z[1] - a[1])[0]; const pick = v.find((x) => norm(x) === b[0]); return `${pick} ${TPL[pick] || ''}${b[1] === runs.length ? '' : ' ⚠(' + Object.entries(c).map(([k, n]) => `${k}×${n}`).join(' ') + ')'}` }
+// ── "โชว์ทุกช่อง": dump ทุก field ที่ AI กรอกได้ (มีค่า=ค่า, ไม่มี= -) เรียงเหมือนฟอร์ม ──
+const ALLF = ['box_template', 'dims', 'comp_type', 'flute', 'gram', 'paper_type', 'color_out', 'color_in', 'print_type', 'ink_type', 'coating', 'foil', 'emboss', 'glued_spots', 'quantities', 'is_multiple_f', 'f_codes', 'reprint', 'pack_pcs']
+const dash = (v) => (v == null || v === '' || v === false || (Array.isArray(v) && !v.length)) ? '-' : (Array.isArray(v) ? JSON.stringify(v) : String(v))
+const pickF = (runs, f) => { const v = runs.map((p) => (R[f] ? R[f](p) : null)); const c = {}; v.forEach((x) => { const k = norm(x); c[k] = (c[k] || 0) + 1 }); return v.find((x) => norm(x) === Object.entries(c).sort((a, z) => z[1] - a[1])[0][0]) }
+const fullOut = (runs) => ALLF.map((f) => `${f} = ${dash(pickF(runs, f))}`).join('\n')
 
 ;(async () => {
   const cases = JSON.parse(fs.readFileSync(process.argv[2] || 'bench/parse_cases.json', 'utf8'))
   const xrows = [['No', 'Case', 'Field', 'Expected', 'Consensus', 'Votes', 'Stable', 'OK']]
-  const byCase = [['No', 'สเปค (input เต็ม)', 'ทรงที่ AI เลือก', 'Expected', 'Real (AI)', 'ผล', 'ที่ไม่ตรง']]  // 1 แถว = 1 เคส
+  const byCase = [['No', 'สเปค (input เต็ม)', 'ทรงที่ AI เลือก', 'Expected (เช็ค)', 'AI กรอก (ทุกช่อง)', 'ผล', 'ที่ไม่ตรง']]  // 1 แถว = 1 เคส
   const md = ['# Parse Consensus Results', '']
   let casePass = 0, fieldPass = 0, fieldTotal = 0, flaky = 0, totalRuns = 0, no = 0
   for (const c of cases) {
@@ -43,7 +48,7 @@ const tplOf = (runs) => { const v = runs.map((p) => R.box_template(p)); const c 
     const tag = allOk ? 'PASS' : 'FAIL'
     // แถวสรุปต่อเคส (อ่านง่าย): สเปคเต็ม + expected/real ทุก field ในเซลล์เดียว
     const expStr = rows.map((r) => `${r[0]} = ${r[1]}`).join('\n')
-    const realStr = rows.map((r) => `${r[0]} = ${r[2]}${String(r[4]).includes('แกว่ง') ? ' ⚠แกว่ง' : ''}`).join('\n')
+    const realStr = fullOut(runs)   // โชว์ทุกช่องที่ AI กรอกได้ (ไม่ใช่แค่ field ที่เช็ค)
     const mismatch = rows.filter((r) => r[5] === '✗').map((r) => `${r[0]}: ${r[1]} ≠ ${r[2]}`).join('\n') || '-'
     byCase.push([no, c.input, tplOf(runs), expStr, realStr, tag, mismatch])
     console.log(`\n## ${c.name} — ${tag} (${runs.length} รอบ)${anyFlaky ? ' ⚠️มี field แกว่ง' : ''}`)

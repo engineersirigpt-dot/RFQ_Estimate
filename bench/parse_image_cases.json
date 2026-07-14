@@ -1,7 +1,12 @@
 [
   { "name": "bloss (RTE + หูแขวน)", "image": "test/uploads/รูปBloss Jeli_240522_145319.jpg", "expected": { "box_template": 1 } },
+  { "name": "Chicken Tuna (TTSLB)", "image": "router/labeled_dielines/3/Chicken Tuna F004910 Rev9_310322_152350.jpg", "expected": { "box_template": 3 } },
+  { "name": "TTAB auto-bottom", "image": "router/labeled_dielines/4/010722_095009.jpg", "expected": { "box_template": 4 } },
+  { "name": "Tray (ถาด)", "image": "router/labeled_dielines/5/030622_061531.jpg", "expected": { "box_template": 5 } },
+  { "name": "Sleeve", "image": "bench/gold/img/17.png", "expected": { "box_template": 9 } },
+  { "name": "Pillow (ทรงหมอน)", "image": "router/labeled_dielines/10/090123_082756-281151.jpg", "expected": { "box_template": 10 } },
+  { "name": "Seal End (Multi-Fiber)", "image": "router/labeled_dielines/11/1_กล่อง Multi-Fiber Mini - re3 - ไดไลน์บางปะกง_290322_145427.jpg", "expected": { "box_template": 11 } },
   { "name": "GENT (Custom ขอบโค้ง)", "image": "bench/gold/img/13.png", "expected": { "box_template": 12 } },
   { "name": "NATUR (Custom หน้าต่าง)", "image": "bench/gold/img/19.png", "expected": { "box_template": 12 } },
-  { "name": "Sleeve", "image": "bench/gold/img/17.png", "expected": { "box_template": 9 } },
   { "name": "Applaws INSERT (Custom แบน)", "image": "test/uploads/F004695 INSERT APPLAWS 12X70G R-1_110522_172106.jpg", "expected": { "box_template": 12 } }
 ]
