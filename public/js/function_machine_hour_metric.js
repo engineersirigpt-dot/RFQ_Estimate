@@ -194,13 +194,20 @@ function computeProcessBreakdown(mainData, qtyIndex, speeds) {
 
 	const procs = []
 	// setupOverride: ใช้แทน setup ปกติ (สำหรับพิมพ์ที่ setup ขึ้นกับจำนวนสี)
-	const add = (label, unit, qty, cost, speedCfg, setupOverride) => {
+	const add = (label, unit, qty, cost, speedCfg, setupOverride, machineCost) => {
 		const { speed, setup } = resolve(speedCfg)
 		const c = Number(cost) || 0
 		if (!(qty > 0) || !(speed > 0) || !(c > 0)) return // c=0 → process ไม่มีในงานนี้ → ข้าม
 		const eff = setupOverride != null ? setupOverride : setup
 		const hours = eff + qty / speed // setup + เวลาเดิน
-		procs.push({ label, unit, qty, speed, setup: eff, cost: +c.toFixed(2), hours: +hours.toFixed(4), costPerHour: hours > 0 ? +(c / hours).toFixed(2) : null })
+		// machineCost = ค่าแรง+เครื่องล้วน (ถอดค่าบล็อก/แม่พิมพ์/วัสดุแล้ว) • undefined = ถอดไม่ได้ (ต้นทุนรวมวัสดุ → โชว์ "—")
+		const mc = machineCost == null ? null : (Number(machineCost) || 0)
+		procs.push({
+			label, unit, qty, speed, setup: eff, cost: +c.toFixed(2), hours: +hours.toFixed(4),
+			costPerHour: hours > 0 ? +(c / hours).toFixed(2) : null,
+			machineCost: mc == null ? null : +mc.toFixed(2),
+			machinePerHour: mc != null && hours > 0 ? +(mc / hours).toFixed(2) : null, // ค่าเครื่องเปล่า/ชม.
+		})
 	}
 	const sumAddon = (types) => (comp.addon || []).filter((a) => a && types.includes(a.type)).reduce((s, a) => s + (((a.line || [])[i] || {}).price || 0), 0)
 	const findProc = (name) => (comp.process || []).find((p) => p && p.name === name)
@@ -208,18 +215,18 @@ function computeProcessBreakdown(mainData, qtyIndex, speeds) {
 	add('พิมพ์', 'แผ่น', paperPrint, Number(tp.print) || 0, sp.print, printSetup) // setup = ตามจำนวนสี (Art)
 	add('เคลือบ', 'แผ่น', paperPrint, sumAddon(['coating']), sp.coating)         // sheet-based
 	const dc = findProc('diecut')
-	if (dc) { const ln = (dc.line || [])[i] || {}; add('ไดคัท', 'แผ่น', paperPrint, ((ln.block && ln.block.price) || 0) + ((ln.labor && ln.labor.price) || 0), sp.diecut) }
+	if (dc) { const ln = (dc.line || [])[i] || {}; add('ไดคัท', 'แผ่น', paperPrint, ((ln.block && ln.block.price) || 0) + ((ln.labor && ln.labor.price) || 0), sp.diecut, undefined, (ln.labor && ln.labor.price) || 0) } // machineCost = ค่าแรง (ถอดค่าบล็อก/แม่พิมพ์)
 	add('ปั๊ม (ฟอยล์/นูน)', 'แผ่น', paperPrint, sumAddon(['foilstamp', 'emboss', 'deboss']), sp.stamp) // sheet-based
 	add('ปะลูกฟูก', 'แผ่น', paperPrint, sumAddon(['corrugated', 'flute', 'laminate']), sp.flute) // sheet-based (เฉพาะงานลูกฟูก type 2/3)
 	const asm = findProc('assembly')
-	if (asm) { const ln = (asm.line || [])[i] || {}; add('ติดกาว/ประกอบ', 'ใบ', orderQty, ln.price || 0, sp.assembly) } // piece-based
+	if (asm) { const ln = (asm.line || [])[i] || {}; add('ติดกาว/ประกอบ', 'ใบ', orderQty, ln.price || 0, sp.assembly, undefined, ln.price || 0) } // piece-based • machineCost = ค่าแรงล้วน (ไม่มีบล็อก/วัสดุน้อยมาก)
 
 	// process ระดับงาน (top-level) เช่น แกะ/strip-out — เป็นเครื่อง (ยกเว้น inspection = QC แมนนวล)
 	const PROC_LABEL = { chip: 'แกะ (strip-out)' }
 	;(mainData.process || []).forEach((p) => {
 		if (!p || p.name === 'inspection') return
 		const ln = (p.line || [])[i] || {}
-		add(PROC_LABEL[p.name] || p.name || 'อื่นๆ', 'ใบ', Number(ln.qty) || orderQty, ln.price || 0, sp[p.name] || sp.strip || sp.assembly) // piece-based
+		add(PROC_LABEL[p.name] || p.name || 'อื่นๆ', 'ใบ', Number(ln.qty) || orderQty, ln.price || 0, sp[p.name] || sp.strip || sp.assembly, undefined, ln.price || 0) // piece-based • machineCost = ค่าแรงล้วน
 	})
 
 	const bottleneck = procs.reduce((mx, p) => (!mx || p.hours > mx.hours ? p : mx), null)
@@ -257,7 +264,8 @@ function renderProcessBreakdown(pb, target) {
 			<td style="text-align:right;color:#9ca3af">${fmt(p.speed, 0)}/ชม.</td>
 			<td style="text-align:right;font-weight:${bn ? 'bold' : 'normal'}">${mins(p.hours)}</td>
 			<td style="text-align:right">${fmt(p.cost, 2)}</td>
-			<td style="text-align:right">${fmt(p.costPerHour, 0)}</td>
+			<td style="text-align:right;color:#9ca3af">${fmt(p.costPerHour, 0)}</td>
+			<td style="text-align:right;color:#0f766e;font-weight:${bn ? 'bold' : 'normal'}">${p.machinePerHour != null ? fmt(p.machinePerHour, 0) : '<span style="color:#cbd5e1">—</span>'}</td>
 		</tr>`
 	}).join('')
 	return `
@@ -270,7 +278,8 @@ function renderProcessBreakdown(pb, target) {
 					<th style="padding:4px 8px;text-align:right">ความเร็ว/ชม.</th>
 					<th style="padding:4px 8px;text-align:right">เวลา</th>
 					<th style="padding:4px 8px;text-align:right">ค่าใช้จ่าย</th>
-					<th style="padding:4px 8px;text-align:right">ค่า/ชม.</th>
+					<th style="padding:4px 8px;text-align:right;color:#9ca3af">ค่า/ชม.<br><span style="font-size:9px;font-weight:normal">(รวมวัสดุ)</span></th>
+					<th style="padding:4px 8px;text-align:right;color:#0f766e">ค่าเครื่องเปล่า/ชม.<br><span style="font-size:9px;font-weight:normal">(ถอดบล็อก/วัสดุ)</span></th>
 				</tr></thead>
 				<tbody>${rows}</tbody>
 			</table>
@@ -358,6 +367,7 @@ function renderMachineComparison(cmp) {
 					</tr></thead>
 					<tbody>${rows}</tbody>
 				</table>
+				<div style="font-size:10px;color:#6b7280;margin-top:3px"><span style="color:#0f766e">ค่าเครื่องเปล่า/ชม.</span> = ค่าแรง+เครื่องล้วน (ถอดค่าบล็อก/แม่พิมพ์/วัสดุ) • <b>—</b> = แยกวัสดุไม่ได้ (พิมพ์รวมหมึก/เคลือบรวมวาร์นิช) → ดูช่อง "ค่า/ชม.(รวมวัสดุ)" แทน</div>
 			</div>`
 	}).join('')
 	return `
