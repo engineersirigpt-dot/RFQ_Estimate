@@ -22,7 +22,7 @@
   {
     "name": "5. BOX ESSENCE 200 ML",
     "input": "TITLE : BOX ESSENCE 200 ML\nSIZE : 45 x 45 x 190 mm.\nPAPER A/C C1s 350 gsm\nPRINT : 2/0 Colors เคลือบ UV Drip off 1 s + ปั๊มนูน 3 จุด (มีปั๊มนูนไล่ระดับบริเวณหน้ากล่อง 1 จุด\nBINDING : ไดคัท + แกะ + ติดกาว 1 จุด\nPACKING : kraftwrap 300 pcs/pack\nREMARKS : ราคาดังกล่าวไม่รวม Vat 7 %\nqty 3000",
-    "expected": { "dims": [45, 45, 190], "gram": 350, "paper_type": "A/C C1s", "color_out": 2, "color_in": 0, "coating": "UV Drip off", "emboss": 1, "glued_spots": 1, "pack_pcs": 300 }
+    "expected": { "dims": [45, 45, 190], "gram": 350, "paper_type": "A/C C1s", "color_out": 2, "color_in": 0, "coating": "UV Drip off", "emboss": 3, "glued_spots": 1, "pack_pcs": 300 }
   },
   {
     "name": "6. กล่องน๊อต Bcel (Option 1) ลูกฟูก",
