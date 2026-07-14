@@ -666,13 +666,19 @@ $(function () {
 				if (!$w.length && !$l.length) return setTimeout(tick, 100) // wait for fields
 				const fw = ow != null ? ow : (dim && dim.width)
 				const fl = ol != null ? ol : (dim && dim.length)
-				if (fw != null && $w.length) $w.val(fw).trigger('change') // → Open Size + setSize4Template12
-				if (fl != null && $l.length) $l.val(fl).trigger('change')
-				// Packing size: fill only if the cascade left it empty.
+				// Fill WITHOUT firing change: triggering .specmm change runs recalcLayoutEachComponent,
+				// which for a Custom text box (empty Open Size) WIPES width/length again — that was the
+				// reset the user saw (the hidden fields below, set without trigger, survived). Set the
+				// value directly + mirror into Open Size + Packing so it sticks; checkRequiredInput()
+				// (run after all fills) clears the pink required styling.
+				if (fw != null && $w.length) $w.val(fw)
+				if (fl != null && $l.length) $l.val(fl)
+				const $os = $iType.find('.openSizemm input')
+				if ($os.length >= 2) { if (fw != null) $os.eq(0).val(fw); if (fl != null) $os.eq(1).val(fl) }
 				const $packMm = $iType.find('.packingsizemm input')
 				if ($packMm.length >= 2) {
-					if (fw != null && !$packMm.eq(0).val()) $packMm.eq(0).val(fw).trigger('change')
-					if (fl != null && !$packMm.eq(1).val()) $packMm.eq(1).val(fl).trigger('change')
+					if (fw != null && !$packMm.eq(0).val()) $packMm.eq(0).val(fw)
+					if (fl != null && !$packMm.eq(1).val()) $packMm.eq(1).val(fl)
 				}
 				// PRESERVE the 3D box values in the (hidden) ความสูง/ฝาเสียบ/ติดกาว/ปีกกล่อง inputs.
 				// The form only .hide()s these for Custom (never clears), so if the estimator
