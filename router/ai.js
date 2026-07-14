@@ -1100,7 +1100,7 @@ module.exports = router
 // env so production never exposes internal helpers — set AI_TEST=1 to enable.
 if (process.env.AI_TEST) {
 	Object.assign(module.exports, {
-		SYSTEM_PROMPT, MODEL, EXPLAIN_PRICE_PROMPT,
+		SYSTEM_PROMPT, MODEL, IMAGE_MODEL, EXPLAIN_PRICE_PROMPT,
 		buildContentFromUpload, validateAndFix, extractJson, stripHallucinations,
 		createWithRetry, stripMoneyPct, inferDuplexFromDP,
 	})
