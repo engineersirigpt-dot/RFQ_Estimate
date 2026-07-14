@@ -54,7 +54,7 @@ async function runOne(txt) {
   return p
 }
 
-;(async () => {
+async function main() {
   const casesFile = process.argv[2] || 'bench/parse_cases.json'
   const cases = JSON.parse(fs.readFileSync(casesFile, 'utf8'))
   const md = [`# Parse Test Results`, `model: ${MODEL} · ${cases.length} cases`, '']
@@ -96,4 +96,6 @@ async function runOne(txt) {
   XLSX.utils.book_append_sheet(wb, ws, 'ExpectedVsReal')
   XLSX.writeFile(wb, 'bench/parse_results.xlsx')
   console.log('รายละเอียด -> bench/parse_results.md + bench/parse_results.xlsx')
-})().catch((e) => { console.error(e); process.exit(1) })
+}
+if (require.main === module) main().catch((e) => { console.error(e); process.exit(1) })
+module.exports = { runOne, R, norm, same, MODEL, client }
