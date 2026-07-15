@@ -312,6 +312,20 @@ $(function () {
 		if (d.ae_name) setVal($('#aeLabel'), d.ae_name)
 		if (d.customer_name) setVal($('#customerLabel'), d.customer_name)
 		if (d.is_new_customer === true) $('#is_newCustomer').prop('checked', true).trigger('change')
+		fillRfqRemark(d)
+	}
+
+	// RFQ Remark (the doc's "Remark" section, parsed into d.notes) → the job-level
+	// remark that SAVES to the DB. Set the model via est.setRfqRemark (mainData.remark)
+	// so it persists through re-renders and the save reads it, then also drop it into
+	// the visible #rfq_remark textarea (created dynamically, may or may not exist yet).
+	function fillRfqRemark(d) {
+		if (!d.notes) return
+		if (typeof est !== 'undefined' && est && typeof est.setRfqRemark === 'function') {
+			est.setRfqRemark(d.notes)
+		}
+		const $rr = $('#rfq_remark')
+		if ($rr.length) $rr.val(d.notes)
 	}
 
 	function fillJobDetail(d) {
