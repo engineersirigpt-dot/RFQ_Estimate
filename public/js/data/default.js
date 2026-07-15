@@ -11,8 +11,8 @@ const defaultData = {
 		paper_waste_per_color: 50,
 		jetpress_paper_waste: 150,
 		jetpress_paper_waste_per_color: 20,
-		special_ink_waste: 100, //* [เฮีย 18/06/26] ตั้งสีพิเศษ (spot) สีละ 100 แผ่น (ใช้ใน setWaste) — verified
-		spoilage_percent: 2 //* [เฮีย 18/06/26] เผื่อสีเสีย (ชักดู) 2% ของจำนวนพิมพ์ (ใช้ใน setWaste) — verified
+		special_ink_waste: 0, //* [ปิด 14/07/26 ตามพี่ ให้ตรง main] เดิม 100 (เฮีย 18/06/26 สีพิเศษ สีละ 100 แผ่น) — เอาคืนใส่ 100
+		spoilage_percent: 0 //* [ปิด 14/07/26 ตามพี่ ให้ตรง main] เดิม 2 (เฮีย 18/06/26 เผื่อสีเสีย 2%) — เอาคืนใส่ 2
 	},
 	special_customer_marking: 7, //* 7% extended
 	paper_price_marking: 10, //* default 10% profit sharing 18%
