@@ -228,11 +228,37 @@ $(function () {
 		}
 	}
 
+	// The province field needs TWO values: .deliveryDestinationName (text) AND the
+	// hidden .deliveryDestinationId (master id, normally set by the autocomplete's
+	// select handler). With the id empty the form's blur handler WIPES the name
+	// (function_estimate_readyFunction.js:2477) and validation still reports the
+	// field empty — so the user has to retype it. Look the province up in the same
+	// autocomplete source the form uses and set BOTH.
+	function setDeliveryDestination($scope, name) {
+		const $name = $scope.find('.deliveryDestinationName').first()
+		if (!$name.length || !name) return
+		$name.val(name)
+		const $id = $scope.find('.deliveryDestinationId').first()
+		if (!$id.length || typeof node_api === 'undefined') return
+		const norm = (s) => String(s || '').trim().toLowerCase()
+		$.getJSON(node_api + '/estimate/autocomplete', { type: 'delivery', term: name })
+			.done((list) => {
+				if (!Array.isArray(list) || list.length === 0) return
+				const hit = list.find((x) => norm(x.value) === norm(name)) ||
+					list.find((x) => norm(x.value).indexOf(norm(name)) !== -1) || list[0]
+				if (!hit || hit.id == null) return
+				$id.val(hit.id)
+				$name.val(hit.value)
+				if (typeof checkRequiredInput === 'function') checkRequiredInput()
+			})
+			.fail(() => { /* keep the typed name; user picks from autocomplete */ })
+	}
+
 	function fillSingleDelivery(first) {
 		const $primary = $('#delivery .deliveryProcess[index="0"]').first()
 		if (!$primary.length) return
 		if (first.destination) {
-			$primary.find('.deliveryDestinationName').first().val(first.destination).trigger('change').trigger('input')
+			setDeliveryDestination($primary, first.destination)
 		}
 		if (first.delivery_date) {
 			$primary.find('.deliveryDate').first().val(first.delivery_date).trigger('change').trigger('input')
@@ -276,7 +302,7 @@ $(function () {
 					const $row = $rows.eq(idx)
 					if (!$row.length) return
 					if (entry.destination) {
-						$row.find('.deliveryDestinationName').first().val(entry.destination).trigger('change').trigger('input')
+						setDeliveryDestination($row, entry.destination)
 					}
 					if (entry.delivery_date) {
 						$row.find('.deliveryDate').first().val(entry.delivery_date).trigger('change').trigger('input')
@@ -713,6 +739,13 @@ $(function () {
 				setHidden('.specmm.tuck', '.specin.tuckin', extraSpec && extraSpec.tuck_mm)
 				setHidden('.specmm.glue', '.specin.gluein', extraSpec && extraSpec.glue_mm)
 				setHidden('.specmm.dust', '.specin.dustin', flap_mm)
+				// We deliberately skip the .specmm change trigger (it recalcs and wipes the
+				// values we just set) — but that same handler is ALSO what syncs the form's
+				// internal state. Run those pieces directly, otherwise the form still thinks
+				// the size is empty ("ยังกรอกไม่ครบ" on calculate) and derived fields stay stale.
+				if (typeof setSize4Template12 === 'function') setSize4Template12(componentIndex)
+				if (typeof getComponentSize === 'function') getComponentSize(componentIndex)
+				if (typeof checkRequiredInput === 'function') checkRequiredInput()
 				return
 			}
 
