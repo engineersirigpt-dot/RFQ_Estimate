@@ -260,6 +260,8 @@ Rules:
     * "Straight Tuck End" / "STE" / "ฝาคู่ ฝาตรง" → 2
     * "Tuck top + snap-lock bottom" / "TTSLB" / "หูขัด" / "ก้นล็อกแบบหูขัด" (no glue at bottom) → 3
     * "Tuck top + auto-bottom glue" / "TTAB" / "ทากาวก้น" / "ปะกาว N จุดก้นกล่อง" → 4
+    * GLUE-SPOT COUNT (strong construction signal — overrides the "ติดกาว = side glue" default): "ติดกาว / ปะกาว / ค่าติดกาว 3 จุด" — i.e. THREE OR MORE glue spots (glued_spots ≥ 3) — → Template 4 (TTAB). An auto-bottom lock is glued at ~3 points (side seam + 2 bottom tabs); a plain tuck box (RTE/STE/TTSLB) has only the SINGLE side-seam spot. So glued_spots ≥ 3 → confidently Template 4; glued_spots = 1 → side seam only, NOT auto-bottom (do not force 4 — if no other style word, leave Custom). THIS APPLIES TO CORRUGATED BOXES TOO (ลูกฟูก / E-flute / mastercarton): a corrugated carton with 3 glue spots is still an auto-bottom Template 4 — do NOT fall back to Custom just because the material is corrugated.
+    * "Auto Lock" / "ก้น Auto Lock" / "auto lock bottom" / "ออโต้ล็อค...ทากาว" (auto-lock bottom WITH glue) → Template 4 (TTAB).
     * "Tray" / "ถาด" / "Simple Tray" / "กล่องฝาครอบ" (with no further detail) → 5
     * "Tray + frame" / "ถาดมีขอบ" / "Frame-Vue Tray" → 6
     * "Bento" / "เบนโตะ" / "Pizza box" / "tray with hinged lid" → 7
