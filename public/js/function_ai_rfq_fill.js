@@ -163,6 +163,12 @@ $(function () {
 			// Refresh dropdowns again now that we added containers
 			if (typeof getFCodeSelectOption === 'function') getFCodeSelectOption()
 
+			// Excess colors (>4 per side) become special inks — same rule as
+			// fillOneComponent, applied to EVERY F container (bug: previously only
+			// container 0 got ticked). Same F-number = same job printed multiple
+			// times, so each pass carries the same special ink(s).
+			const extraSpecial = Math.max(0, (parseInt(baseOutside, 10) || 0) - 4) + Math.max(0, (parseInt(baseInside, 10) || 0) - 4)
+
 			// Select F-code + fill colors in each container
 			setTimeout(() => {
 				$section.find('.specialInk-container').each(function (idx) {
@@ -177,6 +183,20 @@ $(function () {
 					}
 					if (baseInside !== '' && baseInside != null) {
 						$box.find('.colorInside').first().val(baseInside).trigger('change').trigger('input')
+					}
+					// container 0's special inks are handled in fillOneComponent; tick + add
+					// the excess special rows for the additional F containers here.
+					if (idx > 0 && extraSpecial > 0) {
+						const $hasSpe = $box.find('.has_speInk').first()
+						if ($hasSpe.length && !$hasSpe.is(':checked')) $hasSpe[0].click()
+						setTimeout(() => {
+							const $addBtn = $box.find('.div-speInk .addSpeInk').first()
+							const $tbody = $box.find('.div-speInk .table_speInk tbody').first()
+							if ($addBtn.length) {
+								const existingRows = $tbody.find('tr').length
+								for (let k = existingRows; k < extraSpecial; k++) $addBtn[0].click()
+							}
+						}, 150)
 					}
 				})
 			}, 200)

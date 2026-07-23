@@ -787,6 +787,11 @@ $(function () {
 
         setIsReprint(is_reprinted)
 
+        // งาน Reprint → default "ใช้ Plate เก่า" (ลดค่าเพลท 50%). ผู้ใช้ยังปลดติ๊กเองได้.
+        if (is_reprinted === 1) {
+            $('#is_use_previous_plate').prop('checked', true)
+        }
+
         if (checkComponentInfo()) {
             showCalcBttnPrice()
         }

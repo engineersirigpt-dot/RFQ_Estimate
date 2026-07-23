@@ -14,6 +14,10 @@ const defaultData = {
 		special_ink_waste: 0, //* [ปิด 14/07/26 ตามพี่ ให้ตรง main] เดิม 100 (เฮีย 18/06/26 สีพิเศษ สีละ 100 แผ่น) — เอาคืนใส่ 100
 		spoilage_percent: 0 //* [ปิด 14/07/26 ตามพี่ ให้ตรง main] เดิม 2 (เฮีย 18/06/26 เผื่อสีเสีย 2%) — เอาคืนใส่ 2
 	},
+	//* เผื่อเสียจัดจ้าง M-PET (Metalize Silver) — port จาก .3 (192.168.5.3) ให้ waste ตรงกัน (ข้อ 6 พี่เลี้ยง 22/7/2569)
+	metalize_waste_percent: 5, //* % of Paper Net x Split for outsource waste allowance (M-PET / Metalize Silver)
+	metalize_waste_min_sheet: 200, //* minimum print sheets for outsource waste allowance
+	outsource_waste_coating_codes: ['M-PET'], //* coating codes ที่ต้องคิดเผื่อเสียจัดจ้าง
 	special_customer_marking: 7, //* 7% extended
 	paper_price_marking: 10, //* default 10% profit sharing 18%
 	import_paper_price_marking: 13, //* default 13% profit sharing 18%

@@ -3134,6 +3134,8 @@ function displayBoxTemplate(box_type, index) {
         const glued_spot = getDefaultGluedSpot(box_type)
         const [dust_mm, dust_inch] = getDefaultDust(box_type)
 
+        // ข้อ 4 (พี่เลี้ยง 22/7/2569): ไม่บังคับ default ติดกาว — ปล่อยตามทรง (glued_spot 0 = ไม่ติดกาว).
+        // การตั้งติดกาวมาจาก text/AI: "ติดกาว" → 1 จุด, "ติดกาว N จุด" → N (router/ai.js:150 + fillGluedSpots)
         if (glued_spot == 0) {
             var is_assembled = '', is_displayedGlueSpot = 'none'
         } else {
@@ -4707,6 +4709,7 @@ function addFQty() {
         'placeholder': ''
     })
     $('.runonPercent').inputmask("9[9]", { "placeholder": "" })
+    // ข้อ 3 (พี่เลี้ยง 22/7/2569): เพิ่ม F ใหม่ → เว้น qty ว่างไว้ ให้ผู้ใช้กรอกยอดเอง (ไม่ auto-inherit)
     tdNumMaterial('add')
 }
 

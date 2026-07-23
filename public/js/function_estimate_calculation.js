@@ -3438,6 +3438,7 @@ class Estimate {
 		item.paper_usage.line = []
 		this.setCalculatePaperWeight(index) //* F done.
 		this.setCalculateCorrugatedBoard(index) //* F done.
+		this.setCalculateCorrugatedMetalizeWasteCost(this.mainData.component1[index]) //* เผื่อเสียจัดจ้าง กล่องลูกฟูกล้วน M-PET — ต้องรันหลัง corrugated board (port .3)
 		this.setCalculateComponentWeight(index) //* ไม่ต้องแก้
 		setCalculatePackingCost(index)
 	}
@@ -3561,6 +3562,7 @@ class Estimate {
 			})
 		}
 		this.setCalculatePaperCost(item) //1 ตามยอดของแต่ละ F done
+		this.setCalculateMetalizeWasteCost(item) //* เผื่อเสียจัดจ้าง M-PET (Metalize Silver) — ต้องรันหลัง setCalculatePaperCost (port .3)
 		this.setCalculatePlateCost(item) //1 ตามยอดของแต่ละ F done
 		this.setCalculateProofCost(item) // new
 		this.setCalculatePrintCost(item) //1 ตามยอดของแต่ละ F done
@@ -3623,6 +3625,120 @@ class Estimate {
 		}
 	}
 
+
+	//* เผื่อเสียจัดจ้าง M-PET (Metalize Silver) — port จาก .3 (192.168.5.3) ให้ waste ตรงกัน (ข้อ 6)
+	setCalculateMetalizeWasteCost(item) {
+		//* ลูกฟูกล้วน (type 3) ไม่มีกระดาษ -> ข้าม
+		if (item.component_type.type == 3) return
+
+		const {
+			metalize_waste_percent = 5,
+			metalize_waste_min_sheet = 200,
+			outsource_waste_coating_codes = []
+		} = defaultData || {}
+
+		//* เคลียร์ค่าเก่าเสมอ กันค่าค้างเมื่อลบ coating แล้ว recalc
+		item.paper_usage?.line?.forEach((line) => {
+			if (line.price) line.price.paper_metalize_waste = null
+		})
+
+		//* หา coating addon ที่ต้องคิดเผื่อเสียจัดจ้าง (ทุก process ที่เข้าเงื่อนไข)
+		const coatings = item.addon?.filter(
+			(addon) => addon.type == 'coating' && outsource_waste_coating_codes.includes(addon.info?.code)
+		) || []
+		if (!coatings.length) return
+
+		const split = item.paper_usage?.split || 1
+
+		item.paper_usage.line.forEach((line) => {
+			if (!line.price) line.price = {}
+
+			//* ใช้ unit price เดียวกับแถวกระดาษของ component นี้
+			const unit_price = line.price.paper?.unit_price || 0
+
+			//* base = percent x Paper Net x Split (ปัดขึ้น) — ใช้ร่วมกันทุก process ของ line นี้
+			const base = Math.ceil((metalize_waste_percent / 100) * (line.paper_net || 0) * split)
+
+			//* หนึ่ง entry ต่อ coating process จริง (แยก row)
+			line.price.paper_metalize_waste = coatings.map((coating) => {
+				const side = Number(coating.info?.side) || 1
+				let qty = base >= metalize_waste_min_sheet ? base : metalize_waste_min_sheet
+
+				//* เคลือบ 2 ด้าน -> x2
+				if (side == 2) qty = qty * 2
+
+				return {
+					type_id: 10,
+					process_id: 31,
+					type: 'material',
+					name: 'paper',
+					code: coating.info?.code,
+					coating_type: coating.info?.type, //* ชื่อ coating เช่น "M PET (Metalize Silver)"
+					side: side,
+					qty: qty,
+					unit_price: unit_price,
+					price: parseFloat((qty * unit_price).toFixed(2))
+				}
+			})
+		})
+	}
+
+	//* เผื่อเสียจัดจ้าง กล่องลูกฟูกล้วน (type 3) M-PET — port จาก .3
+	setCalculateCorrugatedMetalizeWasteCost(item) {
+		//* เฉพาะกล่องลูกฟูกล้วน (type 3)
+		if (item.component_type.type != 3) return
+		if (!item.corrugated_layer || !Array.isArray(item.corrugated_layer.price)) return
+
+		const {
+			metalize_waste_percent = 5,
+			metalize_waste_min_sheet = 200,
+			outsource_waste_coating_codes = []
+		} = defaultData || {}
+
+		//* เคลียร์ค่าเก่าเสมอ
+		item.corrugated_layer.price.forEach((priceLine) => {
+			if (priceLine) priceLine.metalize_waste = null
+		})
+
+		//* หา coating addon ที่ต้องคิดเผื่อเสียจัดจ้าง (ทุก process ที่เข้าเงื่อนไข)
+		const coatings = item.addon?.filter(
+			(addon) => addon.type == 'coating' && outsource_waste_coating_codes.includes(addon.info?.code)
+		) || []
+		if (!coatings.length) return
+
+		const split = item.paper_usage?.split || 1
+
+		item.corrugated_layer.price.forEach((priceLine) => {
+			//* ใช้ราคาต่อแผ่นของลูกฟูก และจำนวนแผ่น (qty = paper_net สำหรับ type 3)
+			const unit_price = priceLine.unit_price || 0
+			const net = priceLine.qty || 0
+
+			//* base = percent x Net x Split (ปัดขึ้น) — ใช้ร่วมกันทุก process ของ tier นี้
+			const base = Math.ceil((metalize_waste_percent / 100) * net * split)
+
+			//* หนึ่ง entry ต่อ coating process จริง (แยก row)
+			priceLine.metalize_waste = coatings.map((coating) => {
+				const side = Number(coating.info?.side) || 1
+				let qty = base >= metalize_waste_min_sheet ? base : metalize_waste_min_sheet
+
+				//* เคลือบ 2 ด้าน -> x2
+				if (side == 2) qty = qty * 2
+
+				return {
+					type_id: 10,
+					process_id: 31,
+					type: 'material',
+					name: 'corrugated',
+					code: coating.info?.code,
+					coating_type: coating.info?.type,
+					side: side,
+					qty: qty,
+					unit_price: unit_price,
+					price: parseFloat((qty * unit_price).toFixed(2))
+				}
+			})
+		})
+	}
 
 	setCalculatePlateCost(item) {
 		const print_type = this.getPrintType()
@@ -7444,21 +7560,25 @@ class Estimate {
 			}
 
 			this.mainData.component1.forEach((comp) => {
-				//* paper cost
+				//* paper cost (รวมเผื่อเสียจัดจ้าง M-PET port .3)
 				if (comp.component_type.type != 3) {
 					if (isMultipleF) {
-						arr[index].paper += comp.paper_usage.line?.reduce((total, obj) => total += obj.price.paper.price, 0) || 0
+						arr[index].paper += comp.paper_usage.line?.reduce((total, obj) => total += obj.price.paper.price + (Array.isArray(obj.price.paper_metalize_waste) ? obj.price.paper_metalize_waste.reduce((s, w) => s += w.price, 0) : 0), 0) || 0
 					} else {
 						arr[index].paper += comp.paper_usage.line[index].price.paper.price
+						const wasteList = comp.paper_usage.line[index].price.paper_metalize_waste
+						arr[index].paper += Array.isArray(wasteList) ? wasteList.reduce((s, w) => s += w.price, 0) : 0
 					}
 				}
 
-				//* corrugated cost
+				//* corrugated cost (รวมเผื่อเสียจัดจ้างของกล่องลูกฟูกล้วน port .3)
 				if (comp.corrugated_layer) {
 					if (isMultipleF) {
-						arr[index].paper += comp.corrugated_layer.price?.reduce((total, obj) => total += obj.price, 0) || 0
+						arr[index].paper += comp.corrugated_layer.price?.reduce((total, obj) => total += obj.price + (Array.isArray(obj.metalize_waste) ? obj.metalize_waste.reduce((s, w) => s += w.price, 0) : 0), 0) || 0
 					} else {
 						arr[index].corrugated += comp.corrugated_layer.price[index].price
+						const wasteList = comp.corrugated_layer.price[index].metalize_waste
+						arr[index].corrugated += Array.isArray(wasteList) ? wasteList.reduce((s, w) => s += w.price, 0) : 0
 					}
 				}
 

@@ -185,9 +185,28 @@ function computeProcessBreakdown(mainData, qtyIndex, speeds) {
 		? { speed: Number(v.speed) || 0, setup: Number(v.setup) >= 0 ? Number(v.setup) : globalSetup }
 		: { speed: Number(v) || 0, setup: globalSetup }
 	// แยกนับสี: สีปกติ (นอก+ใน) vs สีพิเศษ (special_ink) — ใช้คิด "เวลาตั้งเครื่อง" ของพิมพ์ [Art]
-	const cc2 = (fn) => (mainData.component1 || []).reduce((s, c) => s + (c.color || []).reduce((s2, x) => s2 + fn(x), 0), 0)
-	const colorsNormal = cc2((x) => (Number(x.outside) || 0) + (Number(x.inside) || 0))
-	const colorsSpecial = cc2((x) => (Array.isArray(x.special_ink) ? x.special_ink.length : 0))
+	// สี F เลขเดียวกัน = งานเดียวกันปริ้นหลาย pass → นับชุดสี "ครั้งเดียว" (artwork ชุดเดิม, plate ชุดเดิม)
+	// เช่น F016062-1 + F016062-2 (5/0 ทั้งคู่) → 5 สี พิเศษ 1 ไม่ใช่ 10 สี พิเศษ 2.
+	// base F = เลข F นำหน้า เช่น "F016062-พิมพ์ครั้งที่ 1" / "F016062 พิมพ์ครั้งที่ 2" / "F016062-2" → "F016062"
+	// F คนละเลข (F016063) = คนละงาน = นับแยก • F ว่าง หรือไม่มีเลขนำหน้า = นับแยก (ไม่เดา)
+	const baseF = (fc) => {
+		const s = String(fc == null ? '' : fc).trim()
+		const m = s.match(/^([A-Za-z]*\d+)/)
+		return m ? m[1] : s
+	}
+	const _fgroups = new Map() // key: componentIndex|baseF → {normal, special} (max ต่อกลุ่ม ไม่ sum ข้าม pass)
+	;(mainData.component1 || []).forEach((c, ci) => {
+		(c.color || []).forEach((x, xi) => {
+			const bf = baseF(x.f_code)
+			const key = bf === '' ? (ci + '|__u' + xi) : (ci + '|' + bf) // F ว่าง → key ไม่ซ้ำ = นับแยก
+			const normal = (Number(x.outside) || 0) + (Number(x.inside) || 0)
+			const special = Array.isArray(x.special_ink) ? x.special_ink.length : 0
+			const prev = _fgroups.get(key)
+			_fgroups.set(key, prev ? { normal: Math.max(prev.normal, normal), special: Math.max(prev.special, special) } : { normal, special })
+		})
+	})
+	let colorsNormal = 0, colorsSpecial = 0
+	_fgroups.forEach((v) => { colorsNormal += v.normal; colorsSpecial += v.special })
 	const colors = colorsNormal + colorsSpecial
 	// เวลาตั้งเครื่องพิมพ์ (Art): สีปกติ 0.25 ชม./สี (4 สี=1ชม.) + สีพิเศษ 1 ชม./สี
 	const printSetup = colorsNormal * 0.25 + colorsSpecial * 1
